@@ -1,10 +1,12 @@
 import * as bcryptjs from "bcryptjs";
+import { randomUUID } from "crypto";
 import { DataSource } from "typeorm";
 import { Seeder } from "typeorm-extension";
 
 export class UserSeeder implements Seeder {
   async run(dataSource: DataSource): Promise<void> {
     await dataSource.query(`DELETE FROM auth_users`);
+    await dataSource.query(`DELETE FROM auth_users_companies`);
 
     const users = [
       {
@@ -35,6 +37,12 @@ export class UserSeeder implements Seeder {
           userModel.is_verify,
           userModel.is_super_admin,
         ],
+      );
+
+      await dataSource.query(
+        `INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ($1, $2, $3, $4, $5)`,
+        [randomUUID(), userModel.uuid, process.env.SYSTEM_COMPANY_UUID, true, "admin"],
       );
     }
   }
