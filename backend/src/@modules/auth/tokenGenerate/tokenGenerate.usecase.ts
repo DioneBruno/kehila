@@ -9,5 +9,11 @@ export type TokenGenerateInput = {
 export class TokenGenerateUseCase {
   constructor(readonly repo: TokenGenerateRepository) {}
 
-  async execute(input: TokenGenerateInput) {}
+  async execute(input: TokenGenerateInput): Promise<{ token: string }> {
+    const user = await this.repo.findUser(input.companyUuid, input.userName);
+
+    return {
+      token: "",
+    };
+  }
 }
