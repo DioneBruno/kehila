@@ -29,7 +29,6 @@ services:
       - '${CONTAINER_POSTGRES_PORT:-5432}:5432'
     volumes:
       - './docker/data/db-backend:/var/lib/postgresql/data'
-      # - "./docker/data/db-backend/backup:/var/lib/postgresql/data/backup"
       - './docker/postgres/init:/docker-entrypoint-initdb.d'
     networks:
       - private
