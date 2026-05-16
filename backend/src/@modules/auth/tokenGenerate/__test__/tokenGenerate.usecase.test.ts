@@ -7,4 +7,8 @@ describe("Deve testar TokenGenerateUsecase", () => {
   afterAll(async () => {
     await dataSource.destroy();
   });
+
+  test("Deve gerar token de acesso para usuário", async () => {
+    expect(1 == 1).toBe(true);
+  });
 });

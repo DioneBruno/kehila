@@ -26,6 +26,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     "@modules/(.+)$": "<rootDir>/src/@modules/$1",
+    "^src/(.+)$": "<rootDir>/src/$1",
   },
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
   testMatch: ["<rootDir>/src/**/*.test.ts"],
