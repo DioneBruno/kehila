@@ -2,7 +2,7 @@
 
 # kehila · קהילה
 
-> **קהילה** — *congregação, comunidade, assembleia*  
+> **קהילה** — _congregação, comunidade, assembleia_  
 > Palavra de origem hebraica que descreve um povo reunido com propósito.
 
 ---
@@ -18,7 +18,7 @@ pensada para simplificar o dia a dia de líderes e equipes administrativas.
 
 Kehila nasceu com o objetivo de centralizar e facilitar a gestão de comunidades religiosas, oferecendo ferramentas que ajudam líderes a se concentrarem no que realmente importa: as pessoas.
 
-## Funcionalidades *(planejadas)*
+## Funcionalidades _(planejadas)_
 
 - [ ] Cadastro de membros
 - [ ] Gestão de células / grupos
@@ -26,10 +26,11 @@ Kehila nasceu com o objetivo de centralizar e facilitar a gestão de comunidades
 - [ ] Comunicados e avisos
 - [ ] Gestão financeira / dízimos
 - [ ] Relatórios e dashboards
+- [ ] Incrições para eventos
 
 ## Tecnologias
 
-> *A definir conforme o projeto avança.*
+> _A definir conforme o projeto avança._
 
 ## Como executar
 
