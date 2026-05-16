@@ -1,0 +1,92 @@
+version: '3'
+networks:
+  private:
+    driver: bridge
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: kehila-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: 'admin'
+      RABBITMQ_DEFAULT_PASS: 'admin'
+      RABBITMQ_DEFAULT_VHOST: 'kehila'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - private
+
+  database:
+    image: postgres:17.7
+    container_name: kehila-database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=kehila
+      - TZ=America/Cuiaba
+    ports:
+      - '5433:5432'
+    volumes:
+      - './docker/data/db-backend:/var/lib/postgresql/data'
+      # - "./docker/data/db-backend/backup:/var/lib/postgresql/data/backup"
+      - './docker/postgres/init:/docker-entrypoint-initdb.d'
+    networks:
+      - private
+
+  redis:
+    image: redis:latest
+    container_name: kehila-redis
+    ports:
+      - '6378:6379'
+    expose:
+      - 6379
+    depends_on:
+      - database
+    networks:
+      - private
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: kehila-metabase
+    hostname: metabase.kehila
+    ports:
+      - '3005:3000'
+    environment:
+      JAVA_TIMEZONE: 'America/Cuiaba'
+      JAVA_OPTS: '-Xmx2g'
+      MB_DB_TYPE: postgres
+      MB_DB_PORT: 5432
+      MB_DB_HOST: database
+      MB_DB_USER: postgres
+      MB_DB_PASS: postgres
+      MB_DB_DBNAME: metabase
+      MB_ENCRYPTION_SECRET_KEY: 1234567890abcdef
+      MB_EMAIL_ADMIN: admin@metabase.com
+      MB_PASSWORD_ADMIN: 1234567890
+    depends_on:
+      - rabbitmq
+      - database
+      - redis
+    networks:
+      - private
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: kehila-backend
+    ports:
+      - 3000:3000
+      - 4000:4000
+    volumes:
+      - .:/home/node/app
+    extra_hosts:
+      - 'host.docker.internal:172.17.0.1'
+    depends_on:
+      - rabbitmq
+      - database
+      - redis
+    networks:
+      - private
