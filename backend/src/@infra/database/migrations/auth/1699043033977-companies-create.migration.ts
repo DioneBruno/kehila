@@ -57,12 +57,12 @@ export class MigrationCompanies1699043032977 implements MigrationInterface {
           },
           {
             name: "email",
-            type: "string",
+            type: "varchar",
             isNullable: true,
           },
           {
             name: "phone",
-            type: "string",
+            type: "varchar",
             isNullable: true,
           },
           {
