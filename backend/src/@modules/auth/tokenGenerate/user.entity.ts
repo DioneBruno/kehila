@@ -1,6 +1,6 @@
 export type UserProps = {
   uuid: string;
-  cpfCnpj: string;
+  cpf: string;
   name: string;
   email: string;
   password: string;
@@ -12,8 +12,8 @@ export class UserEntity {
   uuid(): string {
     return this.props.uuid;
   }
-  cpfCnpj(): string {
-    return this.props.cpfCnpj;
+  cpf(): string {
+    return this.props.cpf;
   }
   name(): string {
     return this.props.name;

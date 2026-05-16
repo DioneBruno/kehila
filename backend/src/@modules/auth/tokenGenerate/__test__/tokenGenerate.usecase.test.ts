@@ -24,6 +24,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
   afterAll(async () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}';`);
     await dataSource.query(`DELETE FROM auth_users_companies WHERE uuid = '${userUuid}';`);
+    await dataSource.query(`DELETE FROM auth_companies WHERE uuid = '${companyUuid}';`);
     await dataSource.destroy();
   });
 
@@ -34,6 +35,9 @@ describe("Deve testar TokenGenerateUsecase", () => {
 
     await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
       VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    `);
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
     `);
 
     const usecase = new TokenGenerateUseCase(repo);
@@ -51,6 +55,8 @@ describe("Deve testar TokenGenerateUsecase", () => {
     expect(payload.user.name).toBe(userName);
     expect(payload.user.email).toBe("userEmail");
 
-    expect(1 == 1).toBe(true);
+    expect(payload.company.uuid).toBe(companyUuid);
+    expect(payload.company.name).toBe("companyName");
+    expect(payload.company.cpfCnpj).toBe("cnpj");
   });
 });
