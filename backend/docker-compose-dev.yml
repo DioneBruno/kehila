@@ -6,28 +6,27 @@ networks:
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: kehila-rabbitmq
+    container_name: ${CONTAINER_REF}-rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: 'admin'
       RABBITMQ_DEFAULT_PASS: 'admin'
-      RABBITMQ_DEFAULT_VHOST: 'kehila'
+      RABBITMQ_DEFAULT_VHOST: '${CONTAINER_REF}'
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '${CONTAINER_RABBITMQ_PORT:-15672}:15672'
     networks:
       - private
 
   database:
     image: postgres:17.7
-    container_name: kehila-database
+    container_name: ${CONTAINER_REF}-database
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=kehila
+      - POSTGRES_DB=${CONTAINER_REF}
       - TZ=America/Cuiaba
     ports:
-      - '5433:5432'
+      - '${CONTAINER_POSTGRES_PORT:-5432}:5432'
     volumes:
       - './docker/data/db-backend:/var/lib/postgresql/data'
       # - "./docker/data/db-backend/backup:/var/lib/postgresql/data/backup"
@@ -37,7 +36,7 @@ services:
 
   redis:
     image: redis:latest
-    container_name: kehila-redis
+    container_name: ${CONTAINER_REF}-redis
     ports:
       - '6378:6379'
     expose:
@@ -49,10 +48,10 @@ services:
 
   metabase:
     image: metabase/metabase:latest
-    container_name: kehila-metabase
-    hostname: metabase.kehila
+    container_name: ${CONTAINER_REF}-metabase
+    hostname: metabase.${CONTAINER_REF}
     ports:
-      - '3005:3000'
+      - '${CONTAINER_METABASE_PORT:-3000}:3000'
     environment:
       JAVA_TIMEZONE: 'America/Cuiaba'
       JAVA_OPTS: '-Xmx2g'
@@ -76,10 +75,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: kehila-backend
+    container_name: ${CONTAINER_REF}-backend
     ports:
-      - 3000:3000
-      - 4000:4000
+      - '${CONTAINER_BACKEND_PORT:-3000}:3000'
+      - '${CONTAINER_SOCKET_PORT:-4000}:4000'
     volumes:
       - .:/home/node/app
     extra_hosts:
