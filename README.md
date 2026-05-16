@@ -1,1 +1,55 @@
-# kehila
+<div align="center">
+
+# kehila · קהילה
+
+> **קהילה** — *congregação, comunidade, assembleia*  
+> Palavra de origem hebraica que descreve um povo reunido com propósito.
+
+---
+
+**Kehila** é uma aplicação para gestão de igrejas e congregações,  
+pensada para simplificar o dia a dia de líderes e equipes administrativas.
+
+</div>
+
+---
+
+## Sobre o projeto
+
+Kehila nasceu com o objetivo de centralizar e facilitar a gestão de comunidades religiosas, oferecendo ferramentas que ajudam líderes a se concentrarem no que realmente importa: as pessoas.
+
+## Funcionalidades *(planejadas)*
+
+- [ ] Cadastro de membros
+- [ ] Gestão de células / grupos
+- [ ] Controle de presença
+- [ ] Comunicados e avisos
+- [ ] Gestão financeira / dízimos
+- [ ] Relatórios e dashboards
+
+## Tecnologias
+
+> *A definir conforme o projeto avança.*
+
+## Como executar
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/kehila.git
+
+# Acesse o diretório
+cd kehila
+
+# Instale as dependências
+# (instruções a adicionar)
+```
+
+## Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+<div align="center">
+  Feito com propósito · kehila · קהילה
+</div>
