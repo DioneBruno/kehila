@@ -42,21 +42,6 @@ export class MigrationCreateCompanyDomainsMigration1778959886391 implements Migr
             type: "boolean",
             default: false,
           },
-          {
-            name: "header",
-            type: "json",
-            default: "'{}'",
-          },
-          {
-            name: "login",
-            type: "json",
-            default: "'{}'",
-          },
-          {
-            name: "email",
-            type: "json",
-            default: "'{}'",
-          },
         ],
       }),
     );
