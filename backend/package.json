@@ -22,7 +22,8 @@
     "typeorm-extension": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs",
     "migration:create": "npm run typeorm migration:create src/@infra/database/migrations/migration-create.migration",
     "migration:run-dev": "npm run typeorm migration:run -- -d src/@infra/database/datasource",
-    "migration:run": "npm run typeorm migration:run -- -d dist/@infra/database/datasource"
+    "migration:run": "npm run typeorm migration:run -- -d dist/@infra/database/datasource",
+    "seed:run": "npm run typeorm-extension seed:run -- -d src/@infra/database/datasource"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

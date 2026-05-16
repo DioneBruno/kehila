@@ -53,7 +53,17 @@ export class MigrationUsers1699043032977 implements MigrationInterface {
             default: null,
           },
           {
+            name: "email_confirmed_at",
+            type: "date",
+            isNullable: true,
+          },
+          {
             name: "is_verify",
+            type: "boolean",
+            default: false,
+          },
+          {
+            name: "is_super_admin",
             type: "boolean",
             default: false,
           },

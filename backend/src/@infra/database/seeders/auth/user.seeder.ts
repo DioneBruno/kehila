@@ -8,24 +8,23 @@ export class UserSeeder implements Seeder {
 
     const users = [
       {
-        uuid: "018979ce-6b9e-403a-adcb-3fb537c67b16",
+        uuid: process.env.SYSTEM_USER_UUID,
         name: "Usuário padrão",
         cpf: "12345678909",
         email: "admin@email.com.br",
         password: await bcryptjs.hash("123456", 10),
-        email_confirmed_at: new Date(),
-        email_confirmed: true,
+        email_confirmed_at: "2025-01-01",
         is_accepted: true,
         is_verify: true,
-        permissions: { allowedModules: [] },
+        is_super_admin: true,
       },
     ];
 
     for (let i = 0; i < users.length; i++) {
       const userModel = users[i];
       await dataSource.query(
-        `INSERT INTO auth_users (uuid, name, cpf, email, password, email_confirmed_at, email_confirmed, is_verify, permissions)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)`,
+        `INSERT INTO auth_users (uuid, name, cpf, email, password, email_confirmed_at, is_verify, is_super_admin)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         [
           userModel.uuid,
           userModel.name,
@@ -33,9 +32,8 @@ export class UserSeeder implements Seeder {
           userModel.email,
           userModel.password,
           userModel.email_confirmed_at,
-          userModel.email_confirmed,
           userModel.is_verify,
-          userModel.permissions,
+          userModel.is_super_admin,
         ],
       );
     }
