@@ -274,28 +274,19 @@
           <q-card-section>
             <div class="row items-center justify-between q-mb-sm">
               <p class="text-subtitle1 text-weight-bold q-ma-none">Lotes</p>
+              <q-btn
+                flat
+                dense
+                size="sm"
+                icon="open_in_new"
+                label="Gerenciar"
+                color="primary"
+                :to="{ name: 'eventos.lotes', params: { uuid: evento.uuid } }"
+              />
             </div>
-            <div v-if="evento.lotes && evento.lotes.length > 0">
-              <q-list separator>
-                <q-item v-for="lote in evento.lotes" :key="lote.uuid">
-                  <q-item-section>
-                    <q-item-label>{{ lote.nome }}</q-item-label>
-                    <q-item-label caption
-                      >{{ formatarMoeda(lote.preco) }} · {{ lote.quantidade }} vagas</q-item-label
-                    >
-                  </q-item-section>
-                  <q-item-section side>
-                    <q-badge
-                      :color="lote.ativo ? 'positive' : 'grey'"
-                      :label="lote.ativo ? 'Ativo' : 'Inativo'"
-                    />
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </div>
-            <div v-else class="text-center text-grey-5 q-py-md">
-              <q-icon name="confirmation_number" size="lg" />
-              <p class="q-ma-none text-caption">Nenhum lote criado</p>
+            <div class="text-center text-grey-5 q-py-sm">
+              <q-icon name="confirmation_number" size="md" />
+              <p class="q-ma-none text-caption q-mt-xs">Gerencie lotes e tipos de ingresso</p>
             </div>
           </q-card-section>
         </q-card>
