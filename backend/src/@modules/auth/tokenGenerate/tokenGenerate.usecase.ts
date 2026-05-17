@@ -1,3 +1,4 @@
+import { ApiError } from "src/@modules/shared/apiError";
 import { TokenGenerateRepository } from "./tokenGenerateRepository";
 
 export type TokenGenerateInput = {
@@ -11,9 +12,9 @@ export class TokenGenerateUseCase {
 
   async execute(input: TokenGenerateInput): Promise<{ token: string }> {
     const user = await this.repo.findUser(input.companyUuid, input.userName);
-
-    return {
-      token: "",
-    };
+    if (!user) throw new ApiError("Credenciais inválidas", 401);
+    await user.checkPassword(input.password);
+    const token = user.tokenGenegate();
+    return { token };
   }
 }

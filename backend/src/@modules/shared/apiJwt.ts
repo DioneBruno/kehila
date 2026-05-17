@@ -1,9 +1,13 @@
-import { verify, type JwtPayload } from "jsonwebtoken";
+import { sign, verify, type JwtPayload } from "jsonwebtoken";
 import { ApiError } from "./apiError";
 
 const segredo = process.env.AUTH_JWT_SECRET ?? "404991d8-3ee3-49ee-96dd-b12122026af4";
 
 export class ApiJwt {
+  static tokenSigning(payload: object): string {
+    return sign(payload, segredo, { expiresIn: "8h" });
+  }
+
   static tokenDecoding(token: string): any {
     try {
       const payload = verify(token, segredo) as JwtPayload;

@@ -21,6 +21,11 @@ describe("Deve testar TokenGenerateUsecase", () => {
 
     passwordCrypto = await bcryptjs.hash("123456", 10);
   });
+  beforeEach(async () => {
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}';`);
+    await dataSource.query(`DELETE FROM auth_users_companies WHERE uuid = '${userUuid}';`);
+    await dataSource.query(`DELETE FROM auth_companies WHERE uuid = '${companyUuid}';`);
+  });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}';`);
     await dataSource.query(`DELETE FROM auth_users_companies WHERE uuid = '${userUuid}';`);
@@ -58,5 +63,79 @@ describe("Deve testar TokenGenerateUsecase", () => {
     expect(payload.company.uuid).toBe(companyUuid);
     expect(payload.company.name).toBe("companyName");
     expect(payload.company.cpfCnpj).toBe("cnpj");
+  });
+
+  test("Deve gerar token de acesso para usuário informando cpf e senha", async () => {
+    await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
+      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+    `);
+
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    `);
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
+    `);
+
+    const usecase = new TokenGenerateUseCase(repo);
+    const input = {
+      companyUuid,
+      userName: "userCpf",
+      password: "123456",
+    };
+    const response = await usecase.execute(input);
+
+    const payload = ApiJwt.tokenDecoding(response.token);
+
+    expect(payload.user.uuid).toBe(userUuid);
+    expect(payload.user.cpfCnpj).toBe("userCpf");
+    expect(payload.user.name).toBe(userName);
+    expect(payload.user.email).toBe("userEmail");
+
+    expect(payload.company.uuid).toBe(companyUuid);
+    expect(payload.company.name).toBe("companyName");
+    expect(payload.company.cpfCnpj).toBe("cnpj");
+  });
+
+  test("Deve validar senha inválida", async () => {
+    await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
+      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+    `);
+
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    `);
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
+    `);
+
+    const usecase = new TokenGenerateUseCase(repo);
+    const input = {
+      companyUuid,
+      userName,
+      password: "12345",
+    };
+    await expect(usecase.execute(input)).rejects.toThrow("Credenciais inválidas");
+  });
+
+  test("Deve validar userName inválida", async () => {
+    await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
+      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+    `);
+
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    `);
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
+    `);
+
+    const usecase = new TokenGenerateUseCase(repo);
+    const input = {
+      companyUuid,
+      userName: "userCpf_invalid",
+      password: "123456",
+    };
+    await expect(usecase.execute(input)).rejects.toThrow("Credenciais inválidas");
   });
 });
