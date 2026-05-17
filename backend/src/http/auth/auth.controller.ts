@@ -10,12 +10,11 @@ export class AuthController {
   @Post("token-generate")
   async tokenGenerate(@Req() req: Request, @Body() body: any, @Res() res: Response) {
     const input = {
-      companyUuid: "3ec4dd3b-e3ea-4f44-9a19-04213f64f3b5",
-      userName: "",
-      password: "",
+      companyUuid: body.companyUuid,
+      userName: body.userName,
+      password: body.password,
     };
-    const token = this.tokenGenerateUseCase.execute(input);
-
+    const token = await this.tokenGenerateUseCase.execute(input);
     return res.status(200).json(token);
   }
 }
