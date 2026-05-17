@@ -29,8 +29,8 @@ function checkTenant(): string | null {
 }
 
 const urlApi = Platform.is.electron
-  ? localStorage.getItem("FLOW_URL_API")
-  : import.meta.env.VITE_URL_API;
+  ? (localStorage.getItem("URL_API") as string)
+  : (process.env.URL_API as string);
 
 const api = axios.create({
   baseURL: urlApi,
