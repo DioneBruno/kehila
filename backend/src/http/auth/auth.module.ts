@@ -1,8 +1,9 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 import { TokenGenerateUseCase } from "src/@modules/auth/tokenGenerate/tokenGenerate.usecase";
 import { TokenGenerateRepository } from "src/@modules/auth/tokenGenerate/tokenGenerateRepository";
 import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { DominioMiddleware } from "../middleware/dominio.middleware";
 
 @Module({
   imports: [],
@@ -18,6 +19,8 @@ import { ConnectionHub } from "src/@modules/shared/connectionHub";
     },
   ],
 })
-export class AuthModule {
-  constructor() {}
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DominioMiddleware).forRoutes("token-generate");
+  }
 }

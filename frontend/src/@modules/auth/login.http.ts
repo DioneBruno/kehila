@@ -4,7 +4,7 @@ export class LoginHttp {
   constructor(readonly http: HttpClient) {}
 
   async tokenGenerate(input: any) {
-    const response = await this.http.post("/auth/token/generate", input);
+    const response = await this.http.post("token-generate", input);
     return response;
   }
 }

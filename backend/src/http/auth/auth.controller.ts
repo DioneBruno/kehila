@@ -8,13 +8,14 @@ export class AuthController {
 
   // @ApiOperation({ summary: "Buscar cidades" })
   @Post("token-generate")
-  async tokenGenerate(@Req() req: Request, @Body() body: any, @Res() res: Response) {
+  async tokenGenerate(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
-      companyUuid: body.companyUuid,
+      companyUuid: req.companyUuid,
       userName: body.userName,
       password: body.password,
     };
     const token = await this.tokenGenerateUseCase.execute(input);
-    return res.status(200).json(token);
+
+    return res.status(200).json();
   }
 }
