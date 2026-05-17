@@ -68,8 +68,8 @@ Sistema web para gerenciamento completo do ciclo de vida de eventos, incluindo:
 
 ### 4.2 Gestão de Ingressos e Lotes
 
-- [ ] Criação de tipos de ingresso (inteira, meia, VIP, cortesia)
-- [ ] Criação de lotes com preço, quantidade e validade
+- [x] Criação de tipos de ingresso (inteira, meia, VIP, cortesia)
+- [x] Criação de lotes com preço, quantidade e validade
 - [ ] Ordem automática de lotes (ao esgotar um, abre o próximo)
 - [ ] Código de desconto/cupom com rastreabilidade
 - [ ] Limite de ingressos por CPF/e-mail
