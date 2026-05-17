@@ -2,8 +2,6 @@
   <q-layout view="lHh Lpr lFf">
     <q-header>
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-
         <q-toolbar-title> Quasar App </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
@@ -16,12 +14,22 @@
   </q-layout>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
+<script lang="ts">
+import { reactive, toRefs } from "vue";
+import { useQuasar } from "quasar";
+export default {
+  name: "MainLayout",
+  components: {},
+  setup() {
+    const $q = useQuasar();
 
-const leftDrawerOpen = ref(false);
+    const data = reactive({
+      $q,
+    });
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+    return {
+      ...toRefs(data),
+    };
+  },
+};
 </script>

@@ -104,13 +104,13 @@
         <q-btn flat color="primary" label="Cadastrar" class="q-px-sm" @click="$emit('register')" />
       </p>
     </div>
-    <span
+    <!-- <span
       v-if="$q.platform.is.electron"
       class="q-pt-md cursor-pointer text-negative"
       @click="clearLocalStorage()"
     >
       <q-icon name="settings" class="" /> Limpar configurações
-    </span>
+    </span> -->
   </div>
 </template>
 

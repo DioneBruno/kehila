@@ -40,7 +40,7 @@ export default defineConfigWithVueTs(
     rules: {
       '@typescript-eslint/no-explicit-any': "off",
       '@typescript-eslint/consistent-type-imports': [
-        'error',
+        'warn',
         { prefer: 'type-imports' }
       ],
     }
