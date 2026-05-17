@@ -9,13 +9,27 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/",
-    name: "home",
     component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("pages/home.vue") }],
+    children: [
+      { path: "", name: "home", component: () => import("pages/home.vue") },
+      {
+        path: "eventos",
+        name: "eventos",
+        component: () => import("pages/portalEventos/eventos/home.vue"),
+      },
+      {
+        path: "eventos/criar",
+        name: "eventos.criar",
+        component: () => import("pages/portalEventos/eventos/criar/home.vue"),
+      },
+      {
+        path: "eventos/:uuid",
+        name: "eventos.detalhe",
+        component: () => import("pages/portalEventos/eventos/[uuid]/home.vue"),
+      },
+    ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
