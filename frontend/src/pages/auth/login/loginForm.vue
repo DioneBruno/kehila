@@ -116,10 +116,13 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref, toRefs } from "vue";
+import { LoginService } from "./login.service";
 
 export default defineComponent({
   name: "authLoginLoginForm",
   setup() {
+    const $service = new LoginService();
+
     const data = reactive({
       inputPassword: ref(),
       // loginTemplate: computed(() => $setting.$state.template.login),
@@ -141,7 +144,9 @@ export default defineComponent({
       window.location.reload();
     }
 
-    async function login() {}
+    async function login() {
+      await $service.login(data.input);
+    }
 
     return {
       ...toRefs(data),
