@@ -2,6 +2,7 @@ require("dotenv").config();
 import { Global, Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { PortalEventosModule } from "./portalEventos/portalEventos.module";
 import { ConnectionHub } from "src/@modules/shared/connectionHub";
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
@@ -20,6 +21,7 @@ import { DataSource } from "typeorm";
       ssl: ["1", "SIM", "TRUE", "True", "true", true, 1].includes(process.env.DB_DEFAULT_SSL as string),
     }),
     AuthModule,
+    PortalEventosModule,
   ],
   controllers: [AppController],
   providers: [
