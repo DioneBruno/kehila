@@ -145,7 +145,8 @@ export default defineComponent({
     }
 
     async function login() {
-      await $service.login(data.input);
+      const response = await $service.login(data.input);
+      console.log(response);
     }
 
     return {
