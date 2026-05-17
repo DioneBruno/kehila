@@ -38,7 +38,17 @@ Sistema web para gerenciamento completo do ciclo de vida de eventos, incluindo:
 - Check-in digital via QR Code na entrada
 - Relatórios financeiros e de presença em tempo real
 
-### 3.2 Decisões Arquiteturais Importantes
+---
+
+## 2. Modelo de Domínio
+
+> Em desenvolvimento.
+
+---
+
+## 3. Arquitetura do Sistema
+
+### 3.1 Decisões Arquiteturais Importantes
 
 - **Idempotência na compra:** Cada tentativa de compra deve ter um `idempotency_key` para evitar duplicação em caso de retentativa.
 - **Webhook assíncrono:** Confirmação de pagamento via webhook do gateway, processada em fila.
@@ -546,7 +556,11 @@ cupons (
 
 ```
 
-### 13.2 Padrão de Resposta
+---
+
+## 13. APIs e Integrações
+
+### 13.1 Padrão de Resposta
 
 ```json
 // Sucesso
@@ -566,6 +580,14 @@ cupons (
   }
 }
 ```
+
+---
+
+## 14. Infraestrutura e DevOps
+
+> Em desenvolvimento.
+
+---
 
 ## 15. Testes
 
