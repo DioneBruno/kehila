@@ -11,11 +11,11 @@ export class AuthController {
   async tokenGenerate(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
       companyUuid: req.companyUuid,
-      userName: body.userName,
+      username: body.username,
       password: body.password,
     };
     const token = await this.tokenGenerateUseCase.execute(input);
 
-    return res.status(200).json();
+    return res.status(200).json(token);
   }
 }

@@ -8,7 +8,7 @@ import { ConnectionHub } from "src/@modules/shared/connectionHub";
 
 const companyUuid = "3ec4dd3b-e3ea-4f44-9a19-04213f64f3b5";
 const userUuid = "c9234439-2557-42cd-bcdd-013267df8c50";
-const userName = "";
+const username = "013267df8c50";
 
 let repo: TokenGenerateRepository;
 let passwordCrypto: string;
@@ -25,17 +25,19 @@ describe("Deve testar TokenGenerateUsecase", () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}';`);
     await dataSource.query(`DELETE FROM auth_users_companies WHERE uuid = '${userUuid}';`);
     await dataSource.query(`DELETE FROM auth_companies WHERE uuid = '${companyUuid}';`);
+    await dataSource.query(`DELETE FROM auth_users_companies WHERE company_uuid = '${companyUuid}';`);
   });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}';`);
     await dataSource.query(`DELETE FROM auth_users_companies WHERE uuid = '${userUuid}';`);
     await dataSource.query(`DELETE FROM auth_companies WHERE uuid = '${companyUuid}';`);
+    await dataSource.query(`DELETE FROM auth_users_companies WHERE company_uuid = '${companyUuid}';`);
     await dataSource.destroy();
   });
 
   test("Deve gerar token de acesso para usuário informando email e senha", async () => {
     await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
-      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+      VALUES ('${userUuid}', 'userCpf', 'nome', '${username}', '${passwordCrypto}', '2024-06-06');
     `);
 
     await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
@@ -48,7 +50,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
     const usecase = new TokenGenerateUseCase(repo);
     const input = {
       companyUuid,
-      userName,
+      username,
       password: "123456",
     };
     const response = await usecase.execute(input);
@@ -57,8 +59,8 @@ describe("Deve testar TokenGenerateUsecase", () => {
 
     expect(payload.user.uuid).toBe(userUuid);
     expect(payload.user.cpfCnpj).toBe("userCpf");
-    expect(payload.user.name).toBe(userName);
-    expect(payload.user.email).toBe("userEmail");
+    expect(payload.user.name).toBe("nome");
+    expect(payload.user.email).toBe(username);
 
     expect(payload.company.uuid).toBe(companyUuid);
     expect(payload.company.name).toBe("companyName");
@@ -67,7 +69,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
 
   test("Deve gerar token de acesso para usuário informando cpf e senha", async () => {
     await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
-      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+      VALUES ('${userUuid}', 'userCpf', '${username}', 'userEmail', '${passwordCrypto}', '2024-06-06');
     `);
 
     await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
@@ -80,7 +82,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
     const usecase = new TokenGenerateUseCase(repo);
     const input = {
       companyUuid,
-      userName: "userCpf",
+      username: "userCpf",
       password: "123456",
     };
     const response = await usecase.execute(input);
@@ -89,7 +91,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
 
     expect(payload.user.uuid).toBe(userUuid);
     expect(payload.user.cpfCnpj).toBe("userCpf");
-    expect(payload.user.name).toBe(userName);
+    expect(payload.user.name).toBe(username);
     expect(payload.user.email).toBe("userEmail");
 
     expect(payload.company.uuid).toBe(companyUuid);
@@ -99,7 +101,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
 
   test("Deve validar senha inválida", async () => {
     await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
-      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+      VALUES ('${userUuid}', 'userCpf', '${username}', 'userEmail', '${passwordCrypto}', '2024-06-06');
     `);
 
     await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
@@ -112,15 +114,15 @@ describe("Deve testar TokenGenerateUsecase", () => {
     const usecase = new TokenGenerateUseCase(repo);
     const input = {
       companyUuid,
-      userName,
+      username,
       password: "12345",
     };
     await expect(usecase.execute(input)).rejects.toThrow("Credenciais inválidas");
   });
 
-  test("Deve validar userName inválida", async () => {
+  test("Deve validar username inválida", async () => {
     await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
-      VALUES ('${userUuid}', 'userCpf', '${userName}', 'userEmail', '${passwordCrypto}', '2024-06-06');
+      VALUES ('${userUuid}', 'userCpf', '${username}', 'userEmail', '${passwordCrypto}', '2024-06-06');
     `);
 
     await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
@@ -133,7 +135,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
     const usecase = new TokenGenerateUseCase(repo);
     const input = {
       companyUuid,
-      userName: "userCpf_invalid",
+      username: "userCpf_invalid",
       password: "123456",
     };
     await expect(usecase.execute(input)).rejects.toThrow("Credenciais inválidas");

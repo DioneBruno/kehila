@@ -33,7 +33,7 @@ export class TokenGenerateRepository {
         INNER JOIN auth_companies c
           ON c.uuid = uc.company_uuid
       WHERE users.deleted_at IS NULL
-        AND (users.email = $1 OR users.cpf = $1 OR users.name = $1)
+        AND (users.email = $1 OR users.cpf = $1)
         AND c.uuid = $2
     `,
       [userName, companyUuid],
