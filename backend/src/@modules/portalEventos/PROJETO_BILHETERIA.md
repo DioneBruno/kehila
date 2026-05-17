@@ -60,8 +60,8 @@ Sistema web para gerenciamento completo do ciclo de vida de eventos, incluindo:
 
 ### 4.1 Gestão de Eventos
 
-- [ ] CRUD de eventos (título, descrição, data, local, banner, categoria)
-- [ ] Configuração de localização (endereço ou link online)
+- [x] CRUD de eventos (título, descrição, data, local, banner, categoria)
+- [x] Configuração de localização (endereço ou link online)
 - [ ] Publicação e agendamento de eventos
 - [ ] Duplicar evento (para eventos recorrentes)
 - [ ] Cancelamento com notificação automática aos inscritos
