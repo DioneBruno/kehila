@@ -284,10 +284,27 @@
                 :to="{ name: 'eventos.lotes', params: { uuid: evento.uuid } }"
               />
             </div>
-            <div class="text-center text-grey-5 q-py-sm">
+            <div v-if="lotes.length === 0" class="text-center text-grey-5 q-py-sm">
               <q-icon name="confirmation_number" size="md" />
-              <p class="q-ma-none text-caption q-mt-xs">Gerencie lotes e tipos de ingresso</p>
+              <p class="q-ma-none text-caption q-mt-xs">Nenhum lote cadastrado</p>
             </div>
+            <q-list v-else dense separator>
+              <q-item v-for="lote in lotes" :key="lote.uuid" class="q-pa-none q-py-xs">
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">{{ lote.nome }}</q-item-label>
+                  <q-item-label caption>
+                    {{ lote.quantidade }} ingresso{{ lote.quantidade !== 1 ? "s" : "" }} &middot;
+                    {{ formatarMoeda(lote.preco) }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-badge
+                    :color="lote.ativo ? 'positive' : 'grey-5'"
+                    :label="lote.ativo ? 'Ativo' : 'Inativo'"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
           </q-card-section>
         </q-card>
       </div>
@@ -299,15 +316,18 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute } from "vue-router";
 import { EventosService, STATUS_CORES, STATUS_LABELS } from "../eventos.service";
+import { LotesService } from "../lotes.service";
 
 export default defineComponent({
   name: "PortalEventosEventosDetalhe",
   setup() {
     const $route = useRoute();
     const $service = new EventosService();
+    const $lotesService = new LotesService();
 
     const data = reactive({
       evento: null as any,
+      lotes: [] as any[],
       editando: false,
       form: {
         titulo: "",
@@ -338,11 +358,15 @@ export default defineComponent({
 
     async function carregar() {
       const uuid = $route.params.uuid as string;
-      const evento = await $service.buscarPorUuid(uuid);
+      const [evento, lotes] = await Promise.all([
+        $service.buscarPorUuid(uuid),
+        $lotesService.listar(uuid),
+      ]);
       if (evento) {
         data.evento = evento;
         carregarForm(evento);
       }
+      data.lotes = lotes;
     }
 
     async function salvar() {
