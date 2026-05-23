@@ -6,8 +6,9 @@ export class CreateEventoLoteTiposIngresso1779545498233 implements MigrationInte
       new Table({
         name: "evento_lote_tipos_ingresso",
         columns: [
-          { name: "created_at", type: "timestamptz", default: "now()" },
-          { name: "updated_at", type: "timestamptz", default: "now()" },
+          { name: "created_at", type: "timestamp", default: "now()" },
+          { name: "updated_at", type: "timestamp", default: "now()" },
+          { name: "deleted_at", type: "timestamp", isNullable: true, default: null },
           {
             name: "uuid",
             type: "uuid",

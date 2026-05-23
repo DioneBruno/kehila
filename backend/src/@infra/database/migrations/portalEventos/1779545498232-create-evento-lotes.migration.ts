@@ -6,8 +6,9 @@ export class CreateEventoLotes1779545498232 implements MigrationInterface {
       new Table({
         name: "evento_lotes",
         columns: [
-          { name: "created_at", type: "timestamptz", default: "now()" },
-          { name: "updated_at", type: "timestamptz", default: "now()" },
+          { name: "created_at", type: "timestamp", default: "now()" },
+          { name: "updated_at", type: "timestamp", default: "now()" },
+          { name: "deleted_at", type: "timestamp", isNullable: true, default: null },
           {
             name: "uuid",
             type: "uuid",
@@ -21,8 +22,8 @@ export class CreateEventoLotes1779545498232 implements MigrationInterface {
           { name: "ordem", type: "int" },
           { name: "quantidade", type: "int" },
           { name: "preco", type: "decimal", precision: 10, scale: 2 },
-          { name: "data_inicio", type: "timestamptz", isNullable: true },
-          { name: "data_fim", type: "timestamptz", isNullable: true },
+          { name: "data_inicio", type: "timestamp", isNullable: true },
+          { name: "data_fim", type: "timestamp", isNullable: true },
           { name: "ativo", type: "boolean", default: true },
         ],
       }),

@@ -6,9 +6,9 @@ export class CreateEventos1779545498231 implements MigrationInterface {
       new Table({
         name: "eventos",
         columns: [
-          { name: "created_at", type: "timestamptz", default: "now()" },
-          { name: "updated_at", type: "timestamptz", default: "now()" },
-          { name: "deleted_at", type: "timestamptz", isNullable: true, default: null },
+          { name: "created_at", type: "timestamp", default: "now()" },
+          { name: "updated_at", type: "timestamp", default: "now()" },
+          { name: "deleted_at", type: "timestamp", isNullable: true, default: null },
           {
             name: "uuid",
             type: "uuid",
@@ -22,8 +22,8 @@ export class CreateEventos1779545498231 implements MigrationInterface {
           { name: "slug", type: "varchar", length: "300", isUnique: true },
           { name: "descricao", type: "text", isNullable: true },
           { name: "banner_url", type: "varchar", length: "500", isNullable: true },
-          { name: "data_inicio", type: "timestamptz" },
-          { name: "data_fim", type: "timestamptz", isNullable: true },
+          { name: "data_inicio", type: "timestamp" },
+          { name: "data_fim", type: "timestamp", isNullable: true },
           { name: "capacidade_total", type: "int", isNullable: true },
           { name: "local_nome", type: "varchar", length: "300", isNullable: true },
           { name: "local_endereco", type: "varchar", length: "500", isNullable: true },
@@ -31,7 +31,7 @@ export class CreateEventos1779545498231 implements MigrationInterface {
           { name: "local_lng", type: "decimal", precision: 11, scale: 8, isNullable: true },
           { name: "online", type: "boolean", default: false },
           { name: "link_online", type: "varchar", length: "500", isNullable: true },
-          { name: "status", type: "evento_status", default: "'rascunho'" },
+          { name: "status", type: "varchar", default: "'rascunho'" },
         ],
       }),
     );

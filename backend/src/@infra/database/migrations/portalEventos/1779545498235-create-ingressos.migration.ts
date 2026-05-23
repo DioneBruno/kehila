@@ -6,8 +6,9 @@ export class CreateIngressos1779545498235 implements MigrationInterface {
       new Table({
         name: "evento_ingressos",
         columns: [
-          { name: "created_at", type: "timestamptz", default: "now()" },
-          { name: "updated_at", type: "timestamptz", default: "now()" },
+          { name: "created_at", type: "timestamp", default: "now()" },
+          { name: "updated_at", type: "timestamp", default: "now()" },
+          { name: "deleted_at", type: "timestamp", isNullable: true, default: null },
           {
             name: "uuid",
             type: "uuid",
@@ -25,10 +26,10 @@ export class CreateIngressos1779545498235 implements MigrationInterface {
           { name: "pessoa_email", type: "varchar", isNullable: true },
           { name: "pessoa_documento", type: "varchar", isNullable: true },
           { name: "assinatura", type: "text" },
-          { name: "status", type: "ingresso_status", default: "'pendente'" },
+          { name: "status", type: "varchar", default: "'pendente'" },
           { name: "transferido_de", type: "uuid", isNullable: true },
           { name: "transferido_para", type: "uuid", isNullable: true },
-          { name: "checkin_em", type: "timestamptz", isNullable: true },
+          { name: "checkin_em", type: "timestamp", isNullable: true },
           { name: "checkin_operador_uuid", type: "uuid", isNullable: true },
         ],
       }),
