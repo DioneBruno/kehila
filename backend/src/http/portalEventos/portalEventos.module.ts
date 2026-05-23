@@ -40,10 +40,7 @@ import { EditarTipoIngressoRepository } from "src/@modules/portalEventos/lotes/e
 import { RemoverTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngresso.usecase";
 import { RemoverTipoIngressoRepository } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngressoRepository";
 
-function makeProvider<T>(
-  token: new (...args: any[]) => T,
-  factory: (hub: ConnectionHub) => T,
-) {
+function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
     useFactory: (connectionHub: ConnectionHub) => factory(connectionHub),
@@ -58,10 +55,7 @@ function makeProvider<T>(
     makeProvider(ListarEventosUsecase, (hub) => new ListarEventosUsecase(new ListarEventosRepository(hub))),
     makeProvider(DetalharEventoUsecase, (hub) => new DetalharEventoUsecase(new DetalharEventoRepository(hub))),
     makeProvider(EditarEventoUsecase, (hub) => new EditarEventoUsecase(new EditarEventoRepository(hub))),
-    makeProvider(
-      AtualizarStatusEventoUsecase,
-      (hub) => new AtualizarStatusEventoUsecase(new AtualizarStatusEventoRepository(hub)),
-    ),
+    makeProvider(AtualizarStatusEventoUsecase, (hub) => new AtualizarStatusEventoUsecase(new AtualizarStatusEventoRepository(hub))),
     makeProvider(CriarLoteUsecase, (hub) => new CriarLoteUsecase(new CriarLoteRepository(hub))),
     makeProvider(ListarLotesUsecase, (hub) => new ListarLotesUsecase(new ListarLotesRepository(hub))),
     makeProvider(EditarLoteUsecase, (hub) => new EditarLoteUsecase(new EditarLoteRepository(hub))),

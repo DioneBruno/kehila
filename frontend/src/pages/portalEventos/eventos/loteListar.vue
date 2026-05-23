@@ -13,23 +13,27 @@
       />
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Lotes e Ingressos</p>
-        <p class="text-caption text-grey-6 q-ma-none">Gerencie os lotes e tipos de ingresso do evento</p>
+        <p class="text-caption text-grey-6 q-ma-none">
+          Gerencie os lotes e tipos de ingresso do evento
+        </p>
       </div>
-      <q-btn
-        unelevated
-        color="primary"
-        icon="add"
-        label="Novo Lote"
-        @click="abrirDialogLote()"
-      />
+      <q-btn unelevated color="primary" icon="add" label="Novo Lote" @click="abrirDialogLote()" />
     </div>
 
     <!-- Lista de lotes -->
     <div v-if="lotes.length === 0" class="text-center q-py-xl">
       <q-icon name="confirmation_number" size="64px" color="grey-4" />
       <p class="text-subtitle1 text-grey-5 q-mt-md q-mb-sm">Nenhum lote criado ainda</p>
-      <p class="text-caption text-grey-4 q-mb-lg">Crie um lote para definir preços e disponibilidade de ingressos</p>
-      <q-btn unelevated color="primary" icon="add" label="Criar Primeiro Lote" @click="abrirDialogLote()" />
+      <p class="text-caption text-grey-4 q-mb-lg">
+        Crie um lote para definir preços e disponibilidade de ingressos
+      </p>
+      <q-btn
+        unelevated
+        color="primary"
+        icon="add"
+        label="Criar Primeiro Lote"
+        @click="abrirDialogLote()"
+      />
     </div>
 
     <div v-else class="q-gutter-md">
@@ -59,14 +63,7 @@
               </div>
             </div>
             <div class="col-auto row q-gutter-xs">
-              <q-btn
-                flat
-                dense
-                round
-                icon="edit"
-                color="primary"
-                @click="abrirDialogLote(lote)"
-              >
+              <q-btn flat dense round icon="edit" color="primary" @click="abrirDialogLote(lote)">
                 <q-tooltip>Editar lote</q-tooltip>
               </q-btn>
               <q-btn
@@ -108,25 +105,16 @@
           </div>
 
           <q-list v-else separator dense class="rounded-borders">
-            <q-item
-              v-for="tipo in lote.tiposIngresso"
-              :key="tipo.uuid"
-              class="q-px-sm"
-            >
+            <q-item v-for="tipo in lote.tiposIngresso" :key="tipo.uuid" class="q-px-sm">
               <q-item-section>
                 <q-item-label class="row items-center q-gutter-xs">
                   <span>{{ tipo.nome }}</span>
-                  <q-badge
-                    v-if="!tipo.visivel"
-                    color="grey"
-                    label="Oculto"
-                    dense
-                  />
+                  <q-badge v-if="!tipo.visivel" color="grey" label="Oculto" dense />
                 </q-item-label>
                 <q-item-label caption>
                   {{ formatarMoeda(tipo.preco) }}
-                  · {{ tipo.vendidos }}/{{ tipo.quantidade }} vendidos
-                  · {{ tipo.disponivel }} disponíveis
+                  · {{ tipo.vendidos }}/{{ tipo.quantidade }} vendidos ·
+                  {{ tipo.disponivel }} disponíveis
                   <span v-if="tipo.descricao"> · {{ tipo.descricao }}</span>
                 </q-item-label>
               </q-item-section>
@@ -153,7 +141,9 @@
                     :disable="tipo.vendidos > 0"
                     @click="removerTipo(lote.uuid, tipo.uuid)"
                   >
-                    <q-tooltip>{{ tipo.vendidos > 0 ? 'Possui ingressos vendidos' : 'Remover' }}</q-tooltip>
+                    <q-tooltip>{{
+                      tipo.vendidos > 0 ? "Possui ingressos vendidos" : "Remover"
+                    }}</q-tooltip>
                   </q-btn>
                 </div>
               </q-item-section>
@@ -291,7 +281,9 @@
     <q-dialog v-model="dialogTipo.aberto" persistent>
       <q-card style="min-width: 400px; max-width: 520px; width: 100%">
         <q-card-section class="row items-center">
-          <span class="text-h6">{{ dialogTipo.editando ? "Editar Tipo de Ingresso" : "Novo Tipo de Ingresso" }}</span>
+          <span class="text-h6">{{
+            dialogTipo.editando ? "Editar Tipo de Ingresso" : "Novo Tipo de Ingresso"
+          }}</span>
           <q-space />
           <q-btn flat round dense icon="close" v-close-popup />
         </q-card-section>
@@ -367,7 +359,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute } from "vue-router";
-import { LotesService } from "../../lotes.service";
+import { LotesService } from "./lotes.service";
 
 const loteFormVazio = () => ({
   nome: "",
@@ -430,9 +422,7 @@ export default defineComponent({
         };
       } else {
         const proximaOrdem =
-          data.lotes.length > 0
-            ? Math.max(...data.lotes.map((l) => l.ordem)) + 1
-            : 1;
+          data.lotes.length > 0 ? Math.max(...data.lotes.map((l) => l.ordem)) + 1 : 1;
         data.dialogLote.editando = false;
         data.dialogLote.uuid = "";
         data.dialogLote.form = { ...loteFormVazio(), ordem: proximaOrdem };

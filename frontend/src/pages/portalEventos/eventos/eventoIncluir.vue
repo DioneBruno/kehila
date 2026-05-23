@@ -2,7 +2,15 @@
   <q-page padding>
     <!-- Header -->
     <div class="row items-center q-mb-lg">
-      <q-btn flat round dense icon="arrow_back" color="grey-7" :to="{ name: 'eventos' }" class="q-mr-sm" />
+      <q-btn
+        flat
+        round
+        dense
+        icon="arrow_back"
+        color="grey-7"
+        :to="{ name: 'eventos' }"
+        class="q-mr-sm"
+      />
       <div>
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Novo Evento</p>
         <p class="text-caption text-grey-6 q-ma-none">Preencha os dados do evento</p>
@@ -68,7 +76,12 @@
                       </q-icon>
                       <q-icon name="schedule" class="cursor-pointer q-ml-xs">
                         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                          <q-time v-model="form.dataInicio" mask="YYYY-MM-DDTHH:mm" color="primary" format24h>
+                          <q-time
+                            v-model="form.dataInicio"
+                            mask="YYYY-MM-DDTHH:mm"
+                            color="primary"
+                            format24h
+                          >
                             <div class="row items-center justify-end">
                               <q-btn v-close-popup label="OK" color="primary" flat />
                             </div>
@@ -79,13 +92,7 @@
                   </q-input>
                 </div>
                 <div class="col-12">
-                  <q-input
-                    v-model="form.dataFim"
-                    label="Fim do Evento"
-                    filled
-                    readonly
-                    clearable
-                  >
+                  <q-input v-model="form.dataFim" label="Fim do Evento" filled readonly clearable>
                     <template v-slot:append>
                       <q-icon name="event" class="cursor-pointer">
                         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -98,7 +105,12 @@
                       </q-icon>
                       <q-icon name="schedule" class="cursor-pointer q-ml-xs">
                         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                          <q-time v-model="form.dataFim" mask="YYYY-MM-DDTHH:mm" color="primary" format24h>
+                          <q-time
+                            v-model="form.dataFim"
+                            mask="YYYY-MM-DDTHH:mm"
+                            color="primary"
+                            format24h
+                          >
                             <div class="row items-center justify-end">
                               <q-btn v-close-popup label="OK" color="primary" flat />
                             </div>
@@ -177,12 +189,12 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from "vue";
-import { EventosService } from "../eventos.service";
+import { EventoService } from "./evento.service";
 
 export default defineComponent({
   name: "PortalEventosEventosCriar",
   setup() {
-    const $service = new EventosService();
+    const $service = new EventoService();
 
     const data = reactive({
       form: {

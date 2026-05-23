@@ -21,7 +21,7 @@ export const STATUS_CORES: Record<string, string> = {
   cancelado: "negative",
 };
 
-export class EventosService {
+export class EventoService {
   private $http = inject("eventosHttp") as EventosHttp;
   private $q = useQuasar();
   private $router = useRouter();
@@ -97,7 +97,11 @@ export class EventosService {
     });
   }
 
-  private $confirmar(titulo: string, mensagem: string, acao: () => Promise<void>): Promise<boolean> {
+  private $confirmar(
+    titulo: string,
+    mensagem: string,
+    acao: () => Promise<void>,
+  ): Promise<boolean> {
     return new Promise((resolve) => {
       this.$q
         .dialog({

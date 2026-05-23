@@ -108,7 +108,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs } from "vue";
-import { EventosService, STATUS_CORES, STATUS_LABELS } from "./eventos.service";
+import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
 
 const COLUNAS = [
   {
@@ -138,7 +138,7 @@ const OPCOES_STATUS = Object.entries(STATUS_LABELS).map(([value, label]) => ({ v
 export default defineComponent({
   name: "PortalEventosEventosHome",
   setup() {
-    const $service = new EventosService();
+    const $service = new EventoService();
 
     const data = reactive({
       carregando: false,

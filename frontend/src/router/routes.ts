@@ -15,22 +15,22 @@ const routes: RouteRecordRaw[] = [
       {
         path: "eventos",
         name: "eventos",
-        component: () => import("pages/portalEventos/eventos/home.vue"),
+        component: () => import("pages/portalEventos/eventos/eventoListar.vue"),
       },
       {
         path: "eventos/criar",
         name: "eventos.criar",
-        component: () => import("pages/portalEventos/eventos/criar/home.vue"),
+        component: () => import("pages/portalEventos/eventos/eventoIncluir.vue"),
       },
       {
         path: "eventos/:uuid",
         name: "eventos.detalhe",
-        component: () => import("pages/portalEventos/eventos/[uuid]/home.vue"),
+        component: () => import("pages/portalEventos/eventos/eventoEditar.vue"),
       },
       {
         path: "eventos/:uuid/lotes",
         name: "eventos.lotes",
-        component: () => import("pages/portalEventos/eventos/[uuid]/lotes/home.vue"),
+        component: () => import("pages/portalEventos/eventos/loteListar.vue"),
       },
     ],
   },

@@ -315,14 +315,14 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute } from "vue-router";
-import { EventosService, STATUS_CORES, STATUS_LABELS } from "../eventos.service";
-import { LotesService } from "../lotes.service";
+import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
+import { LotesService } from "./lotes.service";
 
 export default defineComponent({
   name: "PortalEventosEventosDetalhe",
   setup() {
     const $route = useRoute();
-    const $service = new EventosService();
+    const $service = new EventoService();
     const $lotesService = new LotesService();
 
     const data = reactive({
