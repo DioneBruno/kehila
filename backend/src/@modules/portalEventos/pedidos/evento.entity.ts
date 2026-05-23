@@ -24,7 +24,10 @@ export class EventoEntity {
 
   montaPedido(input: { tipoIngressoUuid: string; quantidade: number }[]): PedidoEntity {
     const ingressos: IngressosEntity[] = [];
+    let valorBruto = 0;
     for (const item of input) {
+      const tipo = this.props.tiposEngresso.find((t) => t.uuid() === item.tipoIngressoUuid);
+      if (tipo) valorBruto += tipo.preco() * item.quantidade;
       for (let i = 0; i < item.quantidade; i++) {
         ingressos.push(
           new IngressosEntity({
@@ -35,14 +38,15 @@ export class EventoEntity {
         );
       }
     }
+    valorBruto = Math.round(valorBruto * 100) / 100;
     return new PedidoEntity({
       uuid: randomUUID(),
       companyUuid: this.props.companyUuid,
       eventoUuid: this.props.uuid,
       idempotencyKey: randomUUID(),
-      valorBruto: 0,
+      valorBruto,
       desconto: 0,
-      valorLiquido: 0,
+      valorLiquido: valorBruto,
       ingressos,
     });
   }

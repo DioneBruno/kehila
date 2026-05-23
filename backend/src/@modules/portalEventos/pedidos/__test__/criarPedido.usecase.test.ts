@@ -12,7 +12,15 @@ describe("Deve testar CriarPedidoUsecase", () => {
     const connectionHub = new ConnectionHub(dataSource);
     repo = new CriarPedidoRepository(connectionHub);
   });
+  beforeEach(async () => {
+    await dataSource.query(`DELETE FROM evento_pedidos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM eventos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM evento_lotes WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM evento_lote_tipos_ingresso WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM evento_ingressos WHERE company_uuid = '${companyUuid}'`);
+  });
   afterAll(async () => {
+    await dataSource.query(`DELETE FROM evento_pedidos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM eventos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM evento_lotes WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM evento_lote_tipos_ingresso WHERE company_uuid = '${companyUuid}'`);

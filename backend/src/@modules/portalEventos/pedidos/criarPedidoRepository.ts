@@ -39,6 +39,21 @@ export class CriarPedidoRepository {
   }
 
   async salvarPedido(pedido: PedidoEntity): Promise<void> {
+    await this.connectionHub.database.query(
+      `INSERT INTO evento_pedidos (uuid, company_uuid, evento_uuid, user_uuid, idempotency_key, status, valor_bruto, valor_desconto, valor_liquido)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        pedido.uuid(),
+        pedido.companyUuid(),
+        pedido.eventoUuid(),
+        pedido.userUuid() ?? null,
+        pedido.idempotencyKey(),
+        "pendente",
+        pedido.valorBruto(),
+        pedido.desconto(),
+        pedido.valorLiquido(),
+      ],
+    );
     for (const ingresso of pedido.ingressos()) {
       await this.connectionHub.database.query(
         `INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo)
