@@ -10,9 +10,14 @@ export class CreateEventos1779545498231 implements MigrationInterface {
           { name: "updated_at", type: "timestamp", default: "now()" },
           { name: "deleted_at", type: "timestamp", isNullable: true, default: null },
           {
+            name: "index",
+            type: "int",
+            isGenerated: true,
+            generationStrategy: "increment",
+          },
+          {
             name: "uuid",
             type: "uuid",
-            isPrimary: true,
             primaryKeyConstraintName: "PK_eventos",
             default: "gen_random_uuid()",
           },

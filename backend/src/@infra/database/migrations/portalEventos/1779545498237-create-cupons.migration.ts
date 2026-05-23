@@ -10,6 +10,12 @@ export class CreateCupons1779545498237 implements MigrationInterface {
           { name: "updated_at", type: "timestamp", default: "now()" },
           { name: "deleted_at", type: "timestamp", isNullable: true, default: null },
           {
+            name: "index",
+            type: "int",
+            isGenerated: true,
+            generationStrategy: "increment",
+          },
+          {
             name: "uuid",
             type: "uuid",
             isPrimary: true,
