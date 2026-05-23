@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class CreateEventoLoteTiposIngresso1779545498233 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -25,28 +25,6 @@ export class CreateEventoLoteTiposIngresso1779545498233 implements MigrationInte
           { name: "preco", type: "decimal", precision: 10, scale: 2 },
           { name: "visivel", type: "boolean", default: true },
         ],
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      "evento_lote_tipos_ingresso",
-      new TableForeignKey({
-        name: "FK_tipos_ingresso_eventos",
-        columnNames: ["evento_uuid"],
-        referencedTableName: "eventos",
-        referencedColumnNames: ["uuid"],
-        onDelete: "CASCADE",
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      "evento_lote_tipos_ingresso",
-      new TableForeignKey({
-        name: "FK_tipos_ingresso_lotes",
-        columnNames: ["lote_uuid"],
-        referencedTableName: "evento_lotes",
-        referencedColumnNames: ["uuid"],
-        onDelete: "CASCADE",
       }),
     );
   }

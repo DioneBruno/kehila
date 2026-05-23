@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class CreateIngressos1779545498235 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -31,26 +31,6 @@ export class CreateIngressos1779545498235 implements MigrationInterface {
           { name: "checkin_em", type: "timestamptz", isNullable: true },
           { name: "checkin_operador_uuid", type: "uuid", isNullable: true },
         ],
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      "evento_ingressos",
-      new TableForeignKey({
-        name: "FK_evento_ingressos_evento_pedidos",
-        columnNames: ["pedido_uuid"],
-        referencedTableName: "evento_pedidos",
-        referencedColumnNames: ["uuid"],
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      "evento_ingressos",
-      new TableForeignKey({
-        name: "FK_evento_ingressos_evento_lote_tipos_ingresso",
-        columnNames: ["tipo_ingresso_uuid"],
-        referencedTableName: "evento_lote_tipos_ingresso",
-        referencedColumnNames: ["uuid"],
       }),
     );
   }

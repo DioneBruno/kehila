@@ -1,29 +1,26 @@
 <template>
-  <q-page class="bg-grey-2">
+  <q-page class="bg-grey-2" :class="{ 'page-with-bar': totalIngressos > 0 }">
     <!-- Hero do evento -->
     <div class="bg-primary text-white">
-      <div class="hero-container q-px-md q-py-xl">
-        <div class="row items-center q-col-gutter-lg">
+      <div class="hero-container q-px-md q-py-lg">
+        <div class="row items-center q-col-gutter-md">
           <div class="col-auto gt-xs">
-            <q-avatar size="80px" color="white" text-color="primary" square class="rounded-borders">
-              <q-icon name="event" size="48px" />
+            <q-avatar size="72px" color="white" text-color="primary" square class="rounded-borders">
+              <q-icon name="event" size="44px" />
             </q-avatar>
           </div>
           <div class="col">
             <div class="text-overline q-mb-xs" style="opacity: 0.75">Portal de Ingressos</div>
-            <div class="text-h5 text-weight-bold">{{ evento.titulo }}</div>
-            <div class="row items-center q-gutter-md q-mt-sm text-body2 flex-wrap">
+            <div class="text-h6 text-weight-bold">{{ evento.titulo }}</div>
+            <div class="row items-center q-gutter-sm q-mt-xs text-caption flex-wrap">
               <span class="row items-center no-wrap">
-                <q-icon name="event" size="16px" class="q-mr-xs" />
-                {{ evento.data }}
+                <q-icon name="event" size="13px" class="q-mr-xs" />{{ evento.data }}
               </span>
               <span class="row items-center no-wrap">
-                <q-icon name="schedule" size="16px" class="q-mr-xs" />
-                {{ evento.horario }}
+                <q-icon name="schedule" size="13px" class="q-mr-xs" />{{ evento.horario }}
               </span>
               <span class="row items-center no-wrap">
-                <q-icon name="location_on" size="16px" class="q-mr-xs" />
-                {{ evento.local }}
+                <q-icon name="location_on" size="13px" class="q-mr-xs" />{{ evento.local }}
               </span>
             </div>
           </div>
@@ -35,7 +32,7 @@
     </div>
 
     <!-- Conteúdo principal -->
-    <div class="hero-container q-px-md q-py-lg">
+    <div class="hero-container q-px-md q-py-md">
       <div class="row q-col-gutter-lg">
 
         <!-- Stepper de compra -->
@@ -67,11 +64,13 @@
                     <q-card-section class="q-py-sm">
                       <div class="row items-center no-wrap">
                         <div class="col">
-                          <div class="text-subtitle1 text-weight-medium">{{ tipo.nome }}</div>
+                          <div class="text-subtitle2 text-weight-medium">{{ tipo.nome }}</div>
                           <div v-if="tipo.descricao" class="text-caption text-grey-6 q-mb-xs">
                             {{ tipo.descricao }}
                           </div>
-                          <div class="text-h6 text-primary">{{ formatarMoeda(tipo.preco) }}</div>
+                          <div class="text-subtitle1 text-primary text-weight-bold">
+                            {{ formatarMoeda(tipo.preco) }}
+                          </div>
                           <div class="text-caption text-grey-5">
                             {{ tipo.disponivel }} disponíveis
                           </div>
@@ -188,7 +187,7 @@
                 <div class="text-subtitle2 text-grey-7">Forma de pagamento</div>
 
                 <div class="row q-col-gutter-md">
-                  <div class="col-12 col-sm-6">
+                  <div class="col-6">
                     <q-card
                       flat
                       bordered
@@ -196,25 +195,22 @@
                       :class="formaPagamento === 'pix' ? 'border-primary bg-green-1' : ''"
                       @click="formaPagamento = 'pix'"
                     >
-                      <q-card-section class="text-center q-py-lg">
-                        <q-icon name="pix" size="36px" color="positive" />
-                        <div class="text-subtitle2 q-mt-sm">PIX</div>
+                      <q-card-section class="text-center q-py-md">
+                        <q-icon name="pix" size="32px" color="positive" />
+                        <div class="text-subtitle2 q-mt-xs">PIX</div>
                         <div class="text-caption text-grey-6">Aprovação imediata</div>
-                        <q-chip
+                        <q-icon
                           v-if="formaPagamento === 'pix'"
-                          size="sm"
+                          name="check_circle"
                           color="primary"
-                          text-color="white"
-                          icon="check"
-                          class="q-mt-sm"
-                        >
-                          Selecionado
-                        </q-chip>
+                          size="18px"
+                          class="q-mt-xs"
+                        />
                       </q-card-section>
                     </q-card>
                   </div>
 
-                  <div class="col-12 col-sm-6">
+                  <div class="col-6">
                     <q-card
                       flat
                       bordered
@@ -222,35 +218,30 @@
                       :class="formaPagamento === 'cartao' ? 'border-primary bg-blue-1' : ''"
                       @click="formaPagamento = 'cartao'"
                     >
-                      <q-card-section class="text-center q-py-lg">
-                        <q-icon name="credit_card" size="36px" color="primary" />
-                        <div class="text-subtitle2 q-mt-sm">Cartão de Crédito</div>
+                      <q-card-section class="text-center q-py-md">
+                        <q-icon name="credit_card" size="32px" color="primary" />
+                        <div class="text-subtitle2 q-mt-xs">Cartão</div>
                         <div class="text-caption text-grey-6">Até 12× sem juros</div>
-                        <q-chip
+                        <q-icon
                           v-if="formaPagamento === 'cartao'"
-                          size="sm"
+                          name="check_circle"
                           color="primary"
-                          text-color="white"
-                          icon="check"
-                          class="q-mt-sm"
-                        >
-                          Selecionado
-                        </q-chip>
+                          size="18px"
+                          class="q-mt-xs"
+                        />
                       </q-card-section>
                     </q-card>
                   </div>
                 </div>
 
-                <!-- PIX: instrução -->
                 <q-banner v-if="formaPagamento === 'pix'" rounded class="bg-green-1 text-positive">
                   <template v-slot:avatar>
                     <q-icon name="info" />
                   </template>
-                  Após confirmar, você receberá o QR Code do PIX para realizar o pagamento. O pedido
-                  expira em <strong>30 minutos</strong>.
+                  Após confirmar, você receberá o QR Code do PIX. O pedido expira em
+                  <strong>30 minutos</strong>.
                 </q-banner>
 
-                <!-- Cartão: formulário -->
                 <div v-if="formaPagamento === 'cartao'" class="row q-col-gutter-md">
                   <div class="col-12">
                     <q-input
@@ -319,8 +310,8 @@
           </q-stepper>
         </div>
 
-        <!-- Resumo do pedido -->
-        <div class="col-12 col-md-4">
+        <!-- Resumo lateral: somente desktop -->
+        <div class="col-md-4 gt-sm">
           <q-card flat bordered class="resumo-sticky">
             <q-card-section>
               <div class="text-subtitle1 text-weight-bold q-mb-md row items-center">
@@ -330,9 +321,7 @@
 
               <div v-if="itensSelecionados.length === 0" class="text-center q-py-lg">
                 <q-icon name="confirmation_number" size="48px" color="grey-3" />
-                <div class="text-caption text-grey-5 q-mt-sm">
-                  Nenhum ingresso selecionado
-                </div>
+                <div class="text-caption text-grey-5 q-mt-sm">Nenhum ingresso selecionado</div>
               </div>
 
               <div v-else>
@@ -342,8 +331,7 @@
                   class="row justify-between items-start q-mb-sm"
                 >
                   <div class="col text-body2">
-                    <span class="text-weight-medium">{{ item.qtd }}×</span>
-                    {{ item.nome }}
+                    <span class="text-weight-medium">{{ item.qtd }}×</span> {{ item.nome }}
                   </div>
                   <div class="col-auto text-body2 text-weight-medium">
                     {{ formatarMoeda(item.subtotal) }}
@@ -364,19 +352,97 @@
               </div>
             </q-card-section>
 
-            <q-separator v-if="itensSelecionados.length > 0" />
-
-            <q-card-section v-if="itensSelecionados.length > 0" class="q-pt-sm">
-              <div class="row items-start q-gutter-xs text-caption text-grey-6">
-                <q-icon name="security" size="14px" class="q-mt-xs" />
-                <span>Compra 100% segura e protegida</span>
-              </div>
-            </q-card-section>
+            <template v-if="itensSelecionados.length > 0">
+              <q-separator />
+              <q-card-section class="q-py-sm">
+                <div class="row items-center q-gutter-xs text-caption text-grey-6">
+                  <q-icon name="security" size="14px" />
+                  <span>Compra 100% segura e protegida</span>
+                </div>
+              </q-card-section>
+            </template>
           </q-card>
         </div>
 
       </div>
     </div>
+
+    <!-- Barra inferior: somente mobile, quando há ingressos -->
+    <transition name="slide-up">
+      <div v-if="totalIngressos > 0" class="lt-md resumo-bar-mobile">
+        <q-card flat square class="shadow-up-4">
+          <q-card-section class="q-py-sm q-px-md">
+            <div class="row items-center justify-between no-wrap">
+              <div>
+                <div class="text-caption text-grey-6">{{ totalIngressos }} ingresso(s)</div>
+                <div class="text-subtitle1 text-weight-bold text-primary">
+                  {{ formatarMoeda(totalValor) }}
+                </div>
+              </div>
+              <q-btn
+                unelevated
+                color="primary"
+                icon="receipt_long"
+                label="Ver resumo"
+                size="sm"
+                @click="resumoAberto = true"
+              />
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </transition>
+
+    <!-- Bottom sheet: resumo no mobile -->
+    <q-bottom-sheet v-model="resumoAberto">
+      <q-card flat>
+        <q-card-section class="row items-center q-pb-none">
+          <q-icon name="shopping_cart" class="q-mr-sm" color="primary" size="20px" />
+          <span class="text-subtitle1 text-weight-bold">Resumo do Pedido</span>
+          <q-space />
+          <q-btn flat round dense icon="close" @click="resumoAberto = false" />
+        </q-card-section>
+
+        <q-card-section>
+          <div v-if="itensSelecionados.length === 0" class="text-center q-py-lg">
+            <q-icon name="confirmation_number" size="48px" color="grey-3" />
+            <div class="text-caption text-grey-5 q-mt-sm">Nenhum ingresso selecionado</div>
+          </div>
+
+          <div v-else>
+            <div
+              v-for="item in itensSelecionados"
+              :key="item.uuid"
+              class="row justify-between items-start q-mb-sm"
+            >
+              <div class="col text-body2">
+                <span class="text-weight-medium">{{ item.qtd }}×</span> {{ item.nome }}
+              </div>
+              <div class="col-auto text-body2 text-weight-medium">
+                {{ formatarMoeda(item.subtotal) }}
+              </div>
+            </div>
+
+            <q-separator class="q-my-md" />
+
+            <div class="row justify-between items-center q-mb-md">
+              <div>
+                <div class="text-caption text-grey-6">{{ totalIngressos }} ingresso(s)</div>
+                <div class="text-subtitle2 text-weight-bold">Total</div>
+              </div>
+              <div class="text-h6 text-primary text-weight-bold">
+                {{ formatarMoeda(totalValor) }}
+              </div>
+            </div>
+
+            <div class="row items-center q-gutter-xs text-caption text-grey-6 q-mb-sm">
+              <q-icon name="security" size="14px" />
+              <span>Compra 100% segura e protegida</span>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-bottom-sheet>
   </q-page>
 </template>
 
@@ -389,14 +455,26 @@ const LOTES_MOCK = [
     nome: "1º Lote",
     tiposIngresso: [
       { uuid: "tipo-1", nome: "Inteira", descricao: "", preco: 80, disponivel: 50 },
-      { uuid: "tipo-2", nome: "Meia-entrada", descricao: "Estudantes com carteirinha", preco: 40, disponivel: 20 },
+      {
+        uuid: "tipo-2",
+        nome: "Meia-entrada",
+        descricao: "Estudantes com carteirinha",
+        preco: 40,
+        disponivel: 20,
+      },
     ],
   },
   {
     uuid: "lote-2",
     nome: "VIP",
     tiposIngresso: [
-      { uuid: "tipo-3", nome: "VIP", descricao: "Acesso à área exclusiva + open bar", preco: 200, disponivel: 10 },
+      {
+        uuid: "tipo-3",
+        nome: "VIP",
+        descricao: "Acesso à área exclusiva + open bar",
+        preco: 200,
+        disponivel: 10,
+      },
     ],
   },
 ];
@@ -412,6 +490,7 @@ export default defineComponent({
   setup() {
     const data = reactive({
       etapa: 1,
+      resumoAberto: false,
       evento: {
         titulo: "Evento de Exemplo",
         data: "28/06/2026",
@@ -460,16 +539,12 @@ export default defineComponent({
 
     function aumentar(uuid: string, tipo: { disponivel: number }) {
       const atual = data.quantidades[uuid] ?? 0;
-      if (atual < tipo.disponivel) {
-        data.quantidades[uuid] = atual + 1;
-      }
+      if (atual < tipo.disponivel) data.quantidades[uuid] = atual + 1;
     }
 
     function diminuir(uuid: string) {
       const atual = data.quantidades[uuid] ?? 0;
-      if (atual > 0) {
-        data.quantidades[uuid] = atual - 1;
-      }
+      if (atual > 0) data.quantidades[uuid] = atual - 1;
     }
 
     function formatarMoeda(valor: number) {
@@ -508,5 +583,31 @@ export default defineComponent({
 .border-primary {
   border-color: var(--q-primary) !important;
   border-width: 2px !important;
+}
+
+/* Barra inferior mobile */
+.resumo-bar-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* Espaço para a barra não sobrepor o conteúdo */
+@media (max-width: 1023px) {
+  .page-with-bar {
+    padding-bottom: 72px;
+  }
+}
+
+/* Animação de entrada da barra */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.25s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
 }
 </style>
