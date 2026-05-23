@@ -1,19 +1,7 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class CreateEventoPedidos1780000000004 implements MigrationInterface {
+export class CreateEventoPedidos1779545498234 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TYPE pedido_status AS ENUM (
-        'pendente', 'pago', 'cancelado', 'reembolsado', 'expirado'
-      )
-    `);
-
-    await queryRunner.query(`
-      CREATE TYPE forma_pagamento AS ENUM (
-        'cartao', 'pix', 'boleto', 'cortesia'
-      )
-    `);
-
     await queryRunner.createTable(
       new Table({
         name: "evento_pedidos",
@@ -42,21 +30,9 @@ export class CreateEventoPedidos1780000000004 implements MigrationInterface {
         ],
       }),
     );
-
-    await queryRunner.createForeignKey(
-      "evento_pedidos",
-      new TableForeignKey({
-        name: "FK_pedidos_eventos",
-        columnNames: ["evento_uuid"],
-        referencedTableName: "eventos",
-        referencedColumnNames: ["uuid"],
-      }),
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable("evento_pedidos");
-    await queryRunner.query(`DROP TYPE IF EXISTS pedido_status`);
-    await queryRunner.query(`DROP TYPE IF EXISTS forma_pagamento`);
   }
 }

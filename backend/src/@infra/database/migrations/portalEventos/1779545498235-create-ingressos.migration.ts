@@ -1,16 +1,10 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 
-export class CreateIngressos1780000000005 implements MigrationInterface {
+export class CreateIngressos1779545498235 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TYPE ingresso_status AS ENUM (
-        'pago', 'usado', 'cancelado', 'transferido'
-      )
-    `);
-
     await queryRunner.createTable(
       new Table({
-        name: "ingressos",
+        name: "evento_ingressos",
         columns: [
           { name: "created_at", type: "timestamptz", default: "now()" },
           { name: "updated_at", type: "timestamptz", default: "now()" },
@@ -18,7 +12,7 @@ export class CreateIngressos1780000000005 implements MigrationInterface {
             name: "uuid",
             type: "uuid",
             isPrimary: true,
-            primaryKeyConstraintName: "PK_ingressos",
+            primaryKeyConstraintName: "PK_evento_ingressos",
             default: "gen_random_uuid()",
           },
           { name: "company_uuid", type: "uuid" },
@@ -27,9 +21,13 @@ export class CreateIngressos1780000000005 implements MigrationInterface {
           { name: "pedido_uuid", type: "uuid" },
           { name: "user_uuid", type: "uuid" },
           { name: "codigo", type: "varchar", length: "20", isUnique: true },
+          { name: "pessoa_nome", type: "varchar", isNullable: true },
+          { name: "pessoa_email", type: "varchar", isNullable: true },
+          { name: "pessoa_documento", type: "varchar", isNullable: true },
           { name: "assinatura", type: "text" },
-          { name: "status", type: "ingresso_status", default: "'pago'" },
+          { name: "status", type: "ingresso_status", default: "'pendente'" },
           { name: "transferido_de", type: "uuid", isNullable: true },
+          { name: "transferido_para", type: "uuid", isNullable: true },
           { name: "checkin_em", type: "timestamptz", isNullable: true },
           { name: "checkin_operador_uuid", type: "uuid", isNullable: true },
         ],
@@ -37,9 +35,9 @@ export class CreateIngressos1780000000005 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      "ingressos",
+      "evento_ingressos",
       new TableForeignKey({
-        name: "FK_ingressos_pedidos",
+        name: "FK_evento_ingressos_evento_pedidos",
         columnNames: ["pedido_uuid"],
         referencedTableName: "evento_pedidos",
         referencedColumnNames: ["uuid"],
@@ -47,9 +45,9 @@ export class CreateIngressos1780000000005 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      "ingressos",
+      "evento_ingressos",
       new TableForeignKey({
-        name: "FK_ingressos_tipos_ingresso",
+        name: "FK_evento_ingressos_evento_lote_tipos_ingresso",
         columnNames: ["tipo_ingresso_uuid"],
         referencedTableName: "evento_lote_tipos_ingresso",
         referencedColumnNames: ["uuid"],
@@ -58,7 +56,6 @@ export class CreateIngressos1780000000005 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable("ingressos");
-    await queryRunner.query(`DROP TYPE IF EXISTS ingresso_status`);
+    await queryRunner.dropTable("evento_ingressos");
   }
 }

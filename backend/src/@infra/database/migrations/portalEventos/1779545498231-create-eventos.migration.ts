@@ -1,13 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class CreateEventos1780000000001 implements MigrationInterface {
+export class CreateEventos1779545498231 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TYPE evento_status AS ENUM (
-        'rascunho', 'publicado', 'em_vendas', 'esgotado', 'encerrado', 'cancelado'
-      )
-    `);
-
     await queryRunner.createTable(
       new Table({
         name: "eventos",
@@ -45,6 +39,5 @@ export class CreateEventos1780000000001 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable("eventos");
-    await queryRunner.query(`DROP TYPE IF EXISTS evento_status`);
   }
 }

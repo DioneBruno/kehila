@@ -1,14 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class CreateCupons1780000000006 implements MigrationInterface {
+export class CreateCupons1779545498237 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TYPE cupom_tipo AS ENUM ('percentual', 'fixo')
-    `);
-
     await queryRunner.createTable(
       new Table({
-        name: "cupons",
+        name: "evento_cupons",
         columns: [
           { name: "created_at", type: "timestamptz", default: "now()" },
           { name: "updated_at", type: "timestamptz", default: "now()" },
@@ -16,7 +12,7 @@ export class CreateCupons1780000000006 implements MigrationInterface {
             name: "uuid",
             type: "uuid",
             isPrimary: true,
-            primaryKeyConstraintName: "PK_cupons",
+            primaryKeyConstraintName: "PK_evento_cupons",
             default: "gen_random_uuid()",
           },
           { name: "company_uuid", type: "uuid" },
@@ -36,7 +32,6 @@ export class CreateCupons1780000000006 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable("cupons");
-    await queryRunner.query(`DROP TYPE IF EXISTS cupom_tipo`);
+    await queryRunner.dropTable("evento_cupons");
   }
 }

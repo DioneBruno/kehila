@@ -1,6 +1,6 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class CreateEventoLotes1780000000002 implements MigrationInterface {
+export class CreateEventoLotes1779545498232 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -25,17 +25,6 @@ export class CreateEventoLotes1780000000002 implements MigrationInterface {
           { name: "data_fim", type: "timestamptz", isNullable: true },
           { name: "ativo", type: "boolean", default: true },
         ],
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      "evento_lotes",
-      new TableForeignKey({
-        name: "FK_evento_lotes_eventos",
-        columnNames: ["evento_uuid"],
-        referencedTableName: "eventos",
-        referencedColumnNames: ["uuid"],
-        onDelete: "CASCADE",
       }),
     );
   }
