@@ -34,6 +34,12 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/publico/eventos/:eventoUuid",
+    name: "eventos.publico",
+    component: () => import("layouts/BlankLayout.vue"),
+    children: [{ path: "", component: () => import("pages/portalEventos/pedido/home.vue") }],
+  },
 
   {
     path: "/:catchAll(.*)*",
