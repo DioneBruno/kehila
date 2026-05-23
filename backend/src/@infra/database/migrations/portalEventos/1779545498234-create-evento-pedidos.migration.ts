@@ -24,8 +24,6 @@ export class CreateEventoPedidos1779545498234 implements MigrationInterface {
           { name: "valor_bruto", type: "decimal", precision: 10, scale: 2 },
           { name: "desconto", type: "decimal", precision: 10, scale: 2, default: 0 },
           { name: "valor_liquido", type: "decimal", precision: 10, scale: 2 },
-          { name: "forma_pagamento", type: "varchar", isNullable: true },
-          { name: "gateway_id", type: "varchar", length: "200", isNullable: true },
           { name: "expires_at", type: "timestamp", isNullable: true },
           { name: "pago_em", type: "timestamp", isNullable: true },
         ],
