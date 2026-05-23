@@ -38,5 +38,13 @@ export class CriarPedidoRepository {
     return eventosEntity;
   }
 
-  async salvarPedido(pedido: PedidoEntity): Promise<void> {}
+  async salvarPedido(pedido: PedidoEntity): Promise<void> {
+    for (const ingresso of pedido.ingressos()) {
+      await this.connectionHub.database.query(
+        `INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [ingresso.uuid(), pedido.companyUuid(), pedido.eventoUuid(), ingresso.tipoIngressoUuid(), pedido.uuid(), ingresso.codigo()],
+      );
+    }
+  }
 }

@@ -2,12 +2,14 @@ import { IngressosEntity } from "./ingressos.entity";
 
 export type PedidoProps = {
   uuid: string;
-  userUuid: string;
+  companyUuid: string;
+  eventoUuid: string;
+  userUuid?: string;
   idempotencyKey: string;
   valorBruto: number;
   desconto: number;
   valorLiquido: number;
-  expiresAt: string;
+  expiresAt?: string;
   ingressos: IngressosEntity[];
 };
 
@@ -17,7 +19,13 @@ export class PedidoEntity {
   uuid(): string {
     return this.props.uuid;
   }
-  userUuid(): string {
+  companyUuid(): string {
+    return this.props.companyUuid;
+  }
+  eventoUuid(): string {
+    return this.props.eventoUuid;
+  }
+  userUuid(): string | undefined {
     return this.props.userUuid;
   }
   idempotencyKey(): string {
@@ -32,7 +40,10 @@ export class PedidoEntity {
   valorLiquido(): number {
     return this.props.valorLiquido;
   }
-  expiresAt(): string {
+  expiresAt(): string | undefined {
     return this.props.expiresAt;
+  }
+  ingressos(): IngressosEntity[] {
+    return this.props.ingressos;
   }
 }
