@@ -288,6 +288,7 @@
                     color="primary"
                     icon="copy_all"
                     label="Copiar link"
+                    @click="copiarLink()"
                   />
                 </q-item-section>
               </q-item>
@@ -343,12 +344,14 @@ import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
 import { LotesService } from "./lotes.service";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "PortalEventosEventosDetalhe",
   setup() {
     const $route = useRoute();
     const $router = useRouter();
+    const $q = useQuasar();
     const $service = new EventoService();
     const $lotesService = new LotesService();
 
@@ -462,16 +465,23 @@ export default defineComponent({
     }
 
     function abrirPaginaPublica() {
+      const url = montaLinkPublico();
+      window.open(url, "_blank");
+    }
+
+    function copiarLink() {
+      const url = montaLinkPublico();
+      navigator.clipboard.writeText(url);
+      $q.notify({ message: "Link copiado!", color: "positive" });
+    }
+
+    function montaLinkPublico(): string {
       const urlOrigin = window.location.origin;
       const url = $router.resolve({
         name: "eventos.publico",
         params: { eventoUuid: data.evento.uuid },
       });
-      window.open(`${urlOrigin}${url.href}`, "_blank");
-    }
-
-    function copiarLink() {
-      navigator.clipboard.writeText(`/${data.evento?.slug}`);
+      return `${urlOrigin}${url.href}`;
     }
 
     onMounted(() => void carregar());
@@ -479,6 +489,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       podeEditar,
+      copiarLink,
       abrirPaginaPublica,
       salvar,
       cancelarEdicao,
