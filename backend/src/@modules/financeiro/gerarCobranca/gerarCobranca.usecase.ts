@@ -10,6 +10,7 @@ export type GerarCobrancaInput = {
   pagadorNome: string;
   pagadorDocumento: string;
   pagadorEmail: string;
+  pagadorTelefone: string;
   valor: number;
 };
 export class GerarCobrancaUsecase {
@@ -23,6 +24,7 @@ export class GerarCobrancaUsecase {
       pagadorNome: input.pagadorNome,
       pagadorDocumento: input.pagadorDocumento,
       pagadorEmail: input.pagadorEmail,
+      pagadorTelefone: input.pagadorTelefone,
       origem: input.origem,
       origemUuid: input.origemUuid,
       valor: input.valor,

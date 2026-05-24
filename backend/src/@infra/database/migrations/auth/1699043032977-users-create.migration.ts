@@ -33,11 +33,17 @@ export class MigrationUsers1699043032977 implements MigrationInterface {
             type: "varchar",
           },
           {
-            name: "email",
+            name: "cpf",
             type: "varchar",
+            isNullable: true,
           },
           {
-            name: "cpf",
+            name: "email",
+            type: "varchar",
+            isNullable: true,
+          },
+          {
+            name: "phone",
             type: "varchar",
             isNullable: true,
           },
@@ -45,6 +51,7 @@ export class MigrationUsers1699043032977 implements MigrationInterface {
             name: "password",
             type: "varchar",
             isNullable: true,
+            default: null,
           },
           {
             name: "password_date_update",

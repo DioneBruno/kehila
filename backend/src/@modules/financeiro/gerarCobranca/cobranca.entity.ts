@@ -5,6 +5,7 @@ export type CobrancaProps = {
   pagadorNome: string;
   pagadorDocumento: string;
   pagadorEmail: string;
+  pagadorTelefone: string;
   origem: string;
   origemUuid: string;
   valor: number;
@@ -30,6 +31,9 @@ export class CobrancaEntity {
   }
   pagadorEmail(): string {
     return this.props.pagadorEmail;
+  }
+  pagadorTelefone(): string {
+    return this.props.pagadorTelefone;
   }
   origem(): string {
     return this.props.origem;

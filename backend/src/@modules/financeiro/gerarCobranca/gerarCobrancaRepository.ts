@@ -6,9 +6,20 @@ export class GerarCobrancaRepository {
   async savarCobranca(cobranca: CobrancaEntity): Promise<void> {
     await this.connectionHub.database.query(
       `INSERT INTO
-      financeiro_cobrancas (uuid, company_uuid, user_uuid, origem_tipo, origem_uuid, valor)
-      VALUES ($1, $2, $3, $4, $5, $6)`,
-      [cobranca.uuid(), cobranca.companyUuid(), cobranca.userUuid(), cobranca.origem(), cobranca.origemUuid(), cobranca.valor()],
+      financeiro_cobrancas (uuid, company_uuid, user_uuid, origem_tipo, origem_uuid, pagador_nome, pagador_documento, pagador_email, pagador_telefone, valor)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        cobranca.uuid(),
+        cobranca.companyUuid(),
+        cobranca.userUuid(),
+        cobranca.origem(),
+        cobranca.origemUuid(),
+        cobranca.pagadorNome(),
+        cobranca.pagadorDocumento(),
+        cobranca.pagadorEmail(),
+        cobranca.pagadorTelefone(),
+        cobranca.valor(),
+      ],
     );
   }
 }

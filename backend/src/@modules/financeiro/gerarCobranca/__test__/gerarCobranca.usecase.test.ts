@@ -27,6 +27,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
       pagadorNome: "nome do pagador",
       pagadorDocumento: "12345678909",
       pagadorEmail: "email@dopagador.com",
+      pagadorTelefone: "1199999999",
       valor: 154.36,
     };
     await usecase.execute(input);
@@ -37,5 +38,8 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(cobrancaModel[0].origem_tipo).toBe(input.origem);
     expect(cobrancaModel[0].origem_uuid).toBe(input.origemUuid);
     expect(cobrancaModel[0].valor).toBe("154.36");
+    expect(cobrancaModel[0].pagador_nome).toBe("nome do pagador");
+    expect(cobrancaModel[0].pagador_documento).toBe("12345678909");
+    expect(cobrancaModel[0].pagador_email).toBe("email@dopagador.com");
   });
 });
