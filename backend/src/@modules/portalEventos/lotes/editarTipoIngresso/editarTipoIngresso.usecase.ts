@@ -19,7 +19,7 @@ export class EditarTipoIngressoUsecase {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
     if (!input.tipoUuid) throw new ApiError("Tipo de ingresso não informado");
     if (!input.nome?.trim()) throw new ApiError("O nome do tipo de ingresso é obrigatório");
-    if (input.quantidade == null || input.quantidade <= 0) throw new ApiError("A quantidade deve ser maior que zero");
+    if (input.quantidade == null || input.quantidade < 0) throw new ApiError("Quantidade permitida");
     if (input.preco == null || input.preco < 0) throw new ApiError("O preço não pode ser negativo");
 
     const tipo = await this.repo.buscar(input.tipoUuid, input.companyUuid);

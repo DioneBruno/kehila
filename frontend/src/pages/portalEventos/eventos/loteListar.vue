@@ -189,30 +189,18 @@
                   hint="Prioridade de ativação"
                 />
               </div>
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-6">
                 <q-input
                   v-model.number="dialogLote.form.quantidade"
                   label="Quantidade *"
                   filled
                   type="number"
-                  min="1"
-                  :rules="[(v) => v > 0 || 'Obrigatório']"
+                  min="0"
+                  :rules="[(v) => v > -1 || 'Obrigatório']"
                   lazy-rules
                 />
               </div>
-              <div class="col-12 col-sm-4">
-                <q-input
-                  v-model.number="dialogLote.form.gerarQuantidadeIngressos"
-                  label="Ingressos por compra *"
-                  filled
-                  type="number"
-                  min="1"
-                  :rules="[(v) => v > 0 || 'Obrigatório']"
-                  lazy-rules
-                  hint="Qtd de ingressos gerados por lote comprado"
-                />
-              </div>
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-6">
                 <q-input
                   v-model.number="dialogLote.form.preco"
                   label="Preço (R$) *"
@@ -330,8 +318,8 @@
                   label="Quantidade *"
                   filled
                   type="number"
-                  min="1"
-                  :rules="[(v) => v > 0 || 'Obrigatório']"
+                  min="0"
+                  :rules="[(v) => v > -1 || 'Obrigatório']"
                   lazy-rules
                 />
               </div>

@@ -20,12 +20,8 @@ export class CriarLoteUsecase {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
     if (!input.eventoUuid) throw new ApiError("Evento não informado");
     if (!input.nome?.trim()) throw new ApiError("O nome do lote é obrigatório");
-    if (input.quantidade == null || input.quantidade <= 0)
-      throw new ApiError("A quantidade deve ser maior que zero");
-    if (input.preco == null || input.preco < 0)
-      throw new ApiError("O preço não pode ser negativo");
-    if (input.dataInicio && input.dataFim && input.dataInicio >= input.dataFim)
-      throw new ApiError("A data de início deve ser anterior à data de fim");
+    if (input.quantidade == null || input.quantidade < 0) throw new ApiError("Quantidade permitida");
+    if (input.preco == null || input.preco < 0) throw new ApiError("A data de início deve ser anterior à data de fim");
 
     const eventoExiste = await this.repo.eventoExiste(input.eventoUuid, input.companyUuid);
     if (!eventoExiste) throw new ApiError("Evento não encontrado", 404);
