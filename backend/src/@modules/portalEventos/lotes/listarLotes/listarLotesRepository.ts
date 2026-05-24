@@ -5,6 +5,7 @@ export type TipoIngresso = {
   nome: string;
   descricao: string | null;
   quantidade: number;
+  gerarQuantidadeIngressos: number;
   vendidos: number;
   disponivel: number;
   preco: number;
@@ -48,7 +49,7 @@ export class ListarLotesRepository {
     const tipos = await this.connectionHub.database.query(
       `
       SELECT
-        uuid, lote_uuid AS "loteUuid", nome, descricao, quantidade,
+        uuid, lote_uuid AS "loteUuid", nome, descricao, quantidade, gerar_quantidade_ingressos as "gerarQuantidadeIngressos",
         vendidos, (quantidade - vendidos) AS disponivel,
         preco, visivel
       FROM evento_lote_tipos_ingresso
@@ -66,6 +67,7 @@ export class ListarLotesRepository {
         nome: tipo.nome,
         descricao: tipo.descricao,
         quantidade: tipo.quantidade,
+        gerarQuantidadeIngressos: tipo.gerarQuantidadeIngressos,
         vendidos: tipo.vendidos,
         disponivel: tipo.disponivel,
         preco: parseFloat(tipo.preco),
