@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class MigrationCreateCobrancasMigration1779555127740 implements MigrationInterface {
+export class MigrationCreateContasBancariasMigration1779555127740 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: "financiero_contas_bancarias",
+        name: "financeiro_contas_bancarias",
         columns: [
           { name: "created_at", type: "timestamp", default: "now()" },
           { name: "updated_at", type: "timestamp", default: "now()" },
@@ -18,7 +18,7 @@ export class MigrationCreateCobrancasMigration1779555127740 implements Migration
           {
             name: "uuid",
             type: "uuid",
-            primaryKeyConstraintName: "PK_financiero_contas_bancarias",
+            primaryKeyConstraintName: "PK_financeiro_contas_bancarias",
             default: "gen_random_uuid()",
           },
           { name: "company_uuid", type: "uuid" },

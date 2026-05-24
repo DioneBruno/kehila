@@ -4,7 +4,7 @@ export class MigrationCreatePagamentosMigration1779555472216 implements Migratio
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: "financiero_pagamentos",
+        name: "financeiro_pagamentos",
         columns: [
           { name: "created_at", type: "timestamp", default: "now()" },
           { name: "updated_at", type: "timestamp", default: "now()" },
@@ -18,7 +18,7 @@ export class MigrationCreatePagamentosMigration1779555472216 implements Migratio
           {
             name: "uuid",
             type: "uuid",
-            primaryKeyConstraintName: "PK_financiero_pagamentos",
+            primaryKeyConstraintName: "PK_financeiro_pagamentos",
             default: "gen_random_uuid()",
           },
           { name: "company_uuid", type: "uuid" },
