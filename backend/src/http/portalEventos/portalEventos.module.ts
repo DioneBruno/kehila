@@ -43,6 +43,10 @@ import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedi
 import { CriarPedidoRepository } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedidoRepository";
 import { FecharPedidoUsecase } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedido.usecase";
 import { FecharPedidoRepository } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedidoRepository";
+import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
+import { PedidosController } from "./pedidos.controller";
+import { DominioMiddleware } from "../middleware/dominio.middleware";
+import { PublicoController } from "./publico.controller";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -51,10 +55,11 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     inject: [ConnectionHub],
   };
 }
-
+//
 @Module({
-  controllers: [EventosController, LotesController],
+  controllers: [EventosController, LotesController, PublicoController],
   providers: [
+    makeProvider(PortalEventosQuery, (hub) => new PortalEventosQuery(hub)),
     makeProvider(CriarEventoUsecase, (hub) => new CriarEventoUsecase(new CriarEventoRepository(hub))),
     makeProvider(ListarEventosUsecase, (hub) => new ListarEventosUsecase(new ListarEventosRepository(hub))),
     makeProvider(DetalharEventoUsecase, (hub) => new DetalharEventoUsecase(new DetalharEventoRepository(hub))),
@@ -73,6 +78,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class PortalEventosModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(EventosController, LotesController);
+    consumer.apply(DominioMiddleware).forRoutes(PublicoController);
+    consumer.apply(JwtAuthMiddleware).forRoutes(EventosController, LotesController, PedidosController);
   }
 }

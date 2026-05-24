@@ -34,11 +34,9 @@
     <!-- Conteúdo principal -->
     <div class="hero-container q-px-md q-py-md">
       <div class="row q-col-gutter-lg">
-
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
           <q-stepper v-model="etapa" animated color="primary" flat bordered>
-
             <!-- Etapa 1: Seleção de ingressos -->
             <q-step :name="1" title="Ingressos" icon="confirmation_number" :done="etapa > 1">
               <div v-if="lotes.length === 0" class="text-center q-py-xl">
@@ -274,13 +272,7 @@
                     />
                   </div>
                   <div class="col-6">
-                    <q-input
-                      v-model="cartao.cvv"
-                      label="CVV"
-                      outlined
-                      mask="###"
-                      type="password"
-                    />
+                    <q-input v-model="cartao.cvv" label="CVV" outlined mask="###" type="password" />
                   </div>
                   <div class="col-12">
                     <q-select
@@ -363,7 +355,6 @@
             </template>
           </q-card>
         </div>
-
       </div>
     </div>
 
@@ -447,7 +438,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
+import { PedidoService } from "./pedido.service";
+import { useRoute } from "vue-router";
 
 const LOTES_MOCK = [
   {
@@ -488,6 +481,9 @@ const OPCOES_PARCELAS = [
 export default defineComponent({
   name: "PortalEventosPedidoHome",
   setup() {
+    const $route = useRoute();
+    const $service = new PedidoService();
+
     const data = reactive({
       etapa: 1,
       resumoAberto: false,
@@ -498,14 +494,14 @@ export default defineComponent({
         local: "Centro de Convenções",
       },
       lotes: LOTES_MOCK,
-      quantidades: {} as Record<string, number>,
+      quantidades: {},
       form: {
         nome: "",
         email: "",
         celular: "",
         cpf: "",
       },
-      formaPagamento: "" as "pix" | "cartao" | "",
+      formaPagamento: "",
       cartao: {
         numero: "",
         nome: "",
@@ -515,6 +511,15 @@ export default defineComponent({
       },
       opcoesParcelas: OPCOES_PARCELAS,
     });
+
+    onMounted(async () => {
+      await buscaEvento();
+    });
+
+    async function buscaEvento() {
+      const eventoUuid = $route.params.eventoUuid as string;
+      const response = await $service.buscaEvento(eventoUuid);
+    }
 
     const itensSelecionados = computed(() => {
       const itens: { uuid: string; nome: string; qtd: number; subtotal: number }[] = [];
