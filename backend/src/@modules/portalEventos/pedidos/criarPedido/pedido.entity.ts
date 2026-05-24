@@ -4,7 +4,7 @@ export type PedidoProps = {
   uuid: string;
   companyUuid: string;
   eventoUuid: string;
-  userUuid?: string;
+  userUuid: string;
   idempotencyKey: string;
   valorBruto: number;
   desconto: number;
@@ -25,7 +25,7 @@ export class PedidoEntity {
   eventoUuid(): string {
     return this.props.eventoUuid;
   }
-  userUuid(): string | undefined {
+  userUuid(): string {
     return this.props.userUuid;
   }
   idempotencyKey(): string {

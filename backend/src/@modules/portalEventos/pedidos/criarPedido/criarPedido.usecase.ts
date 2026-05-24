@@ -3,6 +3,7 @@ import { CriarPedidoRepository } from "./criarPedidoRepository";
 
 export type CriarPedidoInput = {
   companyUuid: string;
+  userUuid: string;
   eventoUuid: string;
   pedido: { tipoIngressoUuid: string; quantidade: number }[];
 };
@@ -13,7 +14,7 @@ export class CriarPedidoUsecase {
   async execute(input: CriarPedidoInput) {
     const evento = await this.repo.buscaEvento(input.companyUuid, input.eventoUuid);
     if (!evento) throw new ApiError("Evento não encontrado", 400);
-    const pedido = evento.montaPedido(input.pedido);
+    const pedido = evento.montaPedido(input.userUuid, input.pedido);
     await this.repo.salvarPedido(pedido);
     return pedido;
   }

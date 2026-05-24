@@ -64,6 +64,7 @@ describe("Deve testar CriarPedidoUsecase", () => {
     const input = {
       companyUuid,
       eventoUuid,
+      userUuid: "218a2fe4-e343-4bde-8f4e-a32626d1ffde",
       pedido: [
         {
           tipoIngressoUuid: `1${tipoIngressoUuidBase}`,
@@ -83,6 +84,7 @@ describe("Deve testar CriarPedidoUsecase", () => {
 
     const pedidoModel = await dataSource.query(`SELECT * FROM evento_pedidos WHERE company_uuid = '${companyUuid}'`);
     expect(pedidoModel.length).toBe(1);
+    expect(pedidoModel[0].user_uuid).toBe("218a2fe4-e343-4bde-8f4e-a32626d1ffde");
     expect(pedidoModel[0].valor_bruto).toBe(947.6);
     expect(pedidoModel[0].valor_desconto).toBe(0);
     expect(pedidoModel[0].valor_liquido).toBe(947.6);
@@ -124,6 +126,7 @@ describe("Deve testar CriarPedidoUsecase", () => {
     const usecase = new CriarPedidoUsecase(repo);
     const input = {
       companyUuid,
+      userUuid: "218a2fe4-e343-4bde-8f4e-a32626d1ffde",
       eventoUuid,
       pedido: [
         {
