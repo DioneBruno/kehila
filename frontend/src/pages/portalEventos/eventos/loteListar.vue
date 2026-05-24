@@ -53,7 +53,8 @@
               <div class="row q-gutter-x-md q-mt-xs text-caption text-grey-6">
                 <span>
                   <q-icon name="confirmation_number" size="14px" class="q-mr-xs" />
-                  {{ lote.quantidade === 0 ? '∞' : lote.quantidade }} vagas · {{ formatarMoeda(lote.preco) }}
+                  {{ lote.quantidade === 0 ? "∞" : lote.quantidade }} vagas ·
+                  {{ formatarMoeda(lote.preco) }}
                 </span>
                 <span v-if="lote.dataInicio">
                   <q-icon name="event" size="14px" class="q-mr-xs" />
@@ -113,8 +114,8 @@
                 </q-item-label>
                 <q-item-label caption>
                   {{ formatarMoeda(tipo.preco) }}
-                  · {{ tipo.vendidos }}/{{ tipo.quantidade === 0 ? '∞' : tipo.quantidade }} vendidos ·
-                  {{ tipo.quantidade === 0 ? '∞' : tipo.disponivel }} disponíveis
+                  · {{ tipo.vendidos }}/{{ tipo.quantidade === 0 ? "∞" : tipo.quantidade }} vendidos
+                  · {{ tipo.quantidade === 0 ? "∞" : tipo.disponivel }} disponíveis
                   <span v-if="tipo.descricao"> · {{ tipo.descricao }}</span>
                 </q-item-label>
               </q-item-section>
@@ -306,7 +307,7 @@
               <div class="col-12">
                 <q-input
                   filled
-                  autogrow
+                  :rows="3"
                   type="textarea"
                   v-model="dialogTipo.form.descricao"
                   label="Descrição"
