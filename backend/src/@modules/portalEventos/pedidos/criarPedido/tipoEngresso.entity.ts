@@ -3,6 +3,8 @@ export type TipoEngressoProps = {
   nome: string;
   quantidade: number;
   preco: number;
+  loteUuid: string;
+  gerarQuantidadeIngressos: number;
 };
 
 export class TipoEngressoEntity {
@@ -19,5 +21,11 @@ export class TipoEngressoEntity {
   }
   preco(): number {
     return this.props.preco;
+  }
+  loteUuid(): string {
+    return this.props.loteUuid;
+  }
+  gerarQuantidadeIngressos(): number {
+    return this.props.gerarQuantidadeIngressos ?? 1;
   }
 }

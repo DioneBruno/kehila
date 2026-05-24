@@ -28,14 +28,34 @@ export class EventoEntity {
     for (const item of input) {
       const tipo = this.props.tiposEngresso.find((t) => t.uuid() === item.tipoIngressoUuid);
       if (tipo) valorBruto += tipo.preco() * item.quantidade;
+      const gerarQtd = tipo?.gerarQuantidadeIngressos() ?? 1;
       for (let i = 0; i < item.quantidade; i++) {
-        ingressos.push(
-          new IngressosEntity({
-            uuid: randomUUID(),
-            codigo: randomUUID().replace(/-/g, "").slice(0, 20).toUpperCase(),
-            tipoIngressoUuid: item.tipoIngressoUuid,
-          }),
-        );
+        if (gerarQtd > 1) {
+          ingressos.push(
+            new IngressosEntity({
+              uuid: randomUUID(),
+              codigo: randomUUID().replace(/-/g, "").slice(0, 20).toUpperCase(),
+              tipoIngressoUuid: tipo!.loteUuid(),
+            }),
+          );
+          for (let j = 0; j < gerarQtd; j++) {
+            ingressos.push(
+              new IngressosEntity({
+                uuid: randomUUID(),
+                codigo: randomUUID().replace(/-/g, "").slice(0, 20).toUpperCase(),
+                tipoIngressoUuid: item.tipoIngressoUuid,
+              }),
+            );
+          }
+        } else {
+          ingressos.push(
+            new IngressosEntity({
+              uuid: randomUUID(),
+              codigo: randomUUID().replace(/-/g, "").slice(0, 20).toUpperCase(),
+              tipoIngressoUuid: item.tipoIngressoUuid,
+            }),
+          );
+        }
       }
     }
     valorBruto = Math.round(valorBruto * 100) / 100;

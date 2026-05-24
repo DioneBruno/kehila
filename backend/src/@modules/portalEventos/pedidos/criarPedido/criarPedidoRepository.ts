@@ -26,6 +26,8 @@ export class CriarPedidoRepository {
           nome: tipoEngressoModel.nome,
           quantidade: tipoEngressoModel.quantidade,
           preco: tipoEngressoModel.preco,
+          loteUuid: tipoEngressoModel.lote_uuid,
+          gerarQuantidadeIngressos: tipoEngressoModel.gerar_quantidade_ingressos ?? 1,
         }),
       );
     }
