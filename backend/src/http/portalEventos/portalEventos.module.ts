@@ -39,6 +39,10 @@ import { EditarTipoIngressoRepository } from "src/@modules/portalEventos/lotes/e
 
 import { RemoverTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngresso.usecase";
 import { RemoverTipoIngressoRepository } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngressoRepository";
+import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedido.usecase";
+import { CriarPedidoRepository } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedidoRepository";
+import { FecharPedidoUsecase } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedido.usecase";
+import { FecharPedidoRepository } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedidoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -63,6 +67,8 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(CriarTipoIngressoUsecase, (hub) => new CriarTipoIngressoUsecase(new CriarTipoIngressoRepository(hub))),
     makeProvider(EditarTipoIngressoUsecase, (hub) => new EditarTipoIngressoUsecase(new EditarTipoIngressoRepository(hub))),
     makeProvider(RemoverTipoIngressoUsecase, (hub) => new RemoverTipoIngressoUsecase(new RemoverTipoIngressoRepository(hub))),
+    makeProvider(CriarPedidoUsecase, (hub) => new CriarPedidoUsecase(new CriarPedidoRepository(hub))),
+    makeProvider(FecharPedidoUsecase, (hub) => new FecharPedidoUsecase(new FecharPedidoRepository(hub))),
   ],
 })
 export class PortalEventosModule implements NestModule {

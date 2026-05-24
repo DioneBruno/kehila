@@ -265,6 +265,32 @@
                   <q-item-label class="text-caption text-grey-7">{{ evento.slug }}</q-item-label>
                 </q-item-section>
               </q-item>
+              <q-item>
+                <q-item-section avatar><q-icon name="public" color="grey-6" /></q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    flat
+                    dense
+                    no-caps
+                    size="12px"
+                    color="primary"
+                    icon="open_in_new"
+                    label="Abrir"
+                    @click="abrirPaginaPublica()"
+                  />
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    flat
+                    dense
+                    no-caps
+                    size="12px"
+                    color="primary"
+                    icon="copy_all"
+                    label="Copiar link"
+                  />
+                </q-item-section>
+              </q-item>
             </q-list>
           </q-card-section>
         </q-card>
@@ -314,7 +340,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
 import { LotesService } from "./lotes.service";
 
@@ -322,6 +348,7 @@ export default defineComponent({
   name: "PortalEventosEventosDetalhe",
   setup() {
     const $route = useRoute();
+    const $router = useRouter();
     const $service = new EventoService();
     const $lotesService = new LotesService();
 
@@ -434,11 +461,25 @@ export default defineComponent({
       return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
 
+    function abrirPaginaPublica() {
+      const urlOrigin = window.location.origin;
+      const url = $router.resolve({
+        name: "eventos.publico",
+        params: { eventoUuid: data.evento.uuid },
+      });
+      window.open(`${urlOrigin}${url.href}`, "_blank");
+    }
+
+    function copiarLink() {
+      navigator.clipboard.writeText(`/${data.evento?.slug}`);
+    }
+
     onMounted(() => void carregar());
 
     return {
       ...toRefs(data),
       podeEditar,
+      abrirPaginaPublica,
       salvar,
       cancelarEdicao,
       publicar,
