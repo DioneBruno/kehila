@@ -21,11 +21,14 @@ describe("Deve testar FecharPedidoUsecase", () => {
     await dataSource.destroy();
   });
 
-  test("Deve criar financeiroCobrança", async () => {
+  test("Deve criar financeiroCobranca com dados do usuário", async () => {
     const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";
 
-    await dataSource.query(`INSERT INTO evento_pedidos (uuid, company_uuid, evento_uuid, idempotency_key, valor_bruto, valor_liquido)
-      VALUES ('${pedidoUuid}', '${companyUuid}', '${companyUuid}', '123e4567', 500, 1000)`);
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone )
+      VALUES ('${userUuid}', 'nomeUsuario', 'cpfUsuario', 'emailUsuario', 'telefoneUsuario')`);
+
+    await dataSource.query(`INSERT INTO evento_pedidos (uuid, company_uuid, user_uuid, evento_uuid, idempotency_key, valor_bruto, valor_liquido)
+      VALUES ('${pedidoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', '123e4567', 500, 1000)`);
 
     const usecase = new FecharPedidoUsecase(repo);
     const input = {
@@ -37,5 +40,10 @@ describe("Deve testar FecharPedidoUsecase", () => {
 
     const cobrancaModel = await dataSource.query(`SELECT * FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     expect(cobrancaModel.length).toBe(1);
+    expect(cobrancaModel[0].valor).toBe("1000.00");
+    expect(cobrancaModel[0].pagador_nome).toBe("nomeUsuario");
+    expect(cobrancaModel[0].pagador_documento).toBe("cpfUsuario");
+    expect(cobrancaModel[0].pagador_email).toBe("emailUsuario");
+    expect(cobrancaModel[0].pagador_telefone).toBe("telefoneUsuario");
   });
 });

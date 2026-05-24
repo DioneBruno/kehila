@@ -1,7 +1,10 @@
+import { PagadorEntity } from "./pagador.entity";
+
 export type PedidoProps = {
   companyUuid: string;
   userUuid: string;
   uuid: string;
+  usuario: PagadorEntity;
   valorBruno: number;
   valorDesconto: number;
   valorTotal: number;
@@ -18,6 +21,9 @@ export class PedidoEntity {
   }
   uuid(): string {
     return this.props.uuid;
+  }
+  usuario(): PagadorEntity {
+    return this.props.usuario;
   }
   valorBruno(): number {
     return this.props.valorBruno;

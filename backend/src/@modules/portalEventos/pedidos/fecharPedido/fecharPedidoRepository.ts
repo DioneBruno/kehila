@@ -23,13 +23,22 @@ export class FecharPedidoRepository {
     );
     if (!pedidoModel) return null;
 
+    const [usuarioModel] = await this.connectionHub.database.query(`SELECT * FROM auth_users WHERE uuid = $1`, [pedidoModel.user_uuid]);
+    const usuario = new PagadorEntity({
+      nome: usuarioModel.name,
+      documento: usuarioModel.cpf,
+      email: usuarioModel.email,
+      telefone: usuarioModel.phone,
+    });
+
     const pedido = new PedidoEntity({
       companyUuid: pedidoModel.company_uuid,
       userUuid: pedidoModel.user_uuid,
       uuid: pedidoModel.uuid,
+      usuario,
       valorBruno: pedidoModel.valor_bruto,
       valorDesconto: pedidoModel.valor_desconto,
-      valorTotal: pedidoModel.valor_total,
+      valorTotal: pedidoModel.valor_liquido,
     });
     return pedido;
   }
