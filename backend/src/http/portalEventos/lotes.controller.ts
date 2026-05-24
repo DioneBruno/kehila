@@ -46,12 +46,7 @@ export class LotesController {
   }
 
   @Put(":uuid")
-  async editar(
-    @Req() req: Request | any,
-    @Param("uuid") uuid: string,
-    @Body() body: any,
-    @Res() res: Response,
-  ) {
+  async editar(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
     await this.editarLoteUsecase.execute({
       companyUuid: req.companyUuid,
       loteUuid: uuid,
@@ -76,18 +71,14 @@ export class LotesController {
   }
 
   @Post(":loteUuid/tipos-ingresso")
-  async criarTipo(
-    @Req() req: Request | any,
-    @Param("loteUuid") loteUuid: string,
-    @Body() body: any,
-    @Res() res: Response,
-  ) {
+  async criarTipo(@Req() req: Request | any, @Param("loteUuid") loteUuid: string, @Body() body: any, @Res() res: Response) {
     const resultado = await this.criarTipoIngressoUsecase.execute({
       companyUuid: req.companyUuid,
       loteUuid,
       nome: body.nome,
       descricao: body.descricao,
       quantidade: body.quantidade,
+      gerarQuantidadeIngressos: body.gerarQuantidadeIngressos,
       preco: body.preco,
       visivel: body.visivel,
     });
@@ -95,18 +86,14 @@ export class LotesController {
   }
 
   @Put(":loteUuid/tipos-ingresso/:tipoUuid")
-  async editarTipo(
-    @Req() req: Request | any,
-    @Param("tipoUuid") tipoUuid: string,
-    @Body() body: any,
-    @Res() res: Response,
-  ) {
+  async editarTipo(@Req() req: Request | any, @Param("tipoUuid") tipoUuid: string, @Body() body: any, @Res() res: Response) {
     await this.editarTipoIngressoUsecase.execute({
       companyUuid: req.companyUuid,
       tipoUuid,
       nome: body.nome,
       descricao: body.descricao,
       quantidade: body.quantidade,
+      gerarQuantidadeIngressos: body.gerarQuantidadeIngressos,
       preco: body.preco,
       visivel: body.visivel,
     });
@@ -114,11 +101,7 @@ export class LotesController {
   }
 
   @Delete(":loteUuid/tipos-ingresso/:tipoUuid")
-  async removerTipo(
-    @Req() req: Request | any,
-    @Param("tipoUuid") tipoUuid: string,
-    @Res() res: Response,
-  ) {
+  async removerTipo(@Req() req: Request | any, @Param("tipoUuid") tipoUuid: string, @Res() res: Response) {
     await this.removerTipoIngressoUsecase.execute({
       companyUuid: req.companyUuid,
       tipoUuid,

@@ -189,7 +189,7 @@
                   hint="Prioridade de ativação"
                 />
               </div>
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-input
                   v-model.number="dialogLote.form.quantidade"
                   label="Quantidade *"
@@ -200,7 +200,19 @@
                   lazy-rules
                 />
               </div>
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
+                <q-input
+                  v-model.number="dialogLote.form.gerarQuantidadeIngressos"
+                  label="Ingressos por compra *"
+                  filled
+                  type="number"
+                  min="1"
+                  :rules="[(v) => v > 0 || 'Obrigatório']"
+                  lazy-rules
+                  hint="Qtd de ingressos gerados por lote comprado"
+                />
+              </div>
+              <div class="col-12 col-sm-4">
                 <q-input
                   v-model.number="dialogLote.form.preco"
                   label="Preço (R$) *"
@@ -305,11 +317,11 @@
               </div>
               <div class="col-12">
                 <q-input
+                  filled
+                  autogrow
+                  type="textarea"
                   v-model="dialogTipo.form.descricao"
                   label="Descrição"
-                  filled
-                  type="textarea"
-                  autogrow
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -324,6 +336,18 @@
                 />
               </div>
               <div class="col-12 col-sm-6">
+                <q-input
+                  v-model.number="dialogTipo.form.gerarQuantidadeIngressos"
+                  label="Ingressos por compra *"
+                  filled
+                  type="number"
+                  min="1"
+                  :rules="[(v) => v > 0 || 'Obrigatório']"
+                  lazy-rules
+                  hint="Qtd de ingressos gerados por lote comprado"
+                />
+              </div>
+              <div class="col-12">
                 <q-input
                   v-model.number="dialogTipo.form.preco"
                   label="Preço (R$) *"
@@ -365,6 +389,7 @@ const loteFormVazio = () => ({
   nome: "",
   ordem: 1,
   quantidade: 0,
+  gerarQuantidadeIngressos: 1,
   preco: 0,
   dataInicio: "",
   dataFim: "",
@@ -375,6 +400,7 @@ const tipoFormVazio = () => ({
   nome: "",
   descricao: "",
   quantidade: 0,
+  gerarQuantidadeIngressos: 1,
   preco: 0,
   visivel: true,
 });
@@ -415,6 +441,7 @@ export default defineComponent({
           nome: lote.nome,
           ordem: lote.ordem,
           quantidade: lote.quantidade,
+          gerarQuantidadeIngressos: lote.gerarQuantidadeIngressos,
           preco: lote.preco,
           dataInicio: lote.dataInicio ? lote.dataInicio.slice(0, 16) : "",
           dataFim: lote.dataFim ? lote.dataFim.slice(0, 16) : "",
@@ -437,6 +464,7 @@ export default defineComponent({
         nome: form.nome,
         ordem: form.ordem,
         quantidade: form.quantidade,
+        gerarQuantidadeIngressos: form.gerarQuantidadeIngressos,
         preco: form.preco,
         dataInicio: form.dataInicio || undefined,
         dataFim: form.dataFim || undefined,
@@ -470,6 +498,7 @@ export default defineComponent({
           nome: tipo.nome,
           descricao: tipo.descricao ?? "",
           quantidade: tipo.quantidade,
+          gerarQuantidadeIngressos: tipo.gerarQuantidadeIngressos ?? 1,
           preco: tipo.preco,
           visivel: tipo.visivel,
         };
@@ -487,6 +516,7 @@ export default defineComponent({
         nome: form.nome,
         descricao: form.descricao || undefined,
         quantidade: form.quantidade,
+        gerarQuantidadeIngressos: form.gerarQuantidadeIngressos,
         preco: form.preco,
         visivel: form.visivel,
       };

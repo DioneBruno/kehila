@@ -28,6 +28,7 @@ export class CreateEventoLoteTiposIngresso1779545498233 implements MigrationInte
           { name: "nome", type: "varchar", length: "200" },
           { name: "descricao", type: "text", isNullable: true },
           { name: "quantidade", type: "int", default: 0 },
+          { name: "gerar_quantidade_ingressos", type: "int", default: 1 },
           { name: "vendidos", type: "int", default: 0 },
           { name: "preco", type: "decimal", precision: 10, scale: 2, default: 0 },
           { name: "visivel", type: "boolean", default: true },

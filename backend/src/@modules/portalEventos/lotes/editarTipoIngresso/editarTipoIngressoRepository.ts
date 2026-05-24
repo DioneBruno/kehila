@@ -6,6 +6,7 @@ export type EditarTipoIngressoData = {
   nome: string;
   descricao?: string;
   quantidade: number;
+  gerarQuantidadeIngressos: number;
   preco: number;
   visivel: boolean;
 };
@@ -25,18 +26,10 @@ export class EditarTipoIngressoRepository {
     await this.connectionHub.database.query(
       `
       UPDATE evento_lote_tipos_ingresso SET
-        nome = $1, descricao = $2, quantidade = $3, preco = $4, visivel = $5, updated_at = now()
-      WHERE uuid = $6 AND company_uuid = $7
+        nome = $1, descricao = $2, quantidade = $3, gerar_quantidade_ingressos = $4, preco = $5, visivel = $6, updated_at = now()
+      WHERE uuid = $7 AND company_uuid = $8
       `,
-      [
-        data.nome,
-        data.descricao ?? null,
-        data.quantidade,
-        data.preco,
-        data.visivel,
-        data.uuid,
-        data.companyUuid,
-      ],
+      [data.nome, data.descricao ?? null, data.quantidade, data.gerarQuantidadeIngressos, data.preco, data.visivel, data.uuid, data.companyUuid],
     );
   }
 }

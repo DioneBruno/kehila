@@ -7,6 +7,7 @@ export type CriarTipoIngressoData = {
   nome: string;
   descricao?: string;
   quantidade: number;
+  gerarQuantidadeIngressos: number;
   preco: number;
   visivel: boolean;
 };
@@ -30,9 +31,9 @@ export class CriarTipoIngressoRepository {
     const [row] = await this.connectionHub.database.query(
       `
       INSERT INTO evento_lote_tipos_ingresso (
-        company_uuid, evento_uuid, lote_uuid, nome, descricao, quantidade, preco, visivel
+        company_uuid, evento_uuid, lote_uuid, nome, descricao, quantidade, gerar_quantidade_ingressos, preco, visivel
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
       )
       RETURNING uuid
       `,
@@ -43,6 +44,7 @@ export class CriarTipoIngressoRepository {
         data.nome,
         data.descricao ?? null,
         data.quantidade,
+        data.gerarQuantidadeIngressos,
         data.preco,
         data.visivel,
       ],
