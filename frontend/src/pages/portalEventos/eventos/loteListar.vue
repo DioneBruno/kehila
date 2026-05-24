@@ -322,6 +322,7 @@
                   min="0"
                   :rules="[(v) => v > -1 || 'Obrigatório']"
                   lazy-rules
+                  :hint="!dialogTipo.form.quantidade ? 'Quantidade infinita ∞ de ingressos' : ''"
                 />
               </div>
               <div class="col-12 col-sm-6">
