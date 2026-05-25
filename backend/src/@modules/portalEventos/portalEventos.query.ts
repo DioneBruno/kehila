@@ -26,6 +26,38 @@ export class PortalEventosQuery {
     );
     if (!eventoModel) throw new ApiError("Evento não encontrado");
 
+    const lotesModel = await this.connectionHub.database.query(
+      `SELECT
+        uuid,
+        ativo,
+        data_fim "dataFim",
+        data_inicio "dataInicio",
+        nome
+      FROM evento_lotes WHERE deleted_at IS NULL AND evento_uuid = $1`,
+      [eventoUuid],
+    );
+
+    const tiposEngressoModel = await this.connectionHub.database.query(
+      `SELECT 
+        uuid,
+        nome,
+        descricao,
+        evento_uuid "eventoUuid",
+        lote_uuid "loteUuid",
+        visivel,
+        preco
+      FROM evento_lote_tipos_ingresso WHERE deleted_at IS NULL AND evento_uuid = $1`,
+      [eventoUuid],
+    );
+
+    eventoModel.lotes = lotesModel;
+
+    for (const lote of lotesModel) {
+      lote.tiposEngresso = tiposEngressoModel.filter((tipoEngresso) => tipoEngresso.loteUuid === lote.uuid);
+    }
+
+    // eventoModel.tiposEngresso = tiposEngressoModel;
+
     return {
       ...eventoModel,
       dataFim: ApiDate.format(eventoModel.dataFim, "YYYY-MM-DD HH:mm"),

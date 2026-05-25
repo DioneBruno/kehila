@@ -8,7 +8,7 @@ export class PublicoController {
 
   @Post(":eventoUuid")
   async buscarEvento(@Req() req: Request | any, @Param("eventoUuid") eventoUuid: string, @Body() body: any, @Res() res: Response) {
-    const respose = await this.portalEventosQuery.buscarEvento(req.companyUuid, eventoUuid);
-    return res.status(201).json({ success: true, data: respose });
+    const response = await this.portalEventosQuery.buscarEvento(req.companyUuid, eventoUuid);
+    return res.status(201).json(response);
   }
 }

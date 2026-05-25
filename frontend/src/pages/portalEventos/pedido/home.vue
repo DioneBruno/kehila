@@ -1,35 +1,7 @@
 <template>
   <q-page class="bg-grey-2" :class="{ 'page-with-bar': totalIngressos > 0 }">
     <!-- Hero do evento -->
-    <div class="bg-primary text-white">
-      <div class="hero-container q-px-md q-py-lg">
-        <div class="row items-center q-col-gutter-md">
-          <div class="col-auto gt-xs">
-            <q-avatar size="72px" color="white" text-color="primary" square class="rounded-borders">
-              <q-icon name="event" size="44px" />
-            </q-avatar>
-          </div>
-          <div class="col">
-            <div class="text-overline q-mb-xs" style="opacity: 0.75">Portal de Ingressos</div>
-            <div class="text-h6 text-weight-bold">{{ evento.titulo }}</div>
-            <div class="row items-center q-gutter-sm q-mt-xs text-caption flex-wrap">
-              <span class="row items-center no-wrap">
-                <q-icon name="event" size="13px" class="q-mr-xs" />{{ evento.data }}
-              </span>
-              <span class="row items-center no-wrap">
-                <q-icon name="schedule" size="13px" class="q-mr-xs" />{{ evento.horario }}
-              </span>
-              <span class="row items-center no-wrap">
-                <q-icon name="location_on" size="13px" class="q-mr-xs" />{{ evento.local }}
-              </span>
-            </div>
-          </div>
-          <div class="col-auto">
-            <q-chip color="positive" text-color="white" icon="circle" dense>Em Vendas</q-chip>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Cabecalho />
 
     <!-- Conteúdo principal -->
     <div class="hero-container q-px-md q-py-md">
@@ -210,6 +182,9 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
+import { usePedidoStore } from "src/stores/pedido";
+
+import Cabecalho from "./cabecalho.vue";
 import StepIngressos from "./StepIngressos.vue";
 import StepSeusDados from "./StepSeusDados.vue";
 import StepPagamento from "./StepPagamento.vue";
@@ -252,30 +227,16 @@ const OPCOES_PARCELAS = [
 
 export default defineComponent({
   name: "PortalEventosPedidoHome",
-  components: { StepIngressos, StepSeusDados, StepPagamento },
+  components: { Cabecalho, StepIngressos, StepSeusDados, StepPagamento },
   setup() {
     const $route = useRoute();
+    const $pedidoStore = usePedidoStore();
     const $service = new PedidoService();
 
-    const data = reactive<{
-      etapa: number;
-      resumoAberto: boolean;
-      evento: { titulo: string; data: string; horario: string; local: string };
-      lotes: typeof LOTES_MOCK;
-      quantidades: Record<string, number>;
-      form: { nome: string; email: string; celular: string; cpf: string };
-      formaPagamento: string;
-      cartao: { numero: string; nome: string; validade: string; cvv: string; parcelas: number };
-      opcoesParcelas: typeof OPCOES_PARCELAS;
-    }>({
+    const data = reactive({
       etapa: 1,
       resumoAberto: false,
-      evento: {
-        titulo: "Evento de Exemplo",
-        data: "28/06/2026",
-        horario: "19h00",
-        local: "Centro de Convenções",
-      },
+      evento: computed(() => $pedidoStore.$state.evento),
       lotes: LOTES_MOCK,
       quantidades: {},
       form: {

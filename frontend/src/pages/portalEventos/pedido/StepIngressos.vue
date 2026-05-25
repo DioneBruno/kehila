@@ -1,19 +1,19 @@
 <template>
   <div>
-    <div v-if="lotes.length === 0" class="text-center q-py-xl">
+    <div v-if="evento.lotes.length === 0" class="text-center q-py-xl">
       <q-icon name="confirmation_number" size="56px" color="grey-4" />
       <div class="text-subtitle1 text-grey-5 q-mt-md">Nenhum ingresso disponível</div>
     </div>
 
     <div v-else class="q-gutter-md">
-      <div v-for="lote in lotes" :key="lote.uuid">
+      <div v-for="lote in evento.lotes" :key="lote.uuid">
         <div class="row items-center q-mb-sm">
           <span class="text-overline text-grey-7 text-weight-bold">{{ lote.nome }}</span>
           <q-separator class="col q-ml-sm" />
         </div>
 
         <q-card
-          v-for="tipo in lote.tiposIngresso"
+          v-for="tipo in lote.tiposEngresso"
           :key="tipo.uuid"
           flat
           bordered
@@ -77,7 +77,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { usePedidoStore } from "src/stores/pedido";
+import { computed, defineComponent, PropType, reactive, toRefs } from "vue";
 
 interface TipoIngresso {
   uuid: string;
@@ -102,10 +103,19 @@ export default defineComponent({
   },
   emits: ["aumentar", "diminuir", "next"],
   setup() {
+    const $pedidoStore = usePedidoStore();
+
+    const data = reactive({
+      evento: computed(() => $pedidoStore.$state.evento),
+    });
+
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
-    return { formatarMoeda };
+    return {
+      ...toRefs(data),
+      formatarMoeda,
+    };
   },
 });
 </script>
