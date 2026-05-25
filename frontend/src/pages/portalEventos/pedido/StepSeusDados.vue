@@ -1,6 +1,18 @@
 <template>
   <q-form ref="formRef" @submit.prevent="$emit('next')" greedy>
     <div class="row q-col-gutter-md">
+      <div class="col-12 col-sm-6">
+        <q-input
+          :model-value="form.cpf"
+          label="CPF *"
+          outlined
+          mask="###.###.###-##"
+          unmasked-value
+          :rules="[(v) => !!v || 'Obrigatório']"
+          lazy-rules
+          @update:model-value="update('cpf', $event)"
+        />
+      </div>
       <div class="col-12">
         <q-input
           :model-value="form.nome"
@@ -34,18 +46,6 @@
           @update:model-value="update('celular', $event)"
         />
       </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          :model-value="form.cpf"
-          label="CPF *"
-          outlined
-          mask="###.###.###-##"
-          unmasked-value
-          :rules="[(v) => !!v || 'Obrigatório']"
-          lazy-rules
-          @update:model-value="update('cpf', $event)"
-        />
-      </div>
     </div>
 
     <q-stepper-navigation class="row q-gutter-sm q-pt-md">
@@ -62,7 +62,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import type { PropType } from "vue";
+import { defineComponent } from "vue";
 
 interface FormDados {
   nome: string;
