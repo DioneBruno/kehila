@@ -30,7 +30,7 @@
 
           <div class="row justify-between items-center">
             <div>
-              <div class="text-caption text-grey-6">{{ totalIngressos }} ingresso(s)</div>
+              <!-- <div class="text-caption text-grey-6">{{ totalIngressos }} ingresso(s)</div> -->
               <div class="text-subtitle2 text-weight-bold">Total</div>
             </div>
             <div class="text-h6 text-primary text-weight-bold">
@@ -43,7 +43,7 @@
       <template v-if="itensSelecionados.length > 0">
         <q-separator />
         <q-card-section class="q-py-sm">
-          <div class="row items-center q-gutter-xs text-caption text-grey-6">
+          <div class="row items-center justify-center q-gutter-xs text-caption text-grey-6">
             <q-icon name="security" size="14px" />
             <span>Compra 100% segura e protegida</span>
           </div>
@@ -54,21 +54,47 @@
 </template>
 <script lang="ts">
 import { usePedidoStore } from "src/stores/pedido";
-import { defineComponent, reactive, toRefs } from "vue";
+import { computed, defineComponent } from "vue";
 
 export default defineComponent({
   name: "PedidoResumo",
   setup() {
     const $pedidoStore = usePedidoStore();
 
-    const data = reactive({});
+    function precoDoTipo(uuid: string): number {
+      for (const lote of $pedidoStore.evento?.lotes ?? []) {
+        const tipos = lote.tiposIngresso ?? lote.tiposEngresso ?? [];
+        const tipo = tipos.find((t: any) => t.uuid === uuid);
+        if (tipo) return Number(tipo.preco) || 0;
+      }
+      return 0;
+    }
+
+    const itensSelecionados = computed(() =>
+      ($pedidoStore.pedido.itens as any[]).map((item) => ({
+        uuid: item.tipoIngressoUuid,
+        nome: item.tipoIngressoNome,
+        qtd: item.quantidade,
+        subtotal: item.quantidade * precoDoTipo(item.tipoIngressoUuid),
+      })),
+    );
+
+    const totalIngressos = computed(() =>
+      itensSelecionados.value.reduce((acc, i) => acc + i.qtd, 0),
+    );
+
+    const totalValor = computed(() =>
+      itensSelecionados.value.reduce((acc, i) => acc + i.subtotal, 0),
+    );
 
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
 
     return {
-      ...toRefs(data),
+      itensSelecionados,
+      totalIngressos,
+      totalValor,
       formatarMoeda,
     };
   },
