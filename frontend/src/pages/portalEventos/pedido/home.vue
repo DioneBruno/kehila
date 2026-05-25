@@ -73,57 +73,6 @@
         </q-card>
       </div>
     </transition>
-
-    <!-- Bottom sheet: resumo no mobile -->
-    <q-bottom-sheet v-model="resumoAberto">
-      <q-card flat>
-        <q-card-section class="row items-center q-pb-none">
-          <q-icon name="shopping_cart" class="q-mr-sm" color="primary" size="20px" />
-          <span class="text-subtitle1 text-weight-bold">Resumo do Pedido</span>
-          <q-space />
-          <q-btn flat round dense icon="close" @click="resumoAberto = false" />
-        </q-card-section>
-
-        <q-card-section>
-          <div v-if="itensSelecionados.length === 0" class="text-center q-py-lg">
-            <q-icon name="confirmation_number" size="48px" color="grey-3" />
-            <div class="text-caption text-grey-5 q-mt-sm">Nenhum ingresso selecionado</div>
-          </div>
-
-          <div v-else>
-            <div
-              v-for="item in itensSelecionados"
-              :key="item.uuid"
-              class="row justify-between items-start q-mb-sm"
-            >
-              <div class="col text-body2">
-                <span class="text-weight-medium">{{ item.qtd }}×</span> {{ item.nome }}
-              </div>
-              <div class="col-auto text-body2 text-weight-medium">
-                {{ formatarMoeda(item.subtotal) }}
-              </div>
-            </div>
-
-            <q-separator class="q-my-md" />
-
-            <div class="row justify-between items-center q-mb-md">
-              <div>
-                <div class="text-caption text-grey-6">{{ totalIngressos }} ingresso(s)</div>
-                <div class="text-subtitle2 text-weight-bold">Total</div>
-              </div>
-              <div class="text-h6 text-primary text-weight-bold">
-                {{ formatarMoeda(totalValor) }}
-              </div>
-            </div>
-
-            <div class="row items-center q-gutter-xs text-caption text-grey-6 q-mb-sm">
-              <q-icon name="security" size="14px" />
-              <span>Compra 100% segura e protegida</span>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card>
-    </q-bottom-sheet>
   </q-page>
 </template>
 
