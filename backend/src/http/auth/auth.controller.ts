@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { TokenGenerateUseCase } from "src/@modules/auth/tokenGenerate/tokenGenerate.usecase";
+import { TokenGenerateUseCase } from "src/@modules/auth/generateTokenAutenticationUsernamePassword/tokenGenerate.usecase";
 //
 @Controller("")
 export class AuthController {

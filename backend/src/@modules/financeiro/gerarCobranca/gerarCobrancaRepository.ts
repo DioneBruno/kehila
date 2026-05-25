@@ -1,4 +1,4 @@
-import { ConnectionHub } from "../../shared/connectionHub";
+import { ConnectionHub } from "../../shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
 
 export class GerarCobrancaRepository {

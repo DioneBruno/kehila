@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export type EventoListItem = {
   uuid: string;
@@ -49,10 +49,7 @@ export class ListarEventosRepository {
       idx++;
     }
 
-    const [countRow] = await this.connectionHub.database.query(
-      `SELECT COUNT(*) AS total FROM eventos e ${filterWhere}`,
-      filterBindings,
-    );
+    const [countRow] = await this.connectionHub.database.query(`SELECT COUNT(*) AS total FROM eventos e ${filterWhere}`, filterBindings);
 
     const rows = await this.connectionHub.database.query(
       `

@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { EventosController } from "./eventos.controller";
 import { LotesController } from "./lotes.controller";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 
 import { CriarEventoUsecase } from "src/@modules/portalEventos/eventos/criarEvento/criarEvento.usecase";

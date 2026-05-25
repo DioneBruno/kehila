@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export type CriarEventoData = {
   companyUuid: string;
@@ -27,10 +27,7 @@ export class CriarEventoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async slugExiste(slug: string): Promise<boolean> {
-    const [row] = await this.connectionHub.database.query(
-      `SELECT uuid FROM eventos WHERE slug = $1 AND deleted_at IS NULL`,
-      [slug],
-    );
+    const [row] = await this.connectionHub.database.query(`SELECT uuid FROM eventos WHERE slug = $1 AND deleted_at IS NULL`, [slug]);
     return !!row;
   }
 

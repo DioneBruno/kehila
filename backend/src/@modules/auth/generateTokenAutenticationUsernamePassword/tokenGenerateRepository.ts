@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { UserEntity } from "./user.entity";
 
 export type CompanyData = {

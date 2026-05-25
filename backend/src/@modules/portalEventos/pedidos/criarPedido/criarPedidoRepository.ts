@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { EventoEntity } from "./evento.entity";
 import { TipoEngressoEntity } from "./tipoEngresso.entity";
 import { PedidoEntity } from "./pedido.entity";

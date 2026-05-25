@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export type CriarTipoIngressoData = {
   companyUuid: string;

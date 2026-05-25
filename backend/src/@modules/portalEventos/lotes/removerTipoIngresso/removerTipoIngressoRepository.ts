@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export class RemoverTipoIngressoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -12,9 +12,6 @@ export class RemoverTipoIngressoRepository {
   }
 
   async remover(uuid: string, companyUuid: string): Promise<void> {
-    await this.connectionHub.database.query(
-      `DELETE FROM evento_lote_tipos_ingresso WHERE uuid = $1 AND company_uuid = $2`,
-      [uuid, companyUuid],
-    );
+    await this.connectionHub.database.query(`DELETE FROM evento_lote_tipos_ingresso WHERE uuid = $1 AND company_uuid = $2`, [uuid, companyUuid]);
   }
 }

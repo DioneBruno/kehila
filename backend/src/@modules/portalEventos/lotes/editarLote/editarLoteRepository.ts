@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export type EditarLoteData = {
   uuid: string;
@@ -40,17 +40,7 @@ export class EditarLoteRepository {
         data_inicio = $5, data_fim = $6, ativo = $7, updated_at = now()
       WHERE uuid = $8 AND company_uuid = $9
       `,
-      [
-        data.nome,
-        data.ordem,
-        data.quantidade,
-        data.preco,
-        data.dataInicio ?? null,
-        data.dataFim ?? null,
-        data.ativo,
-        data.uuid,
-        data.companyUuid,
-      ],
+      [data.nome, data.ordem, data.quantidade, data.preco, data.dataInicio ?? null, data.dataFim ?? null, data.ativo, data.uuid, data.companyUuid],
     );
   }
 }

@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { PedidoEntity } from "./pedido.entity";
 import { GerarCobrancaUsecase } from "src/@modules/financeiro/gerarCobranca/gerarCobranca.usecase";
 import { GerarCobrancaRepository } from "src/@modules/financeiro/gerarCobranca/gerarCobrancaRepository";

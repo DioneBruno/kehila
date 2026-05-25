@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, NestMiddleware } from "@nestjs/common";
 import { ApiError } from "src/@modules/shared/apiError";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 @Injectable()
 export class DominioMiddleware implements NestMiddleware {

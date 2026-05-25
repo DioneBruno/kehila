@@ -1,7 +1,7 @@
 import dataSource from "src/@infra/database/datasource";
 import { CriarPedidoUsecase } from "../criarPedido.usecase";
 import { CriarPedidoRepository } from "../criarPedidoRepository";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 const companyUuid = "42c8158d-0132-4a5d-a2f6-10ae38ad5f17";
 let repo: CriarPedidoRepository;

@@ -1,7 +1,7 @@
 import dataSource from "src/@infra/database/datasource";
 import { FecharPedidoUsecase } from "../fecharPedido.usecase";
 import { FecharPedidoRepository } from "../fecharPedidoRepository";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 const companyUuid = "7a0bc611-61f3-400f-8da4-f22b8a2f9e1d";
 const userUuid = "c229e263-83bb-44c5-a6ca-6e16f0de6853";

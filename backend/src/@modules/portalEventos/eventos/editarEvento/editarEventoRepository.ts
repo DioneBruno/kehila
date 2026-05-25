@@ -1,4 +1,4 @@
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export type EditarEventoData = {
   titulo?: string;
@@ -20,10 +20,10 @@ export class EditarEventoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarStatus(companyUuid: string, eventoUuid: string): Promise<string | null> {
-    const [row] = await this.connectionHub.database.query(
-      `SELECT status FROM eventos WHERE uuid = $1 AND company_uuid = $2 AND deleted_at IS NULL`,
-      [eventoUuid, companyUuid],
-    );
+    const [row] = await this.connectionHub.database.query(`SELECT status FROM eventos WHERE uuid = $1 AND company_uuid = $2 AND deleted_at IS NULL`, [
+      eventoUuid,
+      companyUuid,
+    ]);
     return row?.status ?? null;
   }
 
@@ -61,9 +61,6 @@ export class EditarEventoRepository {
     campos.push(`updated_at = now()`);
     valores.push(eventoUuid, companyUuid);
 
-    await this.connectionHub.database.query(
-      `UPDATE eventos SET ${campos.join(", ")} WHERE uuid = $${idx} AND company_uuid = $${idx + 1}`,
-      valores,
-    );
+    await this.connectionHub.database.query(`UPDATE eventos SET ${campos.join(", ")} WHERE uuid = $${idx} AND company_uuid = $${idx + 1}`, valores);
   }
 }

@@ -1,5 +1,5 @@
 import dataSource from "src/@infra/database/datasource";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 

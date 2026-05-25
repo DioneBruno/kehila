@@ -1,6 +1,6 @@
 import { ApiDate } from "../shared/apiDate";
 import { ApiError } from "../shared/apiError";
-import { ConnectionHub } from "../shared/connectionHub";
+import { ConnectionHub } from "../shared/connections/connectionHub";
 
 export class PortalEventosQuery {
   constructor(readonly connectionHub: ConnectionHub) {}

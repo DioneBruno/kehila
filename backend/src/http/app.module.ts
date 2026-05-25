@@ -3,7 +3,7 @@ import { Global, Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
 import { PortalEventosModule } from "./portalEventos/portalEventos.module";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 

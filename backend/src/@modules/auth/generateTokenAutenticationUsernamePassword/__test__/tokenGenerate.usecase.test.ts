@@ -4,7 +4,7 @@ import { TokenGenerateRepository } from "../tokenGenerateRepository";
 import { randomUUID } from "crypto";
 import { TokenGenerateUseCase } from "../tokenGenerate.usecase";
 import { ApiJwt } from "src/@modules/shared/apiJwt";
-import { ConnectionHub } from "src/@modules/shared/connectionHub";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 const companyUuid = "3ec4dd3b-e3ea-4f44-9a19-04213f64f3b5";
 const userUuid = "c9234439-2557-42cd-bcdd-013267df8c50";
