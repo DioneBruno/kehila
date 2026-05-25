@@ -78,44 +78,49 @@
 
 <script lang="ts">
 import { usePedidoStore } from "src/stores/pedido";
-import { computed, defineComponent, PropType, reactive, toRefs } from "vue";
-
-interface TipoIngresso {
-  uuid: string;
-  nome: string;
-  descricao: string;
-  preco: number;
-  disponivel: number;
-}
-
-interface Lote {
-  uuid: string;
-  nome: string;
-  tiposIngresso: TipoIngresso[];
-}
+import { computed, defineComponent, reactive, toRefs } from "vue";
 
 export default defineComponent({
   name: "StepIngressos",
-  props: {
-    lotes: { type: Array as PropType<Lote[]>, required: true },
-    quantidades: { type: Object as PropType<Record<string, number>>, required: true },
-    totalIngressos: { type: Number, required: true },
-  },
   emits: ["next"],
   setup() {
     const $pedidoStore = usePedidoStore();
 
     const data = reactive({
       evento: computed(() => $pedidoStore.$state.evento),
+      quantidades: computed(() =>
+        Object.fromEntries(
+          $pedidoStore.$state.pedido.itens.map(
+            (item: { tipoIngressoUuid: string; quantidade: number }) => [item.tipoIngressoUuid, item.quantidade]
+          )
+        )
+      ),
+      totalIngressos: computed(() =>
+        $pedidoStore.$state.pedido.itens.reduce(
+          (acc: number, item: { quantidade: number }) => acc + item.quantidade,
+          0
+        )
+      ),
     });
 
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
 
-    function aumentar(tipoIngresso: any) {}
+    function aumentar(tipoIngresso: { uuid: string; nome: string }) {
+      const jaExiste = $pedidoStore.$state.pedido.itens.some(
+        (item: { tipoIngressoUuid: string }) => item.tipoIngressoUuid === tipoIngresso.uuid
+      );
+      if (jaExiste) {
+        $pedidoStore.incrementarTipoIngresso(tipoIngresso.uuid);
+      } else {
+        $pedidoStore.adicionarTipoIngresso(tipoIngresso.uuid, tipoIngresso.nome);
+      }
+    }
 
-    function diminuir(tipoIngresso: any) {}
+    function diminuir(tipoIngresso: { uuid: string }) {
+      $pedidoStore.decrementarTipoIngresso(tipoIngresso.uuid);
+    }
 
     return {
       ...toRefs(data),
