@@ -8,7 +8,7 @@
       <div class="row q-col-gutter-lg">
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
-          <q-stepper v-model="etapa" animated color="primary" flat bordered>
+          <q-stepper v-model="etapa" animated color="primary" flat bordered vertical>
             <q-step :name="1" title="Ingressos" icon="confirmation_number" :done="etapa > 1">
               <StepIngressos
                 :lotes="lotes"
