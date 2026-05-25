@@ -41,7 +41,7 @@
                     icon="remove"
                     color="primary"
                     :disable="(quantidades[tipo.uuid] ?? 0) === 0"
-                    @click="$emit('diminuir', tipo.uuid)"
+                    @click="diminuir(tipo)"
                   />
                   <div class="text-h6 text-center text-weight-bold" style="min-width: 36px">
                     {{ quantidades[tipo.uuid] ?? 0 }}
@@ -53,7 +53,7 @@
                     icon="add"
                     color="primary"
                     :disable="(quantidades[tipo.uuid] ?? 0) >= tipo.disponivel"
-                    @click="$emit('aumentar', tipo.uuid, tipo)"
+                    @click="aumentar(tipo)"
                   />
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default defineComponent({
     quantidades: { type: Object as PropType<Record<string, number>>, required: true },
     totalIngressos: { type: Number, required: true },
   },
-  emits: ["aumentar", "diminuir", "next"],
+  emits: ["next"],
   setup() {
     const $pedidoStore = usePedidoStore();
 
@@ -112,9 +112,16 @@ export default defineComponent({
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
+
+    function aumentar(tipoIngresso: any) {}
+
+    function diminuir(tipoIngresso: any) {}
+
     return {
       ...toRefs(data),
       formatarMoeda,
+      aumentar,
+      diminuir,
     };
   },
 });
