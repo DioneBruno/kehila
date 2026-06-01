@@ -17,7 +17,7 @@
               <div class="text-subtitle2 q-mt-xs">Boleto</div>
               <div class="text-caption text-grey-6">Até 12x sem juros</div>
               <q-icon
-                v-if="formaPagamento === 'pix'"
+                v-if="formaPagamento === 'boleto'"
                 name="check_circle"
                 color="primary"
                 size="18px"

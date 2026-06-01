@@ -1,6 +1,9 @@
 <template>
   <q-form ref="formRef" @submit.prevent="$emit('next')" greedy>
     <div class="row q-col-gutter-xs">
+      <div class="col-12 q-pb-md text-grey-8">
+        <span>Dados do usuário principal</span>
+      </div>
       <div class="col-12 col-sm-6">
         <q-input
           :model-value="form.cpf"
