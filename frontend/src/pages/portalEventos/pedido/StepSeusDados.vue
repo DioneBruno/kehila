@@ -1,6 +1,6 @@
 <template>
   <q-form ref="formRef" @submit.prevent="$emit('next')" greedy>
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-xs">
       <div class="col-12 col-sm-6">
         <q-input
           :model-value="form.cpf"
@@ -48,8 +48,9 @@
       </div>
     </div>
 
-    <q-stepper-navigation class="row q-gutter-sm q-pt-md">
+    <q-stepper-navigation class="row">
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
+      <q-space />
       <q-btn
         unelevated
         type="submit"

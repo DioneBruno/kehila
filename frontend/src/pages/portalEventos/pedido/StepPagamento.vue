@@ -4,7 +4,29 @@
       <div class="text-subtitle2 text-grey-7">Forma de pagamento</div>
 
       <div class="row q-col-gutter-md">
-        <div class="col-6">
+        <div class="col-4">
+          <q-card
+            flat
+            bordered
+            class="cursor-pointer"
+            :class="formaPagamento === 'boleto' ? 'border-primary bg-grey-1' : ''"
+            @click="$emit('update:formaPagamento', 'boleto')"
+          >
+            <q-card-section class="text-center q-py-md">
+              <q-icon name="description" size="32px" color="grey-9" />
+              <div class="text-subtitle2 q-mt-xs">Boleto</div>
+              <div class="text-caption text-grey-6">Até 12x sem juros</div>
+              <q-icon
+                v-if="formaPagamento === 'pix'"
+                name="check_circle"
+                color="primary"
+                size="18px"
+                class="q-mt-xs"
+              />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-4">
           <q-card
             flat
             bordered
@@ -27,7 +49,7 @@
           </q-card>
         </div>
 
-        <div class="col-6">
+        <div class="col-4">
           <q-card
             flat
             bordered
@@ -117,8 +139,9 @@
       </div>
     </div>
 
-    <q-stepper-navigation class="row q-gutter-sm q-pt-md">
+    <q-stepper-navigation class="row">
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
+      <q-space />
       <q-btn
         unelevated
         color="positive"
@@ -132,7 +155,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import type { PropType } from "vue";
+import { defineComponent } from "vue";
 
 interface Cartao {
   numero: string;

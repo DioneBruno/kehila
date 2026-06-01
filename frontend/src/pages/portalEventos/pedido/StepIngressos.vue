@@ -63,7 +63,8 @@
       </div>
     </div>
 
-    <q-stepper-navigation class="q-pt-md">
+    <q-stepper-navigation class="row">
+      <q-space />
       <q-btn
         unelevated
         color="primary"
@@ -91,15 +92,18 @@ export default defineComponent({
       quantidades: computed(() =>
         Object.fromEntries(
           $pedidoStore.$state.pedido.itens.map(
-            (item: { tipoIngressoUuid: string; quantidade: number }) => [item.tipoIngressoUuid, item.quantidade]
-          )
-        )
+            (item: { tipoIngressoUuid: string; quantidade: number }) => [
+              item.tipoIngressoUuid,
+              item.quantidade,
+            ],
+          ),
+        ),
       ),
       totalIngressos: computed(() =>
         $pedidoStore.$state.pedido.itens.reduce(
           (acc: number, item: { quantidade: number }) => acc + item.quantidade,
-          0
-        )
+          0,
+        ),
       ),
     });
 
@@ -109,7 +113,7 @@ export default defineComponent({
 
     function aumentar(tipoIngresso: { uuid: string; nome: string }) {
       const jaExiste = $pedidoStore.$state.pedido.itens.some(
-        (item: { tipoIngressoUuid: string }) => item.tipoIngressoUuid === tipoIngresso.uuid
+        (item: { tipoIngressoUuid: string }) => item.tipoIngressoUuid === tipoIngresso.uuid,
       );
       if (jaExiste) {
         $pedidoStore.incrementarTipoIngresso(tipoIngresso.uuid);
