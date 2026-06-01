@@ -10,7 +10,9 @@
             <div class="text-subtitle1">Home</div>
           </q-card-section>
           <q-card-section>
-            <div class="text-body1">Home</div>
+            <div class="text-body1">
+              <q-btn label="Enviar SMS" @click="enviarSms" />
+            </div>
           </q-card-section>
         </q-card>
       </div>
@@ -20,14 +22,25 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from "vue";
+import { HomeService } from "./home.service";
 
 export default defineComponent({
   name: "pageHome",
   setup() {
+    const $homeService = new HomeService();
     const data = reactive({});
+
+    async function enviarSms() {
+      await $homeService.enviarSms({
+        gateway: "vonage",
+        destinatario: "5569984852834",
+        mensagem: "Teste",
+      });
+    }
 
     return {
       ...toRefs(data),
+      enviarSms,
     };
   },
 });

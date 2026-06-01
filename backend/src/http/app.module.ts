@@ -6,6 +6,7 @@ import { PortalEventosModule } from "./portalEventos/portalEventos.module";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
+import { NotificacaoModule } from "./notificacao/notificacao.module";
 
 @Global()
 @Module({
@@ -22,6 +23,7 @@ import { DataSource } from "typeorm";
     }),
     AuthModule,
     PortalEventosModule,
+    NotificacaoModule,
   ],
   controllers: [AppController],
   providers: [
