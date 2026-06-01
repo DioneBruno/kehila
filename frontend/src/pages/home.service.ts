@@ -9,4 +9,8 @@ export class HomeService {
   enviarSms(input: any) {
     this.$notificacaoHttp.enviarSms(input);
   }
+
+  enviarEmail(input: any) {
+    this.$notificacaoHttp.enviarEmail(input);
+  }
 }

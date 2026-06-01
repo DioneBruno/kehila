@@ -6,4 +6,8 @@ export class NotificacaoHttp {
   async enviarSms(input: any) {
     return await this.http.post("notificacoes/enviar-sms", input);
   }
+
+  async enviarEmail(input: any) {
+    return await this.http.post("notificacoes/enviar-email", input);
+  }
 }

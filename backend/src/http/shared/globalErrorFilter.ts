@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from "@nestjs/common";
 import { Response } from "express";
 import { ApiError } from "src/@modules/shared/apiError";
-
+//
 @Catch()
 export class GlobalErrorFilter implements ExceptionFilter {
   async catch(error: any, host: ArgumentsHost) {
@@ -24,6 +24,7 @@ export class GlobalErrorFilter implements ExceptionFilter {
       return response.status(status).json(typeof body === "object" ? body : { statusCode: status, message: body });
     }
 
+    console.error(error.stack);
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: "Erro interno no servidor.",

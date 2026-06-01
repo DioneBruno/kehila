@@ -12,6 +12,7 @@
           <q-card-section>
             <div class="text-body1">
               <q-btn label="Enviar SMS" @click="enviarSms" />
+              <q-btn label="Enviar Email" @click="enviarEmail" />
             </div>
           </q-card-section>
         </q-card>
@@ -38,9 +39,19 @@ export default defineComponent({
       });
     }
 
+    async function enviarEmail() {
+      await $homeService.enviarEmail({
+        gateway: "smtp",
+        destinatario: "dionebruno88@gmail.com",
+        titulo: "Teste",
+        mensagem: "Teste",
+      });
+    }
+
     return {
       ...toRefs(data),
       enviarSms,
+      enviarEmail,
     };
   },
 });
