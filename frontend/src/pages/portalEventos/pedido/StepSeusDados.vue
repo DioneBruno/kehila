@@ -6,11 +6,12 @@
       </div>
       <div class="col-12 col-sm-6">
         <q-input
+          outlined
+          dense
+          unmasked-value
           :model-value="form.cpf"
           label="CPF *"
-          outlined
           mask="###.###.###-##"
-          unmasked-value
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
           @update:model-value="update('cpf', $event)"
@@ -18,9 +19,10 @@
       </div>
       <div class="col-12">
         <q-input
+          outlined
+          dense
           :model-value="form.nome"
           label="Nome completo *"
-          outlined
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
           @update:model-value="update('nome', $event)"
@@ -28,10 +30,11 @@
       </div>
       <div class="col-12 col-sm-6">
         <q-input
+          outlined
+          dense
           :model-value="form.email"
           label="E-mail *"
           type="email"
-          outlined
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
           @update:model-value="update('email', $event)"
@@ -39,11 +42,12 @@
       </div>
       <div class="col-12 col-sm-6">
         <q-input
+          unmasked-value
+          outlined
+          dense
           :model-value="form.celular"
           label="Celular *"
-          outlined
           mask="(##) #####-####"
-          unmasked-value
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
           @update:model-value="update('celular', $event)"
