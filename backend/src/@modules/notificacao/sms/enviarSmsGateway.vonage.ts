@@ -8,8 +8,8 @@ export class EnviarSmsGatewayVonage {
 
   async enviar(mensagem: MensagemEntity) {
     const vonage = new Vonage({
-      apiKey: "3177d5a0",
-      apiSecret: "!elxQ16SM3j",
+      apiKey: process.env.NOTIFICACAO_VONAGE_APIKEY,
+      apiSecret: process.env.NOTIFICACAO_VONAGE_APISECRET,
     });
 
     await vonage.messages.send({
