@@ -1,60 +1,64 @@
 <template>
-  <q-form ref="formRef" greedy>
-    <div class="row q-col-gutter-xs">
-      <div class="col-12 q-pb-md text-grey-8">
-        <span>Dados do usuário principal</span>
+  <div>
+    <q-form ref="formRef" greedy v-if="!user.uuid">
+      <div class="row q-col-gutter-xs">
+        <div class="col-12 q-pb-md text-grey-8">
+          <span>Dados do usuário principal</span>
+        </div>
+        <div class="col-12 col-sm-4">
+          <q-input
+            outlined
+            dense
+            unmasked-value
+            stack-label
+            v-model="user.cpf"
+            label="CPF *"
+            mask="###.###.###-##"
+            :rules="[(v) => !!v || 'Obrigatório']"
+            lazy-rules
+          />
+        </div>
+        <div class="col-12 col-sm-8">
+          <q-input
+            outlined
+            dense
+            stack-label
+            v-model="user.name"
+            label="Nome completo *"
+            :rules="[(v) => !!v || 'Obrigatório']"
+            lazy-rules
+          />
+        </div>
+        <div class="col-12 col-sm-6">
+          <q-input
+            outlined
+            dense
+            stack-label
+            v-model="user.email"
+            label="E-mail *"
+            type="email"
+            :rules="[(v) => !!v || 'Obrigatório']"
+            lazy-rules
+          />
+        </div>
+        <div class="col-12 col-sm-6">
+          <q-input
+            unmasked-value
+            outlined
+            dense
+            stack-label
+            fill-mask
+            v-model="user.phone"
+            label="Celular *"
+            mask="(##) #####-####"
+            :rules="[(v) => !!v || 'Obrigatório']"
+            lazy-rules
+          />
+        </div>
       </div>
-      <div class="col-12 col-sm-4">
-        <q-input
-          outlined
-          dense
-          unmasked-value
-          stack-label
-          v-model="user.cpf"
-          label="CPF *"
-          mask="###.###.###-##"
-          :rules="[(v) => !!v || 'Obrigatório']"
-          lazy-rules
-        />
-      </div>
-      <div class="col-12 col-sm-8">
-        <q-input
-          outlined
-          dense
-          stack-label
-          v-model="user.name"
-          label="Nome completo *"
-          :rules="[(v) => !!v || 'Obrigatório']"
-          lazy-rules
-        />
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          outlined
-          dense
-          stack-label
-          v-model="user.email"
-          label="E-mail *"
-          type="email"
-          :rules="[(v) => !!v || 'Obrigatório']"
-          lazy-rules
-        />
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          unmasked-value
-          outlined
-          dense
-          stack-label
-          fill-mask
-          v-model="user.phone"
-          label="Celular *"
-          mask="(##) #####-####"
-          :rules="[(v) => !!v || 'Obrigatório']"
-          lazy-rules
-        />
-      </div>
-    </div>
+    </q-form>
+
+    <div class="" v-if="user.uuid"></div>
 
     <q-stepper-navigation class="row">
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
@@ -79,7 +83,7 @@
         @click="cadastrarUsuario()"
       />
     </q-stepper-navigation>
-  </q-form>
+  </div>
 </template>
 
 <script lang="ts">
