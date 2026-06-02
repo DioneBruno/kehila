@@ -18,7 +18,7 @@ export class TokenGenerateUseCase {
     const user = await this.repo.findUser(input.companyUuid, input.username);
     if (!user) throw new ApiError("Credenciais inválidas", 401);
     await user.checkPassword(input.password);
-    const token = user.tokenGenegate();
-    return { token };
+    const token = await this.repo.generateToken(user);
+    return token;
   }
 }

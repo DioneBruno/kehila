@@ -1,6 +1,5 @@
 import * as bcryptjs from "bcryptjs";
 import { ApiError } from "src/@modules/shared/apiError";
-import { ApiJwt } from "src/@modules/shared/apiJwt";
 
 export type CompanyProps = {
   uuid: string;
@@ -42,22 +41,5 @@ export class UserEntity {
   async checkPassword(password: string) {
     const passwordMatch = await bcryptjs.compare(password, this.props.password);
     if (!passwordMatch) throw new ApiError("Credenciais inválidas", 401);
-  }
-
-  tokenGenegate(): any {
-    const token = ApiJwt.tokenSigning({
-      user: {
-        uuid: this.uuid(),
-        cpfCnpj: this.cpf(),
-        name: this.name(),
-        email: this.email(),
-      },
-      company: {
-        uuid: this.company().uuid,
-        name: this.company().name,
-        cpfCnpj: this.company().cpfCnpj,
-      },
-    });
-    return token;
   }
 }

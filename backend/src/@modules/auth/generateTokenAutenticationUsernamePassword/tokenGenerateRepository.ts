@@ -1,5 +1,7 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { UserEntity } from "./user.entity";
+import { GenerateTokenAuthenticationUserRepository } from "../generateTokenAuthenticationUser/generateTokenAuthenticationUserRepository";
+import { GenerateTokenAuthenticationUserUsecase } from "../generateTokenAuthenticationUser/generateTokenAuthenticationUser.usecase";
 
 export type CompanyData = {
   uuid: string;
@@ -53,5 +55,15 @@ export class TokenGenerateRepository {
         cpfCnpj: row.cpf_cnpj,
       },
     });
+  }
+
+  async generateToken(user: UserEntity): Promise<{ token: string }> {
+    const repo = new GenerateTokenAuthenticationUserRepository(this.connectionHub);
+    const usecase = new GenerateTokenAuthenticationUserUsecase(repo);
+    const input = {
+      companyUuid: user.company().uuid,
+      userUuid: user.uuid(),
+    };
+    return usecase.execute(input);
   }
 }
