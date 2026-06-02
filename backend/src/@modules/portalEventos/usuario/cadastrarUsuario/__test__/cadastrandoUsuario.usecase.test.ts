@@ -35,7 +35,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
       companyUuid,
       cpf,
       nome: "Usuário teste",
-      email: "emailUsuario",
+      email: "email@gmail.com",
       phone: "99999999999",
     };
     await usecase.execute(input);

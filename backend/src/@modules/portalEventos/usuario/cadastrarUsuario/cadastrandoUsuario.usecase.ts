@@ -22,6 +22,7 @@ export class CadastrandoUsuarioUsecase {
 
   async execute(input: CadastrandoUsuarioInput): Promise<CadastroUsuarioOutput> {
     if (!ApiValidate.validateCpf(input.cpf)) throw new Error("CPF inválido");
+    if (input.email && !ApiValidate.validateEmail(input.email)) throw new Error("Email inválido");
 
     const usuario = new UsuarioEntity({
       uuid: randomUUID(),
