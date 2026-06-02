@@ -44,7 +44,7 @@
         <q-separator />
         <q-card-section class="q-py-sm">
           <div class="row items-center justify-center q-gutter-xs text-caption text-grey-6">
-            <q-icon name="security" size="14px" />
+            <q-icon name="security" size="14px" color="green-7" />
             <span>Compra 100% segura e protegida</span>
           </div>
         </q-card-section>

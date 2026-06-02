@@ -5,7 +5,7 @@
 
     <!-- Conteúdo principal -->
     <div class="hero-container q-px-xs q-py-xs">
-      <div class="row q-col-gutter-lg">
+      <div class="row q-col-gutter-md">
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
           <q-stepper
