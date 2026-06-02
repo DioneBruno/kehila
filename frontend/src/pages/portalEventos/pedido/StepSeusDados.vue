@@ -71,7 +71,7 @@
 
 <script lang="ts">
 import type { PropType } from "vue";
-import { defineComponent } from "vue";
+import { defineComponent, reactive, ref, toRefs } from "vue";
 
 interface FormDados {
   nome: string;
@@ -87,10 +87,18 @@ export default defineComponent({
   },
   emits: ["update:form", "next", "prev"],
   setup(props, { emit }) {
+    const data = reactive({
+      usuario: ref({} as any),
+    });
+
     function update(campo: keyof FormDados, valor: string) {
       emit("update:form", { ...props.form, [campo]: valor });
     }
-    return { update };
+
+    return {
+      ...toRefs(data),
+      update,
+    };
   },
 });
 </script>

@@ -12,4 +12,9 @@ export class PedidoService {
     const response = await this.pedidoHttp.buscaEvento(eventoUuid);
     this.$pedidoStore.setEvento(response);
   }
+
+  async cadastrarUsuario(usuario: any) {
+    const response = await this.pedidoHttp.cadastrarUsuario(usuario);
+    return response;
+  }
 }
