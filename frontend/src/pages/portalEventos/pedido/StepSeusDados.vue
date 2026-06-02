@@ -83,7 +83,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs, watch } from "vue";
+import { defineComponent, onMounted, reactive, toRefs, watch } from "vue";
 import { PedidoService } from "./pedido.service";
 
 export default defineComponent({
@@ -97,9 +97,20 @@ export default defineComponent({
       usuario: {} as any,
     });
 
+    onMounted(async () => {
+      await verificaUsuario();
+    });
+
     async function cadastrarUsuario() {
       const response = await $service.cadastrarUsuario(data.usuario);
       data.usuario = response;
+    }
+
+    async function verificaUsuario() {
+      const usuario = await $service.verificaUsuario();
+      if (usuario) {
+        data.usuario = usuario;
+      }
     }
 
     function avancar() {

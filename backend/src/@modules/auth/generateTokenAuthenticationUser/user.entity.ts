@@ -37,7 +37,7 @@ export class UserEntity {
     const token = ApiJwt.tokenSigning({
       user: {
         uuid: this.uuid(),
-        cpfCnpj: this.cpf(),
+        cpf: this.cpf(),
         name: this.name(),
         email: this.email(),
       },
