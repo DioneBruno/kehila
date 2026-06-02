@@ -35,12 +35,16 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
       companyUuid,
       cpf,
       nome: "Usuário teste",
+      email: "emailUsuario",
+      phone: "99999999999",
     };
     await usecase.execute(input);
 
     const [usuarioModel] = await dataSource.query(`SELECT * FROM auth_users WHERE cpf = '${cpf}'`);
     expect(usuarioModel.cpf).toBe(cpf);
     expect(usuarioModel.name).toBe(input.nome);
+    expect(usuarioModel.email).toBe(input.email);
+    expect(usuarioModel.phone).toBe(input.phone);
   });
 
   test("Deve vincular novo usuario na empresa", async () => {
@@ -57,6 +61,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
 
     const [usuarioModel] = await dataSource.query(`SELECT * FROM auth_users_companies WHERE company_uuid = '${companyUuid}'`);
     expect(usuarioModel.user_uuid).toBe(usuario.uuid);
+    expect(usuarioModel.roles).toEqual(["usuario-externo"]);
   });
 
   test("Deve informar que cpf já tem cadastro na company", async () => {

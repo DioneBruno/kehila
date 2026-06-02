@@ -19,14 +19,14 @@ export class CadastrandoUsuarioRepository {
   async salvarUsuario(usuario: UsuarioEntity) {
     await this.connectionHub.database.query(
       `INSERT INTO auth_users
-      (uuid, name, cpf) VALUES ($1, $2, $3)`,
-      [usuario.uuid(), usuario.nome(), usuario.cpf()],
+      (uuid, name, cpf, email, phone) VALUES ($1, $2, $3, $4, $5)`,
+      [usuario.uuid(), usuario.nome(), usuario.cpf(), usuario.email(), usuario.phone()],
     );
 
     await this.connectionHub.database.query(
       `INSERT INTO auth_users_companies
-      (uuid, user_uuid, company_uuid, is_accepted) VALUES ($1, $2, $3, $4)`,
-      [randomUUID(), usuario.uuid(), usuario.companyUuid(), true],
+      (uuid, user_uuid, company_uuid, is_accepted, roles) VALUES ($1, $2, $3, $4, $5)`,
+      [randomUUID(), usuario.uuid(), usuario.companyUuid(), true, JSON.stringify(usuario.roles())],
     );
   }
 }

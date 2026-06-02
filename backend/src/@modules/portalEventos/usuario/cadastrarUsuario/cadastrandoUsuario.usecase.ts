@@ -6,6 +6,8 @@ export type CadastrandoUsuarioInput = {
   companyUuid: string;
   cpf: string;
   nome: string;
+  email?: string;
+  phone?: string;
 };
 
 export type CadastroUsuarioOutput = {
@@ -23,6 +25,8 @@ export class CadastrandoUsuarioUsecase {
       companyUuid: input.companyUuid,
       cpf: input.cpf,
       nome: input.nome,
+      email: input.email,
+      phone: input.phone,
     });
 
     const usuarioJaCadastrado = await this.repo.verificaCadastro(usuario);
