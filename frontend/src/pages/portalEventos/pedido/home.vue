@@ -105,36 +105,6 @@ import StepSeusDados from "./StepSeusDados.vue";
 import StepResumo from "./StepResumo.vue";
 import StepPagamento from "./StepPagamento.vue";
 
-const LOTES_MOCK = [
-  {
-    uuid: "lote-1",
-    nome: "1º Lote",
-    tiposIngresso: [
-      { uuid: "tipo-1", nome: "Inteira", descricao: "", preco: 80, disponivel: 50 },
-      {
-        uuid: "tipo-2",
-        nome: "Meia-entrada",
-        descricao: "Estudantes com carteirinha",
-        preco: 40,
-        disponivel: 20,
-      },
-    ],
-  },
-  {
-    uuid: "lote-2",
-    nome: "VIP",
-    tiposIngresso: [
-      {
-        uuid: "tipo-3",
-        nome: "VIP",
-        descricao: "Acesso à área exclusiva + open bar",
-        preco: 200,
-        disponivel: 10,
-      },
-    ],
-  },
-];
-
 const OPCOES_PARCELAS = [
   { label: "1× de R$ 80,00 (sem juros)", value: 1 },
   { label: "2× de R$ 40,00 (sem juros)", value: 2 },
@@ -153,7 +123,7 @@ export default defineComponent({
       etapa: 1,
       resumoAberto: false,
       evento: computed(() => $pedidoStore.$state.evento),
-      lotes: LOTES_MOCK,
+      lotes: [],
       quantidades: {},
       formaPagamento: "",
       cartao: {

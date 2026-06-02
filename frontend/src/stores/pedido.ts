@@ -18,7 +18,8 @@ export const usePedidoStore = defineStore("pedidoStore", {
     },
     adicionarTipoIngresso(uuid: string, nome: string) {
       const tipoIngresso = this.evento.lotes.forEach((lote: any) => {
-        return lote.tiposIngresso.find((tipo: any) => tipo.uuid === uuid);
+        const tipo = lote.tiposIngresso.find((tipo: any) => tipo.uuid === uuid);
+        if (tipo) return tipo;
       });
       console.log(tipoIngresso);
       this.pedido.itens.push({ tipoIngressoUuid: uuid, tipoIngressoNome: nome, quantidade: 1 });
