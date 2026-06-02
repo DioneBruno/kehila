@@ -2,7 +2,7 @@ export type UsuarioProps = {
   uuid: string;
   companyUuid: string;
   cpf: string;
-  nome: string;
+  name: string;
   email?: string;
   phone?: string;
   roles?: string[];
@@ -23,8 +23,8 @@ export class UsuarioEntity {
   cpf(): string {
     return this.props.cpf;
   }
-  nome(): string {
-    return this.props.nome;
+  name(): string {
+    return this.props.name;
   }
   email(): string | null {
     return this.props.email ?? null;

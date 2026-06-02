@@ -10,7 +10,7 @@
           dense
           unmasked-value
           stack-label
-          v-model="usuario.cpf"
+          v-model="user.cpf"
           label="CPF *"
           mask="###.###.###-##"
           :rules="[(v) => !!v || 'Obrigatório']"
@@ -22,7 +22,7 @@
           outlined
           dense
           stack-label
-          v-model="usuario.nome"
+          v-model="user.name"
           label="Nome completo *"
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
@@ -33,7 +33,7 @@
           outlined
           dense
           stack-label
-          v-model="usuario.email"
+          v-model="user.email"
           label="E-mail *"
           type="email"
           :rules="[(v) => !!v || 'Obrigatório']"
@@ -47,7 +47,7 @@
           dense
           stack-label
           fill-mask
-          v-model="usuario.phone"
+          v-model="user.phone"
           label="Celular *"
           mask="(##) #####-####"
           :rules="[(v) => !!v || 'Obrigatório']"
@@ -60,7 +60,7 @@
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
       <q-space />
       <q-btn
-        v-if="usuario.uuid"
+        v-if="user.uuid"
         unelevated
         type="submit"
         label="Continuar"
@@ -94,7 +94,7 @@ export default defineComponent({
     const $service = new PedidoService();
 
     const data = reactive({
-      usuario: {} as any,
+      user: {} as any,
     });
 
     onMounted(async () => {
@@ -102,19 +102,22 @@ export default defineComponent({
     });
 
     async function cadastrarUsuario() {
-      const response = await $service.cadastrarUsuario(data.usuario);
-      data.usuario = response;
+      await $service.cadastrarUsuario(data.user);
+      await verificaUsuario();
     }
 
     async function verificaUsuario() {
-      const usuario = await $service.verificaUsuario();
-      if (usuario) {
-        data.usuario = usuario;
+      const response = await $service.verificaUsuario();
+      if (response?.user) {
+        const { uuid, name, email } = response.user;
+        data.user.uuid = uuid;
+        data.user.name = name;
+        data.user.email = email;
       }
     }
 
     function avancar() {
-      if (!data.usuario.uuid) {
+      if (!data.user.uuid) {
         cadastrarUsuario();
         return;
       }

@@ -7,7 +7,7 @@ import { ApiError } from "src/@modules/shared/apiError";
 export type CadastrandoUsuarioInput = {
   companyUuid: string;
   cpf: string;
-  nome: string;
+  name: string;
   email?: string;
   phone?: string;
 };
@@ -15,7 +15,7 @@ export type CadastrandoUsuarioInput = {
 export type CadastroUsuarioOutput = {
   uuid: string;
   cpf: string;
-  nome: string;
+  name: string;
   token: string;
   email: string | null;
   phone: string | null;
@@ -32,7 +32,7 @@ export class CadastrandoUsuarioUsecase {
       uuid: randomUUID(),
       companyUuid: input.companyUuid,
       cpf: input.cpf,
-      nome: input.nome,
+      name: input.name,
       email: input.email,
       phone: input.phone,
     });
@@ -45,7 +45,7 @@ export class CadastrandoUsuarioUsecase {
     return {
       uuid: usuario.uuid(),
       cpf: usuario.cpf(),
-      nome: usuario.nome(),
+      name: usuario.name(),
       token: token.token,
       email: usuario.email(),
       phone: usuario.phone(),

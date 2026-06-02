@@ -7,7 +7,7 @@ export class PedidoHttp {
     return this.http.post(`publico/eventos/${eventoUuid}`, {});
   }
 
-  async cadastrarUsuario(usuario: any) {
-    return this.http.post(`publico/eventos/novo-usuario`, usuario);
+  async cadastrarUsuario(user: any) {
+    return this.http.post(`publico/eventos/novo-usuario`, user);
   }
 }

@@ -22,7 +22,7 @@ export class CadastrandoUsuarioRepository {
     await this.connectionHub.database.query(
       `INSERT INTO auth_users
       (uuid, name, cpf, email, phone) VALUES ($1, $2, $3, $4, $5)`,
-      [usuario.uuid(), usuario.nome(), usuario.cpf(), usuario.email(), usuario.phone()],
+      [usuario.uuid(), usuario.name(), usuario.cpf(), usuario.email(), usuario.phone()],
     );
 
     await this.connectionHub.database.query(

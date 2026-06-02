@@ -15,7 +15,7 @@ export class PublicoController {
     const input = {
       companyUuid: req.companyUuid,
       cpf: body.cpf,
-      nome: body.nome,
+      name: body.name,
       email: body.email,
       phone: body.phone,
     };

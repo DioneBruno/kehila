@@ -24,9 +24,9 @@ export class PedidoService {
     this.$pedidoStore.setEvento(response);
   }
 
-  async cadastrarUsuario(usuario: any) {
+  async cadastrarUsuario(user: any) {
     const authCookies = new AuthCookiesQuasar();
-    const response = await this.pedidoHttp.cadastrarUsuario(usuario);
+    const response = await this.pedidoHttp.cadastrarUsuario(user);
     authCookies.setToken(response.token);
     // authCookies.setRefreshToken(response.refreshToken);
     return response;

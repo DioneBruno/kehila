@@ -34,7 +34,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
     const input = {
       companyUuid,
       cpf,
-      nome: "Usuário teste",
+      name: "Usuário teste",
       email: "email@gmail.com",
       phone: "99999999999",
     };
@@ -42,7 +42,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
 
     const [usuarioModel] = await dataSource.query(`SELECT * FROM auth_users WHERE cpf = '${cpf}'`);
     expect(usuarioModel.cpf).toBe(cpf);
-    expect(usuarioModel.name).toBe(input.nome);
+    expect(usuarioModel.name).toBe(input.name);
     expect(usuarioModel.email).toBe(input.email);
     expect(usuarioModel.phone).toBe(input.phone);
   });
@@ -55,7 +55,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
     const input = {
       companyUuid,
       cpf,
-      nome: "Usuário teste",
+      name: "Usuário teste",
     };
     const usuario = await usecase.execute(input);
 
@@ -72,7 +72,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
     const input = {
       companyUuid,
       cpf,
-      nome: "Usuário teste",
+      name: "Usuário teste",
     };
     const usuario = await usecase.execute(input);
 
@@ -94,7 +94,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
     const input = {
       companyUuid,
       cpf,
-      nome: "Usuário teste",
+      name: "Usuário teste",
     };
     await expect(usecase.execute(input)).rejects.toThrow("Usuário já cadastrado");
   });
@@ -120,7 +120,7 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
     const input = {
       companyUuid,
       cpf,
-      nome: "Usuário teste",
+      name: "Usuário teste",
     };
     await usecase.execute(input);
   });
