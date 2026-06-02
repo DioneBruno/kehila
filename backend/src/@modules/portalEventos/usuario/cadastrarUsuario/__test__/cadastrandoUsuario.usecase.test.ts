@@ -64,6 +64,22 @@ describe("Deve testar CadastrandoUsuarioUsecase", () => {
     expect(usuarioModel.roles).toEqual(["usuario-externo"]);
   });
 
+  test("Deve retornar token authentication para o novo usuario", async () => {
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', '${companyUuid}', 'Empresa teste', '12345678901234')`);
+
+    const usecase = new CadastrandoUsuarioUsecase(repo);
+    const input = {
+      companyUuid,
+      cpf,
+      nome: "Usuário teste",
+    };
+    const usuario = await usecase.execute(input);
+
+    expect(usuario.token).not.toBe(null);
+    expect(usuario.token).not.toBe(undefined);
+  });
+
   test("Deve informar que cpf já tem cadastro na company", async () => {
     await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
       VALUES ('${companyUuid}', '${companyUuid}', 'Empresa teste', '12345678901234')`);

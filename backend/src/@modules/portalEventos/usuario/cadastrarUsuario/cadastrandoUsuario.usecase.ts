@@ -15,6 +15,7 @@ export type CadastroUsuarioOutput = {
   uuid: string;
   cpf: string;
   nome: string;
+  token: string;
 };
 
 export class CadastrandoUsuarioUsecase {
@@ -37,10 +38,12 @@ export class CadastrandoUsuarioUsecase {
     if (usuarioJaCadastrado) throw new Error("Usuário já cadastrado");
 
     await this.repo.salvarUsuario(usuario);
+    const token = await this.repo.gerarTokenAutenticacao(usuario);
     return {
       uuid: usuario.uuid(),
       cpf: usuario.cpf(),
       nome: usuario.nome(),
+      token: token.token,
     };
   }
 }
