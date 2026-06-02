@@ -31,7 +31,9 @@
                 <div class="text-subtitle1 text-primary text-weight-bold">
                   {{ formatarMoeda(tipo.preco) }}
                 </div>
-                <div class="text-caption text-grey-5">{{ tipo.disponivel }} disponíveis</div>
+                <div class="text-caption text-grey-5">
+                  {{ tipo.gerarQuantidadeIngressos }} ingressos
+                </div>
               </div>
               <div class="col-auto">
                 <div class="row items-center q-gutter-xs">

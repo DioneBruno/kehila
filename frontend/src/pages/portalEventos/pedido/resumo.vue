@@ -6,7 +6,7 @@
           <q-icon name="shopping_cart" class="q-mr-sm" color="primary" />
           Resumo do Pedido
         </div>
-        {{ itensSelecionados }}
+
         <div v-if="itensSelecionados.length === 0" class="text-center q-py-lg">
           <q-icon name="confirmation_number" size="48px" color="grey-3" />
           <div class="text-caption text-grey-5 q-mt-sm">Nenhum ingresso selecionado</div>
@@ -27,7 +27,9 @@
           </div>
 
           <q-separator class="q-my-md" />
-          <span class="text-grey-8">Será gerado x Ingressos individuais.</span>
+          <span class="text-grey-8"
+            >Será gerado {{ totalIngressosGerados }} Ingressos individuais.</span
+          >
           <q-separator class="q-my-md" />
 
           <div class="row justify-between items-center">
@@ -75,7 +77,7 @@ export default defineComponent({
     const itensSelecionados = computed(() =>
       ($pedidoStore.pedido.itens as any[]).map((item) => ({
         ...item,
-        nome: `${item.tipoIngressoNome} (${item.gerarQuantidadeIngressos}x)`,
+        nome: `${item.tipoIngressoNome}`,
         subtotal: item.quantidade * precoDoTipo(item.tipoIngressoUuid),
       })),
     );
@@ -88,6 +90,13 @@ export default defineComponent({
       itensSelecionados.value.reduce((acc, i) => acc + i.subtotal, 0),
     );
 
+    const totalIngressosGerados = computed(() =>
+      ($pedidoStore.pedido.itens as any[]).reduce(
+        (acc, i) => acc + i.quantidade * (i.gerarQuantidadeIngressos ?? 1),
+        0,
+      ),
+    );
+
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
@@ -96,6 +105,7 @@ export default defineComponent({
       itensSelecionados,
       totalIngressos,
       totalValor,
+      totalIngressosGerados,
       formatarMoeda,
     };
   },
