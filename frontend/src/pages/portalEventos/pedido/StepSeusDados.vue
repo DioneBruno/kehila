@@ -1,43 +1,43 @@
 <template>
-  <q-form ref="formRef" @submit.prevent="$emit('next')" greedy>
+  <q-form ref="formRef" greedy>
     <div class="row q-col-gutter-xs">
       <div class="col-12 q-pb-md text-grey-8">
         <span>Dados do usuário principal</span>
       </div>
-      <div class="col-12 col-sm-6">
+      <div class="col-12 col-sm-4">
         <q-input
           outlined
           dense
           unmasked-value
-          :model-value="form.cpf"
+          stack-label
+          v-model="usuario.cpf"
           label="CPF *"
           mask="###.###.###-##"
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
-          @update:model-value="update('cpf', $event)"
         />
       </div>
-      <div class="col-12">
+      <div class="col-12 col-sm-8">
         <q-input
           outlined
           dense
-          :model-value="form.nome"
+          stack-label
+          v-model="usuario.nome"
           label="Nome completo *"
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
-          @update:model-value="update('nome', $event)"
         />
       </div>
       <div class="col-12 col-sm-6">
         <q-input
           outlined
           dense
-          :model-value="form.email"
+          stack-label
+          v-model="usuario.email"
           label="E-mail *"
           type="email"
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
-          @update:model-value="update('email', $event)"
         />
       </div>
       <div class="col-12 col-sm-6">
@@ -45,12 +45,13 @@
           unmasked-value
           outlined
           dense
-          :model-value="form.celular"
+          stack-label
+          fill-mask
+          v-model="usuario.phone"
           label="Celular *"
           mask="(##) #####-####"
           :rules="[(v) => !!v || 'Obrigatório']"
           lazy-rules
-          @update:model-value="update('celular', $event)"
         />
       </div>
     </div>
@@ -59,45 +60,60 @@
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
       <q-space />
       <q-btn
+        v-if="usuario.uuid"
         unelevated
         type="submit"
         label="Continuar"
         color="primary"
         icon-right="chevron_right"
+        @click="avancar()"
+      />
+      <q-btn
+        v-else
+        no-caps
+        unelevated
+        type="submit"
+        label="Cadastrar-se"
+        color="green-9"
+        icon-right="chevron_right"
+        @click="cadastrarUsuario()"
       />
     </q-stepper-navigation>
   </q-form>
 </template>
 
 <script lang="ts">
-import type { PropType } from "vue";
-import { defineComponent, reactive, ref, toRefs } from "vue";
-
-interface FormDados {
-  nome: string;
-  email: string;
-  celular: string;
-  cpf: string;
-}
+import { defineComponent, reactive, toRefs, watch } from "vue";
+import { PedidoService } from "./pedido.service";
 
 export default defineComponent({
   name: "StepSeusDados",
-  props: {
-    form: { type: Object as PropType<FormDados>, required: true },
-  },
-  emits: ["update:form", "next", "prev"],
+  props: {},
+  emits: ["next", "prev"],
   setup(props, { emit }) {
+    const $service = new PedidoService();
+
     const data = reactive({
-      usuario: ref({} as any),
+      usuario: {} as any,
     });
 
-    function update(campo: keyof FormDados, valor: string) {
-      emit("update:form", { ...props.form, [campo]: valor });
+    async function cadastrarUsuario() {
+      const response = await $service.cadastrarUsuario(data.usuario);
+      data.usuario = response;
+    }
+
+    function avancar() {
+      if (!data.usuario.uuid) {
+        cadastrarUsuario();
+        return;
+      }
+      emit("next");
     }
 
     return {
       ...toRefs(data),
-      update,
+      cadastrarUsuario,
+      avancar,
     };
   },
 });

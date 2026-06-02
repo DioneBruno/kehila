@@ -30,7 +30,6 @@
 
             <q-step :name="2" title="Seus Dados" icon="person" :done="etapa > 2">
               <StepSeusDados
-                :form="form"
                 @update:form="Object.assign(form, $event)"
                 @prev="etapa = 1"
                 @next="etapa = 3"
@@ -146,12 +145,6 @@ export default defineComponent({
       evento: computed(() => $pedidoStore.$state.evento),
       lotes: LOTES_MOCK,
       quantidades: {},
-      form: {
-        nome: "",
-        email: "",
-        celular: "",
-        cpf: "",
-      },
       formaPagamento: "",
       cartao: {
         numero: "",

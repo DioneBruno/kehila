@@ -10,21 +10,22 @@ export class PublicoController {
     readonly cadastrandoUsuarioUsecase: CadastrandoUsuarioUsecase,
   ) {}
 
-  @Post(":eventoUuid")
-  async buscarEvento(@Req() req: Request | any, @Param("eventoUuid") eventoUuid: string, @Body() body: any, @Res() res: Response) {
-    const response = await this.portalEventosQuery.buscarEvento(req.companyUuid, eventoUuid);
-    return res.status(201).json(response);
-  }
-
   @Post("novo-usuario")
   async cadastrarUsuario(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
-    const response = await this.cadastrandoUsuarioUsecase.execute({
-      companyUuid: body.companyUuid,
+    const input = {
+      companyUuid: req.companyUuid,
       cpf: body.cpf,
       nome: body.nome,
       email: body.email,
       phone: body.phone,
-    });
+    };
+    const response = await this.cadastrandoUsuarioUsecase.execute(input);
+    return res.status(201).json(response);
+  }
+
+  @Post(":eventoUuid")
+  async buscarEvento(@Req() req: Request | any, @Param("eventoUuid") eventoUuid: string, @Body() body: any, @Res() res: Response) {
+    const response = await this.portalEventosQuery.buscarEvento(req.companyUuid, eventoUuid);
     return res.status(201).json(response);
   }
 }

@@ -1,3 +1,4 @@
+import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import type { PedidoHttp } from "src/@modules/portalEventos/pedido.http";
 import { usePedidoStore } from "src/stores/pedido";
 import { inject } from "vue";
@@ -14,7 +15,10 @@ export class PedidoService {
   }
 
   async cadastrarUsuario(usuario: any) {
+    const authCookies = new AuthCookiesQuasar();
     const response = await this.pedidoHttp.cadastrarUsuario(usuario);
+    authCookies.setToken(response.token);
+    // authCookies.setRefreshToken(response.refreshToken);
     return response;
   }
 }
