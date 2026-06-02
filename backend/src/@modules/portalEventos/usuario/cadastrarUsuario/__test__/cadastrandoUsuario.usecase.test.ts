@@ -5,7 +5,7 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { randomUUID } from "crypto";
 
 const companyUuid = "93c54133-a399-43a3-99f1-fa8a8a603bdd";
-const cpf = "fa8a8a603bdd";
+const cpf = "68869955451";
 let repo: CadastrandoUsuarioRepository;
 
 describe("Deve testar CadastrandoUsuarioUsecase", () => {

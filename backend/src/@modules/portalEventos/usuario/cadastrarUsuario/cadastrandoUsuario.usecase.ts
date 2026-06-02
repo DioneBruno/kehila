@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { CadastrandoUsuarioRepository } from "./cadastrandoUsuarioRepository";
 import { UsuarioEntity } from "./usuario.entity";
+import { ApiValidate } from "src/@modules/shared/apiValidate";
 
 export type CadastrandoUsuarioInput = {
   companyUuid: string;
@@ -20,6 +21,8 @@ export class CadastrandoUsuarioUsecase {
   constructor(readonly repo: CadastrandoUsuarioRepository) {}
 
   async execute(input: CadastrandoUsuarioInput): Promise<CadastroUsuarioOutput> {
+    if (!ApiValidate.validateCpf(input.cpf)) throw new Error("CPF inválido");
+
     const usuario = new UsuarioEntity({
       uuid: randomUUID(),
       companyUuid: input.companyUuid,
