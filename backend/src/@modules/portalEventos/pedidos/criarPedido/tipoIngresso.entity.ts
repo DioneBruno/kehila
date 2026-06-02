@@ -1,4 +1,4 @@
-export type TipoEngressoProps = {
+export type TipoIngressoProps = {
   uuid: string;
   nome: string;
   quantidade: number;
@@ -7,8 +7,8 @@ export type TipoEngressoProps = {
   gerarQuantidadeIngressos: number;
 };
 
-export class TipoEngressoEntity {
-  constructor(readonly props: TipoEngressoProps) {}
+export class TipoIngressoEntity {
+  constructor(readonly props: TipoIngressoProps) {}
 
   uuid(): string {
     return this.props.uuid;

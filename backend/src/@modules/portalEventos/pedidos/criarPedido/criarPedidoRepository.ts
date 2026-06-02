@@ -1,6 +1,6 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { EventoEntity } from "./evento.entity";
-import { TipoEngressoEntity } from "./tipoEngresso.entity";
+import { TipoIngressoEntity } from "./tipoIngresso.entity";
 import { PedidoEntity } from "./pedido.entity";
 
 export class CriarPedidoRepository {
@@ -10,8 +10,8 @@ export class CriarPedidoRepository {
     const [eventoModel] = await this.connectionHub.database.query(`SELECT * FROM eventos WHERE deleted_at IS NULL AND uuid = $1`, [eventoUuid]);
     if (!eventoModel) return null;
 
-    const tiposEngresso: TipoEngressoEntity[] = [];
-    const tipoEngressosModel = await this.connectionHub.database.query(
+    const tiposIngresso: TipoIngressoEntity[] = [];
+    const tipoIngressosModel = await this.connectionHub.database.query(
       `SELECT *
       FROM evento_lote_tipos_ingresso
       WHERE deleted_at IS NULL
@@ -19,15 +19,15 @@ export class CriarPedidoRepository {
         AND evento_uuid = $2`,
       [companyUuid, eventoUuid],
     );
-    for (const tipoEngressoModel of tipoEngressosModel) {
-      tiposEngresso.push(
-        new TipoEngressoEntity({
-          uuid: tipoEngressoModel.uuid,
-          nome: tipoEngressoModel.nome,
-          quantidade: tipoEngressoModel.quantidade,
-          preco: tipoEngressoModel.preco,
-          loteUuid: tipoEngressoModel.lote_uuid,
-          gerarQuantidadeIngressos: tipoEngressoModel.gerar_quantidade_ingressos ?? 1,
+    for (const tipoIngressoModel of tipoIngressosModel) {
+      tiposIngresso.push(
+        new TipoIngressoEntity({
+          uuid: tipoIngressoModel.uuid,
+          nome: tipoIngressoModel.nome,
+          quantidade: tipoIngressoModel.quantidade,
+          preco: tipoIngressoModel.preco,
+          loteUuid: tipoIngressoModel.lote_uuid,
+          gerarQuantidadeIngressos: tipoIngressoModel.gerar_quantidade_ingressos ?? 1,
         }),
       );
     }
@@ -35,7 +35,7 @@ export class CriarPedidoRepository {
     const eventosEntity = new EventoEntity({
       companyUuid,
       uuid: eventoUuid,
-      tiposEngresso,
+      tiposIngresso,
     });
     return eventosEntity;
   }

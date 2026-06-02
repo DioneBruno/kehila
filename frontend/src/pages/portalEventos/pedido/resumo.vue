@@ -6,7 +6,7 @@
           <q-icon name="shopping_cart" class="q-mr-sm" color="primary" />
           Resumo do Pedido
         </div>
-
+        {{ itensSelecionados }}
         <div v-if="itensSelecionados.length === 0" class="text-center q-py-lg">
           <q-icon name="confirmation_number" size="48px" color="grey-3" />
           <div class="text-caption text-grey-5 q-mt-sm">Nenhum ingresso selecionado</div>
@@ -63,7 +63,7 @@ export default defineComponent({
 
     function precoDoTipo(uuid: string): number {
       for (const lote of $pedidoStore.evento?.lotes ?? []) {
-        const tipos = lote.tiposIngresso ?? lote.tiposEngresso ?? [];
+        const tipos = lote.tiposIngresso ?? lote.tiposIngresso ?? [];
         const tipo = tipos.find((t: any) => t.uuid === uuid);
         if (tipo) return Number(tipo.preco) || 0;
       }

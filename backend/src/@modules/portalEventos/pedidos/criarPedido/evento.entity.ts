@@ -1,12 +1,12 @@
 import { randomUUID } from "crypto";
 import { IngressosEntity } from "./ingressos.entity";
 import { PedidoEntity } from "./pedido.entity";
-import { TipoEngressoEntity } from "./tipoEngresso.entity";
+import { TipoIngressoEntity } from "./tipoIngresso.entity";
 
 export type EventoProps = {
   companyUuid: string;
   uuid: string;
-  tiposEngresso: TipoEngressoEntity[];
+  tiposIngresso: TipoIngressoEntity[];
 };
 
 export class EventoEntity {
@@ -18,15 +18,15 @@ export class EventoEntity {
   uuid(): string {
     return this.props.uuid;
   }
-  tiposEngresso(): TipoEngressoEntity[] {
-    return this.props.tiposEngresso;
+  tiposIngresso(): TipoIngressoEntity[] {
+    return this.props.tiposIngresso;
   }
 
   montaPedido(userUuid: string, input: { tipoIngressoUuid: string; quantidade: number }[]): PedidoEntity {
     const ingressos: IngressosEntity[] = [];
     let valorBruto = 0;
     for (const item of input) {
-      const tipo = this.props.tiposEngresso.find((t) => t.uuid() === item.tipoIngressoUuid);
+      const tipo = this.props.tiposIngresso.find((t) => t.uuid() === item.tipoIngressoUuid);
       if (tipo) valorBruto += tipo.preco() * item.quantidade;
       const gerarQtd = tipo?.gerarQuantidadeIngressos() ?? 1;
       for (let i = 0; i < item.quantidade; i++) {

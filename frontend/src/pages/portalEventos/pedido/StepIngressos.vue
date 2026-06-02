@@ -14,7 +14,7 @@
         </div>
 
         <q-card
-          v-for="tipo in lote.tiposEngresso"
+          v-for="tipo in lote.tiposIngresso"
           :key="tipo.uuid"
           flat
           bordered

@@ -63,7 +63,7 @@ export default defineComponent({
 
     function precoDoTipo(uuid: string): number {
       for (const lote of $pedidoStore.evento?.lotes ?? []) {
-        const tipos = lote.tiposIngresso ?? lote.tiposEngresso ?? [];
+        const tipos = lote.tiposIngresso ?? lote.tiposIngresso ?? [];
         const tipo = tipos.find((t: any) => t.uuid === uuid);
         if (tipo) return Number(tipo.preco) || 0;
       }
