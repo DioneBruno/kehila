@@ -1,9 +1,21 @@
 <template>
   <div>
-    <q-form ref="formRef" greedy v-if="!user.uuid">
+    <q-form ref="formRef" greedy v-if="!user.uuid && form == 'novoUsuario'">
       <div class="row q-col-gutter-xs">
         <div class="col-12 q-pb-md text-grey-8">
           <span>Dados do usuário principal</span>
+        </div>
+        <div class="col-12 q-mb-sm">
+          <q-btn
+            flat
+            dense
+            no-caps
+            class="full-width"
+            color="primary"
+            icon="person"
+            label="Já tenho cadastro"
+            @click="entrarComUsuarioCadastrado"
+          />
         </div>
         <div class="col-12 col-sm-4">
           <q-input
@@ -121,7 +133,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs, watch } from "vue";
+import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 
 export default defineComponent({
@@ -132,6 +144,7 @@ export default defineComponent({
     const $service = new PedidoService();
 
     const data = reactive({
+      form: ref("novoUsuario"),
       user: {} as any,
     });
 
