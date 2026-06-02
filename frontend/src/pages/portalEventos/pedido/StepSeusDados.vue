@@ -1,5 +1,55 @@
 <template>
   <div>
+    <q-form ref="loginFormRef" greedy v-if="!user.uuid && form == 'login'">
+      <div class="row q-col-gutter-xs">
+        <div class="col-12 q-pb-md text-grey-8">
+          <span>Entrar com usuário cadastrado</span>
+        </div>
+        <div class="col-12 q-mb-sm">
+          <q-btn
+            flat
+            dense
+            no-caps
+            class="full-width"
+            color="primary"
+            icon="person_add"
+            label="Criar novo cadastro"
+            @click="form = 'novoUsuario'"
+          />
+        </div>
+        <div class="col-12">
+          <q-input
+            outlined
+            dense
+            stack-label
+            v-model="loginData.username"
+            label="Email ou CPF *"
+            lazy-rules
+          />
+        </div>
+        <div class="col-12">
+          <q-input
+            outlined
+            dense
+            stack-label
+            v-model="loginData.password"
+            label="Senha *"
+            :type="mostrarSenha ? 'text' : 'password'"
+            :rules="[(v) => !!v || 'Obrigatório']"
+            lazy-rules
+          >
+            <template #append>
+              <q-icon
+                :name="mostrarSenha ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer"
+                @click="mostrarSenha = !mostrarSenha"
+              />
+            </template>
+          </q-input>
+        </div>
+      </div>
+    </q-form>
+
     <q-form ref="formRef" greedy v-if="!user.uuid && form == 'novoUsuario'">
       <div class="row q-col-gutter-xs">
         <div class="col-12 q-pb-md text-grey-8">
@@ -83,11 +133,12 @@
           </div>
         </div>
         <q-separator class="q-my-sm" />
-        <div class="row q-gutter-sm">
+        <div class="row q-col-gutter-md">
           <q-btn
             flat
             dense
             no-caps
+            class="col-12 full-width"
             color="primary"
             icon="swap_horiz"
             label="Trocar usuário"
@@ -97,6 +148,7 @@
             flat
             dense
             no-caps
+            class="col-12 full-width"
             color="green-8"
             icon="person_add"
             label="Cadastrar novo usuário"
@@ -112,17 +164,24 @@
       <q-btn
         v-if="user.uuid"
         unelevated
-        type="submit"
         label="Continuar"
         color="primary"
         icon-right="chevron_right"
         @click="avancar()"
       />
       <q-btn
+        v-else-if="form == 'login'"
+        no-caps
+        unelevated
+        label="Entrar"
+        color="primary"
+        icon-right="login"
+        @click="loginUsuario()"
+      />
+      <q-btn
         v-else
         no-caps
         unelevated
-        type="submit"
         label="Cadastrar-se"
         color="green-9"
         icon-right="chevron_right"
@@ -146,6 +205,8 @@ export default defineComponent({
     const data = reactive({
       form: ref("novoUsuario"),
       user: {} as any,
+      loginData: { username: "", password: "" },
+      mostrarSenha: false,
     });
 
     onMounted(async () => {
@@ -167,8 +228,18 @@ export default defineComponent({
       }
     }
 
+    function entrarComUsuarioCadastrado() {
+      data.form = "login";
+    }
+
+    async function loginUsuario() {
+      await $service.loginUsuario(data.loginData);
+      await verificaUsuario();
+    }
+
     function trocarUsuario() {
       data.user = {};
+      data.form = "login";
     }
 
     function avancar() {
@@ -182,6 +253,8 @@ export default defineComponent({
     return {
       ...toRefs(data),
       cadastrarUsuario,
+      loginUsuario,
+      entrarComUsuarioCadastrado,
       trocarUsuario,
       avancar,
     };

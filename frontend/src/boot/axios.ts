@@ -62,6 +62,7 @@ function redirectToLogin() {
   cookie.deleteToken();
   cookie.deleteRefreshToken();
   Loading.hide();
+  if (window.location.href.includes("publico")) return; // TODO: Rever essa logica
   window.location.href = "#/login";
 }
 

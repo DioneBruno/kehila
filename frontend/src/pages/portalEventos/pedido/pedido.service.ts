@@ -1,5 +1,6 @@
 import type { AuthHttp } from "src/@modules/auth/auth.http";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
+import type { LoginHttp } from "src/@modules/auth/login.http";
 import type { PedidoHttp } from "src/@modules/portalEventos/pedido.http";
 import { usePedidoStore } from "src/stores/pedido";
 import { inject } from "vue";
@@ -7,6 +8,7 @@ import { inject } from "vue";
 export class PedidoService {
   private pedidoHttp: PedidoHttp = inject("pedidoHttp") as PedidoHttp;
   private authHttp: AuthHttp = inject("authHttp") as AuthHttp;
+  private loginHttp: LoginHttp = inject("loginHttp") as LoginHttp;
   private $pedidoStore = usePedidoStore();
 
   constructor() {}
@@ -29,6 +31,13 @@ export class PedidoService {
     const response = await this.pedidoHttp.cadastrarUsuario(user);
     authCookies.setToken(response.token);
     // authCookies.setRefreshToken(response.refreshToken);
+    return response;
+  }
+
+  async loginUsuario(credentials: { email: string; senha: string }) {
+    const authCookies = new AuthCookiesQuasar();
+    const response = await this.loginHttp.tokenGenerate(credentials);
+    authCookies.setToken(response.token);
     return response;
   }
 }
