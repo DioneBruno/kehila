@@ -6,7 +6,12 @@ export const usePedidoStore = defineStore("pedidoStore", {
       lotes: [] as any[],
     } as any,
     pedido: {
-      itens: [] as { tipoIngressoUuid: string; tipoIngressoNome: string; quantidade: number }[],
+      itens: [] as {
+        tipoIngressoUuid: string;
+        tipoIngressoNome: string;
+        quantidade: number;
+        gerarQuantidadeIngressos: number;
+      }[],
     } as any,
   }),
 
@@ -17,12 +22,20 @@ export const usePedidoStore = defineStore("pedidoStore", {
       this.evento = evento;
     },
     adicionarTipoIngresso(uuid: string, nome: string) {
-      const tipoIngresso = this.evento.lotes.forEach((lote: any) => {
-        const tipo = lote.tiposIngresso.find((tipo: any) => tipo.uuid === uuid);
-        if (tipo) return tipo;
+      let tipoIngresso: any;
+      for (const lote of this.evento.lotes) {
+        const tipo = lote.tiposIngresso?.find((tipo: any) => tipo.uuid === uuid);
+        if (tipo) {
+          tipoIngresso = tipo;
+          break;
+        }
+      }
+      this.pedido.itens.push({
+        tipoIngressoUuid: uuid,
+        tipoIngressoNome: nome,
+        quantidade: 1,
+        gerarQuantidadeIngressos: tipoIngresso?.gerarQuantidadeIngressos ?? 1,
       });
-      console.log(tipoIngresso);
-      this.pedido.itens.push({ tipoIngressoUuid: uuid, tipoIngressoNome: nome, quantidade: 1 });
     },
     removerTipoIngresso(uuid: string) {
       this.pedido.itens = this.pedido.itens.filter((item: any) => item.tipoIngressoUuid !== uuid);

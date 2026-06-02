@@ -19,13 +19,15 @@
             class="row justify-between items-start q-mb-sm"
           >
             <div class="col text-body2">
-              <span class="text-weight-medium">{{ item.qtd }}×</span> {{ item.nome }}
+              <span class="text-weight-medium">{{ item.quantidade }}×</span> {{ item.nome }}
             </div>
             <div class="col-auto text-body2 text-weight-medium">
               {{ formatarMoeda(item.subtotal) }}
             </div>
           </div>
 
+          <q-separator class="q-my-md" />
+          <span class="text-grey-8">Será gerado x Ingressos individuais.</span>
           <q-separator class="q-my-md" />
 
           <div class="row justify-between items-center">
@@ -72,15 +74,14 @@ export default defineComponent({
 
     const itensSelecionados = computed(() =>
       ($pedidoStore.pedido.itens as any[]).map((item) => ({
-        uuid: item.tipoIngressoUuid,
-        nome: item.tipoIngressoNome,
-        qtd: item.quantidade,
+        ...item,
+        nome: `${item.tipoIngressoNome} (${item.gerarQuantidadeIngressos}x)`,
         subtotal: item.quantidade * precoDoTipo(item.tipoIngressoUuid),
       })),
     );
 
     const totalIngressos = computed(() =>
-      itensSelecionados.value.reduce((acc, i) => acc + i.qtd, 0),
+      itensSelecionados.value.reduce((acc, i) => acc + i.quantidade, 0),
     );
 
     const totalValor = computed(() =>
