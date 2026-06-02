@@ -36,14 +36,23 @@
               />
             </q-step>
 
-            <q-step :name="3" title="Pagamento" icon="payment">
+            <q-step :name="3" title="Resumo" icon="receipt_long" :done="etapa > 3">
+              <StepResumo
+                :itens="itensSelecionados"
+                :total-valor="totalValor"
+                @prev="etapa = 2"
+                @next="etapa = 4"
+              />
+            </q-step>
+
+            <q-step :name="4" title="Pagamento" icon="payment">
               <StepPagamento
                 :forma-pagamento="formaPagamento"
                 :cartao="cartao"
                 :opcoes-parcelas="opcoesParcelas"
                 @update:forma-pagamento="formaPagamento = $event"
                 @update:cartao="Object.assign(cartao, $event)"
-                @prev="etapa = 2"
+                @prev="etapa = 3"
                 @confirmar="confirmar"
               />
             </q-step>
@@ -93,6 +102,7 @@ import Cabecalho from "./cabecalho.vue";
 import PedidoResumo from "./resumo.vue";
 import StepIngressos from "./StepIngressos.vue";
 import StepSeusDados from "./StepSeusDados.vue";
+import StepResumo from "./StepResumo.vue";
 import StepPagamento from "./StepPagamento.vue";
 
 const LOTES_MOCK = [
@@ -133,7 +143,7 @@ const OPCOES_PARCELAS = [
 
 export default defineComponent({
   name: "PortalEventosPedidoHome",
-  components: { Cabecalho, PedidoResumo, StepIngressos, StepSeusDados, StepPagamento },
+  components: { Cabecalho, PedidoResumo, StepIngressos, StepSeusDados, StepResumo, StepPagamento },
   setup() {
     const $route = useRoute();
     const $pedidoStore = usePedidoStore();
