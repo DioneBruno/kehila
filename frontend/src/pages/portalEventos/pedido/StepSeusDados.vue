@@ -58,7 +58,41 @@
       </div>
     </q-form>
 
-    <div class="" v-if="user.uuid"></div>
+    <div v-if="user.uuid">
+      <div class="text-grey-8 q-pb-sm">Dados do usuário principal</div>
+      <q-card flat bordered class="q-pa-md">
+        <div class="row items-center q-col-gutter-sm">
+          <div class="col-auto">
+            <q-avatar color="primary" text-color="white" icon="person" />
+          </div>
+          <div class="col">
+            <div class="text-subtitle2 text-weight-medium">{{ user.name }}</div>
+            <div class="text-caption text-grey-6">{{ user.email }}</div>
+          </div>
+        </div>
+        <q-separator class="q-my-sm" />
+        <div class="row q-gutter-sm">
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="primary"
+            icon="swap_horiz"
+            label="Trocar usuário"
+            @click="trocarUsuario"
+          />
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="green-8"
+            icon="person_add"
+            label="Cadastrar novo usuário"
+            @click="trocarUsuario"
+          />
+        </div>
+      </q-card>
+    </div>
 
     <q-stepper-navigation class="row">
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
@@ -120,6 +154,10 @@ export default defineComponent({
       }
     }
 
+    function trocarUsuario() {
+      data.user = {};
+    }
+
     function avancar() {
       if (!data.user.uuid) {
         cadastrarUsuario();
@@ -131,6 +169,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       cadastrarUsuario,
+      trocarUsuario,
       avancar,
     };
   },
