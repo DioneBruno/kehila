@@ -18,7 +18,8 @@ export class PedidosController {
       eventoUuid: body.eventoUuid,
       pedido: body.pedido,
     };
-    return await this.criarPedidoUsecase.execute(input);
+    const response = await this.criarPedidoUsecase.execute(input);
+    return res.status(200).json({ message: "Pedido criado com sucesso", data: { ...response } });
   }
 
   @Post("fechar")

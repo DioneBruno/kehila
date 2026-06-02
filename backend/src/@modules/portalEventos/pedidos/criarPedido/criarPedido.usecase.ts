@@ -16,6 +16,6 @@ export class CriarPedidoUsecase {
     if (!evento) throw new ApiError("Evento não encontrado", 400);
     const pedido = evento.montaPedido(input.userUuid, input.pedido);
     await this.repo.salvarPedido(pedido);
-    return pedido;
+    return pedido.toJson();
   }
 }

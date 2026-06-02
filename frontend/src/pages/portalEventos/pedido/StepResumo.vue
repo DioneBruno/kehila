@@ -16,6 +16,10 @@
       </q-item>
     </q-list>
 
+    <div class="text-grey-6 text-right">
+      Será gerado {{ totalIngressosGerados }} Ingressos individuais.
+    </div>
+
     <q-card flat bordered class="q-mt-md">
       <q-card-section class="row items-center justify-between q-py-sm">
         <span class="text-subtitle1 text-weight-bold">Total</span>
@@ -28,12 +32,20 @@
     <q-stepper-navigation class="row">
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
       <q-space />
-      <q-btn
+      <!-- <q-btn
         unelevated
         label="Continuar"
         color="primary"
         icon-right="chevron_right"
         @click="$emit('next')"
+      /> -->
+      <q-btn
+        no-caps
+        unelevated
+        label="Confirmar Pedido"
+        color="primary"
+        icon-right="chevron_right"
+        @click="criarPedido"
       />
     </q-stepper-navigation>
   </div>
@@ -43,6 +55,7 @@
 import { usePedidoStore } from "src/stores/pedido";
 import type { PropType } from "vue";
 import { computed, defineComponent } from "vue";
+import { PedidoService } from "./pedido.service";
 
 interface ItemResumo {
   uuid: string;
@@ -59,6 +72,7 @@ export default defineComponent({
   },
   emits: ["prev", "next"],
   setup() {
+    const $service = new PedidoService();
     const $pedidoStore = usePedidoStore();
 
     function precoDoTipo(uuid: string): number {
@@ -87,6 +101,17 @@ export default defineComponent({
       itensSelecionados.value.reduce((acc, i) => acc + i.subtotal, 0),
     );
 
+    const totalIngressosGerados = computed(() =>
+      ($pedidoStore.pedido.itens as any[]).reduce(
+        (acc, i) => acc + i.quantidade * (i.gerarQuantidadeIngressos ?? 1),
+        0,
+      ),
+    );
+
+    async function criarPedido() {
+      await $service.criarPedido();
+    }
+
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
@@ -95,7 +120,9 @@ export default defineComponent({
       itensSelecionados,
       totalIngressos,
       totalValor,
+      totalIngressosGerados,
       formatarMoeda,
+      criarPedido,
     };
   },
 });

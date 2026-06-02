@@ -59,7 +59,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 }
 //
 @Module({
-  controllers: [EventosController, LotesController, PublicoController],
+  controllers: [EventosController, LotesController, PedidosController, PublicoController],
   providers: [
     makeProvider(PortalEventosQuery, (hub) => new PortalEventosQuery(hub)),
     makeProvider(CriarEventoUsecase, (hub) => new CriarEventoUsecase(new CriarEventoRepository(hub))),

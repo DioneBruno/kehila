@@ -27,9 +27,9 @@
           </div>
 
           <q-separator class="q-my-md" />
-          <span class="text-grey-8"
-            >Será gerado {{ totalIngressosGerados }} Ingressos individuais.</span
-          >
+          <div class="text-grey-6 text-right">
+            Será gerado {{ totalIngressosGerados }} Ingressos individuais.
+          </div>
           <q-separator class="q-my-md" />
 
           <div class="row justify-between items-center">

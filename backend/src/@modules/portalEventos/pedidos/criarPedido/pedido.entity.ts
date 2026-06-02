@@ -46,4 +46,10 @@ export class PedidoEntity {
   ingressos(): IngressosEntity[] {
     return this.props.ingressos;
   }
+
+  toJson() {
+    return {
+      uuid: this.props.uuid,
+    };
+  }
 }

@@ -10,4 +10,8 @@ export class PedidoHttp {
   async cadastrarUsuario(user: any) {
     return this.http.post(`publico/eventos/novo-usuario`, user);
   }
+
+  async criarPedido(pedido: any) {
+    return this.http.post(`pedidos/criar`, pedido);
+  }
 }

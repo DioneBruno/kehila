@@ -40,4 +40,13 @@ export class PedidoService {
     authCookies.setToken(response.token);
     return response;
   }
+
+  async criarPedido() {
+    const input = {
+      eventoUuid: this.$pedidoStore.$state.evento.uuid,
+      pedido: this.$pedidoStore.$state.pedido.itens,
+    };
+    const response = await this.pedidoHttp.criarPedido(input);
+    // this.$pedidoStore.setPedido(response);
+  }
 }
