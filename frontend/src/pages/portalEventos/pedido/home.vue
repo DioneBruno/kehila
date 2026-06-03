@@ -104,6 +104,7 @@ import StepIngressos from "./StepIngressos.vue";
 import StepSeusDados from "./StepSeusDados.vue";
 import StepResumo from "./StepResumo.vue";
 import StepPagamento from "./StepPagamento.vue";
+import { useAuthStore } from "src/stores/auth";
 
 const OPCOES_PARCELAS = [
   { label: "1× de R$ 80,00 (sem juros)", value: 1 },
@@ -115,6 +116,7 @@ export default defineComponent({
   name: "PortalEventosPedidoHome",
   components: { Cabecalho, PedidoResumo, StepIngressos, StepSeusDados, StepResumo, StepPagamento },
   setup() {
+    const $authStore = useAuthStore();
     const $route = useRoute();
     const $pedidoStore = usePedidoStore();
     const $service = new PedidoService();
@@ -125,6 +127,7 @@ export default defineComponent({
       evento: computed(() => $pedidoStore.$state.evento),
       lotes: [],
       quantidades: {},
+      user: computed(() => $authStore.$state.user),
       formaPagamento: "",
       cartao: {
         numero: "",
@@ -137,8 +140,13 @@ export default defineComponent({
     });
 
     onMounted(async () => {
+      await verificaUsuario();
       await buscaEvento();
     });
+
+    async function verificaUsuario() {
+      await $service.verificaUsuario();
+    }
 
     async function buscaEvento() {
       const eventoUuid = $route.params.eventoUuid as string;

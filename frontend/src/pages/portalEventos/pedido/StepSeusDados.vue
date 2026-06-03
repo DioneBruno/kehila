@@ -142,7 +142,7 @@
             color="primary"
             icon="swap_horiz"
             label="Trocar usuário"
-            @click="trocarUsuario"
+            @click="trocarUsuario()"
           />
           <q-btn
             flat
@@ -152,7 +152,7 @@
             color="green-8"
             icon="person_add"
             label="Cadastrar novo usuário"
-            @click="trocarUsuario"
+            @click="novoUsuario()"
           />
         </div>
       </q-card>
@@ -192,19 +192,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
+import { useAuthStore } from "src/stores/auth";
 
 export default defineComponent({
   name: "StepSeusDados",
   props: {},
   emits: ["next", "prev"],
   setup(props, { emit }) {
+    const $authStore = useAuthStore();
     const $service = new PedidoService();
 
     const data = reactive({
       form: ref("novoUsuario"),
-      user: {} as any,
+      user: computed(() => $authStore.$state.user),
       loginData: { username: "", password: "" },
       mostrarSenha: false,
     });
@@ -219,13 +221,7 @@ export default defineComponent({
     }
 
     async function verificaUsuario() {
-      const response = await $service.verificaUsuario();
-      if (response?.user) {
-        const { uuid, name, email } = response.user;
-        data.user.uuid = uuid;
-        data.user.name = name;
-        data.user.email = email;
-      }
+      await $service.verificaUsuario();
     }
 
     function entrarComUsuarioCadastrado() {
@@ -238,8 +234,13 @@ export default defineComponent({
     }
 
     function trocarUsuario() {
-      data.user = {};
+      $authStore.setUser({});
       data.form = "login";
+    }
+
+    function novoUsuario() {
+      $authStore.setUser({});
+      data.form = "novoUsuario";
     }
 
     function avancar() {
@@ -252,6 +253,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      novoUsuario,
       cadastrarUsuario,
       loginUsuario,
       entrarComUsuarioCadastrado,
