@@ -240,8 +240,14 @@
       <div class="col-12 col-md-4">
         <q-card flat bordered>
           <q-card-section>
-            <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-md">Resumo</p>
             <q-list dense>
+              <q-item v-if="evento.capacidadeTotal">
+                <q-item-section avatar><q-icon name="group" color="grey-6" /></q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Capacidade</q-item-label>
+                  <q-item-label>{{ evento.capacidadeTotal }} pessoas</q-item-label>
+                </q-item-section>
+              </q-item>
               <q-item>
                 <q-item-section avatar
                   ><q-icon name="calendar_today" color="grey-6"
@@ -251,18 +257,19 @@
                   <q-item-label>{{ formatarData(evento.createdAt) }}</q-item-label>
                 </q-item-section>
               </q-item>
-              <q-item v-if="evento.capacidadeTotal">
-                <q-item-section avatar><q-icon name="group" color="grey-6" /></q-item-section>
-                <q-item-section>
-                  <q-item-label caption>Capacidade</q-item-label>
-                  <q-item-label>{{ evento.capacidadeTotal }} pessoas</q-item-label>
-                </q-item-section>
-              </q-item>
               <q-item>
                 <q-item-section avatar><q-icon name="tag" color="grey-6" /></q-item-section>
                 <q-item-section>
                   <q-item-label caption>Slug</q-item-label>
                   <q-item-label class="text-caption text-grey-7">{{ evento.slug }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section avatar> <q-icon name="assignment" color="grey-6" /></q-item-section>
+                <q-item-section>
+                  <q-item-label caption>
+                    <EventoFormulario />
+                  </q-item-label>
                 </q-item-section>
               </q-item>
               <q-item>
@@ -345,9 +352,15 @@ import { useRoute, useRouter } from "vue-router";
 import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
 import { LotesService } from "./lotes.service";
 import { useQuasar } from "quasar";
+import { ApiDate } from "src/shared/apiDate.service";
+
+import EventoFormulario from "./eventoFormulario.vue";
 
 export default defineComponent({
   name: "PortalEventosEventosDetalhe",
+  components: {
+    EventoFormulario,
+  },
   setup() {
     const $route = useRoute();
     const $router = useRouter();
@@ -449,15 +462,8 @@ export default defineComponent({
       return STATUS_CORES[status] ?? "grey";
     }
 
-    function formatarData(iso: string) {
-      if (!iso) return "-";
-      return new Date(iso).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+    function formatarData(data: string) {
+      return ApiDate.format(data, "DD/MM/YYYY HH:mm");
     }
 
     function formatarMoeda(valor: number) {

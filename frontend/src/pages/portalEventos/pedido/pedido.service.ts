@@ -55,6 +55,14 @@ export class PedidoService {
 
   async listarPedidos(eventoUuid: string) {
     const response = await this.pedidoHttp.listarPedidos(eventoUuid);
+    const pedido = response.data.find((item: any) => item.status === "pendente");
+    if (pedido) this.buscarPedido(pedido.uuid);
+    return response;
+  }
+
+  async buscarPedido(pedidoUuid: string) {
+    const response = await this.pedidoHttp.buscarPedido(pedidoUuid);
+    this.$pedidoStore.setIngressos(response.ingressos);
     return response;
   }
 }

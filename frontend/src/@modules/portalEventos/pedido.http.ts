@@ -18,4 +18,8 @@ export class PedidoHttp {
   async listarPedidos(eventoUuid: string) {
     return this.http.post(`pedidos/listar`, { eventoUuid });
   }
+
+  async buscarPedido(pedidoUuid: string) {
+    return this.http.post(`pedidos/${pedidoUuid}`, {});
+  }
 }

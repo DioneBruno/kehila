@@ -9,7 +9,7 @@
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
           <q-stepper
-            v-model="etapa"
+            v-model="pedido.etapa"
             color="primary"
             class="q-pa-none"
             flat
@@ -17,42 +17,51 @@
             vertical
             animated
           >
-            <q-step :name="1" title="Ingressos" icon="confirmation_number" :done="etapa > 1">
+            <q-step :name="1" title="Ingressos" icon="confirmation_number" :done="pedido.etapa > 1">
               <StepIngressos
                 :lotes="lotes"
                 :quantidades="quantidades"
                 :total-ingressos="totalIngressos"
                 @aumentar="aumentar"
                 @diminuir="diminuir"
-                @next="etapa = 2"
+                @next="pedido.etapa = 2"
               />
             </q-step>
 
-            <q-step :name="2" title="Seus Dados" icon="person" :done="etapa > 2">
+            <q-step :name="2" title="Seus Dados" icon="person" :done="pedido.etapa > 2">
               <StepSeusDados
                 @update:form="Object.assign(form, $event)"
-                @prev="etapa = 1"
-                @next="etapa = 3"
+                @prev="pedido.etapa = 1"
+                @next="pedido.etapa = 3"
               />
             </q-step>
 
-            <q-step :name="3" title="Resumo" icon="receipt_long" :done="etapa > 3">
+            <q-step :name="3" title="Resumo" icon="receipt_long" :done="pedido.etapa > 3">
               <StepResumo
                 :itens="itensSelecionados"
                 :total-valor="totalValor"
-                @prev="etapa = 2"
-                @next="etapa = 4"
+                @prev="pedido.etapa = 2"
+                @next="pedido.etapa = 4"
               />
             </q-step>
 
-            <q-step :name="4" title="Pagamento" icon="payment">
+            <q-step :name="4" title="Formulário" icon="assignment" :done="pedido.etapa > 4">
+              <StepIngressoForm
+                :itens="itensSelecionados"
+                :total-valor="totalValor"
+                @prev="pedido.etapa = 3"
+                @next="pedido.etapa = 5"
+              />
+            </q-step>
+
+            <q-step :name="5" title="Pagamento" icon="payment">
               <StepPagamento
                 :forma-pagamento="formaPagamento"
                 :cartao="cartao"
                 :opcoes-parcelas="opcoesParcelas"
                 @update:forma-pagamento="formaPagamento = $event"
                 @update:cartao="Object.assign(cartao, $event)"
-                @prev="etapa = 3"
+                @prev="pedido.etapa = 4"
                 @confirmar="confirmar"
               />
             </q-step>
@@ -106,6 +115,7 @@ import Cabecalho from "./cabecalho.vue";
 import PedidoResumo from "./resumo.vue";
 import PedidoPedidos from "./pedidos.vue";
 import StepIngressos from "./StepIngressos.vue";
+import StepIngressoForm from "./StepIngressoForm.vue";
 import StepSeusDados from "./StepSeusDados.vue";
 import StepResumo from "./StepResumo.vue";
 import StepPagamento from "./StepPagamento.vue";
@@ -124,6 +134,7 @@ export default defineComponent({
     PedidoResumo,
     PedidoPedidos,
     StepIngressos,
+    StepIngressoForm,
     StepSeusDados,
     StepResumo,
     StepPagamento,
@@ -135,9 +146,9 @@ export default defineComponent({
     const $service = new PedidoService();
 
     const data = reactive({
-      etapa: 1,
       resumoAberto: false,
       evento: computed(() => $pedidoStore.$state.evento),
+      pedido: computed(() => $pedidoStore.$state.pedido),
       lotes: [],
       quantidades: {},
       user: computed(() => $authStore.$state.user),

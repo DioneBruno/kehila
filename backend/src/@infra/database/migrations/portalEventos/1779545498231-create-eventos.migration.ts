@@ -37,6 +37,7 @@ export class CreateEventos1779545498231 implements MigrationInterface {
           { name: "online", type: "boolean", default: false },
           { name: "link_online", type: "varchar", length: "500", isNullable: true },
           { name: "status", type: "varchar", default: "'rascunho'" },
+          { name: "form_campos", type: "jsonb", default: "'[]'" },
         ],
       }),
     );

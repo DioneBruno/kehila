@@ -94,4 +94,42 @@ export class PortalEventosQuery {
       pagoEm: ApiDate.format(pedido.pagoEm, "YYYY-MM-DD HH:mm"),
     }));
   }
+
+  async buscarPedido(pedidoUuid: string) {
+    const [pedidoModel] = await this.connectionHub.database.query(
+      `SELECT 
+        pedidos.created_at as "createdAt",
+        pedidos.uuid,
+        pedidos.status,
+        pedidos.valor_liquido "valorLiquido",
+        pedidos.pago_em "pagoEm"
+      FROM evento_pedidos pedidos
+      WHERE deleted_at IS NULL
+        AND uuid = $1
+      `,
+      [pedidoUuid],
+    );
+    if (!pedidoModel) return null;
+
+    const ingressosModel = await this.connectionHub.database.query(
+      `
+      SELECT 
+        uuid,
+        codigo,
+        pessoa_nome "pessoaNome",
+        pessoa_email "pessoaEmail",
+        pessoa_telefone "pessoaTelefone",
+        pessoa_documento "pessoaDocumento",
+        pessoa_uf "pessoaUf",
+        pessoa_cidade "pessoaCidade",
+        form_data "formData"
+      FROM evento_ingressos ingressos
+      WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pedido_uuid = $1
+      `,
+      [pedidoUuid],
+    );
+
+    return { ...pedidoModel, ingressos: ingressosModel };
+  }
 }
