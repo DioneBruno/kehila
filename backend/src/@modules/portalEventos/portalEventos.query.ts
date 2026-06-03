@@ -65,4 +65,27 @@ export class PortalEventosQuery {
       dataInicio: ApiDate.format(eventoModel.dataInicio, "YYYY-MM-DD HH:mm"),
     };
   }
+
+  async listarPedidosDoUsuario(input: { companyUuid: string; eventoUuid: string; userUuid: string }): Promise<any[]> {
+    const pedidosModel = await this.connectionHub.database.query(
+      `SELECT
+        pedidos.created_at as "createdAt",
+        pedidos.uuid,
+        pedidos.status,
+        pedidos.valor_liquido "valorLiquido",
+        pedidos.pago_em "pagoEm"
+      FROM evento_pedidos pedidos
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.evento_uuid = $1
+        AND pedidos.user_uuid = $2
+      `,
+      [input.eventoUuid, input.userUuid],
+    );
+
+    return pedidosModel.map((pedido) => ({
+      ...pedido,
+      createdAt: ApiDate.format(pedido.createdAt, "YYYY-MM-DD HH:mm"),
+      pagoEm: ApiDate.format(pedido.pagoEm, "YYYY-MM-DD HH:mm"),
+    }));
+  }
 }

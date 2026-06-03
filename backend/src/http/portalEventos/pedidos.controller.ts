@@ -1,14 +1,27 @@
-import { Body, Controller, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedido.usecase";
 import { FecharPedidoUsecase } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedido.usecase";
+import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
 
 @Controller("pedidos")
 export class PedidosController {
   constructor(
+    private readonly portalEventosQuery: PortalEventosQuery,
     private readonly criarPedidoUsecase: CriarPedidoUsecase,
     private readonly fecharPedidoUsecase: FecharPedidoUsecase,
   ) {}
+
+  @Post("listar")
+  async list(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    const input = {
+      companyUuid: req.companyUuid,
+      eventoUuid: body.eventoUuid,
+      userUuid: req.userUuid,
+    };
+    const response = await this.portalEventosQuery.listarPedidosDoUsuario(input);
+    return res.status(200).json({ data: { ...response } });
+  }
 
   @Post("criar")
   async create(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {

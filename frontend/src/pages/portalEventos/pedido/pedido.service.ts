@@ -52,4 +52,9 @@ export class PedidoService {
     const response = await this.pedidoHttp.criarPedido(input);
     // this.$pedidoStore.setPedido(response);
   }
+
+  async listarPedidos(eventoUuid: string) {
+    const response = await this.pedidoHttp.listarPedidos(eventoUuid);
+    return response;
+  }
 }

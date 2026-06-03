@@ -59,8 +59,12 @@
           </q-stepper>
         </div>
 
-        <!-- Resumo lateral: somente desktop -->
-        <PedidoResumo />
+        <div class="col">
+          <PedidoPedidos />
+
+          <!-- Resumo lateral: somente desktop -->
+          <PedidoResumo />
+        </div>
       </div>
     </div>
 
@@ -100,6 +104,7 @@ import { usePedidoStore } from "src/stores/pedido";
 
 import Cabecalho from "./cabecalho.vue";
 import PedidoResumo from "./resumo.vue";
+import PedidoPedidos from "./pedidos.vue";
 import StepIngressos from "./StepIngressos.vue";
 import StepSeusDados from "./StepSeusDados.vue";
 import StepResumo from "./StepResumo.vue";
@@ -114,7 +119,15 @@ const OPCOES_PARCELAS = [
 
 export default defineComponent({
   name: "PortalEventosPedidoHome",
-  components: { Cabecalho, PedidoResumo, StepIngressos, StepSeusDados, StepResumo, StepPagamento },
+  components: {
+    Cabecalho,
+    PedidoResumo,
+    PedidoPedidos,
+    StepIngressos,
+    StepSeusDados,
+    StepResumo,
+    StepPagamento,
+  },
   setup() {
     const $authStore = useAuthStore();
     const $route = useRoute();
