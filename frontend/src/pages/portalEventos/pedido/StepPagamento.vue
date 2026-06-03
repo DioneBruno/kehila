@@ -142,14 +142,6 @@
     <q-stepper-navigation class="row">
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
       <q-space />
-      <q-btn
-        unelevated
-        color="positive"
-        icon="lock"
-        label="Confirmar Pedido"
-        :disable="!formaPagamento"
-        @click="$emit('confirmar')"
-      />
     </q-stepper-navigation>
   </div>
 </template>
