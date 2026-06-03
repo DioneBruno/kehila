@@ -155,7 +155,7 @@ describe("Deve testar CriarPedidoUsecase", () => {
     expect(ingressosTipo3.length).toBe(6);
   });
 
-  test("Deve gerar ingressos com tipo de ingresso - Um para Muintos", async () => {
+  test("Deve gerar ingressos com tipo de ingresso - Um para Muitos", async () => {
     const eventoUuid = "e301a3c0-aaf4-42c5-86d0-d8800116b674";
     await dataSource.query(`INSERT INTO eventos (uuid, company_uuid, user_uuid, titulo, slug, data_inicio)
       VALUES ('${eventoUuid}', '${companyUuid}', '${companyUuid}', 'Evento Teste', 'evento-teste', now())`);
@@ -213,7 +213,7 @@ describe("Deve testar CriarPedidoUsecase", () => {
     await usecase.execute(input);
 
     const ingressosModel = await dataSource.query(`SELECT * FROM evento_ingressos WHERE company_uuid = '${companyUuid}'`);
-    expect(ingressosModel.length).toBe(19);
+    expect(ingressosModel.length).toBe(15);
     const ingressosTipo1 = ingressosModel.filter((ingresso: any) => ingresso.tipo_ingresso_uuid == `1${tipoIngressoUuidBase}`);
     expect(ingressosTipo1.length).toBe(2);
     const ingressosTipo2 = ingressosModel.filter((ingresso: any) => ingresso.tipo_ingresso_uuid == `2${tipoIngressoUuidBase}`);

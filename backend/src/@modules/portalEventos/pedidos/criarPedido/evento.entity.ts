@@ -31,13 +31,6 @@ export class EventoEntity {
       const gerarQtd = tipo?.gerarQuantidadeIngressos() ?? 1;
       for (let i = 0; i < item.quantidade; i++) {
         if (gerarQtd > 1) {
-          ingressos.push(
-            new IngressosEntity({
-              uuid: randomUUID(),
-              codigo: randomUUID().replace(/-/g, "").slice(0, 20).toUpperCase(),
-              tipoIngressoUuid: tipo!.loteUuid(),
-            }),
-          );
           for (let j = 0; j < gerarQtd; j++) {
             ingressos.push(
               new IngressosEntity({
