@@ -22,4 +22,8 @@ export class PedidoHttp {
   async buscarPedido(pedidoUuid: string) {
     return this.http.post(`pedidos/${pedidoUuid}`, {});
   }
+
+  async editarFormIngresso(input: any) {
+    return this.http.post(`pedidos/${input.pedidoUuid}/editar-form-ingresso`, input);
+  }
 }

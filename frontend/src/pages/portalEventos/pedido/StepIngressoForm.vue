@@ -85,9 +85,14 @@
           <div class="col-12 col-sm-8">
             <q-input outlined dense stack-label v-model="ingresso.pessoaCidade" label="Cidade" />
           </div>
-          <div class="col-12 row q-mt-md">
-            <q-space />
-            <q-btn no-caps flat color="primary" label="Salvar" />
+          <div class="col-12 text-center q-mt-md">
+            <q-btn
+              no-caps
+              flat
+              color="primary"
+              label="Salvar"
+              @click="editarFormIngresso(ingresso)"
+            />
           </div>
         </div>
       </q-carousel-slide>
@@ -99,13 +104,9 @@
         v-for="(ingresso, index) in ingressos"
         :key="ingresso.uuid"
         :color="
-          Number(slide) === index
-            ? 'primary'
-            : isIngressoPreenchido(ingresso)
-              ? 'positive'
-              : 'grey-4'
+          Number(slide) === index ? 'primary' : ingresso.formDataValido ? 'positive' : 'grey-4'
         "
-        :text-color="Number(slide) === index || isIngressoPreenchido(ingresso) ? 'white' : 'grey-7'"
+        :text-color="Number(slide) === index || ingresso.formDataValido ? 'white' : 'grey-7'"
         :label="`${index + 1}`"
         dense
         unelevated
@@ -179,13 +180,13 @@ export default defineComponent({
       ufs: UFS.map((uf) => ({ label: uf, value: uf })),
     });
 
-    function isIngressoPreenchido(ingresso: any): boolean {
-      return !!ingresso.pessoaNome;
+    async function editarFormIngresso(ingresso: any) {
+      await $service.editarFormIngresso(ingresso);
     }
 
     return {
       ...toRefs(data),
-      isIngressoPreenchido,
+      editarFormIngresso,
     };
   },
 });

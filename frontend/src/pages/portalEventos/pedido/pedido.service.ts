@@ -63,6 +63,23 @@ export class PedidoService {
   async buscarPedido(pedidoUuid: string) {
     const response = await this.pedidoHttp.buscarPedido(pedidoUuid);
     this.$pedidoStore.setIngressos(response.ingressos);
+    this.$pedidoStore.setPedidoUuid(pedidoUuid);
+    return response;
+  }
+
+  async editarFormIngresso(ingresso: any) {
+    const input = {
+      pedidoUuid: this.$pedidoStore.$state.pedido.uuid,
+      ingressoUuid: ingresso.uuid,
+      pessoaNome: ingresso.pessoaNome,
+      pessoaDocumento: ingresso.pessoaDocumento,
+      pessoaEmail: ingresso.pessoaEmail,
+      pessoaTelefone: ingresso.pessoaTelefone,
+      pessoaUf: ingresso.pessoaUf,
+      pessoaCidade: ingresso.pessoaCidade,
+    };
+    const response = await this.pedidoHttp.editarFormIngresso(input);
+    await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
     return response;
   }
 }

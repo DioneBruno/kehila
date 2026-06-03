@@ -122,10 +122,12 @@ export class PortalEventosQuery {
         pessoa_documento "pessoaDocumento",
         pessoa_uf "pessoaUf",
         pessoa_cidade "pessoaCidade",
-        form_data "formData"
+        form_data "formData",
+        form_data_valido "formDataValido"
       FROM evento_ingressos ingressos
       WHERE ingressos.deleted_at IS NULL
         AND ingressos.pedido_uuid = $1
+      ORDER BY index
       `,
       [pedidoUuid],
     );

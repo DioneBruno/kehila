@@ -6,6 +6,7 @@ export const usePedidoStore = defineStore("pedidoStore", {
       lotes: [] as any[],
     } as any,
     pedido: {
+      uuid: "",
       etapa: 4,
       itens: [] as {
         tipoIngressoUuid: string;
@@ -59,6 +60,9 @@ export const usePedidoStore = defineStore("pedidoStore", {
     },
     setIngressos(ingressos: any[]) {
       this.pedido.ingressos = ingressos;
+    },
+    setPedidoUuid(uuid: string) {
+      this.pedido.uuid = uuid;
     },
   },
 });

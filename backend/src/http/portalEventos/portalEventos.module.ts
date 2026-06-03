@@ -49,6 +49,8 @@ import { DominioMiddleware } from "../middleware/dominio.middleware";
 import { PublicoController } from "./publico.controller";
 import { CadastrandoUsuarioUsecase } from "src/@modules/portalEventos/cadastrarUsuario/cadastrandoUsuario.usecase";
 import { CadastrandoUsuarioRepository } from "src/@modules/portalEventos/cadastrarUsuario/cadastrandoUsuarioRepository";
+import { EditarFormIngressoUsecase } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngresso.usecase";
+import { EditarFormIngressoRepository } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngressoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -77,6 +79,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(CriarPedidoUsecase, (hub) => new CriarPedidoUsecase(new CriarPedidoRepository(hub))),
     makeProvider(FecharPedidoUsecase, (hub) => new FecharPedidoUsecase(new FecharPedidoRepository(hub))),
     makeProvider(CadastrandoUsuarioUsecase, (hub) => new CadastrandoUsuarioUsecase(new CadastrandoUsuarioRepository(hub))),
+    makeProvider(EditarFormIngressoUsecase, (hub) => new EditarFormIngressoUsecase(new EditarFormIngressoRepository(hub))),
   ],
 })
 export class PortalEventosModule implements NestModule {

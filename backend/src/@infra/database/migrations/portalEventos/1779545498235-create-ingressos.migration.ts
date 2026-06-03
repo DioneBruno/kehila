@@ -41,6 +41,7 @@ export class CreateIngressos1779545498235 implements MigrationInterface {
           { name: "checkin_em", type: "timestamp", isNullable: true },
           { name: "checkin_operador_uuid", type: "uuid", isNullable: true },
           { name: "form_data", type: "jsonb", default: "'{}'" },
+          { name: "form_data_valido", type: "boolean", default: false },
         ],
       }),
     );
