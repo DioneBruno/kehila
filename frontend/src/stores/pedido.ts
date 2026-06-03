@@ -7,7 +7,7 @@ export const usePedidoStore = defineStore("pedidoStore", {
     } as any,
     pedido: {
       uuid: "",
-      etapa: 4,
+      etapa: 1,
       itens: [] as {
         tipoIngressoUuid: string;
         tipoIngressoNome: string;
@@ -58,11 +58,8 @@ export const usePedidoStore = defineStore("pedidoStore", {
         }
       }
     },
-    setIngressos(ingressos: any[]) {
-      this.pedido.ingressos = ingressos;
-    },
-    setPedidoUuid(uuid: string) {
-      this.pedido.uuid = uuid;
+    setPedido(pedido: any) {
+      this.pedido = { ...pedido, etapa: 4 };
     },
   },
 });

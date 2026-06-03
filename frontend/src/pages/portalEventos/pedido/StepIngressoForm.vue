@@ -140,7 +140,7 @@
         color="positive"
         icon="attach_money"
         label="Avançar para o Pagamento"
-        @click="$emit('confirmar')"
+        @click="$emit('next')"
       />
     </q-stepper-navigation>
   </div>
@@ -194,7 +194,7 @@ export default defineComponent({
       pedido: computed(() => $pedidoStore.$state.pedido),
       ingressos: computed(() => $pedidoStore.$state.pedido.ingressos ?? []),
       todosIngressosValidos: computed(() =>
-        ($pedidoStore.$state.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true)
+        ($pedidoStore.$state.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true),
       ),
       ufs: UFS.map((uf) => ({ label: uf, value: uf })),
     });

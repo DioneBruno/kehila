@@ -49,8 +49,8 @@ export class PedidoService {
       eventoUuid: this.$pedidoStore.$state.evento.uuid,
       pedido: this.$pedidoStore.$state.pedido.itens,
     };
-    const response = await this.pedidoHttp.criarPedido(input);
-    // this.$pedidoStore.setPedido(response);
+    await this.pedidoHttp.criarPedido(input);
+    await this.listarPedidos(input.eventoUuid);
   }
 
   async listarPedidos(eventoUuid: string) {
@@ -62,8 +62,7 @@ export class PedidoService {
 
   async buscarPedido(pedidoUuid: string) {
     const response = await this.pedidoHttp.buscarPedido(pedidoUuid);
-    this.$pedidoStore.setIngressos(response.ingressos);
-    this.$pedidoStore.setPedidoUuid(pedidoUuid);
+    this.$pedidoStore.setPedido(response);
     return response;
   }
 

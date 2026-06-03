@@ -14,6 +14,33 @@ export class PedidosController {
     private readonly editarFormIngressoUsecase: EditarFormIngressoUsecase,
   ) {}
 
+  @Post("criar")
+  async create(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    const input = {
+      companyUuid: req.companyUuid,
+      userUuid: req.userUuid,
+      eventoUuid: body.eventoUuid,
+      pedido: body.pedido,
+    };
+    const response = await this.criarPedidoUsecase.execute(input);
+    return res.status(200).json({ message: "Pedido criado com sucesso", data: { ...response } });
+  }
+
+  @Post("fechar")
+  async close(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    const input = {
+      companyUuid: req.companyUuid,
+      userUuid: req.userUuid,
+      pedidoUuid: body.pedidoUuid,
+      pagadorAvulso: body.pagadorAvulso,
+      pagadorNome: body.pagadorNome,
+      pagadorDocumento: body.pagadorDocumento,
+      pagadorEmail: body.pagadorEmail,
+      pagadorTelefone: body.pagadorTelefone,
+    };
+    return await this.fecharPedidoUsecase.execute(input);
+  }
+
   @Post("listar")
   async list(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
@@ -45,32 +72,5 @@ export class PedidosController {
     } as any;
     await this.editarFormIngressoUsecase.execute(input);
     return res.status(200).json({ message: "Formulário do ingresso editado com sucesso" });
-  }
-
-  @Post("criar")
-  async create(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
-    const input = {
-      companyUuid: req.companyUuid,
-      userUuid: req.userUuid,
-      eventoUuid: body.eventoUuid,
-      pedido: body.pedido,
-    };
-    const response = await this.criarPedidoUsecase.execute(input);
-    return res.status(200).json({ message: "Pedido criado com sucesso", data: { ...response } });
-  }
-
-  @Post("fechar")
-  async close(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
-    const input = {
-      companyUuid: req.companyUuid,
-      userUuid: req.userUuid,
-      pedidoUuid: body.pedidoUuid,
-      pagadorAvulso: body.pagadorAvulso,
-      pagadorNome: body.pagadorNome,
-      pagadorDocumento: body.pagadorDocumento,
-      pagadorEmail: body.pagadorEmail,
-      pagadorTelefone: body.pagadorTelefone,
-    };
-    return await this.fecharPedidoUsecase.execute(input);
   }
 }
