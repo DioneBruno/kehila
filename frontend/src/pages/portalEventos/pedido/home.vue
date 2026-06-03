@@ -60,7 +60,7 @@
         </div>
 
         <div class="col">
-          <PedidoPedidos />
+          <PedidoPedidos class="q-mb-xs" />
 
           <!-- Resumo lateral: somente desktop -->
           <PedidoResumo />

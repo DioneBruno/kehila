@@ -73,7 +73,13 @@ export class PortalEventosQuery {
         pedidos.uuid,
         pedidos.status,
         pedidos.valor_liquido "valorLiquido",
-        pedidos.pago_em "pagoEm"
+        pedidos.pago_em "pagoEm",
+        (
+          SELECT COUNT(*)::int
+          FROM evento_ingressos ingressos
+          WHERE ingressos.deleted_at IS NULL
+            AND ingressos.pedido_uuid = pedidos.uuid
+        ) AS "quantidadeIngressos"
       FROM evento_pedidos pedidos
       WHERE pedidos.deleted_at IS NULL
         AND pedidos.evento_uuid = $1

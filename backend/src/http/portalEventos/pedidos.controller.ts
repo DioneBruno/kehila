@@ -20,7 +20,7 @@ export class PedidosController {
       userUuid: req.userUuid,
     };
     const response = await this.portalEventosQuery.listarPedidosDoUsuario(input);
-    return res.status(200).json({ data: { ...response } });
+    return res.status(200).json({ data: response });
   }
 
   @Post("criar")
