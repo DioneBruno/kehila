@@ -85,13 +85,27 @@
           <div class="col-12 col-sm-8">
             <q-input outlined dense stack-label v-model="ingresso.pessoaCidade" label="Cidade" />
           </div>
-          <div class="col-12 text-center q-mt-md">
+          <div class="col-12 row q-mt-md row items-center justify-center q-gutter-sm">
+            <q-space />
             <q-btn
+              v-if="Number(index) >= ingressos.length - 1"
               no-caps
               flat
               color="primary"
               label="Salvar"
               @click="editarFormIngresso(ingresso)"
+            />
+            <q-btn
+              v-if="Number(index) < ingressos.length - 1"
+              no-caps
+              flat
+              color="primary"
+              icon-right="chevron_right"
+              label="Próximo"
+              @click="
+                editarFormIngresso(ingresso);
+                slide = Number(index) + 1;
+              "
             />
           </div>
         </div>
