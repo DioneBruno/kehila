@@ -135,9 +135,10 @@
       <q-space />
       <q-btn
         unelevated
+        no-caps
         color="positive"
-        icon="lock"
-        label="Confirmar Pedido"
+        icon="attach_money"
+        label="Avançar para o Pagamento"
         @click="$emit('confirmar')"
       />
     </q-stepper-navigation>
