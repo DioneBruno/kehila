@@ -134,6 +134,7 @@
       <q-btn flat label="Voltar" color="grey-7" @click="$emit('prev')" />
       <q-space />
       <q-btn
+        v-if="todosIngressosValidos"
         unelevated
         no-caps
         color="positive"
@@ -192,6 +193,9 @@ export default defineComponent({
       slide: ref<string | number>(0),
       pedido: computed(() => $pedidoStore.$state.pedido),
       ingressos: computed(() => $pedidoStore.$state.pedido.ingressos ?? []),
+      todosIngressosValidos: computed(() =>
+        ($pedidoStore.$state.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true)
+      ),
       ufs: UFS.map((uf) => ({ label: uf, value: uf })),
     });
 
