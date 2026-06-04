@@ -1,10 +1,10 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { PedidoEntity } from "./pedido.entity";
 import { GerarCobrancaUsecase } from "src/@modules/financeiro/gerarCobranca/gerarCobranca.usecase";
-import { GerarCobrancaRepository } from "src/@modules/financeiro/gerarCobranca/gerarCobrancaRepository";
+import { GerarCobrancaRepository as FinanceiroGerarCobrancaRepository } from "src/@modules/financeiro/gerarCobranca/gerarCobrancaRepository";
 import { PagadorEntity } from "./pagador.entity";
 
-export class FecharPedidoRepository {
+export class GerarCobrancaRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarPedido(companyUuid: string, pedidoUuid: string): Promise<PedidoEntity | null> {
@@ -44,7 +44,7 @@ export class FecharPedidoRepository {
   }
 
   async criarCobranca(pedido: PedidoEntity, pagador: PagadorEntity): Promise<void> {
-    const repo = new GerarCobrancaRepository(this.connectionHub);
+    const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
       companyUuid: pedido.companyUuid(),

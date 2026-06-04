@@ -1,17 +1,17 @@
 import dataSource from "src/@infra/database/datasource";
-import { FecharPedidoUsecase } from "../fecharPedido.usecase";
-import { FecharPedidoRepository } from "../fecharPedidoRepository";
+import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
+import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 const companyUuid = "7a0bc611-61f3-400f-8da4-f22b8a2f9e1d";
 const userUuid = "c229e263-83bb-44c5-a6ca-6e16f0de6853";
-let repo: FecharPedidoRepository;
+let repo: GerarCobrancaRepository;
 
-describe("Deve testar FecharPedidoUsecase", () => {
+describe("Deve testar GerarCobrancaUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
     const connectionHub = new ConnectionHub(dataSource);
-    repo = new FecharPedidoRepository(connectionHub);
+    repo = new GerarCobrancaRepository(connectionHub);
   });
   beforeEach(async () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
@@ -35,7 +35,7 @@ describe("Deve testar FecharPedidoUsecase", () => {
     await dataSource.query(`INSERT INTO evento_pedidos (uuid, company_uuid, user_uuid, evento_uuid, idempotency_key, valor_bruto, valor_liquido)
       VALUES ('${pedidoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', '123e4567', 500, 1000)`);
 
-    const usecase = new FecharPedidoUsecase(repo);
+    const usecase = new GerarCobrancaUsecase(repo);
     const input = {
       companyUuid,
       userUuid,
@@ -61,7 +61,7 @@ describe("Deve testar FecharPedidoUsecase", () => {
     await dataSource.query(`INSERT INTO evento_pedidos (uuid, company_uuid, user_uuid, evento_uuid, idempotency_key, valor_bruto, valor_liquido)
       VALUES ('${pedidoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', '123e4567', 500, 1000)`);
 
-    const usecase = new FecharPedidoUsecase(repo);
+    const usecase = new GerarCobrancaUsecase(repo);
     const input = {
       companyUuid,
       userUuid,

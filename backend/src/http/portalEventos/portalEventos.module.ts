@@ -41,8 +41,8 @@ import { RemoverTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/rem
 import { RemoverTipoIngressoRepository } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngressoRepository";
 import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedido.usecase";
 import { CriarPedidoRepository } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedidoRepository";
-import { FecharPedidoUsecase } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedido.usecase";
-import { FecharPedidoRepository } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedidoRepository";
+import { GerarCobrancaUsecase } from "src/@modules/portalEventos/pedidos/gerarCobranca/gerarCobranca.usecase";
+import { GerarCobrancaRepository } from "src/@modules/portalEventos/pedidos/gerarCobranca/gerarCobrancaRepository";
 import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
 import { PedidosController } from "./pedidos.controller";
 import { DominioMiddleware } from "../middleware/dominio.middleware";
@@ -77,7 +77,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(EditarTipoIngressoUsecase, (hub) => new EditarTipoIngressoUsecase(new EditarTipoIngressoRepository(hub))),
     makeProvider(RemoverTipoIngressoUsecase, (hub) => new RemoverTipoIngressoUsecase(new RemoverTipoIngressoRepository(hub))),
     makeProvider(CriarPedidoUsecase, (hub) => new CriarPedidoUsecase(new CriarPedidoRepository(hub))),
-    makeProvider(FecharPedidoUsecase, (hub) => new FecharPedidoUsecase(new FecharPedidoRepository(hub))),
+    makeProvider(GerarCobrancaUsecase, (hub) => new GerarCobrancaUsecase(new GerarCobrancaRepository(hub))),
     makeProvider(CadastrandoUsuarioUsecase, (hub) => new CadastrandoUsuarioUsecase(new CadastrandoUsuarioRepository(hub))),
     makeProvider(EditarFormIngressoUsecase, (hub) => new EditarFormIngressoUsecase(new EditarFormIngressoRepository(hub))),
   ],

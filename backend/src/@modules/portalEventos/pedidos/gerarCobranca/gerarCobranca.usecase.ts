@@ -1,4 +1,4 @@
-import { FecharPedidoRepository } from "./fecharPedidoRepository";
+import { GerarCobrancaRepository } from "./gerarCobrancaRepository";
 import { PagadorEntity } from "./pagador.entity";
 
 export type FecharPedidoInput = {
@@ -12,8 +12,8 @@ export type FecharPedidoInput = {
   pagadorTelefone?: string;
 };
 
-export class FecharPedidoUsecase {
-  constructor(readonly repo: FecharPedidoRepository) {}
+export class GerarCobrancaUsecase {
+  constructor(readonly repo: GerarCobrancaRepository) {}
 
   async execute(input: FecharPedidoInput) {
     const pedido = await this.repo.buscarPedido(input.companyUuid, input.pedidoUuid);

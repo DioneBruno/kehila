@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedido.usecase";
 import { EditarFormIngressoUsecase } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngresso.usecase";
-import { FecharPedidoUsecase } from "src/@modules/portalEventos/pedidos/fecharPedido/fecharPedido.usecase";
+import { GerarCobrancaUsecase } from "src/@modules/portalEventos/pedidos/gerarCobranca/gerarCobranca.usecase";
 import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
 
 @Controller("pedidos")
@@ -10,7 +10,7 @@ export class PedidosController {
   constructor(
     private readonly portalEventosQuery: PortalEventosQuery,
     private readonly criarPedidoUsecase: CriarPedidoUsecase,
-    private readonly fecharPedidoUsecase: FecharPedidoUsecase,
+    private readonly GerarCobrancaUsecase: GerarCobrancaUsecase,
     private readonly editarFormIngressoUsecase: EditarFormIngressoUsecase,
   ) {}
 
@@ -38,7 +38,7 @@ export class PedidosController {
       pagadorEmail: body.pagadorEmail,
       pagadorTelefone: body.pagadorTelefone,
     };
-    return await this.fecharPedidoUsecase.execute(input);
+    return await this.GerarCobrancaUsecase.execute(input);
   }
 
   @Post("listar")
