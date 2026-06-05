@@ -8,6 +8,9 @@ export type GerarCobrancaOutput = {
     nossoNumero: string; // nossoNumero
     urlBoleto: string; // bankSlipUrl
     vencimento: string; // dueDate
+    codigoBarras: string; // codigoBarras
+    linhaDigitavel: string; // linhaDigitavel
+    pix: string; // pix
     valorCobranca: number; // value
     valorComDescontoGateway: number; // netValue
   }[];
@@ -103,6 +106,9 @@ export class GerarCobrancaGatewayAsaas {
           nossoNumero: installment.nossoNumero,
           urlBoleto: installment.bankSlipUrl,
           vencimento: installment.dueDate,
+          codigoBarras: installment.bankSlipUrl,
+          linhaDigitavel: installment.identificationField,
+          pix: installment.pixTransaction?.qrCode?.payload,
           valorCobranca: installment.value,
           valorComDescontoGateway: installment.netValue,
         };

@@ -12,6 +12,7 @@ export type GerarCobrancaInput = {
   pagadorEmail: string;
   pagadorTelefone: string;
   valor: number;
+  vencimento: string;
 };
 export class GerarCobrancaUsecase {
   constructor(readonly repo: GerarCobrancaRepository) {}
@@ -29,8 +30,11 @@ export class GerarCobrancaUsecase {
       origem: input.origem,
       origemUuid: input.origemUuid,
       valor: input.valor,
+      vencimento: input.vencimento,
     });
-    await gateway.gerarCobranca(cobranca);
+    const result = await gateway.gerarCobranca(cobranca);
+    cobranca.setBancoRef(result.gatewayRef);
     await this.repo.savarCobranca(cobranca);
+    await this.repo.savarPagamentos(cobranca, result.pagamentos);
   }
 }

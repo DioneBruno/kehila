@@ -9,9 +9,12 @@ export type CobrancaProps = {
   origem: string;
   origemUuid: string;
   valor: number;
+  vencimento: string;
 };
 
 export class CobrancaEntity {
+  private _bancoRef?: string;
+
   constructor(readonly props: CobrancaProps) {}
 
   companyUuid(): string {
@@ -51,5 +54,17 @@ export class CobrancaEntity {
   }
   valor(): number {
     return this.props.valor;
+  }
+  vencimento(): string {
+    return this.props.vencimento;
+  }
+  totalParcelas(): number | undefined {
+    return undefined;
+  }
+  setBancoRef(ref: string): void {
+    this._bancoRef = ref;
+  }
+  bancoRef(): string | undefined {
+    return this._bancoRef;
   }
 }
