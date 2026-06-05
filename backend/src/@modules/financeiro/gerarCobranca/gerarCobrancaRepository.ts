@@ -42,7 +42,7 @@ export class GerarCobrancaRepository {
           cobranca.userUuid(),
           cobranca.uuid(),
           "boleto",
-          cobranca.vencimento(),
+          pagamento.vancimento,
           pagamento.valorCobranca,
           pagamento.valorComDescontoGateway,
           pagamento.gatewayRef,

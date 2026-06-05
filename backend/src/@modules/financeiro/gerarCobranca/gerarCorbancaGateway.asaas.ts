@@ -7,7 +7,7 @@ export type GerarCobrancaOutput = {
     gatewayRef: string; // id
     nossoNumero: string; // nossoNumero
     urlBoleto: string; // bankSlipUrl
-    vencimento: string; // dueDate
+    vancimento: string; // dueDate
     codigoBarras: string; // codigoBarras
     linhaDigitavel: string; // linhaDigitavel
     pix: string; // pix
@@ -89,7 +89,7 @@ export class GerarCobrancaGatewayAsaas {
   private async buscarParcelas(
     installment: string,
   ): Promise<
-    { gatewayRef: string; nossoNumero: string; urlBoleto: string; vencimento: string; valorCobranca: number; valorComDescontoGateway: number }[]
+    { gatewayRef: string; nossoNumero: string; urlBoleto: string; vancimento: string; codigoBarras: string; linhaDigitavel: string; pix: string; valorCobranca: number; valorComDescontoGateway: number }[]
   > {
     try {
       const url = `https://api-sandbox.asaas.com/v3/installments/${installment}/payments?limit=24`;
@@ -105,7 +105,7 @@ export class GerarCobrancaGatewayAsaas {
           gatewayRef: installment.id,
           nossoNumero: installment.nossoNumero,
           urlBoleto: installment.bankSlipUrl,
-          vencimento: installment.dueDate,
+          vancimento: installment.dueDate,
           codigoBarras: installment.bankSlipUrl,
           linhaDigitavel: installment.identificationField,
           pix: installment.pixTransaction?.qrCode?.payload,
