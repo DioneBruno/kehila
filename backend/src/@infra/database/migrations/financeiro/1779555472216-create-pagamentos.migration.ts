@@ -39,6 +39,7 @@ export class MigrationCreatePagamentosMigration1779555472216 implements Migratio
           { name: "nosso_numero", type: "varchar", isNullable: true },
           { name: "codigo_barras", type: "varchar", length: "300", isNullable: true },
           { name: "linha_digitavel", type: "varchar", length: "300", isNullable: true },
+          { name: "link_boleto", type: "varchar", length: "300", isNullable: true },
           { name: "pix", type: "text", isNullable: true },
         ],
         foreignKeys: [

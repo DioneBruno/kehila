@@ -112,6 +112,9 @@ export class PortalEventosQuery {
     );
     if (!pedidoModel) return null;
 
+    pedidoModel.createdAt = ApiDate.format(pedidoModel.createdAt, "YYYY-MM-DD HH:mm");
+    pedidoModel.pagoEm = ApiDate.format(pedidoModel.pagoEm, "YYYY-MM-DD HH:mm");
+
     const ingressosModel = await this.connectionHub.database!.query(
       `
       SELECT 
@@ -135,19 +138,45 @@ export class PortalEventosQuery {
 
     let cobrancasModel = await this.connectionHub.database?.query(
       `
-      SELECT 
+      SELECT
         cobrancas.created_at "createdAt",
         cobrancas.uuid,
         cobrancas.pagador_nome "pagadorNome",
         cobrancas.pagador_documento "pagadorDocumento",
         cobrancas.valor "valor",
         cobrancas.valor_pago "valorPago",
-        cobrancas.status
+        cobrancas.status,
+        COALESCE(
+          (
+            SELECT json_agg(
+              json_build_object(
+                'uuid',                   p.uuid,
+                'formaPagamento',         p.forma_pagamento,
+                'vencimento',             p.vencimento,
+                'valor',                  p.valor,
+                'valorPago',              p.valor_pago,
+                'pagoEm',                 p.pago_em,
+                'status',                 p.status,
+                'bancoRef',               p.banco_ref,
+                'codigoBarras',           p.codigo_barras,
+                'linhaDigitavel',         p.linha_digitavel,
+                'linkBoleto',             p.link_boleto,
+                'pix',                    p.pix,
+                'createdAt',              p.created_at
+              )
+              ORDER BY p.created_at ASC
+            )
+            FROM financeiro_pagamentos p
+            WHERE p.deleted_at IS NULL
+              AND p.cobanca_uuid = cobrancas.uuid
+          ),
+          '[]'::json
+        ) "pagamentos"
       FROM financeiro_cobrancas cobrancas
       WHERE deleted_at IS NULL
         AND cobrancas.origem_tipo IN ('eventoPedido', 'eventoIngresso')
         AND cobrancas.origem_uuid = ANY($1)
-      ORDER BY created_at desc
+      ORDER BY created_at DESC
       `,
       [[pedidoUuid, ...ingressosModel.map((ingresso) => ingresso.uuid)]],
     );
@@ -157,6 +186,11 @@ export class PortalEventosQuery {
       pagadorDocumento: ApiString.ocultarCpfCnpj(cobranca.pagadorDocumento),
       createdAt: ApiDate.format(cobranca.createdAt, "YYYY-MM-DD HH:mm"),
       pagoEm: ApiDate.format(cobranca.pagoEm, "YYYY-MM-DD HH:mm"),
+      pagamentos: cobranca.pagamentos.map((p) => ({
+        ...p,
+        createdAt: ApiDate.format(p.createdAt, "YYYY-MM-DD HH:mm"),
+        pagoEm: ApiDate.format(p.pagoEm, "YYYY-MM-DD HH:mm"),
+      })),
     }));
 
     return { ...pedidoModel, ingressos: ingressosModel, cobrancas: cobrancasModel };

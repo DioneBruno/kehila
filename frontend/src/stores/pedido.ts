@@ -60,6 +60,7 @@ export const usePedidoStore = defineStore("pedidoStore", {
     },
     setPedido(pedido: any) {
       this.pedido = { ...pedido, etapa: 4 };
+      if (pedido.cobrancas?.length) this.pedido.etapa = 6;
     },
   },
 });

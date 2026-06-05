@@ -54,7 +54,7 @@
               />
             </q-step>
 
-            <q-step :name="5" title="Pagamento" icon="payment">
+            <q-step :name="5" title="Gerando Pagamento" icon="payment" :done="pedido.etapa > 5">
               <StepPagamento
                 :forma-pagamento="formaPagamento"
                 :cartao="cartao"
@@ -62,6 +62,19 @@
                 @update:forma-pagamento="formaPagamento = $event"
                 @update:cartao="Object.assign(cartao, $event)"
                 @prev="pedido.etapa = 4"
+                @next="pedido.etapa = 6"
+                @confirmar="confirmar"
+              />
+            </q-step>
+
+            <q-step :name="6" title="Aguardando pagamento" icon="currency_exchange">
+              <StepCobranca
+                :forma-pagamento="formaPagamento"
+                :cartao="cartao"
+                :opcoes-parcelas="opcoesParcelas"
+                @update:forma-pagamento="formaPagamento = $event"
+                @update:cartao="Object.assign(cartao, $event)"
+                @prev="pedido.etapa = 5"
                 @confirmar="confirmar"
               />
             </q-step>
@@ -119,6 +132,7 @@ import StepIngressoForm from "./StepIngressoForm.vue";
 import StepSeusDados from "./StepSeusDados.vue";
 import StepResumo from "./StepResumo.vue";
 import StepPagamento from "./StepPagamento.vue";
+import StepCobranca from "./StepCobranca.vue";
 import { useAuthStore } from "src/stores/auth";
 
 const OPCOES_PARCELAS = [
@@ -138,6 +152,7 @@ export default defineComponent({
     StepSeusDados,
     StepResumo,
     StepPagamento,
+    StepCobranca,
   },
   setup() {
     const $authStore = useAuthStore();
