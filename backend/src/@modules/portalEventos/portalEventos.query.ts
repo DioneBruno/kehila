@@ -1,5 +1,6 @@
 import { ApiDate } from "../shared/apiDate";
 import { ApiError } from "../shared/apiError";
+import { ApiString } from "../shared/apiString";
 import { ConnectionHub } from "../shared/connections/connectionHub";
 
 export class PortalEventosQuery {
@@ -132,6 +133,32 @@ export class PortalEventosQuery {
       [pedidoUuid],
     );
 
-    return { ...pedidoModel, ingressos: ingressosModel };
+    let cobrancasModel = await this.connectionHub.database?.query(
+      `
+      SELECT 
+        cobrancas.created_at "createdAt",
+        cobrancas.uuid,
+        cobrancas.pagador_nome "pagadorNome",
+        cobrancas.pagador_documento "pagadorDocumento",
+        cobrancas.valor "valor",
+        cobrancas.valor_pago "valorPago",
+        cobrancas.status
+      FROM financeiro_cobrancas cobrancas
+      WHERE deleted_at IS NULL
+        AND cobrancas.origem_tipo IN ('eventoPedido', 'eventoIngresso')
+        AND cobrancas.origem_uuid = ANY($1)
+      ORDER BY created_at desc
+      `,
+      [[pedidoUuid, ...ingressosModel.map((ingresso) => ingresso.uuid)]],
+    );
+
+    cobrancasModel = cobrancasModel.map((cobranca) => ({
+      ...cobranca,
+      pagadorDocumento: ApiString.ocultarCpfCnpj(cobranca.pagadorDocumento),
+      createdAt: ApiDate.format(cobranca.createdAt, "YYYY-MM-DD HH:mm"),
+      pagoEm: ApiDate.format(cobranca.pagoEm, "YYYY-MM-DD HH:mm"),
+    }));
+
+    return { ...pedidoModel, ingressos: ingressosModel, cobrancas: cobrancasModel };
   }
 }
