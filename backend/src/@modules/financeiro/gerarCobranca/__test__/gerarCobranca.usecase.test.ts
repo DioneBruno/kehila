@@ -9,7 +9,7 @@ let repo: GerarCobrancaRepository;
 describe("Deve testar GerarCobrancaUsecas", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new GerarCobrancaRepository(connectionHub);
   });
   afterAll(async () => {

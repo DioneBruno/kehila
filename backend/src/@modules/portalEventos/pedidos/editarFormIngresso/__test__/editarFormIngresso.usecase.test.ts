@@ -9,7 +9,7 @@ let repo: EditarFormIngressoRepository;
 describe("Deve testar EditarFormIngressoUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new EditarFormIngressoRepository(connectionHub);
   });
   beforeEach(async () => {

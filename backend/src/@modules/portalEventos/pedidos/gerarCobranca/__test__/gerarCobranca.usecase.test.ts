@@ -10,7 +10,7 @@ let repo: GerarCobrancaRepository;
 describe("Deve testar GerarCobrancaUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new GerarCobrancaRepository(connectionHub);
   });
   beforeEach(async () => {

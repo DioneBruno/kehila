@@ -37,7 +37,7 @@ import axios from "axios";
             "Content-Type": "application/json",
           },
         });
-        return new ConnectionHub(dataSource, http);
+        return new ConnectionHub({ database: dataSource, http });
       },
       inject: [getDataSourceToken()],
     },

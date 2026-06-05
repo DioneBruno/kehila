@@ -16,7 +16,7 @@ let passwordCrypto: string;
 describe("Deve testar TokenGenerateUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new GenerateTokenAuthenticationUserRepository(connectionHub);
 
     passwordCrypto = await bcryptjs.hash("123456", 10);

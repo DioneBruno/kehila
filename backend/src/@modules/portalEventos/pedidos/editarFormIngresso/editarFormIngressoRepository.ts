@@ -5,7 +5,7 @@ export class EditarFormIngressoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarIngresso(ingressoUuid: string): Promise<IngressoEntity | null> {
-    const [ingressoModel] = await this.connectionHub.database.query(
+    const [ingressoModel] = await this.connectionHub.database!.query(
       `SELECT 
         ingressos.uuid,
         ingressos.company_uuid,
@@ -46,7 +46,7 @@ export class EditarFormIngressoRepository {
   }
 
   async salvarIngresso(ingresso: IngressoEntity) {
-    await this.connectionHub.database.query(
+    await this.connectionHub.database!.query(
       `UPDATE evento_ingressos SET
         pessoa_nome = $1,
         pessoa_documento = $2,

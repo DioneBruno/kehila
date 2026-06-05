@@ -4,7 +4,7 @@ export class RemoverLoteRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscar(uuid: string, companyUuid: string): Promise<{ uuid: string; vendidosTotal: number } | null> {
-    const [row] = await this.connectionHub.database.query(
+    const [row] = await this.connectionHub.database!.query(
       `
       SELECT
         l.uuid,
@@ -21,6 +21,6 @@ export class RemoverLoteRepository {
   }
 
   async remover(uuid: string, companyUuid: string): Promise<void> {
-    await this.connectionHub.database.query(`DELETE FROM evento_lotes WHERE uuid = $1 AND company_uuid = $2`, [uuid, companyUuid]);
+    await this.connectionHub.database!.query(`DELETE FROM evento_lotes WHERE uuid = $1 AND company_uuid = $2`, [uuid, companyUuid]);
   }
 }

@@ -8,7 +8,7 @@ let repo: EnviarSmsRepository;
 describe("Deve testar EnviarSmsUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new EnviarSmsRepository(connectionHub);
   });
   afterAll(async () => {

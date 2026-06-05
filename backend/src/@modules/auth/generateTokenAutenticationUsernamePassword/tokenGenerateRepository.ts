@@ -18,7 +18,7 @@ export class TokenGenerateRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async findUser(companyUuid: string, userName: string): Promise<UserEntity | null> {
-    const [row] = await this.connectionHub.database.query(
+    const [row] = await this.connectionHub.database!.query(
       `
       SELECT
         users.uuid AS user_uuid,

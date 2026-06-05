@@ -11,7 +11,7 @@ export class GerarCobrancaRepository {
   }
 
   async savarCobranca(cobranca: CobrancaEntity): Promise<void> {
-    await this.connectionHub.database.query(
+    await this.connectionHub.database!.query(
       `INSERT INTO
       financeiro_cobrancas (uuid, company_uuid, user_uuid, origem_tipo, origem_uuid, pagador_nome, pagador_documento, pagador_email, pagador_telefone, valor)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,

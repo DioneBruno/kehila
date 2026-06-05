@@ -29,7 +29,7 @@ export class ListarLotesRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async listar(eventoUuid: string, companyUuid: string): Promise<Lote[]> {
-    const lotes = await this.connectionHub.database.query(
+    const lotes = await this.connectionHub.database!.query(
       `
       SELECT
         uuid, nome, ordem, quantidade, preco,
@@ -46,7 +46,7 @@ export class ListarLotesRepository {
 
     const loteUuids = lotes.map((l: any) => l.uuid);
 
-    const tipos = await this.connectionHub.database.query(
+    const tipos = await this.connectionHub.database!.query(
       `
       SELECT
         uuid, lote_uuid AS "loteUuid", nome, descricao, quantidade, gerar_quantidade_ingressos as "gerarQuantidadeIngressos",

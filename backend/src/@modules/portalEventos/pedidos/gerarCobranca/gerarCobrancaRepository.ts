@@ -8,7 +8,7 @@ export class GerarCobrancaRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarPedido(companyUuid: string, pedidoUuid: string): Promise<PedidoEntity | null> {
-    const [pedidoModel] = await this.connectionHub.database.query(
+    const [pedidoModel] = await this.connectionHub.database!.query(
       `SELECT
        uuid,
        company_uuid,
@@ -23,7 +23,7 @@ export class GerarCobrancaRepository {
     );
     if (!pedidoModel) return null;
 
-    const [usuarioModel] = await this.connectionHub.database.query(`SELECT * FROM auth_users WHERE uuid = $1`, [pedidoModel.user_uuid]);
+    const [usuarioModel] = await this.connectionHub.database!.query(`SELECT * FROM auth_users WHERE uuid = $1`, [pedidoModel.user_uuid]);
     const usuario = new PagadorEntity({
       nome: usuarioModel.name,
       documento: usuarioModel.cpf,

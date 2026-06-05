@@ -33,7 +33,7 @@ export class DominioMiddleware implements NestMiddleware {
     }
 
     //TODO: Remanejar para um local mais apropriado
-    const [companyModel] = await this.connectionHub.database.query(
+    const [companyModel] = await this.connectionHub.database!.query(
       `SELECT companies.uuid
       FROM auth_companies companies
         INNER JOIN auth_company_domains domains

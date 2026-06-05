@@ -9,7 +9,7 @@ let repo: CriarPedidoRepository;
 describe("Deve testar CriarPedidoUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new CriarPedidoRepository(connectionHub);
   });
   beforeEach(async () => {

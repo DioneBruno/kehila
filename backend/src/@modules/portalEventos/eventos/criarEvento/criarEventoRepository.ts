@@ -27,12 +27,12 @@ export class CriarEventoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async slugExiste(slug: string): Promise<boolean> {
-    const [row] = await this.connectionHub.database.query(`SELECT uuid FROM eventos WHERE slug = $1 AND deleted_at IS NULL`, [slug]);
+    const [row] = await this.connectionHub.database!.query(`SELECT uuid FROM eventos WHERE slug = $1 AND deleted_at IS NULL`, [slug]);
     return !!row;
   }
 
   async criar(data: CriarEventoData): Promise<EventoCriado> {
-    const [row] = await this.connectionHub.database.query(
+    const [row] = await this.connectionHub.database!.query(
       `
       INSERT INTO eventos (
         company_uuid, user_uuid, titulo, slug, descricao, banner_url,

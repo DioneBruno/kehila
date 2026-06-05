@@ -49,9 +49,9 @@ export class ListarEventosRepository {
       idx++;
     }
 
-    const [countRow] = await this.connectionHub.database.query(`SELECT COUNT(*) AS total FROM eventos e ${filterWhere}`, filterBindings);
+    const [countRow] = await this.connectionHub.database!.query(`SELECT COUNT(*) AS total FROM eventos e ${filterWhere}`, filterBindings);
 
-    const rows = await this.connectionHub.database.query(
+    const rows = await this.connectionHub.database!.query(
       `
       SELECT
         e.uuid,

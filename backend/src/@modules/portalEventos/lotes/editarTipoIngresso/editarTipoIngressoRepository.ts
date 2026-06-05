@@ -15,7 +15,7 @@ export class EditarTipoIngressoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscar(uuid: string, companyUuid: string): Promise<{ uuid: string; vendidos: number } | null> {
-    const [row] = await this.connectionHub.database.query(
+    const [row] = await this.connectionHub.database!.query(
       `SELECT uuid, vendidos FROM evento_lote_tipos_ingresso WHERE uuid = $1 AND company_uuid = $2`,
       [uuid, companyUuid],
     );
@@ -23,7 +23,7 @@ export class EditarTipoIngressoRepository {
   }
 
   async editar(data: EditarTipoIngressoData): Promise<void> {
-    await this.connectionHub.database.query(
+    await this.connectionHub.database!.query(
       `
       UPDATE evento_lote_tipos_ingresso SET
         nome = $1, descricao = $2, quantidade = $3, gerar_quantidade_ingressos = $4, preco = $5, visivel = $6, updated_at = now()

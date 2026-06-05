@@ -46,7 +46,7 @@ export class DetalharEventoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarPorUuid(companyUuid: string, eventoUuid: string): Promise<EventoDetalhe | null> {
-    const [row] = await this.connectionHub.database.query(
+    const [row] = await this.connectionHub.database!.query(
       `
       SELECT
         e.uuid, e.titulo, e.slug, e.descricao,
@@ -77,7 +77,7 @@ export class DetalharEventoRepository {
   }
 
   private async buscarLotes(eventoUuid: string): Promise<LoteDetalhe[]> {
-    const rows = await this.connectionHub.database.query(
+    const rows = await this.connectionHub.database!.query(
       `
       SELECT
         l.uuid, l.nome, l.ordem, l.quantidade, l.preco,
@@ -100,7 +100,7 @@ export class DetalharEventoRepository {
   }
 
   private async buscarTiposIngresso(loteUuid: string): Promise<TipoIngressoDetalhe[]> {
-    return this.connectionHub.database.query(
+    return this.connectionHub.database!.query(
       `
       SELECT
         t.uuid, t.nome, t.descricao, t.quantidade, t.vendidos, t.preco, t.visivel

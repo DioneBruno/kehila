@@ -11,7 +11,7 @@ let repo: CadastrandoUsuarioRepository;
 describe("Deve testar CadastrandoUsuarioUsecase", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const connectionHub = new ConnectionHub(dataSource);
+    const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new CadastrandoUsuarioRepository(connectionHub);
   });
   beforeEach(async () => {

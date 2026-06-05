@@ -5,7 +5,7 @@ export class GenerateTokenAuthenticationUserRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarUsuario(companyUuid: string, userUuid: string) {
-    const [usuarioModel] = await this.connectionHub.database.query(
+    const [usuarioModel] = await this.connectionHub.database!.query(
       `SELECT 
         users.uuid,
         users.cpf,

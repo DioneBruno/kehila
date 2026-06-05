@@ -6,7 +6,7 @@ export class PortalEventosQuery {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarEvento(companyUuid: string, eventoUuid: string) {
-    const [eventoModel] = await this.connectionHub.database.query(
+    const [eventoModel] = await this.connectionHub.database!.query(
       `SELECT 
       eventos.uuid,
       eventos.banner_url "bannerUrl",
@@ -26,7 +26,7 @@ export class PortalEventosQuery {
     );
     if (!eventoModel) throw new ApiError("Evento não encontrado");
 
-    const lotesModel = await this.connectionHub.database.query(
+    const lotesModel = await this.connectionHub.database!.query(
       `SELECT
         uuid,
         ativo,
@@ -37,7 +37,7 @@ export class PortalEventosQuery {
       [eventoUuid],
     );
 
-    const tiposIngressoModel = await this.connectionHub.database.query(
+    const tiposIngressoModel = await this.connectionHub.database!.query(
       `SELECT 
         uuid,
         nome,
@@ -67,7 +67,7 @@ export class PortalEventosQuery {
   }
 
   async listarPedidosDoUsuario(input: { companyUuid: string; eventoUuid: string; userUuid: string }): Promise<any[]> {
-    const pedidosModel = await this.connectionHub.database.query(
+    const pedidosModel = await this.connectionHub.database!.query(
       `SELECT
         pedidos.created_at as "createdAt",
         pedidos.uuid,
@@ -96,7 +96,7 @@ export class PortalEventosQuery {
   }
 
   async buscarPedido(pedidoUuid: string) {
-    const [pedidoModel] = await this.connectionHub.database.query(
+    const [pedidoModel] = await this.connectionHub.database!.query(
       `SELECT 
         pedidos.created_at as "createdAt",
         pedidos.uuid,
@@ -111,7 +111,7 @@ export class PortalEventosQuery {
     );
     if (!pedidoModel) return null;
 
-    const ingressosModel = await this.connectionHub.database.query(
+    const ingressosModel = await this.connectionHub.database!.query(
       `
       SELECT 
         uuid,

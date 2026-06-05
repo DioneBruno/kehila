@@ -20,7 +20,7 @@ export class CriarLoteRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async eventoExiste(eventoUuid: string, companyUuid: string): Promise<boolean> {
-    const [row] = await this.connectionHub.database.query(`SELECT uuid FROM eventos WHERE uuid = $1 AND company_uuid = $2`, [
+    const [row] = await this.connectionHub.database!.query(`SELECT uuid FROM eventos WHERE uuid = $1 AND company_uuid = $2`, [
       eventoUuid,
       companyUuid,
     ]);
@@ -28,14 +28,14 @@ export class CriarLoteRepository {
   }
 
   async proximaOrdem(eventoUuid: string): Promise<number> {
-    const [row] = await this.connectionHub.database.query(`SELECT COALESCE(MAX(ordem), 0) + 1 AS proxima FROM evento_lotes WHERE evento_uuid = $1`, [
+    const [row] = await this.connectionHub.database!.query(`SELECT COALESCE(MAX(ordem), 0) + 1 AS proxima FROM evento_lotes WHERE evento_uuid = $1`, [
       eventoUuid,
     ]);
     return row.proxima;
   }
 
   async criar(data: CriarLoteData): Promise<LoteCriado> {
-    const [row] = await this.connectionHub.database.query(
+    const [row] = await this.connectionHub.database!.query(
       `
       INSERT INTO evento_lotes (
         company_uuid, evento_uuid, nome, ordem, quantidade, preco, data_inicio, data_fim, ativo
