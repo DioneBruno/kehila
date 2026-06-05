@@ -52,7 +52,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
       companyUuid,
       userUuid,
       pedidoUuid,
-      tipoPagador: "usuarioLogado",
+      tipoPagador: "usuarioLogado" as const,
     };
     await usecase.execute(input);
 
@@ -90,7 +90,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
       companyUuid,
       userUuid,
       pedidoUuid,
-      tipoPagador: "avulso",
+      tipoPagador: "avulso" as const,
       pagadorNome: "pagadorNome",
       pagadorDocumento: "pagadorDocumento",
       pagadorEmail: "pagadorEmail",
@@ -132,7 +132,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
       companyUuid,
       userUuid,
       pedidoUuid,
-      tipoPagador: "ingresso",
+      tipoPagador: "ingresso" as const,
     };
     await usecase.execute(input);
 

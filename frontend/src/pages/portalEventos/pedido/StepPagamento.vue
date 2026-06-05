@@ -4,7 +4,7 @@
       <div class="text-subtitle2 text-grey-7">Forma de pagamento</div>
 
       <div class="row q-col-gutter-md">
-        <div class="col-12 col-sm-4">
+        <div class="col-4">
           <q-card
             flat
             bordered
@@ -26,7 +26,7 @@
             </q-card-section>
           </q-card>
         </div>
-        <div class="col-12 col-sm-4">
+        <div class="col-4">
           <q-card
             flat
             bordered
@@ -49,7 +49,7 @@
           </q-card>
         </div>
 
-        <div class="col-12 col-sm-4">
+        <div class="col-4">
           <q-card
             flat
             bordered
@@ -72,6 +72,8 @@
           </q-card>
         </div>
       </div>
+
+      <StepPagamentoBoleto v-if="formaPagamento === 'boleto'" />
 
       <q-banner v-if="formaPagamento === 'pix'" rounded class="bg-green-1 text-positive">
         <template v-slot:avatar>
@@ -149,6 +151,7 @@
 <script lang="ts">
 import type { PropType } from "vue";
 import { defineComponent } from "vue";
+import StepPagamentoBoleto from "./StepPagamentoBoleto.vue";
 
 interface Cartao {
   numero: string;
@@ -165,6 +168,9 @@ interface OpcaoParcela {
 
 export default defineComponent({
   name: "StepPagamento",
+  components: {
+    StepPagamentoBoleto,
+  },
   props: {
     formaPagamento: { type: String, required: true },
     cartao: { type: Object as PropType<Cartao>, required: true },
