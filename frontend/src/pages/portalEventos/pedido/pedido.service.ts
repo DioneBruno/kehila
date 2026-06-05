@@ -66,6 +66,11 @@ export class PedidoService {
     return response;
   }
 
+  async gerarCobranca(input: any) {
+    const response = await this.pedidoHttp.gerarCobranca(input);
+    return response;
+  }
+
   async editarFormIngresso(ingresso: any) {
     const input = {
       pedidoUuid: this.$pedidoStore.$state.pedido.uuid,

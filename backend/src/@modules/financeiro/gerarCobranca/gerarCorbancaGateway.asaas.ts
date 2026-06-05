@@ -1,5 +1,6 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
+import { ApiSleep } from "src/@modules/shared/apiSleep";
 
 export type GerarCobrancaOutput = {
   gatewayRef: string; // installment
@@ -87,10 +88,18 @@ export class GerarCobrancaGatewayAsaas {
     return this.buscarCliente(pagador);
   }
 
-  private async buscarParcelas(
-    installment: string,
-  ): Promise<
-    { gatewayRef: string; nossoNumero: string; urlBoleto: string; vancimento: string; codigoBarras: string; linhaDigitavel: string; pix: string; valorCobranca: number; valorComDescontoGateway: number }[]
+  private async buscarParcelas(installment: string): Promise<
+    {
+      gatewayRef: string;
+      nossoNumero: string;
+      urlBoleto: string;
+      vancimento: string;
+      codigoBarras: string;
+      linhaDigitavel: string;
+      pix: string;
+      valorCobranca: number;
+      valorComDescontoGateway: number;
+    }[]
   > {
     try {
       const url = `https://api-sandbox.asaas.com/v3/installments/${installment}/payments?limit=24`;
@@ -101,7 +110,8 @@ export class GerarCobrancaGatewayAsaas {
         access_token: process.env.FINANCEIRO_CHAVE_API,
       };
       const response = await this.connectionHub.http?.get(url, { headers });
-      return response!.data.map((installment: any) => {
+
+      return response?.data?.data?.map((installment: any) => {
         return {
           gatewayRef: installment.id,
           nossoNumero: installment.nossoNumero,

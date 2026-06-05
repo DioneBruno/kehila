@@ -32,7 +32,7 @@ export class GerarCobrancaUsecase {
       origemUuid: input.origemUuid,
       valor: input.valor,
       vencimento: input.vencimento,
-      numParcelas: input.numParcelas,
+      numParcelas: input.numParcelas ?? 1,
     });
     const result = await gateway.gerarCobranca(cobranca);
     cobranca.setBancoRef(result.gatewayRef);

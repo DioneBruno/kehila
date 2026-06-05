@@ -23,6 +23,10 @@ export class PedidoHttp {
     return this.http.post(`pedidos/${pedidoUuid}`, {});
   }
 
+  async gerarCobranca(input: any) {
+    return this.http.post(`pedidos/gerarCobranca`, input);
+  }
+
   async editarFormIngresso(input: any) {
     return this.http.post(`pedidos/${input.pedidoUuid}/editar-form-ingresso`, input);
   }

@@ -2,14 +2,81 @@
   <div class="row q-col-gutter-md">
     <div class="col-12 text-grey-8">
       <div class="">Dados para gerar o boleto</div>
-      <div><q-radio v-model="pagador" val="usuarioLogado" label="Dados do usuário logado" /></div>
-      <div><q-radio v-model="pagador" val="ingresso" label="Dados de cada ingresso" /></div>
-      <div><q-radio v-model="pagador" val="avulso" label="Informar dados do pagador" /></div>
+      <div>
+        <q-radio
+          v-model="pagador.tipoPagador"
+          val="usuarioLogado"
+          label="Dados do usuário logado"
+        />
+      </div>
+      <div>
+        <q-radio v-model="pagador.tipoPagador" val="ingresso" label="Dados de cada ingresso" />
+      </div>
+      <div>
+        <q-radio v-model="pagador.tipoPagador" val="avulso" label="Informar dados do pagador" />
+      </div>
+    </div>
+    <div class="col-12" v-if="pagador.tipoPagador === 'avulso'">
+      <div class="col-12 col-md-6">
+        <q-input
+          dense
+          outlined
+          stack-label
+          v-model="pagador.pagadorNome"
+          label="Nome"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <q-input
+          dense
+          outlined
+          stack-label
+          v-model="pagador.pagadorDocumento"
+          label="Documento"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <q-input
+          dense
+          outlined
+          stack-label
+          v-model="pagador.pagadorEmail"
+          label="Email"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <q-input
+          dense
+          outlined
+          stack-label
+          v-model="pagador.pagadorTelefone"
+          label="Telefone"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+        />
+      </div>
+    </div>
+    <div class="col-12">
+      <q-btn
+        no-caps
+        class="full-width"
+        color="primary"
+        label="Gerar Pagamento"
+        @click="gerarCobranca"
+      />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, reactive, ref, toRefs } from "vue";
+import { PedidoService } from "./pedido.service";
+import { usePedidoStore } from "src/stores/pedido";
 
 export default defineComponent({
   name: "StepPagamentoBoleto",
@@ -17,12 +84,29 @@ export default defineComponent({
   props: {},
   emits: [],
   setup(props, { emit }) {
+    const $service = new PedidoService();
+    const $pedidoStore = usePedidoStore();
+
     const data = reactive({
-      pagador: ref("usuarioLogado"),
+      pedido: computed(() => $pedidoStore.$state.pedido),
+      pagador: ref({
+        pedidoUuid: null,
+        tipoPagador: "usuarioLogado",
+        pagadorNome: "",
+        pagadorDocumento: "",
+        pagadorEmail: "",
+        pagadorTelefone: "",
+      }),
     });
+
+    async function gerarCobranca() {
+      data.pagador.pedidoUuid = data.pedido.uuid;
+      const response = await $service.gerarCobranca(data.pagador);
+    }
 
     return {
       ...toRefs(data),
+      gerarCobranca,
     };
   },
 });

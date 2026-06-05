@@ -59,8 +59,8 @@ export class CobrancaEntity {
   vencimento(): string | undefined {
     return this.props.vencimento;
   }
-  totalParcelas(): number | undefined {
-    return this.props.numParcelas;
+  totalParcelas(): number {
+    return this.props.numParcelas ?? 1;
   }
   setBancoRef(ref: string): void {
     this._bancoRef = ref;

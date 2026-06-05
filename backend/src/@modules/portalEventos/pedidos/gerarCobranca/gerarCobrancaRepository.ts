@@ -64,7 +64,7 @@ export class GerarCobrancaRepository {
     );
   }
 
-  async criarCobranca(pedido: PedidoEntity, pagador: PagadorEntity): Promise<void> {
+  async criarCobranca(pedido: PedidoEntity, pagador: PagadorEntity, numParcelas: number): Promise<void> {
     const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
@@ -73,6 +73,7 @@ export class GerarCobrancaRepository {
       origem: "eventoPedido",
       origemUuid: pedido.uuid(),
       pagadorNome: pagador.nome(),
+      numParcelas,
       pagadorDocumento: pagador.documento(),
       pagadorEmail: pagador.email(),
       pagadorTelefone: pagador.telefone(),
@@ -81,7 +82,7 @@ export class GerarCobrancaRepository {
     await usecase.execute(input);
   }
 
-  async criarCobrancaIngresso(pedido: PedidoEntity, ingresso: IngressoEntity, valor: number): Promise<void> {
+  async criarCobrancaIngresso(pedido: PedidoEntity, ingresso: IngressoEntity, valor: number, numParcelas: number): Promise<void> {
     const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
     await usecase.execute({
@@ -89,6 +90,7 @@ export class GerarCobrancaRepository {
       userUuid: pedido.userUuid(),
       origem: "eventoIngresso",
       origemUuid: ingresso.uuid(),
+      numParcelas,
       pagadorNome: ingresso.pessoaNome(),
       pagadorDocumento: ingresso.pessoaDocumento(),
       pagadorEmail: ingresso.pessoaEmail(),

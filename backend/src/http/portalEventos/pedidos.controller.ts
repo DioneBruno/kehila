@@ -10,7 +10,7 @@ export class PedidosController {
   constructor(
     private readonly portalEventosQuery: PortalEventosQuery,
     private readonly criarPedidoUsecase: CriarPedidoUsecase,
-    private readonly GerarCobrancaUsecase: GerarCobrancaUsecase,
+    private readonly gerarCobrancaUsecase: GerarCobrancaUsecase,
     private readonly editarFormIngressoUsecase: EditarFormIngressoUsecase,
   ) {}
 
@@ -26,19 +26,21 @@ export class PedidosController {
     return res.status(200).json({ message: "Pedido criado com sucesso", data: { ...response } });
   }
 
-  @Post("fechar")
+  @Post("gerarCobranca")
   async close(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
       companyUuid: req.companyUuid,
       userUuid: req.userUuid,
       pedidoUuid: body.pedidoUuid,
       tipoPagador: body.tipoPagador,
+      numParcelas: body.numParcelas,
       pagadorNome: body.pagadorNome,
       pagadorDocumento: body.pagadorDocumento,
       pagadorEmail: body.pagadorEmail,
       pagadorTelefone: body.pagadorTelefone,
     };
-    return await this.GerarCobrancaUsecase.execute(input);
+    await this.gerarCobrancaUsecase.execute(input);
+    return res.status(200).json({ message: "Boleto gerado com sucesso" });
   }
 
   @Post("listar")
