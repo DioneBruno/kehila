@@ -1,5 +1,17 @@
 <template>
   <div class="row q-col-gutter-md">
+    <div class="col-12">
+      <q-select
+        dense
+        outlined
+        stack-label
+        v-model.number="pagador.numParcelas"
+        label="Número de parcelas"
+        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+        lazy-rules
+        :rules="[(val) => (val && val > 0) || 'Campo obrigatório']"
+      />
+    </div>
     <div class="col-12 text-grey-8">
       <div class="">Dados para gerar o boleto</div>
       <div>
@@ -91,6 +103,7 @@ export default defineComponent({
       pedido: computed(() => $pedidoStore.$state.pedido),
       pagador: ref({
         pedidoUuid: null,
+        numParcelas: 1,
         tipoPagador: "usuarioLogado",
         pagadorNome: "",
         pagadorDocumento: "",
