@@ -1,8 +1,15 @@
 import { ConnectionHub } from "../../shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
+import { GerarCobrancaGatewayAsaas } from "./gerarCorbancaGateway.asaas";
 
 export class GerarCobrancaRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
+
+  buscarGateway() {
+    const gateway = new GerarCobrancaGatewayAsaas(this.connectionHub);
+    return gateway;
+  }
+
   async savarCobranca(cobranca: CobrancaEntity): Promise<void> {
     await this.connectionHub.database.query(
       `INSERT INTO

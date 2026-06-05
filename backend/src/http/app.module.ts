@@ -7,6 +7,7 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { NotificacaoModule } from "./notificacao/notificacao.module";
+import axios from "axios";
 
 @Global()
 @Module({
@@ -30,7 +31,13 @@ import { NotificacaoModule } from "./notificacao/notificacao.module";
     {
       provide: ConnectionHub,
       useFactory: (dataSource: DataSource) => {
-        return new ConnectionHub(dataSource);
+        const http = axios.create({
+          baseURL: process.env.SYSTEM_URL_API,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        return new ConnectionHub(dataSource, http);
       },
       inject: [getDataSourceToken()],
     },

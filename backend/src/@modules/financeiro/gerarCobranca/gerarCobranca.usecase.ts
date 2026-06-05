@@ -16,7 +16,8 @@ export type GerarCobrancaInput = {
 export class GerarCobrancaUsecase {
   constructor(readonly repo: GerarCobrancaRepository) {}
 
-  async execute(input: GerarCobrancaInput) {
+  async execute(input: GerarCobrancaInput): Promise<any> {
+    const gateway = this.repo.buscarGateway();
     const cobranca = new CobrancaEntity({
       uuid: randomUUID(),
       companyUuid: input.companyUuid,
@@ -29,6 +30,7 @@ export class GerarCobrancaUsecase {
       origemUuid: input.origemUuid,
       valor: input.valor,
     });
+    await gateway.gerarCobranca(cobranca);
     await this.repo.savarCobranca(cobranca);
   }
 }
