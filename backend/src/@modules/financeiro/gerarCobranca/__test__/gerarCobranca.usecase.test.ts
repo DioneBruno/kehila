@@ -14,8 +14,13 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     const connectionHub = new ConnectionHub({ database: dataSource, http });
     repo = new GerarCobrancaRepository(connectionHub);
   });
+  beforeEach(async () => {
+    await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+  });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.destroy();
   });
 
@@ -82,6 +87,120 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(pagamentosModel[0].codigo_barras).toBe("codigoBarras");
     expect(pagamentosModel[0].linha_digitavel).toBe("linhaDigitavel");
     expect(pagamentosModel[0].pix).toBe("pix");
+
+    buscarGatewayStub.restore();
+  });
+
+  test("Deve incluir nova cobranca padrão - Boleto parcelada", async () => {
+    const gateway = {
+      gerarCobranca: () => {
+        return {
+          gatewayRef: "cobancaBancoRef",
+          pagamentos: [
+            {
+              gatewayRef: "pagamentoBancoRef1",
+              nossoNumero: "nossoNumero1",
+              urlBoleto: "urlBoleto1",
+              vancimento: "2026-06-10",
+              codigoBarras: "codigoBarras1",
+              linhaDigitavel: "linhaDigitavel1",
+              pix: "pix1",
+              valorCobranca: 100,
+              valorComDescontoGateway: 99,
+            },
+            {
+              gatewayRef: "pagamentoBancoRef2",
+              nossoNumero: "nossoNumero2",
+              urlBoleto: "urlBoleto2",
+              vancimento: "2026-07-10",
+              codigoBarras: "codigoBarras2",
+              linhaDigitavel: "linhaDigitavel2",
+              pix: "pix2",
+              valorCobranca: 100,
+              valorComDescontoGateway: 99,
+            },
+            {
+              gatewayRef: "pagamentoBancoRef3",
+              nossoNumero: "nossoNumero3",
+              urlBoleto: "urlBoleto3",
+              vancimento: "2026-08-10",
+              codigoBarras: "codigoBarras3",
+              linhaDigitavel: "linhaDigitavel3",
+              pix: "pix3",
+              valorCobranca: 100,
+              valorComDescontoGateway: 99,
+            },
+          ],
+        };
+      },
+    };
+    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      pagadorNome: "nome do pagador",
+      pagadorDocumento: "12345678909",
+      pagadorEmail: "email@dopagador.com",
+      pagadorTelefone: "1199999999",
+      valor: 300,
+      numParcelas: 3,
+      vencimento: "2026-06-10",
+    };
+    await usecase.execute(input);
+
+    const cobrancaModel = await dataSource.query(`SELECT * FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
+    expect(cobrancaModel.length).toBe(1);
+    expect(cobrancaModel[0].user_uuid).toBe(input.userUuid);
+    expect(cobrancaModel[0].origem_tipo).toBe(input.origem);
+    expect(cobrancaModel[0].origem_uuid).toBe(input.origemUuid);
+    expect(cobrancaModel[0].banco_ref).toBe("cobancaBancoRef");
+    expect(cobrancaModel[0].valor).toBe("300.00");
+    expect(cobrancaModel[0].status).toBe("pendente");
+    expect(cobrancaModel[0].pagador_nome).toBe("nome do pagador");
+    expect(cobrancaModel[0].pagador_documento).toBe("12345678909");
+    expect(cobrancaModel[0].pagador_email).toBe("email@dopagador.com");
+
+    const pagamentosModel = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentosModel.length).toBe(3);
+    expect(pagamentosModel[0].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[0].banco_ref).toBe("pagamentoBancoRef1");
+    expect(pagamentosModel[0].status).toBe("pendente");
+    expect(pagamentosModel[0].vencimento).toBe("2026-06-10");
+    expect(pagamentosModel[0].valor).toBe(100);
+    expect(pagamentosModel[0].valor_com_desc_gateway).toBe(99);
+    expect(pagamentosModel[0].status).toBe("pendente");
+    expect(pagamentosModel[0].nosso_numero).toBe("nossoNumero1");
+    expect(pagamentosModel[0].codigo_barras).toBe("codigoBarras1");
+    expect(pagamentosModel[0].linha_digitavel).toBe("linhaDigitavel1");
+    expect(pagamentosModel[0].pix).toBe("pix1");
+
+    expect(pagamentosModel[1].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[1].banco_ref).toBe("pagamentoBancoRef2");
+    expect(pagamentosModel[1].status).toBe("pendente");
+    expect(pagamentosModel[1].vencimento).toBe("2026-07-10");
+    expect(pagamentosModel[1].valor).toBe(100);
+    expect(pagamentosModel[1].valor_com_desc_gateway).toBe(99);
+    expect(pagamentosModel[1].status).toBe("pendente");
+    expect(pagamentosModel[1].nosso_numero).toBe("nossoNumero2");
+    expect(pagamentosModel[1].codigo_barras).toBe("codigoBarras2");
+    expect(pagamentosModel[1].linha_digitavel).toBe("linhaDigitavel2");
+    expect(pagamentosModel[1].pix).toBe("pix2");
+
+    expect(pagamentosModel[2].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[2].banco_ref).toBe("pagamentoBancoRef3");
+    expect(pagamentosModel[2].status).toBe("pendente");
+    expect(pagamentosModel[2].vencimento).toBe("2026-08-10");
+    expect(pagamentosModel[2].valor).toBe(100);
+    expect(pagamentosModel[2].valor_com_desc_gateway).toBe(99);
+    expect(pagamentosModel[2].status).toBe("pendente");
+    expect(pagamentosModel[2].nosso_numero).toBe("nossoNumero3");
+    expect(pagamentosModel[2].codigo_barras).toBe("codigoBarras3");
+    expect(pagamentosModel[2].linha_digitavel).toBe("linhaDigitavel3");
+    expect(pagamentosModel[2].pix).toBe("pix3");
 
     buscarGatewayStub.restore();
   });
