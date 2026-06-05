@@ -29,46 +29,71 @@
 
         <q-separator />
 
-        <q-list separator>
-          <q-item v-for="pag in cobranca.pagamentos" :key="pag.uuid" class="q-py-sm">
-            <q-item-section avatar>
-              <q-icon
-                :name="iconePagamento(pag.formaPagamento)"
-                :color="statusColor(pag.status)"
-                size="24px"
-              />
-            </q-item-section>
+        <q-item
+          clickable
+          dense
+          @click="togglePagamentos(cobranca.uuid)"
+        >
+          <q-item-section>
+            <q-item-label class="text-caption text-grey-7">
+              Pagamentos:
+              <strong>{{ pagamentosPagos(cobranca.pagamentos) }} de {{ cobranca.pagamentos.length }}</strong>
+              pagos
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-icon
+              :name="pagamentosVisiveis[cobranca.uuid] ? 'expand_less' : 'expand_more'"
+              color="grey-6"
+            />
+          </q-item-section>
+        </q-item>
 
-            <q-item-section>
-              <q-item-label class="text-capitalize">{{ pag.formaPagamento }}</q-item-label>
-              <q-item-label caption>
-                Vencimento: {{ formatarData(pag.vencimento) }}
-                <span v-if="pag.pagoEm"> · Pago em: {{ formatarData(pag.pagoEm) }}</span>
-              </q-item-label>
-            </q-item-section>
+        <q-slide-transition>
+          <div v-show="pagamentosVisiveis[cobranca.uuid]">
+            <q-separator />
+            <q-list separator>
+              <q-item v-for="pag in cobranca.pagamentos" :key="pag.uuid" class="q-py-sm">
+                <q-item-section avatar>
+                  <q-icon
+                    :name="iconePagamento(pag.formaPagamento)"
+                    :color="statusColor(pag.status)"
+                    size="24px"
+                  />
+                </q-item-section>
 
-            <q-item-section side>
-              <div class="column items-end q-gutter-y-xs">
-                <div class="text-weight-medium">{{ formatarMoeda(pag.valor) }}</div>
-                <q-badge :color="statusColor(pag.status)" :label="pag.status" />
-              </div>
-            </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-capitalize">{{ pag.formaPagamento }}</q-item-label>
+                  <q-item-label caption>
+                    Vencimento: {{ formatarData(pag.vencimento) }}
+                    <span v-if="pag.pagoEm"> · Pago em: {{ formatarData(pag.pagoEm) }}</span>
+                  </q-item-label>
+                </q-item-section>
 
-            <q-item-section v-if="pag.linkBoleto" side>
-              <q-btn
-                flat
-                dense
-                round
-                icon="open_in_new"
-                color="primary"
-                :href="pag.linkBoleto"
-                target="_blank"
-              >
-                <q-tooltip>Abrir boleto</q-tooltip>
-              </q-btn>
-            </q-item-section>
-          </q-item>
-        </q-list>
+                <q-item-section side>
+                  <div class="column items-end q-gutter-y-xs">
+                    <div class="text-weight-medium">{{ formatarMoeda(pag.valor) }}</div>
+                    <q-badge :color="statusColor(pag.status)" :label="pag.status" />
+                  </div>
+                </q-item-section>
+
+                <q-item-section v-if="pag.linkBoleto" side>
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    icon="open_in_new"
+                    color="primary"
+                    :href="pag.linkBoleto"
+                    target="_blank"
+                  >
+                    <q-tooltip>Abrir boleto</q-tooltip>
+                  </q-btn>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
+        </q-slide-transition>
       </q-card>
     </div>
   </div>
@@ -86,17 +111,26 @@ export default defineComponent({
     const data = reactive({
       pedido: computed(() => $pedidoStore.$state.pedido),
       cobrancas: computed(() => ($pedidoStore.$state.pedido as any)?.cobrancas ?? []),
+      pagamentosVisiveis: {} as Record<string, boolean>,
     });
+
+    function togglePagamentos(uuid: string) {
+      data.pagamentosVisiveis[uuid] = !data.pagamentosVisiveis[uuid];
+    }
+
+    function pagamentosPagos(pagamentos: any[]): number {
+      return pagamentos.filter((p) => p.status === "pago" || p.status === "confirmado").length;
+    }
 
     function formatarMoeda(valor: number) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
 
-    function formatarData(data: string | null) {
-      if (!data) return "-";
-      const [ano, mes, dia] = data.split("-");
+    function formatarData(valor: string | null) {
+      if (!valor) return "-";
+      const [ano, mes, dia] = valor.split("-");
       if (dia) return `${dia}/${mes}/${ano}`;
-      return data;
+      return valor;
     }
 
     function statusColor(status: string) {
@@ -129,6 +163,8 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      togglePagamentos,
+      pagamentosPagos,
       formatarMoeda,
       formatarData,
       statusColor,

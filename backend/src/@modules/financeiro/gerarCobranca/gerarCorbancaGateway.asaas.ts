@@ -1,6 +1,5 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
-import { ApiSleep } from "src/@modules/shared/apiSleep";
 
 export type GerarCobrancaOutput = {
   gatewayRef: string; // installment
