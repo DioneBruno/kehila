@@ -52,6 +52,7 @@ export class GerarCobrancaGatewayAsaas {
       };
     } catch (error: any) {
       console.log(error.response?.data);
+      throw error;
     }
   }
 
@@ -100,7 +101,7 @@ export class GerarCobrancaGatewayAsaas {
         access_token: process.env.FINANCEIRO_CHAVE_API,
       };
       const response = await this.connectionHub.http?.get(url, { headers });
-      return response.data.map((installment: any) => {
+      return response!.data.map((installment: any) => {
         return {
           gatewayRef: installment.id,
           nossoNumero: installment.nossoNumero,

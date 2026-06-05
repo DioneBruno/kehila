@@ -1,5 +1,7 @@
 import dataSource from "src/@infra/database/datasource";
+import { stub } from "sinon";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
+import { GerarCobrancaUsecase as FinanceiroGerarCobrancaUsecase } from "src/@modules/financeiro/gerarCobranca/gerarCobranca.usecase";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
@@ -29,6 +31,8 @@ describe("Deve testar GerarCobrancaUsecase", () => {
   test("Deve criar financeiroCobranca com dados do usuário", async () => {
     const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";
 
+    const gerarCobrancaStub = stub(FinanceiroGerarCobrancaUsecase.prototype, "execute").resolves();
+
     await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone )
       VALUES ('${userUuid}', 'nomeUsuario', 'cpfUsuario', 'emailUsuario', 'telefoneUsuario')`);
 
@@ -43,17 +47,22 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     };
     await usecase.execute(input);
 
-    const cobrancaModel = await dataSource.query(`SELECT * FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
-    expect(cobrancaModel.length).toBe(1);
-    expect(cobrancaModel[0].valor).toBe("1000.00");
-    expect(cobrancaModel[0].pagador_nome).toBe("nomeUsuario");
-    expect(cobrancaModel[0].pagador_documento).toBe("cpfUsuario");
-    expect(cobrancaModel[0].pagador_email).toBe("emailUsuario");
-    expect(cobrancaModel[0].pagador_telefone).toBe("telefoneUsuario");
+    expect(gerarCobrancaStub.callCount).toBe(1);
+    expect(gerarCobrancaStub.args[0][0].valor).toBe(1000);
+    expect(gerarCobrancaStub.args[0][0].origem).toBe("eventoPedido");
+    expect(gerarCobrancaStub.args[0][0].origemUuid).toBe(pedidoUuid);
+    expect(gerarCobrancaStub.args[0][0].pagadorNome).toBe("nomeUsuario");
+    expect(gerarCobrancaStub.args[0][0].pagadorDocumento).toBe("cpfUsuario");
+    expect(gerarCobrancaStub.args[0][0].pagadorEmail).toBe("emailUsuario");
+    expect(gerarCobrancaStub.args[0][0].pagadorTelefone).toBe("telefoneUsuario");
+
+    gerarCobrancaStub.restore();
   });
 
   test("Deve criar financeiroCobranca com dados informador no input - pagadorAvulso", async () => {
     const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";
+
+    const gerarCobrancaStub = stub(FinanceiroGerarCobrancaUsecase.prototype, "execute").resolves();
 
     await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone )
       VALUES ('${userUuid}', 'nomeUsuario', 'cpfUsuario', 'emailUsuario', 'telefoneUsuario')`);
@@ -74,12 +83,15 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     };
     await usecase.execute(input);
 
-    const cobrancaModel = await dataSource.query(`SELECT * FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
-    expect(cobrancaModel.length).toBe(1);
-    expect(cobrancaModel[0].valor).toBe("1000.00");
-    expect(cobrancaModel[0].pagador_nome).toBe("pagadorNome");
-    expect(cobrancaModel[0].pagador_documento).toBe("pagadorDocumento");
-    expect(cobrancaModel[0].pagador_email).toBe("pagadorEmail");
-    expect(cobrancaModel[0].pagador_telefone).toBe("pagadorTelefone");
+    expect(gerarCobrancaStub.callCount).toBe(1);
+    expect(gerarCobrancaStub.args[0][0].valor).toBe(1000);
+    expect(gerarCobrancaStub.args[0][0].origem).toBe("eventoPedido");
+    expect(gerarCobrancaStub.args[0][0].origemUuid).toBe(pedidoUuid);
+    expect(gerarCobrancaStub.args[0][0].pagadorNome).toBe("pagadorNome");
+    expect(gerarCobrancaStub.args[0][0].pagadorDocumento).toBe("pagadorDocumento");
+    expect(gerarCobrancaStub.args[0][0].pagadorEmail).toBe("pagadorEmail");
+    expect(gerarCobrancaStub.args[0][0].pagadorTelefone).toBe("pagadorTelefone");
+
+    gerarCobrancaStub.restore();
   });
 });
