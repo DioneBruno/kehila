@@ -86,4 +86,13 @@ export class PedidoService {
     await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
     return response;
   }
+
+  async cancelarPedido(pedidoUuid: string) {
+    await this.pedidoHttp.cancelarPedido(pedidoUuid);
+    if (this.$pedidoStore.$state.pedido.uuid === pedidoUuid) {
+      this.$pedidoStore.$patch((state) => {
+        state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [], status: "" };
+      });
+    }
+  }
 }

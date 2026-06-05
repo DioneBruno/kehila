@@ -83,6 +83,7 @@ export class PortalEventosQuery {
         ) AS "quantidadeIngressos"
       FROM evento_pedidos pedidos
       WHERE pedidos.deleted_at IS NULL
+        AND pedidos.status NOT IN ('cancelado')
         AND pedidos.evento_uuid = $1
         AND pedidos.user_uuid = $2
       `,

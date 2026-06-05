@@ -31,7 +31,7 @@
                 <div class="text-subtitle1 text-primary text-weight-bold">
                   {{ formatarMoeda(tipo.preco) }}
                 </div>
-                <div class="text-caption text-grey-5">
+                <div class="text-caption text-grey-7">
                   {{ tipo.gerarQuantidadeIngressos }} ingressos
                 </div>
               </div>

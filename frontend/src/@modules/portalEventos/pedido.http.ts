@@ -30,4 +30,8 @@ export class PedidoHttp {
   async editarFormIngresso(input: any) {
     return this.http.post(`pedidos/${input.pedidoUuid}/editar-form-ingresso`, input);
   }
+
+  async cancelarPedido(pedidoUuid: string) {
+    return this.http.post(`pedidos/${pedidoUuid}/cancelar`, {});
+  }
 }

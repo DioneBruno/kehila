@@ -43,6 +43,19 @@
                   pedido.quantidadeIngressos !== 1 ? "s" : ""
                 }}
               </q-item-label>
+
+              <div v-if="pedido.status === 'pendente'" class="q-mt-sm text-right">
+                <q-btn
+                  flat
+                  dense
+                  color="negative"
+                  icon="cancel"
+                  label="Cancelar"
+                  size="sm"
+                  :loading="cancelando === pedido.uuid"
+                  @click="confirmarCancelamento(pedido.uuid)"
+                />
+              </div>
             </q-item-section>
           </q-item>
 
@@ -57,6 +70,7 @@
   </div>
 </template>
 <script lang="ts">
+import { useQuasar } from "quasar";
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { PedidoService } from "./pedido.service";
@@ -68,11 +82,14 @@ export default defineComponent({
     const $authStore = useAuthStore();
     const $service = new PedidoService();
     const $route = useRoute();
+    const $q = useQuasar();
 
     const data = reactive({
       user: computed(() => $authStore.$state.user),
       pedidos: ref([] as any),
     });
+
+    const cancelando = ref<string | null>(null);
 
     onMounted(() => {
       listarPedidos();
@@ -82,6 +99,30 @@ export default defineComponent({
       const eventoUuid = $route.params.eventoUuid as string;
       const response = await $service.listarPedidos(eventoUuid);
       data.pedidos = response.data;
+    }
+
+    function confirmarCancelamento(pedidoUuid: string) {
+      $q.dialog({
+        title: "Cancelar pedido",
+        message: "Tem certeza que deseja cancelar este pedido?",
+        cancel: { label: "Não", flat: true },
+        ok: { label: "Sim, cancelar", color: "negative" },
+        persistent: true,
+      }).onOk(() => {
+        cancelando.value = pedidoUuid;
+        $service
+          .cancelarPedido(pedidoUuid)
+          .then(() => {
+            $q.notify({ type: "positive", message: "Pedido cancelado com sucesso." });
+            listarPedidos();
+          })
+          .catch(() =>
+            $q.notify({ type: "negative", message: "Não foi possível cancelar o pedido." }),
+          )
+          .finally(() => {
+            cancelando.value = null;
+          });
+      });
     }
 
     function statusColor(status: string): string {
@@ -101,6 +142,8 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      cancelando,
+      confirmarCancelamento,
       statusColor,
       formatCurrency,
     };

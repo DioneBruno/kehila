@@ -51,6 +51,8 @@ import { CadastrandoUsuarioUsecase } from "src/@modules/portalEventos/cadastrarU
 import { CadastrandoUsuarioRepository } from "src/@modules/portalEventos/cadastrarUsuario/cadastrandoUsuarioRepository";
 import { EditarFormIngressoUsecase } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngresso.usecase";
 import { EditarFormIngressoRepository } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngressoRepository";
+import { CancelarPedidoUsecase } from "src/@modules/portalEventos/pedidos/cancelarPedido/cancelarPedido.usecase";
+import { CancelarPedidoRepository } from "src/@modules/portalEventos/pedidos/cancelarPedido/cancelarPedidoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -80,6 +82,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(GerarCobrancaUsecase, (hub) => new GerarCobrancaUsecase(new GerarCobrancaRepository(hub))),
     makeProvider(CadastrandoUsuarioUsecase, (hub) => new CadastrandoUsuarioUsecase(new CadastrandoUsuarioRepository(hub))),
     makeProvider(EditarFormIngressoUsecase, (hub) => new EditarFormIngressoUsecase(new EditarFormIngressoRepository(hub))),
+    makeProvider(CancelarPedidoUsecase, (hub) => new CancelarPedidoUsecase(new CancelarPedidoRepository(hub))),
   ],
 })
 export class PortalEventosModule implements NestModule {

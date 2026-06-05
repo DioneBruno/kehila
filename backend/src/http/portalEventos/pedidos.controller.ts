@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
+import { CancelarPedidoUsecase } from "src/@modules/portalEventos/pedidos/cancelarPedido/cancelarPedido.usecase";
 import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedido.usecase";
 import { EditarFormIngressoUsecase } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngresso.usecase";
 import { GerarCobrancaUsecase } from "src/@modules/portalEventos/pedidos/gerarCobranca/gerarCobranca.usecase";
@@ -12,6 +13,7 @@ export class PedidosController {
     private readonly criarPedidoUsecase: CriarPedidoUsecase,
     private readonly gerarCobrancaUsecase: GerarCobrancaUsecase,
     private readonly editarFormIngressoUsecase: EditarFormIngressoUsecase,
+    private readonly cancelarPedidoUsecase: CancelarPedidoUsecase,
   ) {}
 
   @Post("criar")
@@ -58,6 +60,12 @@ export class PedidosController {
   async buscar(@Req() req: Request | any, @Body() body: any, @Param("pedidoUuid") pedidoUuid: string, @Res() res: Response) {
     const response = await this.portalEventosQuery.buscarPedido(pedidoUuid);
     return res.status(200).json(response);
+  }
+
+  @Post(":pedidoUuid/cancelar")
+  async cancelar(@Req() req: Request | any, @Param("pedidoUuid") pedidoUuid: string, @Res() res: Response) {
+    await this.cancelarPedidoUsecase.execute({ pedidoUuid, userUuid: req.userUuid });
+    return res.status(200).json({ message: "Pedido cancelado com sucesso" });
   }
 
   @Post(":pedidoUuid/editar-form-ingresso")

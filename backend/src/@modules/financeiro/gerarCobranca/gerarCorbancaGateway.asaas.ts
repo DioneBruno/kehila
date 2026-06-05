@@ -118,7 +118,7 @@ export class GerarCobrancaGatewayAsaas {
           nossoNumero: installment.nossoNumero,
           urlBoleto: installment.bankSlipUrl,
           vancimento: installment.dueDate,
-          linkBoleto: installment.invoiceUrl,
+          linkBoleto: installment.bankSlipUrl,
           codigoBarras: null,
           linhaDigitavel: null,
           pix: installment.pixTransaction?.qrCode?.payload,
