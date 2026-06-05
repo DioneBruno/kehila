@@ -23,6 +23,14 @@ export class CobrancaEntity {
   userUuid(): string {
     return this.props.userUuid;
   }
+  pagador(): { nome: string; documento: string; email: string; telefone: string } {
+    return {
+      nome: this.props.pagadorNome,
+      documento: this.props.pagadorDocumento,
+      email: this.props.pagadorEmail,
+      telefone: this.props.pagadorTelefone,
+    };
+  }
   pagadorNome(): string {
     return this.props.pagadorNome;
   }

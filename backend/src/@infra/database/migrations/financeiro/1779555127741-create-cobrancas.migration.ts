@@ -25,6 +25,7 @@ export class MigrationCreateCobrancasMigration1779555127741 implements Migration
           { name: "user_uuid", type: "uuid" },
           { name: "origem_tipo", type: "varchar", isNullable: true },
           { name: "origem_uuid", type: "uuid", isNullable: true },
+          { name: "banco_ref", type: "varchar", isNullable: true },
           { name: "pagador_nome", type: "varchar", isNullable: true },
           { name: "pagador_documento", type: "varchar", isNullable: true },
           { name: "pagador_email", type: "varchar", isNullable: true },
