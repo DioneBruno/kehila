@@ -5,7 +5,7 @@ export type FecharPedidoInput = {
   companyUuid: string;
   userUuid: string;
   pedidoUuid: string;
-  pagadorAvulso?: boolean;
+  tipoPagador?: "usuarioLogado" | "avulso" | "ingresso";
   pagadorNome?: string;
   pagadorDocumento?: string;
   pagadorEmail?: string;
@@ -28,8 +28,10 @@ export class GerarCobrancaUsecase {
       return;
     }
 
-    let pagador = pedido.usuario();
-    if (input.pagadorAvulso) {
+    let pagador: PagadorEntity;
+    if (input.tipoPagador === "usuarioLogado") {
+      pagador = pedido.usuario();
+    } else {
       pagador = new PagadorEntity({
         nome: input.pagadorNome || "",
         documento: input.pagadorDocumento || "",

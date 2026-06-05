@@ -32,7 +32,7 @@ export class PedidosController {
       companyUuid: req.companyUuid,
       userUuid: req.userUuid,
       pedidoUuid: body.pedidoUuid,
-      pagadorAvulso: body.pagadorAvulso,
+      tipoPagador: body.tipoPagador,
       pagadorNome: body.pagadorNome,
       pagadorDocumento: body.pagadorDocumento,
       pagadorEmail: body.pagadorEmail,
