@@ -52,7 +52,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     expect(cobrancaModel[0].pagador_telefone).toBe("telefoneUsuario");
   });
 
-  test("Deve criar financeiroCobranca com dados informador no input", async () => {
+  test("Deve criar financeiroCobranca com dados informador no input - pagadorAvulso", async () => {
     const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";
 
     await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone )
