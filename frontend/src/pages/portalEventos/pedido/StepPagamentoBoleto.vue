@@ -114,7 +114,7 @@ export default defineComponent({
 
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
-      const response = await $service.gerarCobranca(data.pagador);
+      await $service.gerarCobranca(data.pagador);
     }
 
     return {

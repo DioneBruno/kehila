@@ -164,7 +164,7 @@ export class PortalEventosQuery {
                 'pix',                    p.pix,
                 'createdAt',              p.created_at
               )
-              ORDER BY p.created_at ASC
+              ORDER BY p.vencimento ASC
             )
             FROM financeiro_pagamentos p
             WHERE p.deleted_at IS NULL
