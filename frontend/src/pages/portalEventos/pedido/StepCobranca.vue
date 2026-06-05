@@ -43,8 +43,10 @@
           </q-item-section>
           <q-item-section side>
             <q-icon
-              :name="pagamentosVisiveis[cobranca.uuid] ? 'expand_less' : 'expand_more'"
+              name="expand_more"
               color="grey-6"
+              class="toggle-icon"
+              :class="{ 'toggle-icon--open': pagamentosVisiveis[cobranca.uuid] }"
             />
           </q-item-section>
         </q-item>
@@ -174,4 +176,19 @@ export default defineComponent({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.toggle-icon {
+  transition: transform 0.3s ease;
+  animation: pulsar 1.5s ease-in-out infinite;
+}
+
+.toggle-icon--open {
+  transform: rotate(180deg);
+  animation: none;
+}
+
+@keyframes pulsar {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(4px); opacity: 0.5; }
+}
+</style>
