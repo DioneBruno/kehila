@@ -3,6 +3,7 @@ import { PedidoEntity } from "./pedido.entity";
 import { GerarCobrancaUsecase } from "src/@modules/financeiro/gerarCobranca/gerarCobranca.usecase";
 import { GerarCobrancaRepository as FinanceiroGerarCobrancaRepository } from "src/@modules/financeiro/gerarCobranca/gerarCobrancaRepository";
 import { PagadorEntity } from "./pagador.entity";
+import { IngressoEntity } from "./ingresso.entity";
 
 export class GerarCobrancaRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -43,6 +44,26 @@ export class GerarCobrancaRepository {
     return pedido;
   }
 
+  async buscarIngressos(companyUuid: string, pedidoUuid: string): Promise<IngressoEntity[]> {
+    const rows = await this.connectionHub.database!.query(
+      `SELECT uuid, pessoa_nome, pessoa_documento, pessoa_email, pessoa_telefone
+       FROM evento_ingressos
+       WHERE company_uuid = $1
+         AND pedido_uuid = $2`,
+      [companyUuid, pedidoUuid],
+    );
+    return rows.map(
+      (r: any) =>
+        new IngressoEntity({
+          uuid: r.uuid,
+          pessoaNome: r.pessoa_nome,
+          pessoaDocumento: r.pessoa_documento,
+          pessoaEmail: r.pessoa_email,
+          pessoaTelefone: r.pessoa_telefone,
+        }),
+    );
+  }
+
   async criarCobranca(pedido: PedidoEntity, pagador: PagadorEntity): Promise<void> {
     const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
@@ -58,5 +79,21 @@ export class GerarCobrancaRepository {
       valor: pedido.valorTotal(),
     };
     await usecase.execute(input);
+  }
+
+  async criarCobrancaIngresso(pedido: PedidoEntity, ingresso: IngressoEntity, valor: number): Promise<void> {
+    const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
+    const usecase = new GerarCobrancaUsecase(repo);
+    await usecase.execute({
+      companyUuid: pedido.companyUuid(),
+      userUuid: pedido.userUuid(),
+      origem: "eventoIngresso",
+      origemUuid: ingresso.uuid(),
+      pagadorNome: ingresso.pessoaNome(),
+      pagadorDocumento: ingresso.pessoaDocumento(),
+      pagadorEmail: ingresso.pessoaEmail(),
+      pagadorTelefone: ingresso.pessoaTelefone(),
+      valor,
+    });
   }
 }

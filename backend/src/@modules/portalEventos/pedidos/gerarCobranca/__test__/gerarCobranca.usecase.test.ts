@@ -137,21 +137,21 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     expect(gerarCobrancaStub.args[0][0].pagadorEmail).toBe("email Pessoa1");
     expect(gerarCobrancaStub.args[0][0].pagadorTelefone).toBe("telefone Pessoa1");
 
-    expect(gerarCobrancaStub.args[0][1].valor).toBe(100);
-    expect(gerarCobrancaStub.args[0][1].origem).toBe("eventoIngresso");
-    expect(gerarCobrancaStub.args[0][1].origemUuid).toBe(`2${ingressoUuidBase}`);
-    expect(gerarCobrancaStub.args[0][1].pagadorNome).toBe("pessoa2");
-    expect(gerarCobrancaStub.args[0][1].pagadorDocumento).toBe("22222222222");
-    expect(gerarCobrancaStub.args[0][1].pagadorEmail).toBe("email Pessoa2");
-    expect(gerarCobrancaStub.args[0][1].pagadorTelefone).toBe("telefone Pessoa2");
+    expect(gerarCobrancaStub.args[1][0].valor).toBe(100);
+    expect(gerarCobrancaStub.args[1][0].origem).toBe("eventoIngresso");
+    expect(gerarCobrancaStub.args[1][0].origemUuid).toBe(`2${ingressoUuidBase}`);
+    expect(gerarCobrancaStub.args[1][0].pagadorNome).toBe("pessoa2");
+    expect(gerarCobrancaStub.args[1][0].pagadorDocumento).toBe("22222222222");
+    expect(gerarCobrancaStub.args[1][0].pagadorEmail).toBe("email Pessoa2");
+    expect(gerarCobrancaStub.args[1][0].pagadorTelefone).toBe("telefone Pessoa2");
 
-    expect(gerarCobrancaStub.args[0][2].valor).toBe(100);
-    expect(gerarCobrancaStub.args[0][2].origem).toBe("eventoIngresso");
-    expect(gerarCobrancaStub.args[0][2].origemUuid).toBe(`3${ingressoUuidBase}`);
-    expect(gerarCobrancaStub.args[0][2].pagadorNome).toBe("pessoa3");
-    expect(gerarCobrancaStub.args[0][2].pagadorDocumento).toBe("33333333333");
-    expect(gerarCobrancaStub.args[0][2].pagadorEmail).toBe("email Pessoa3");
-    expect(gerarCobrancaStub.args[0][2].pagadorTelefone).toBe("telefone Pessoa3");
+    expect(gerarCobrancaStub.args[2][0].valor).toBe(100);
+    expect(gerarCobrancaStub.args[2][0].origem).toBe("eventoIngresso");
+    expect(gerarCobrancaStub.args[2][0].origemUuid).toBe(`3${ingressoUuidBase}`);
+    expect(gerarCobrancaStub.args[2][0].pagadorNome).toBe("pessoa3");
+    expect(gerarCobrancaStub.args[2][0].pagadorDocumento).toBe("33333333333");
+    expect(gerarCobrancaStub.args[2][0].pagadorEmail).toBe("email Pessoa3");
+    expect(gerarCobrancaStub.args[2][0].pagadorTelefone).toBe("telefone Pessoa3");
 
     gerarCobrancaStub.restore();
   });

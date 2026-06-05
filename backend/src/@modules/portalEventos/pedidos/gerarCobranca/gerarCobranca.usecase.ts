@@ -18,6 +18,16 @@ export class GerarCobrancaUsecase {
   async execute(input: FecharPedidoInput) {
     const pedido = await this.repo.buscarPedido(input.companyUuid, input.pedidoUuid);
     if (!pedido) throw new Error("Pedido não encontrado");
+
+    const ingressos = await this.repo.buscarIngressos(input.companyUuid, input.pedidoUuid);
+    if (ingressos.length > 0) {
+      const valorPorIngresso = pedido.valorTotal() / ingressos.length;
+      for (const ingresso of ingressos) {
+        await this.repo.criarCobrancaIngresso(pedido, ingresso, valorPorIngresso);
+      }
+      return;
+    }
+
     let pagador = pedido.usuario();
     if (input.pagadorAvulso) {
       pagador = new PagadorEntity({
