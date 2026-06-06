@@ -90,126 +90,131 @@
       </div>
     </div>
 
+    <!-- Resumo: usuário logado -->
     <template v-if="pagador.tipoPagador === 'usuarioLogado'">
       <div class="col-12">
-        <q-card flat bordered class="q-pa-sm">
-          <q-card-section class="q-pa-xs">
-            <div class="row q-col-gutter-sm items-center">
-              <div class="col-auto">
-                <q-icon name="person" color="primary" size="20px" />
-              </div>
-              <div class="col">
+        <q-card flat bordered>
+          <q-card-section class="q-py-sm">
+            <div class="row items-center q-gutter-x-sm no-wrap">
+              <q-icon name="person" color="primary" size="20px" />
+              <div>
                 <div class="text-body2 text-weight-medium">{{ usuarioLogado.nome }}</div>
                 <div class="text-caption text-grey-6">CPF: {{ usuarioLogado.cpf }}</div>
               </div>
             </div>
-            <q-separator spaced="xs" />
-            <div class="text-caption text-grey-8">
-              Será gerado
-              <strong>1 carnê</strong>
-              parcelado em
-              <strong
-                >{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
-              >.
-            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section class="q-py-sm text-caption text-grey-8">
+            Será gerado <strong>1 carnê</strong> parcelado em
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong>.
           </q-card-section>
         </q-card>
       </div>
     </template>
 
-    <template v-if="pagador.tipoPagador == 'ingresso'">
-      <div>
-        <p class="q-mb-sm">
-          Serão gerados
-          <strong>{{ totalIngressos }} carnê{{ totalIngressos !== 1 ? "s" : "" }}</strong>
-          — um para cada ingresso do pedido.
-        </p>
-        <p class="q-mb-none">
-          Cada carnê será parcelado em
-          <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
-          >.
-        </p>
+    <!-- Resumo: por ingresso -->
+    <template v-if="pagador.tipoPagador === 'ingresso'">
+      <div class="col-12">
+        <q-card flat bordered>
+          <q-card-section class="q-py-sm">
+            <div class="row items-center q-gutter-x-sm no-wrap">
+              <q-icon name="confirmation_number" color="primary" size="20px" />
+              <div>
+                <div class="text-body2 text-weight-medium">
+                  {{ totalIngressos }} carnê{{ totalIngressos !== 1 ? "s" : "" }}
+                </div>
+                <div class="text-caption text-grey-6">Um boleto por ingresso do pedido</div>
+              </div>
+            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section class="q-py-sm text-caption text-grey-8">
+            Cada carnê será parcelado em
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong>.
+          </q-card-section>
+        </q-card>
       </div>
     </template>
 
     <!-- Dados do pagador avulso -->
     <template v-if="pagador.tipoPagador === 'avulso'">
       <div class="col-12">
-        <q-separator spaced />
-        <div
-          class="text-caption text-weight-medium text-grey-7 q-mb-sm q-mt-sm"
-          style="letter-spacing: 0.5px; text-transform: uppercase"
-        >
-          Dados do pagador
-        </div>
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          dense
-          outlined
-          stack-label
-          v-model="pagador.pagadorNome"
-          label="Nome completo"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        >
-          <template #prepend>
-            <q-icon name="person" color="grey-6" size="18px" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          dense
-          outlined
-          stack-label
-          v-model="pagador.pagadorDocumento"
-          label="CPF / CNPJ"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        >
-          <template #prepend>
-            <q-icon name="badge" color="grey-6" size="18px" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          dense
-          outlined
-          stack-label
-          v-model="pagador.pagadorEmail"
-          label="E-mail"
-          type="email"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        >
-          <template #prepend>
-            <q-icon name="email" color="grey-6" size="18px" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          dense
-          outlined
-          stack-label
-          v-model="pagador.pagadorTelefone"
-          label="Telefone"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        >
-          <template #prepend>
-            <q-icon name="phone" color="grey-6" size="18px" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-12 text-caption text-grey-8">
-        Será gerado
-        <strong>1 carnê</strong>
-        parcelado em
-        <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
-        >.
+        <q-card flat bordered>
+          <q-card-section class="q-py-sm">
+            <div class="row items-center q-gutter-x-sm no-wrap q-mb-sm">
+              <q-icon name="edit_note" color="primary" size="20px" />
+              <div class="text-body2 text-weight-medium">Dados do pagador</div>
+            </div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-sm-6">
+                <q-input
+                  dense
+                  outlined
+                  stack-label
+                  v-model="pagador.pagadorNome"
+                  label="Nome completo"
+                  lazy-rules
+                  :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+                >
+                  <template #prepend>
+                    <q-icon name="person" color="grey-6" size="18px" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-sm-6">
+                <q-input
+                  dense
+                  outlined
+                  stack-label
+                  v-model="pagador.pagadorDocumento"
+                  label="CPF / CNPJ"
+                  lazy-rules
+                  :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+                >
+                  <template #prepend>
+                    <q-icon name="badge" color="grey-6" size="18px" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-sm-6">
+                <q-input
+                  dense
+                  outlined
+                  stack-label
+                  v-model="pagador.pagadorEmail"
+                  label="E-mail"
+                  type="email"
+                  lazy-rules
+                  :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+                >
+                  <template #prepend>
+                    <q-icon name="email" color="grey-6" size="18px" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-sm-6">
+                <q-input
+                  dense
+                  outlined
+                  stack-label
+                  v-model="pagador.pagadorTelefone"
+                  label="Telefone"
+                  lazy-rules
+                  :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
+                >
+                  <template #prepend>
+                    <q-icon name="phone" color="grey-6" size="18px" />
+                  </template>
+                </q-input>
+              </div>
+            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section class="q-py-sm text-caption text-grey-8">
+            Será gerado <strong>1 carnê</strong> parcelado em
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong>.
+          </q-card-section>
+        </q-card>
       </div>
     </template>
 
