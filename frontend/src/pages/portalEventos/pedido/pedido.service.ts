@@ -35,7 +35,6 @@ export class PedidoService {
     const authCookies = new AuthCookiesQuasar();
     const response = await this.pedidoHttp.cadastrarUsuario(user);
     authCookies.setToken(response.token);
-    // authCookies.setRefreshToken(response.refreshToken);
     return response;
   }
 
@@ -56,6 +55,9 @@ export class PedidoService {
   }
 
   async listarPedidos(eventoUuid: string) {
+    const authCookies = new AuthCookiesQuasar();
+    const token = authCookies.getToken();
+    if (!token) return;
     const response = await this.pedidoHttp.listarPedidos(eventoUuid);
     const pedido = response.data.find((item: any) => item.status === "pendente");
     if (pedido) this.buscarPedido(pedido.uuid);

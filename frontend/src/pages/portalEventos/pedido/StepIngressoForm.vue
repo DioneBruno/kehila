@@ -96,6 +96,29 @@
           <div class="col-12 col-sm-8">
             <q-input outlined dense stack-label v-model="ingresso.pessoaCidade" label="Cidade" />
           </div>
+          <div class="col-12">
+            <q-select
+              outlined
+              dense
+              stack-label
+              map-options
+              emit-value
+              v-model="ingresso.pessoaPais"
+              label="Distrito"
+              :options="[
+                { label: 'Distrito01', value: 'Distrito01' },
+                { label: 'Distrito02', value: 'Distrito02' },
+                { label: 'Distrito03', value: 'Distrito03' },
+                { label: 'Distrito04', value: 'Distrito04' },
+                { label: 'Distrito05', value: 'Distrito05' },
+                { label: 'Distrito06', value: 'Distrito06' },
+                { label: 'Distrito07', value: 'Distrito07' },
+                { label: 'Distrito08', value: 'Distrito08' },
+                { label: 'Distrito09', value: 'Distrito09' },
+                { label: 'Distrito10', value: 'Distrito10' },
+              ]"
+            />
+          </div>
           <div class="col-12 row q-mt-md row items-center justify-center q-gutter-sm">
             <q-space />
             <q-btn
