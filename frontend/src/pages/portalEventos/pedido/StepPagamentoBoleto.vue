@@ -34,6 +34,7 @@
         style="letter-spacing: 0.5px; text-transform: uppercase"
       >
         Dados para gerar o boleto
+        {{ tokenPayload() }}
       </div>
       <div class="row q-col-gutter-sm">
         <div class="col-12 col-sm-4">
@@ -199,6 +200,7 @@
 import { computed, defineComponent, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
+import TokenDecode from "src/@modules/auth/tokenDecode";
 
 export default defineComponent({
   name: "StepPagamentoBoleto",
@@ -223,6 +225,11 @@ export default defineComponent({
       totalIngressos: computed(() => ($pedidoStore.$state.pedido.ingressos ?? []).length),
     });
 
+    function tokenPayload() {
+      const token = TokenDecode.execute();
+      console.log(token);
+    }
+
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
       await $service.gerarCobranca(data.pagador);
@@ -231,6 +238,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       gerarCobranca,
+      tokenPayload,
     };
   },
 });
