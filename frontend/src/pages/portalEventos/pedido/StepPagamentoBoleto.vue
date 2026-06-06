@@ -29,7 +29,10 @@
 
     <!-- Tipo de pagador -->
     <div class="col-12">
-      <div class="text-caption text-weight-medium text-grey-7 q-mb-sm" style="letter-spacing: 0.5px; text-transform: uppercase;">
+      <div
+        class="text-caption text-weight-medium text-grey-7 q-mb-sm"
+        style="letter-spacing: 0.5px; text-transform: uppercase"
+      >
         Dados para gerar o boleto
       </div>
       <div class="row q-col-gutter-sm">
@@ -91,7 +94,10 @@
     <template v-if="pagador.tipoPagador === 'avulso'">
       <div class="col-12">
         <q-separator spaced />
-        <div class="text-caption text-weight-medium text-grey-7 q-mb-sm q-mt-sm" style="letter-spacing: 0.5px; text-transform: uppercase;">
+        <div
+          class="text-caption text-weight-medium text-grey-7 q-mb-sm q-mt-sm"
+          style="letter-spacing: 0.5px; text-transform: uppercase"
+        >
           Dados do pagador
         </div>
       </div>
@@ -159,7 +165,7 @@
     </template>
 
     <!-- Botão gerar -->
-    <div class="col-12 q-pt-sm">
+    <div class="col-12 q-pt-sm q-mt-lg">
       <q-btn
         no-caps
         unelevated
@@ -169,9 +175,42 @@
         label="Gerar Boleto"
         size="md"
         padding="sm md"
-        @click="gerarCobranca"
+        @click="handleGerarCobranca"
       />
     </div>
+
+    <!-- Dialog de confirmação (tipoPagador = ingresso) -->
+    <q-dialog v-model="showConfirmDialog" persistent>
+      <q-card style="min-width: 320px; max-width: 480px">
+        <q-card-section class="row items-center q-gutter-sm q-pb-none">
+          <q-icon name="info" color="primary" size="28px" />
+          <span class="text-h6">Confirmar geração de boletos</span>
+        </q-card-section>
+        <q-card-section>
+          <p class="q-mb-sm">
+            Serão gerados
+            <strong>{{ totalIngressos }} carnê{{ totalIngressos !== 1 ? "s" : "" }}</strong>
+            — um para cada ingresso do pedido.
+          </p>
+          <p class="q-mb-none">
+            Cada carnê será parcelado em
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+            >.
+          </p>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat no-caps label="Cancelar" color="grey-7" v-close-popup />
+          <q-btn
+            no-caps
+            unelevated
+            label="Confirmar"
+            color="primary"
+            icon="check"
+            @click="confirmarGerarCobranca"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <script lang="ts">
@@ -199,7 +238,22 @@ export default defineComponent({
         pagadorEmail: "",
         pagadorTelefone: "",
       }),
+      showConfirmDialog: false,
+      totalIngressos: computed(() => ($pedidoStore.$state.pedido.ingressos ?? []).length),
     });
+
+    function handleGerarCobranca() {
+      if (data.pagador.tipoPagador === "ingresso") {
+        data.showConfirmDialog = true;
+      } else {
+        gerarCobranca();
+      }
+    }
+
+    async function confirmarGerarCobranca() {
+      data.showConfirmDialog = false;
+      await gerarCobranca();
+    }
 
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
@@ -208,6 +262,8 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      handleGerarCobranca,
+      confirmarGerarCobranca,
       gerarCobranca,
     };
   },
@@ -215,7 +271,9 @@ export default defineComponent({
 </script>
 <style scoped>
 .tipo-pagador-card {
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
 }
 .tipo-pagador-card--active {
   border-color: var(--q-primary) !important;
