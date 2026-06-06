@@ -90,6 +90,21 @@
       </div>
     </div>
 
+    <template v-if="pagador.tipoPagador == 'ingresso'">
+      <div>
+        <p class="q-mb-sm">
+          Serão gerados
+          <strong>{{ totalIngressos }} carnê{{ totalIngressos !== 1 ? "s" : "" }}</strong>
+          — um para cada ingresso do pedido.
+        </p>
+        <p class="q-mb-none">
+          Cada carnê será parcelado em
+          <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+          >.
+        </p>
+      </div>
+    </template>
+
     <!-- Dados do pagador avulso -->
     <template v-if="pagador.tipoPagador === 'avulso'">
       <div class="col-12">
@@ -175,42 +190,9 @@
         label="Gerar Boleto"
         size="md"
         padding="sm md"
-        @click="handleGerarCobranca"
+        @click="gerarCobranca"
       />
     </div>
-
-    <!-- Dialog de confirmação (tipoPagador = ingresso) -->
-    <q-dialog v-model="showConfirmDialog" persistent>
-      <q-card style="min-width: 320px; max-width: 480px">
-        <q-card-section class="row items-center q-gutter-sm q-pb-none">
-          <q-icon name="info" color="primary" size="28px" />
-          <span class="text-h6">Confirmar geração de boletos</span>
-        </q-card-section>
-        <q-card-section>
-          <p class="q-mb-sm">
-            Serão gerados
-            <strong>{{ totalIngressos }} carnê{{ totalIngressos !== 1 ? "s" : "" }}</strong>
-            — um para cada ingresso do pedido.
-          </p>
-          <p class="q-mb-none">
-            Cada carnê será parcelado em
-            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
-            >.
-          </p>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat no-caps label="Cancelar" color="grey-7" v-close-popup />
-          <q-btn
-            no-caps
-            unelevated
-            label="Confirmar"
-            color="primary"
-            icon="check"
-            @click="confirmarGerarCobranca"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <script lang="ts">
@@ -238,22 +220,8 @@ export default defineComponent({
         pagadorEmail: "",
         pagadorTelefone: "",
       }),
-      showConfirmDialog: false,
       totalIngressos: computed(() => ($pedidoStore.$state.pedido.ingressos ?? []).length),
     });
-
-    function handleGerarCobranca() {
-      if (data.pagador.tipoPagador === "ingresso") {
-        data.showConfirmDialog = true;
-      } else {
-        gerarCobranca();
-      }
-    }
-
-    async function confirmarGerarCobranca() {
-      data.showConfirmDialog = false;
-      await gerarCobranca();
-    }
 
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
@@ -262,8 +230,6 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
-      handleGerarCobranca,
-      confirmarGerarCobranca,
       gerarCobranca,
     };
   },
