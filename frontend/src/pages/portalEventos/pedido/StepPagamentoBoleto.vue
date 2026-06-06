@@ -34,7 +34,6 @@
         style="letter-spacing: 0.5px; text-transform: uppercase"
       >
         Dados para gerar o boleto
-        {{ tokenPayload() }}
       </div>
       <div class="row q-col-gutter-sm">
         <div class="col-12 col-sm-4">
@@ -90,6 +89,33 @@
         </div>
       </div>
     </div>
+
+    <template v-if="pagador.tipoPagador === 'usuarioLogado'">
+      <div class="col-12">
+        <q-card flat bordered class="q-pa-sm">
+          <q-card-section class="q-pa-xs">
+            <div class="row q-col-gutter-sm items-center">
+              <div class="col-auto">
+                <q-icon name="person" color="primary" size="20px" />
+              </div>
+              <div class="col">
+                <div class="text-body2 text-weight-medium">{{ usuarioLogado.nome }}</div>
+                <div class="text-caption text-grey-6">CPF: {{ usuarioLogado.cpf }}</div>
+              </div>
+            </div>
+            <q-separator spaced="xs" />
+            <div class="text-caption text-grey-8">
+              Será gerado
+              <strong>1 carnê</strong>
+              parcelado em
+              <strong
+                >{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+              >.
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </template>
 
     <template v-if="pagador.tipoPagador == 'ingresso'">
       <div>
@@ -178,6 +204,13 @@
           </template>
         </q-input>
       </div>
+      <div class="col-12 text-caption text-grey-8">
+        Será gerado
+        <strong>1 carnê</strong>
+        parcelado em
+        <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+        >.
+      </div>
     </template>
 
     <!-- Botão gerar -->
@@ -223,12 +256,11 @@ export default defineComponent({
         pagadorTelefone: "",
       }),
       totalIngressos: computed(() => ($pedidoStore.$state.pedido.ingressos ?? []).length),
+      usuarioLogado: computed(() => {
+        const token = TokenDecode.execute();
+        return { nome: token?.user?.name ?? "", cpf: token?.user?.cpf ?? "" };
+      }),
     });
-
-    function tokenPayload() {
-      const token = TokenDecode.execute();
-      console.log(token);
-    }
 
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
@@ -238,7 +270,6 @@ export default defineComponent({
     return {
       ...toRefs(data),
       gerarCobranca,
-      tokenPayload,
     };
   },
 });
