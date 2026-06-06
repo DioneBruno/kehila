@@ -1,6 +1,16 @@
 <template>
   <div class="row q-col-gutter-md">
+    <!-- Cabeçalho boleto -->
     <div class="col-12">
+      <div class="row items-center q-gutter-sm q-mb-xs">
+        <q-icon name="receipt_long" size="24px" color="primary" />
+        <span class="text-subtitle1 text-weight-medium text-grey-9">Pagamento via Boleto</span>
+      </div>
+      <q-separator />
+    </div>
+
+    <!-- Número de parcelas -->
+    <div class="col-12 col-sm-6">
       <q-select
         dense
         outlined
@@ -10,59 +20,128 @@
         :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
         lazy-rules
         :rules="[(val) => (val && val > 0) || 'Campo obrigatório']"
-      />
+      >
+        <template #prepend>
+          <q-icon name="splitscreen" color="grey-6" size="18px" />
+        </template>
+      </q-select>
     </div>
-    <div class="col-12 text-grey-8">
-      <div class="">Dados para gerar o boleto</div>
-      <div>
-        <q-radio
-          v-model="pagador.tipoPagador"
-          val="usuarioLogado"
-          label="Dados do usuário logado"
-        />
+
+    <!-- Tipo de pagador -->
+    <div class="col-12">
+      <div class="text-caption text-weight-medium text-grey-7 q-mb-sm" style="letter-spacing: 0.5px; text-transform: uppercase;">
+        Dados para gerar o boleto
       </div>
-      <div>
-        <q-radio v-model="pagador.tipoPagador" val="ingresso" label="Dados de cada ingresso" />
-      </div>
-      <div>
-        <q-radio v-model="pagador.tipoPagador" val="avulso" label="Informar dados do pagador" />
+      <div class="row q-col-gutter-sm">
+        <div class="col-12 col-sm-4">
+          <q-card
+            flat
+            bordered
+            class="cursor-pointer tipo-pagador-card"
+            :class="pagador.tipoPagador === 'usuarioLogado' ? 'tipo-pagador-card--active' : ''"
+            @click="pagador.tipoPagador = 'usuarioLogado'"
+          >
+            <q-card-section class="q-pa-sm row items-center q-gutter-x-sm no-wrap">
+              <q-radio v-model="pagador.tipoPagador" val="usuarioLogado" dense />
+              <div>
+                <div class="text-body2 text-weight-medium">Usuário logado</div>
+                <div class="text-caption text-grey-6">Usar meus dados</div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-4">
+          <q-card
+            flat
+            bordered
+            class="cursor-pointer tipo-pagador-card"
+            :class="pagador.tipoPagador === 'ingresso' ? 'tipo-pagador-card--active' : ''"
+            @click="pagador.tipoPagador = 'ingresso'"
+          >
+            <q-card-section class="q-pa-sm row items-center q-gutter-x-sm no-wrap">
+              <q-radio v-model="pagador.tipoPagador" val="ingresso" dense />
+              <div>
+                <div class="text-body2 text-weight-medium">Por ingresso</div>
+                <div class="text-caption text-grey-6">Dados de cada ingresso</div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-4">
+          <q-card
+            flat
+            bordered
+            class="cursor-pointer tipo-pagador-card"
+            :class="pagador.tipoPagador === 'avulso' ? 'tipo-pagador-card--active' : ''"
+            @click="pagador.tipoPagador = 'avulso'"
+          >
+            <q-card-section class="q-pa-sm row items-center q-gutter-x-sm no-wrap">
+              <q-radio v-model="pagador.tipoPagador" val="avulso" dense />
+              <div>
+                <div class="text-body2 text-weight-medium">Informar dados</div>
+                <div class="text-caption text-grey-6">Preencher manualmente</div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
       </div>
     </div>
-    <div class="col-12" v-if="pagador.tipoPagador === 'avulso'">
-      <div class="col-12 col-md-6">
+
+    <!-- Dados do pagador avulso -->
+    <template v-if="pagador.tipoPagador === 'avulso'">
+      <div class="col-12">
+        <q-separator spaced />
+        <div class="text-caption text-weight-medium text-grey-7 q-mb-sm q-mt-sm" style="letter-spacing: 0.5px; text-transform: uppercase;">
+          Dados do pagador
+        </div>
+      </div>
+      <div class="col-12 col-sm-6">
         <q-input
           dense
           outlined
           stack-label
           v-model="pagador.pagadorNome"
-          label="Nome"
+          label="Nome completo"
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        />
+        >
+          <template #prepend>
+            <q-icon name="person" color="grey-6" size="18px" />
+          </template>
+        </q-input>
       </div>
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-sm-6">
         <q-input
           dense
           outlined
           stack-label
           v-model="pagador.pagadorDocumento"
-          label="Documento"
+          label="CPF / CNPJ"
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        />
+        >
+          <template #prepend>
+            <q-icon name="badge" color="grey-6" size="18px" />
+          </template>
+        </q-input>
       </div>
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-sm-6">
         <q-input
           dense
           outlined
           stack-label
           v-model="pagador.pagadorEmail"
-          label="Email"
+          label="E-mail"
+          type="email"
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        />
+        >
+          <template #prepend>
+            <q-icon name="email" color="grey-6" size="18px" />
+          </template>
+        </q-input>
       </div>
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-sm-6">
         <q-input
           dense
           outlined
@@ -71,15 +150,25 @@
           label="Telefone"
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Campo obrigatório']"
-        />
+        >
+          <template #prepend>
+            <q-icon name="phone" color="grey-6" size="18px" />
+          </template>
+        </q-input>
       </div>
-    </div>
-    <div class="col-12">
+    </template>
+
+    <!-- Botão gerar -->
+    <div class="col-12 q-pt-sm">
       <q-btn
         no-caps
+        unelevated
         class="full-width"
         color="primary"
-        label="Gerar Pagamento"
+        icon="receipt"
+        label="Gerar Boleto"
+        size="md"
+        padding="sm md"
         @click="gerarCobranca"
       />
     </div>
@@ -124,4 +213,12 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped></style>
+<style scoped>
+.tipo-pagador-card {
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.tipo-pagador-card--active {
+  border-color: var(--q-primary) !important;
+  background-color: rgba(var(--q-primary-rgb, 25, 118, 210), 0.05);
+}
+</style>

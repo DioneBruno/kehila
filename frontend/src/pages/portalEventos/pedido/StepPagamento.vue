@@ -13,7 +13,7 @@
             @click="$emit('update:formaPagamento', 'boleto')"
           >
             <q-card-section class="text-center q-py-md">
-              <q-icon name="description" size="32px" color="grey-9" />
+              <q-icon name="receipt_long" size="32px" color="grey-9" />
               <div class="text-subtitle2 q-mt-xs">Boleto</div>
               <div class="text-caption text-grey-6">Até 12x sem juros</div>
               <q-icon
