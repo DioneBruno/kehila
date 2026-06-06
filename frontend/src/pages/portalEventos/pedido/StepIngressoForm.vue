@@ -91,10 +91,24 @@
               :options="ufs"
               emit-value
               map-options
+              @update:model-value="(uf) => { ingresso.pessoaCidade = ''; fetchCidades(uf); }"
             />
           </div>
           <div class="col-12 col-sm-8">
-            <q-input outlined dense stack-label v-model="ingresso.pessoaCidade" label="Cidade" />
+            <q-select
+              outlined
+              dense
+              stack-label
+              use-input
+              hide-selected
+              fill-input
+              input-debounce="0"
+              v-model="ingresso.pessoaCidade"
+              label="Cidade"
+              :options="cidadesFiltradas[ingresso.uuid] || []"
+              :disable="!ingresso.pessoaUf"
+              @filter="(val, update) => filterCidades(val, update, ingresso)"
+            />
           </div>
           <div class="col-12">
             <q-select
@@ -223,6 +237,36 @@ export default defineComponent({
     const $service = new PedidoService();
     const $pedidoStore = usePedidoStore();
 
+    const cidadesPorUf = reactive<Record<string, string[]>>({});
+    const cidadesFiltradas = reactive<Record<string, string[]>>({});
+
+    async function fetchCidades(uf: string) {
+      if (!uf || cidadesPorUf[uf]) return;
+      const response = await fetch(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`,
+      );
+      const data: { nome: string }[] = await response.json();
+      cidadesPorUf[uf] = data.map((m) => m.nome).sort();
+    }
+
+    function filterCidades(val: string, update: (fn: () => void) => void, ingresso: any) {
+      const uf = ingresso.pessoaUf;
+      const key = ingresso.uuid;
+      const doFilter = () => {
+        update(() => {
+          const all = cidadesPorUf[uf] || [];
+          cidadesFiltradas[key] = val
+            ? all.filter((c) => c.toLowerCase().includes(val.toLowerCase()))
+            : all;
+        });
+      };
+      if (uf && !cidadesPorUf[uf]) {
+        void fetchCidades(uf).then(doFilter);
+      } else {
+        doFilter();
+      }
+    }
+
     const data = reactive({
       slide: ref<string | number>(0),
       pedido: computed(() => $pedidoStore.pedido),
@@ -248,6 +292,9 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      cidadesFiltradas,
+      fetchCidades,
+      filterCidades,
       editarFormIngresso,
       copiarDadosPrimeiroIngresso,
     };
