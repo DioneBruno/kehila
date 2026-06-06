@@ -48,15 +48,17 @@ export class EditarFormIngressoRepository {
   async salvarIngresso(ingresso: IngressoEntity) {
     await this.connectionHub.database!.query(
       `UPDATE evento_ingressos SET
-        pessoa_nome = $1,
-        pessoa_documento = $2,
-        pessoa_email = $3,
-        pessoa_telefone = $4,
-        pessoa_uf = $5,
-        pessoa_cidade = $6,
-        form_data_valido = $7
-      WHERE uuid = $8`,
+        pessoa_nome = $2,
+        pessoa_documento = $3,
+        pessoa_email = $4,
+        pessoa_telefone = $5,
+        pessoa_uf = $6,
+        pessoa_cidade = $7,
+        form_data_valido = $8,
+        form_data = $9
+      WHERE uuid = $1`,
       [
+        ingresso.uuid(),
         ingresso.pessoaNome(),
         ingresso.pessoaDocumento(),
         ingresso.pessoaEmail(),
@@ -64,7 +66,7 @@ export class EditarFormIngressoRepository {
         ingresso.pessoaUf(),
         ingresso.pessoaCidade(),
         ingresso.formDataValido(),
-        ingresso.uuid(),
+        ingresso.formData(),
       ],
     );
   }

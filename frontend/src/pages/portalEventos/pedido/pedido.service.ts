@@ -91,6 +91,7 @@ export class PedidoService {
       pessoaTelefone: ingresso.pessoaTelefone,
       pessoaUf: ingresso.pessoaUf,
       pessoaCidade: ingresso.pessoaCidade,
+      formData: ingresso.formData,
     };
     await this.pedidoHttp.editarFormIngresso(input);
     ingresso.formDataValido = true;

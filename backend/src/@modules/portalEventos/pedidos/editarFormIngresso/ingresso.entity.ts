@@ -11,6 +11,7 @@ export type IngressoProps = {
   pessoaTelefone?: string;
   pessoaUf?: string;
   pessoaCidade?: string;
+  formData?: object;
 };
 
 export class IngressoEntity {
@@ -51,6 +52,9 @@ export class IngressoEntity {
   pessoaCidade(): string | undefined {
     return this.props.pessoaCidade;
   }
+  formData(): object | undefined {
+    return this.props.formData ?? {};
+  }
   checkDadosObrigatoriosPreenchidos(): boolean {
     return (
       !!this.props.pessoaNome &&
@@ -69,6 +73,7 @@ export class IngressoEntity {
     pessoaTelefone?: string;
     pessoaUf?: string;
     pessoaCidade?: string;
+    formData?: object;
   }) {
     this.props.pessoaNome = data.pessoaNome;
     this.props.pessoaDocumento = data.pessoaDocumento;
@@ -76,6 +81,7 @@ export class IngressoEntity {
     this.props.pessoaTelefone = data.pessoaTelefone;
     this.props.pessoaUf = data.pessoaUf;
     this.props.pessoaCidade = data.pessoaCidade;
+    this.props.formData = data.formData;
     this.props.formDataValido = this.checkDadosObrigatoriosPreenchidos();
   }
 }

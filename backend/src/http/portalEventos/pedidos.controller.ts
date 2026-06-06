@@ -79,6 +79,7 @@ export class PedidosController {
       pessoaTelefone: body.pessoaTelefone,
       pessoaUf: body.pessoaUf,
       pessoaCidade: body.pessoaCidade,
+      formData: body.formData,
     } as any;
     await this.editarFormIngressoUsecase.execute(input);
     return res.status(200).json({ message: "Formulário do ingresso editado com sucesso" });

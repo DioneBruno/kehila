@@ -9,6 +9,7 @@ export interface EditarFormIngressoInput {
   pessoaTelefone?: string;
   pessoaUf?: string;
   pessoaCidade?: string;
+  formData?: object;
 }
 
 export class EditarFormIngressoUsecase {

@@ -91,7 +91,12 @@
               :options="ufs"
               emit-value
               map-options
-              @update:model-value="(uf) => { ingresso.pessoaCidade = ''; fetchCidades(uf); }"
+              @update:model-value="
+                (uf) => {
+                  ingresso.pessoaCidade = '';
+                  fetchCidades(uf);
+                }
+              "
             />
           </div>
           <div class="col-12 col-sm-8">
@@ -117,7 +122,7 @@
               stack-label
               map-options
               emit-value
-              v-model="ingresso.pessoaPais"
+              v-model="ingresso.formData.distrito"
               label="Distrito"
               :options="[
                 { label: 'Distrito01', value: 'Distrito01' },
@@ -288,6 +293,7 @@ export default defineComponent({
       ingresso.pessoaTelefone = primeiro.pessoaTelefone;
       ingresso.pessoaUf = primeiro.pessoaUf;
       ingresso.pessoaCidade = primeiro.pessoaCidade;
+      ingresso.formData = primeiro.formData;
     }
 
     return {

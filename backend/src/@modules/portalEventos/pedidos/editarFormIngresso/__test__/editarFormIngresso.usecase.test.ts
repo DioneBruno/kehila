@@ -38,6 +38,7 @@ describe("Deve testar EditarFormIngressoUsecase", () => {
       pessoaTelefone: "11999999999",
       pessoaUf: "SP",
       pessoaCidade: "São Paulo",
+      formData: { teste: "DadosTeste" },
     };
     await usecase.execute(input);
 
@@ -48,6 +49,7 @@ describe("Deve testar EditarFormIngressoUsecase", () => {
     expect(ingressoModel.pessoa_telefone).toBe(input.pessoaTelefone);
     expect(ingressoModel.pessoa_uf).toBe(input.pessoaUf);
     expect(ingressoModel.pessoa_cidade).toBe(input.pessoaCidade);
+    expect(ingressoModel.form_data).toEqual(input.formData);
   });
 
   test("Caso todos os campos tiverem preenchidos, deve validar o form e marcar como valido", async () => {
