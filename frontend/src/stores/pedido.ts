@@ -60,7 +60,7 @@ export const usePedidoStore = defineStore("pedidoStore", {
     },
     setPedido(pedido: any) {
       this.$patch((state) => {
-        state.pedido = { ...pedido, etapa: pedido.cobrancas?.length ? 6 : 4 };
+        Object.assign(state.pedido, { ...pedido, etapa: pedido.cobrancas?.length ? 6 : 4 });
       });
     },
   },

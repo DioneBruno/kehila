@@ -91,6 +91,7 @@ export class PedidoService {
       pessoaCidade: ingresso.pessoaCidade,
     };
     await this.pedidoHttp.editarFormIngresso(input);
+    ingresso.formDataValido = true;
     await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
   }
 
