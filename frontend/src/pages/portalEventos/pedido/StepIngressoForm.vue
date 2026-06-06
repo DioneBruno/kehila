@@ -23,6 +23,17 @@
             Ingresso {{ Number(index) + 1 }} de {{ ingressos.length }}
           </span>
           <q-space />
+          <q-btn
+            v-if="Number(index) > 0"
+            no-caps
+            flat
+            dense
+            size="sm"
+            color="primary"
+            icon="content_copy"
+            label="Copiar do 1º ingresso"
+            @click="copiarDadosPrimeiroIngresso(ingresso)"
+          />
         </div>
 
         <div class="row q-col-gutter-sm">
@@ -191,10 +202,10 @@ export default defineComponent({
 
     const data = reactive({
       slide: ref<string | number>(0),
-      pedido: computed(() => $pedidoStore.$state.pedido),
-      ingressos: computed(() => $pedidoStore.$state.pedido.ingressos ?? []),
+      pedido: computed(() => $pedidoStore.pedido),
+      ingressos: computed(() => $pedidoStore.pedido.ingressos ?? []),
       todosIngressosValidos: computed(() =>
-        ($pedidoStore.$state.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true),
+        ($pedidoStore.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true),
       ),
       ufs: UFS.map((uf) => ({ label: uf, value: uf })),
     });
@@ -203,9 +214,19 @@ export default defineComponent({
       await $service.editarFormIngresso(ingresso);
     }
 
+    function copiarDadosPrimeiroIngresso(ingresso: any) {
+      const primeiro = ($pedidoStore.$state.pedido.ingressos ?? [])[0];
+      if (!primeiro) return;
+      ingresso.pessoaEmail = primeiro.pessoaEmail;
+      ingresso.pessoaTelefone = primeiro.pessoaTelefone;
+      ingresso.pessoaUf = primeiro.pessoaUf;
+      ingresso.pessoaCidade = primeiro.pessoaCidade;
+    }
+
     return {
       ...toRefs(data),
       editarFormIngresso,
+      copiarDadosPrimeiroIngresso,
     };
   },
 });

@@ -1,3 +1,4 @@
+import { useQuasar } from "quasar";
 import type { AuthHttp } from "src/@modules/auth/auth.http";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import type { LoginHttp } from "src/@modules/auth/login.http";
@@ -7,6 +8,7 @@ import { usePedidoStore } from "src/stores/pedido";
 import { inject } from "vue";
 
 export class PedidoService {
+  private $q = useQuasar();
   private pedidoHttp: PedidoHttp = inject("pedidoHttp") as PedidoHttp;
   private authHttp: AuthHttp = inject("authHttp") as AuthHttp;
   private loginHttp: LoginHttp = inject("loginHttp") as LoginHttp;
@@ -67,8 +69,14 @@ export class PedidoService {
   }
 
   async gerarCobranca(input: any) {
-    await this.pedidoHttp.gerarCobranca(input);
-    await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
+    try {
+      this.$q.loading.show();
+      await this.pedidoHttp.gerarCobranca(input);
+      await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
+    } catch (error) {
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 
   async editarFormIngresso(ingresso: any) {
@@ -82,17 +90,22 @@ export class PedidoService {
       pessoaUf: ingresso.pessoaUf,
       pessoaCidade: ingresso.pessoaCidade,
     };
-    const response = await this.pedidoHttp.editarFormIngresso(input);
+    await this.pedidoHttp.editarFormIngresso(input);
     await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
-    return response;
   }
 
   async cancelarPedido(pedidoUuid: string) {
-    await this.pedidoHttp.cancelarPedido(pedidoUuid);
-    if (this.$pedidoStore.$state.pedido.uuid === pedidoUuid) {
-      this.$pedidoStore.$patch((state) => {
-        state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [], status: "" };
-      });
+    try {
+      this.$q.loading.show();
+      await this.pedidoHttp.cancelarPedido(pedidoUuid);
+      if (this.$pedidoStore.$state.pedido.uuid === pedidoUuid) {
+        this.$pedidoStore.$patch((state) => {
+          state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [], status: "" };
+        });
+      }
+    } catch (error) {
+    } finally {
+      this.$q.loading.hide();
     }
   }
 }

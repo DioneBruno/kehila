@@ -113,7 +113,6 @@ export default defineComponent({
         $service
           .cancelarPedido(pedidoUuid)
           .then(() => {
-            $q.notify({ type: "positive", message: "Pedido cancelado com sucesso." });
             listarPedidos();
           })
           .catch(() =>
