@@ -4,6 +4,7 @@ import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import axios from "axios";
+import { randomUUID } from "crypto";
 
 const companyUuid = "e8d34640-f273-4d62-8b06-5bb19d6169ad";
 let repo: GerarCobrancaRepository;
@@ -27,6 +28,9 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const http = axios.create({ baseURL: "https://api-sandbox.asaas.com" });
     const connectionHub = new ConnectionHub({ database: dataSource, http });
     repo = new GerarCobrancaRepository(connectionHub);
+
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+      VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
   });
   beforeEach(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
@@ -35,6 +39,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
     await dataSource.destroy();
   });
 
@@ -101,6 +106,8 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].link_boleto).toBe("https://boleto.url");
     expect(pagamentos[0].valor).toBe(154.36);
     expect(pagamentos[0].valor_com_desc_gateway).toBe(152.0);
+
+    expect(getStub.args[0][1].headers.access_token).toBe("FINANCEIRO_CHAVE_API");
 
     getStub.restore();
     postStub.restore();

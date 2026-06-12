@@ -22,6 +22,8 @@ export type GerarCobrancaOutput = {
   pagamentos: PagamentoOutput[];
 };
 
+const baseUrl = "https://api-sandbox.asaas.com";
+
 export class GerarCobrancaGatewayAsaas {
   constructor(readonly connectionHub: ConnectionHub) {}
 
@@ -44,9 +46,9 @@ export class GerarCobrancaGatewayAsaas {
   }
 
   private async formaPagamentoBoleto(cobranca: CobrancaEntity): Promise<GerarCobrancaOutput> {
-    const cliente = await this.buscarCliente(cobranca.pagador());
+    const cliente = await this.buscarCliente(cobranca);
 
-    const url = "https://api-sandbox.asaas.com/v3/payments";
+    const url = `${baseUrl}/v3/payments`;
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",
@@ -68,7 +70,7 @@ export class GerarCobrancaGatewayAsaas {
       // callback: { successUrl: "", autoRedirect: true }, // Informações de redirecionamento automático após pagamento do link de pagamento
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    const responseParcelas = await this.buscarParcelas(responseCobranca?.data?.installment);
+    const responseParcelas = await this.buscarParcelas(cobranca, responseCobranca?.data?.installment);
     return {
       gatewayRef: responseCobranca?.data?.installment,
       pagamentos: responseParcelas,
@@ -76,14 +78,15 @@ export class GerarCobrancaGatewayAsaas {
   }
 
   private async formaPagamentoCartaoCredito(cobranca: CobrancaEntity): Promise<GerarCobrancaOutput> {
-    const cliente = await this.buscarCliente(cobranca.pagador());
+    const cliente = await this.buscarCliente(cobranca);
 
-    const url = "https://api-sandbox.asaas.com/v3/payments";
+    const token = await this.buscarToken(cobranca);
+    const url = `${baseUrl}/v3/payments`;
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",
       "content-type": "application/json",
-      access_token: process.env.FINANCEIRO_CHAVE_API,
+      access_token: token,
     };
     const body = {
       externalReference: cobranca.uuid(),
@@ -107,7 +110,7 @@ export class GerarCobrancaGatewayAsaas {
       },
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    const pagamentos = await this.buscarParcelas(responseCobranca?.data?.installment);
+    const pagamentos = await this.buscarParcelas(cobranca, responseCobranca?.data?.installment);
     return {
       gatewayRef: responseCobranca?.data?.installment,
       pagamentos,
@@ -127,45 +130,48 @@ export class GerarCobrancaGatewayAsaas {
     }
   }
 
-  private async buscarCliente(pagador: { nome: string; documento: string; email: string; telefone: string }): Promise<{ id: string }> {
-    const url = `https://api-sandbox.asaas.com/v3/customers?cpfCnpj=${pagador.documento}`;
+  private async buscarCliente(cobranca: CobrancaEntity): Promise<{ id: string }> {
+    const token = await this.buscarToken(cobranca);
+    const url = `${baseUrl}/v3/customers?cpfCnpj=${cobranca.pagador().documento}`;
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",
       "content-type": "application/json",
-      access_token: process.env.FINANCEIRO_CHAVE_API,
+      access_token: token,
     };
     const response = await this.connectionHub.http?.get(url, { headers });
-    if (!response?.data?.data.length) return await this.cadastrarCliente(pagador);
+    if (!response?.data?.data.length) return await this.cadastrarCliente(cobranca);
     return response?.data?.data[0];
   }
 
-  private async cadastrarCliente(pagador: { nome: string; documento: string; email: string; telefone: string }) {
-    const url = `https://api-sandbox.asaas.com/v3/customers`;
+  private async cadastrarCliente(cobranca: CobrancaEntity) {
+    const token = await this.buscarToken(cobranca);
+    const url = `${baseUrl}/v3/customers`;
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",
       "content-type": "application/json",
-      access_token: process.env.FINANCEIRO_CHAVE_API,
+      access_token: token,
     };
     const body = {
-      name: pagador.nome,
-      cpfCnpj: pagador.documento,
-      email: pagador.email,
-      phone: pagador.telefone,
+      name: cobranca.pagador().nome,
+      cpfCnpj: cobranca.pagador().documento,
+      email: cobranca.pagador().email,
+      phone: cobranca.pagador().telefone,
     };
     await this.connectionHub.http?.post(url, body, { headers });
-    return this.buscarCliente(pagador);
+    return this.buscarCliente(cobranca);
   }
 
-  private async buscarParcelas(installment: string, linkCartao?: string): Promise<PagamentoOutput[]> {
+  private async buscarParcelas(cobranca: CobrancaEntity, installment: string, linkCartao?: string): Promise<PagamentoOutput[]> {
     try {
-      const url = `https://api-sandbox.asaas.com/v3/installments/${installment}/payments?limit=24`;
+      const token = await this.buscarToken(cobranca);
+      const url = `${baseUrl}/v3/installments/${installment}/payments?limit=24`;
       const headers = {
         accept: "application/json",
         "User-Agent": "NomeDaSuaAplicacao/1.0.0",
         "content-type": "application/json",
-        access_token: process.env.FINANCEIRO_CHAVE_API,
+        access_token: token,
       };
       const response = await this.connectionHub.http?.get(url, { headers });
 
@@ -189,5 +195,13 @@ export class GerarCobrancaGatewayAsaas {
       console.log(error);
       return [];
     }
+  }
+
+  private async buscarToken(cobranca: CobrancaEntity) {
+    const [contaBancariaModel] = await this.connectionHub.database?.query(
+      `SELECT chave_api FROM financeiro_contas_bancarias WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'ativo'`,
+      [cobranca.companyUuid()],
+    );
+    return contaBancariaModel?.chave_api;
   }
 }
