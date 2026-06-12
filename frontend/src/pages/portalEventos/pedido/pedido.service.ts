@@ -50,8 +50,8 @@ export class PedidoService {
       eventoUuid: this.$pedidoStore.$state.evento.uuid,
       pedido: this.$pedidoStore.$state.pedido.itens,
     };
-    await this.pedidoHttp.criarPedido(input);
-    await this.listarPedidos(input.eventoUuid);
+    const response = await this.pedidoHttp.criarPedido(input);
+    await this.buscarPedido(response.data.uuid);
   }
 
   async listarPedidos(eventoUuid: string) {

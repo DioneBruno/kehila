@@ -1,5 +1,6 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
+import { ApiDate } from "src/@modules/shared/apiDate";
 
 export type GerarCobrancaOutput = {
   gatewayRef: string; // installment
@@ -36,7 +37,7 @@ export class GerarCobrancaGatewayAsaas {
         billingType: "boleto", //BOLETO, CREDIT_CARD, PIX
         customer: cliente.id,
         value: cobranca.valor(),
-        dueDate: "2026-06-10",
+        dueDate: ApiDate.addDay(ApiDate.now(), 1),
         description: `Breve descrição para a cobrança`,
         installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
         // installmentValue: cobranca.valor(), // Valor de cada parcela (somente no caso de cobrança parcelada). Envie este campo em caso de querer definir o valor de cada parcela.
