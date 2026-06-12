@@ -8,9 +8,10 @@
     <div v-else class="q-gutter-md">
       <div v-html="evento.descricao" />
       <div v-for="lote in evento.lotes" :key="lote.uuid">
-        <div class="text-grey-8">Opções para ingressos</div>
+        <!-- <div class="text-grey-8">Opções para ingressos</div> -->
         <div class="row items-center q-mb-sm">
-          <span class="text-overline text-grey-7 text-weight-bold">{{ lote.nome }}</span>
+          <q-separator class="col q-ml-sm" />
+          <span class="text-overline text-grey-7 text-bold">{{ lote.nome }}</span>
           <q-separator class="col q-ml-sm" />
         </div>
 
