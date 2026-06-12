@@ -40,6 +40,8 @@ export class PedidosController {
       pagadorDocumento: body.pagadorDocumento,
       pagadorEmail: body.pagadorEmail,
       pagadorTelefone: body.pagadorTelefone,
+      tipoCobranca: body.tipoCobranca,
+      cartaoCredito: body.cartaoCredito,
     };
     await this.gerarCobrancaUsecase.execute(input);
     return res.status(200).json({ message: "Boleto gerado com sucesso" });

@@ -2,7 +2,7 @@
   <div class="row q-col-gutter-md">
     <div class="col-12">
       <q-input
-        :model-value="pagador.cartao.numero"
+        v-model="pagador.cartao.numero"
         label="Número do cartão"
         outlined
         mask="#### #### #### ####"
@@ -15,7 +15,7 @@
     </div>
     <div class="col-12">
       <q-input
-        :model-value="pagador.cartao.nome"
+        v-model="pagador.cartao.nome"
         label="Nome no cartão"
         outlined
         placeholder="Como está impresso"
@@ -23,7 +23,7 @@
     </div>
     <div class="col-6">
       <q-input
-        :model-value="pagador.cartao.validade"
+        v-model="pagador.cartao.validade"
         label="Validade"
         outlined
         mask="##/##"
@@ -31,11 +31,11 @@
       />
     </div>
     <div class="col-6">
-      <q-input :model-value="pagador.cartao.cvv" label="CVV" outlined mask="###" type="password" />
+      <q-input v-model="pagador.cartao.cvv" label="CVV" outlined mask="###" type="password" />
     </div>
     <div class="col-12">
       <q-select
-        :model-value="pagador.numParcelas"
+        v-model="pagador.numParcelas"
         label="Parcelas"
         outlined
         :options="opcoesParcelas"
@@ -80,20 +80,39 @@ export default defineComponent({
     const data = reactive({
       pedido: computed(() => $pedidoStore.$state.pedido),
       pagador: ref({
-        pedidoUuid: null,
+        pedidoUuid: null as string | null,
         numParcelas: 1,
         tipoPagador: "usuarioLogado",
         pagadorNome: "",
         pagadorDocumento: "",
         pagadorEmail: "",
         pagadorTelefone: "",
-        cartao: ref({} as any),
+        cartao: reactive({
+          numero: "",
+          nome: "",
+          validade: "",
+          cvv: "",
+        }),
       }),
     });
 
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
-      await $service.gerarCobranca(data.pagador);
+      const [mes, ano] = data.pagador.cartao.validade.split("/");
+      const payload = {
+        pedidoUuid: data.pagador.pedidoUuid,
+        numParcelas: data.pagador.numParcelas,
+        tipoPagador: data.pagador.tipoPagador,
+        tipoCobranca: "cartaoCredito",
+        cartaoCredito: {
+          numeroCartao: data.pagador.cartao.numero.replace(/\s/g, ""),
+          nomeNoCartao: data.pagador.cartao.nome,
+          mesVencimento: mes,
+          anoVencimento: ano,
+          codigoSeguranca: data.pagador.cartao.cvv,
+        },
+      };
+      await $service.gerarCobranca(payload);
     }
 
     return {
