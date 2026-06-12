@@ -1,5 +1,5 @@
 <template>
-  <q-page class="bg-grey-2" :class="{ 'page-with-bar': totalIngressos > 0 }">
+  <q-page class="bg-grey-2 q-pb-xl" :class="{ 'page-with-bar': totalIngressos > 0 }">
     <!-- Hero do evento -->
     <Cabecalho />
 
