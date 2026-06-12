@@ -63,5 +63,10 @@ export const usePedidoStore = defineStore("pedidoStore", {
         Object.assign(state.pedido, { ...pedido, etapa: pedido.cobrancas?.length ? 6 : 4 });
       });
     },
+    resetPedido() {
+      this.$patch((state) => {
+        state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [] };
+      });
+    },
   },
 });

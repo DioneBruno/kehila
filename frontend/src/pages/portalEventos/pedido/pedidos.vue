@@ -1,78 +1,85 @@
 <template>
   <div class="col-md-4 gt-sm" v-if="user.uuid">
-    <span v-if="pedidos.length > 0">
-      <q-card flat bordered class="resumo-sticky">
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-bold row items-center">
+    <q-card flat bordered class="resumo-sticky">
+      <q-card-section>
+        <div class="text-subtitle1 text-weight-bold row items-center justify-between">
+          <div class="row items-center">
             <q-icon name="shopping_bag" class="q-mr-sm" color="primary" />
             Meus pedidos
           </div>
-        </q-card-section>
+          <q-btn
+            unelevated
+            color="primary"
+            icon="add"
+            label="Novo pedido"
+            size="sm"
+            @click="novoPedido"
+          />
+        </div>
+      </q-card-section>
 
-        <q-list separator>
-          <q-item v-for="pedido in pedidos" :key="pedido.uuid" class="q-py-md">
-            <q-item-section>
-              <div class="row items-center justify-between q-mb-xs">
-                <q-chip
-                  dense
-                  size="sm"
-                  :color="statusColor(pedido.status)"
-                  text-color="white"
-                  class="text-capitalize q-ma-none"
-                >
-                  {{ pedido.status }}
-                </q-chip>
-                <span class="text-weight-bold text-primary">
-                  {{ formatCurrency(pedido.valorLiquido) }}
-                </span>
-              </div>
+      <q-list separator v-if="pedidos.length > 0">
+        <q-item v-for="pedido in pedidos" :key="pedido.uuid" class="q-py-md">
+          <q-item-section>
+            <div class="row items-center justify-between q-mb-xs">
+              <q-chip
+                dense
+                size="sm"
+                :color="statusColor(pedido.status)"
+                text-color="white"
+                class="text-capitalize q-ma-none"
+              >
+                {{ pedido.status }}
+              </q-chip>
+              <span class="text-weight-bold text-primary">
+                {{ formatCurrency(pedido.valorLiquido) }}
+              </span>
+            </div>
 
-              <q-item-label caption class="q-mt-xs">
-                <q-icon name="event" size="12px" class="q-mr-xs" />
-                Criado em: {{ pedido.createdAt }}
-              </q-item-label>
+            <q-item-label caption class="q-mt-xs">
+              <q-icon name="event" size="12px" class="q-mr-xs" />
+              Criado em: {{ pedido.createdAt }}
+            </q-item-label>
 
-              <q-item-label caption v-if="pedido.pagoEm">
-                <q-icon name="check_circle" size="12px" color="positive" class="q-mr-xs" />
-                Pago em: {{ pedido.pagoEm }}
-              </q-item-label>
+            <q-item-label caption v-if="pedido.pagoEm">
+              <q-icon name="check_circle" size="12px" color="positive" class="q-mr-xs" />
+              Pago em: {{ pedido.pagoEm }}
+            </q-item-label>
 
-              <q-item-label caption>
-                <q-icon name="confirmation_number" size="12px" class="q-mr-xs" />
-                {{ pedido.quantidadeIngressos }} ingresso{{
-                  pedido.quantidadeIngressos !== 1 ? "s" : ""
-                }}
-              </q-item-label>
+            <q-item-label caption>
+              <q-icon name="confirmation_number" size="12px" class="q-mr-xs" />
+              {{ pedido.quantidadeIngressos }} ingresso{{
+                pedido.quantidadeIngressos !== 1 ? "s" : ""
+              }}
+            </q-item-label>
 
-              <div v-if="pedido.status === 'pendente'" class="q-mt-sm text-right">
-                <q-btn
-                  flat
-                  dense
-                  color="negative"
-                  icon="cancel"
-                  label="Cancelar"
-                  size="sm"
-                  :loading="cancelando === pedido.uuid"
-                  @click="confirmarCancelamento(pedido.uuid)"
-                />
-              </div>
-            </q-item-section>
-          </q-item>
+            <div v-if="pedido.status === 'pendente'" class="q-mt-sm text-right">
+              <q-btn
+                flat
+                dense
+                color="negative"
+                icon="cancel"
+                label="Cancelar"
+                size="sm"
+                :loading="cancelando === pedido.uuid"
+                @click="confirmarCancelamento(pedido.uuid)"
+              />
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
 
-          <q-item v-if="pedidos.length === 0">
-            <q-item-section class="text-center text-grey q-py-md">
-              Nenhum pedido encontrado
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card>
-    </span>
+      <q-card-section v-else>
+        <div class="text-center text-grey q-py-sm">Nenhum pedido encontrado</div>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 <script lang="ts">
 import { useQuasar } from "quasar";
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { useAuthStore } from "src/stores/auth";
+import { usePedidoStore } from "src/stores/pedido";
 import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
 
@@ -80,6 +87,7 @@ export default defineComponent({
   name: "PedidoPedidos",
   setup() {
     const $authStore = useAuthStore();
+    const $pedidoStore = usePedidoStore();
     const $service = new PedidoService();
     const $route = useRoute();
     const $q = useQuasar();
@@ -139,12 +147,19 @@ export default defineComponent({
       );
     }
 
+    function novoPedido() {
+      $pedidoStore.$patch((state) => {
+        state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [] };
+      });
+    }
+
     return {
       ...toRefs(data),
       cancelando,
       confirmarCancelamento,
       statusColor,
       formatCurrency,
+      novoPedido,
     };
   },
 });
