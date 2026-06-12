@@ -278,4 +278,47 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     getStub.restore();
     postStub.restore();
   });
+
+  test("Caso Cartáo de Credito,  todo objeto cartaoCredito deve ser informado", async () => {
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+      return Promise.resolve({
+        data: {
+          data: [{ id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null }],
+        },
+      });
+    });
+    const postStub = stub(http, "post").resolves({ data: { installment: installmentId, invoiceUrl: "invoiceUrl", invoiceNumber: "invoiceNumber" } });
+
+    const input = {
+      companyUuid,
+      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      tipoCobranca: "cartaoCredito",
+      cartaoCredito: {
+        nomeNoCartao: "",
+        numeroCartao: "",
+        mesVencimento: "",
+        anoVencimento: "",
+        codigoSeguranca: "",
+      },
+      pagadorNome: "Pagador de teste 001",
+      pagadorDocumento: "88247744317",
+      pagadorEmail: "emailpagador@gmail.com",
+      pagadorTelefone: "65985455877",
+      valor: 300,
+      numParcelas: 3,
+      vencimento: "2026-07-12",
+    };
+
+    await expect(new GerarCobrancaUsecase(repo).execute(input)).rejects.toThrow("Cartão de crédito inválido, todos os campos devem ser informados");
+
+    getStub.restore();
+    postStub.restore();
+  });
 });
