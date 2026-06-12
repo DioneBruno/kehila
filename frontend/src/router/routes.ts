@@ -32,6 +32,21 @@ const routes: RouteRecordRaw[] = [
         name: "eventos.lotes",
         component: () => import("pages/portalEventos/eventos/loteListar.vue"),
       },
+      {
+        path: "financeiro/contas-bancarias",
+        name: "financeiro.contas-bancarias",
+        component: () => import("pages/financeiro/contaBancaria/contaBancariaListar.vue"),
+      },
+      {
+        path: "financeiro/contas-bancarias/criar",
+        name: "financeiro.contas-bancarias.criar",
+        component: () => import("pages/financeiro/contaBancaria/contaBancariaIncluir.vue"),
+      },
+      {
+        path: "financeiro/contas-bancarias/:uuid",
+        name: "financeiro.contas-bancarias.detalhe",
+        component: () => import("pages/financeiro/contaBancaria/contaBancariaEditar.vue"),
+      },
     ],
   },
   {

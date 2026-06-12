@@ -20,22 +20,32 @@
           MENU
         </q-item-label>
 
-        <q-item
-          v-for="item in menuItems"
-          :key="item.label"
-          clickable
-          v-ripple
-          :to="{ name: item.route }"
-          active-class="text-primary bg-blue-1"
-          class="rounded-borders q-mb-xs"
-        >
-          <q-item-section avatar>
-            <q-icon :name="item.icon" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ item.label }}</q-item-label>
-          </q-item-section>
-        </q-item>
+        <template v-for="item in menuItems">
+          <q-item-label
+            v-if="item.type === 'section'"
+            :key="'sec-' + item.label"
+            header
+            class="text-grey-6 text-weight-bold text-caption q-mt-sm"
+          >
+            {{ item.label }}
+          </q-item-label>
+          <q-item
+            v-else
+            :key="item.label"
+            clickable
+            v-ripple
+            :to="{ name: item.route }"
+            active-class="text-primary bg-blue-1"
+            class="rounded-borders q-mb-xs"
+          >
+            <q-item-section avatar>
+              <q-icon :name="item.icon" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ item.label }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
 
         <q-separator class="q-my-md" />
 
@@ -64,6 +74,8 @@ import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 const MENU_ITEMS = [
   { label: "Início", icon: "home", route: "home" },
   { label: "Eventos", icon: "event", route: "eventos" },
+  { label: "FINANCEIRO", type: "section" },
+  { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
 ];
 
 export default defineComponent({

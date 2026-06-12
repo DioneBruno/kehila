@@ -7,6 +7,7 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { NotificacaoModule } from "./notificacao/notificacao.module";
+import { FinanceiroModule } from "./financeiro/financeiro.module";
 import axios from "axios";
 
 @Global()
@@ -24,6 +25,7 @@ import axios from "axios";
     }),
     AuthModule,
     PortalEventosModule,
+    FinanceiroModule,
     NotificacaoModule,
   ],
   controllers: [AppController],
