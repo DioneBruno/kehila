@@ -64,7 +64,13 @@ export class GerarCobrancaRepository {
     );
   }
 
-  async criarCobranca(pedido: PedidoEntity, pagador: PagadorEntity, numParcelas: number): Promise<void> {
+  async criarCobranca(
+    pedido: PedidoEntity,
+    pagador: PagadorEntity,
+    numParcelas: number,
+    tipoCobranca?: string,
+    cartaoCredito?: { nomeNoCartao: string; numeroCartao: string; mesVencimento: string; anoVencimento: string; codigoSeguranca: string },
+  ): Promise<void> {
     const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
@@ -78,6 +84,8 @@ export class GerarCobrancaRepository {
       pagadorEmail: pagador.email(),
       pagadorTelefone: pagador.telefone(),
       valor: pedido.valorTotal(),
+      tipoCobranca,
+      cartaoCredito,
     };
     await usecase.execute(input);
   }
