@@ -75,7 +75,7 @@ export class GerarCobrancaGatewayAsaas {
   private async formaPagamentoCartaoCredito(cobranca: CobrancaEntity): Promise<GerarCobrancaOutput> {
     const cliente = await this.buscarCliente(cobranca.pagador());
 
-    const url = "https://api-sandbox.asaas.com/v3/payments";
+    const url = "https://api-sandbox.asaas.com/v3/lean/payments";
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",

@@ -232,6 +232,13 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
       origem: "origem",
       origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
       tipoCobranca: "cartaoCredito",
+      cartaoCredito: {
+        nomeNoCartao: "holderName",
+        numeroCartao: "number",
+        mesVencimento: "06",
+        anoVencimento: "25",
+        codigoSeguranca: "ccv",
+      },
       pagadorNome: "Pagador de teste 001",
       pagadorDocumento: "88247744317",
       pagadorEmail: "emailpagador@gmail.com",
@@ -244,7 +251,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     await new GerarCobrancaUsecase(repo).execute(input);
 
     // Verifica que installmentCount e totalValue foram enviados corretamente
-    expect(postStub.firstCall.args[0]).toContain("v3/payments");
+    expect(postStub.firstCall.args[0]).toContain("v3/lean/payments");
     const bodyCobranca = postStub.firstCall.args[1] as any;
     expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
@@ -253,6 +260,11 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
     expect(postStub.firstCall.args[1].installmentCount).toBe(3);
     expect(postStub.firstCall.args[1].totalValue).toBe(300);
+    expect(postStub.firstCall.args[1].creditCard.holderName).toBe("holderName");
+    expect(postStub.firstCall.args[1].creditCard.number).toBe("number");
+    expect(postStub.firstCall.args[1].creditCard.expiryMonth).toBe("expiryMonth");
+    expect(postStub.firstCall.args[1].creditCard.expiryYear).toBe("expiryYear");
+    expect(postStub.firstCall.args[1].creditCard.ccv).toBe("ccv");
     expect(bodyCobranca.installmentCount).toBe(3);
     expect(bodyCobranca.totalValue).toBe(300);
 
