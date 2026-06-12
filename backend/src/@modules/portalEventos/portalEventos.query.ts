@@ -119,20 +119,23 @@ export class PortalEventosQuery {
     const ingressosModel = await this.connectionHub.database!.query(
       `
       SELECT 
-        uuid,
-        codigo,
-        pessoa_nome "pessoaNome",
-        pessoa_email "pessoaEmail",
-        pessoa_telefone "pessoaTelefone",
-        pessoa_documento "pessoaDocumento",
-        pessoa_uf "pessoaUf",
-        pessoa_cidade "pessoaCidade",
-        form_data "formData",
-        form_data_valido "formDataValido"
+        ingressos.uuid,
+        ingressos.codigo,
+        ingressos.pessoa_nome "pessoaNome",
+        ingressos.pessoa_email "pessoaEmail",
+        ingressos.pessoa_telefone "pessoaTelefone",
+        ingressos.pessoa_documento "pessoaDocumento",
+        ingressos.pessoa_uf "pessoaUf",
+        ingressos.pessoa_cidade "pessoaCidade",
+        ingressos.form_data "formData",
+        ingressos.form_data_valido "formDataValido",
+        tipos_ingresso.nome "tipoIngressoNome"
       FROM evento_ingressos ingressos
+        INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
+          ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
       WHERE ingressos.deleted_at IS NULL
         AND ingressos.pedido_uuid = $1
-      ORDER BY index
+      ORDER BY tipos_ingresso.uuid, ingressos.index
       `,
       [pedidoUuid],
     );

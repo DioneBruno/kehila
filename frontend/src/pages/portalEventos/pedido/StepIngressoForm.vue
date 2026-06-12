@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div class="text-grey-8 q-pb-sm">Preencha os dados para cada ingresso</div>
+    <div class="text-grey-8 q-pb-sm">
+      Preencha o formulário abaixo com atenção ao tipo de ingresso!
+    </div>
 
     <q-carousel
       v-model="slide"
@@ -18,10 +20,17 @@
         class="column no-wrap"
       >
         <div class="row items-center q-mb-md">
-          <q-icon name="confirmation_number" color="primary" size="sm" class="q-mr-xs" />
-          <span class="text-subtitle2 text-weight-medium text-grey-8">
-            Ingresso {{ Number(index) + 1 }} de {{ ingressos.length }}
-          </span>
+          <div>
+            <div>
+              <q-icon name="confirmation_number" color="primary" size="sm" class="q-mr-xs" />
+              <span class="text-subtitle2 text-weight-medium text-grey-8">
+                Ingresso {{ Number(index) + 1 }} de {{ ingressos.length }}
+              </span>
+            </div>
+            <div class="text-primary text-weight-medium text-italic">
+              Tipo: {{ ingresso.tipoIngressoNome }}
+            </div>
+          </div>
           <q-space />
           <q-btn
             v-if="Number(index) > 0"
