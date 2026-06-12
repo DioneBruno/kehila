@@ -45,7 +45,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
         };
       },
     };
-    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway);
+    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway as any);
 
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
@@ -76,7 +76,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
 
     const pagamentosModel = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentosModel.length).toBe(1);
-    expect(pagamentosModel[0].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[0].forma_pagamento).toBe("BOLETO");
     expect(pagamentosModel[0].banco_ref).toBe("pagamentoBancoRef");
     expect(pagamentosModel[0].status).toBe("pendente");
     expect(pagamentosModel[0].vencimento).toBe(input.vencimento);
@@ -134,7 +134,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
         };
       },
     };
-    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway);
+    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway as any);
 
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
@@ -166,7 +166,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
 
     const pagamentosModel = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentosModel.length).toBe(3);
-    expect(pagamentosModel[0].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[0].forma_pagamento).toBe("BOLETO");
     expect(pagamentosModel[0].banco_ref).toBe("pagamentoBancoRef1");
     expect(pagamentosModel[0].status).toBe("pendente");
     expect(pagamentosModel[0].vencimento).toBe("2026-06-10");
@@ -178,7 +178,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(pagamentosModel[0].linha_digitavel).toBe("linhaDigitavel1");
     expect(pagamentosModel[0].pix).toBe("pix1");
 
-    expect(pagamentosModel[1].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[1].forma_pagamento).toBe("BOLETO");
     expect(pagamentosModel[1].banco_ref).toBe("pagamentoBancoRef2");
     expect(pagamentosModel[1].status).toBe("pendente");
     expect(pagamentosModel[1].vencimento).toBe("2026-07-10");
@@ -190,7 +190,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(pagamentosModel[1].linha_digitavel).toBe("linhaDigitavel2");
     expect(pagamentosModel[1].pix).toBe("pix2");
 
-    expect(pagamentosModel[2].forma_pagamento).toBe("boleto");
+    expect(pagamentosModel[2].forma_pagamento).toBe("BOLETO");
     expect(pagamentosModel[2].banco_ref).toBe("pagamentoBancoRef3");
     expect(pagamentosModel[2].status).toBe("pendente");
     expect(pagamentosModel[2].vencimento).toBe("2026-08-10");
@@ -226,7 +226,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
         };
       },
     };
-    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway);
+    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway as any);
 
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {

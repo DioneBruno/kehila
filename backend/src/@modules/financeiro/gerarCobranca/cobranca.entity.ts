@@ -11,6 +11,7 @@ export type CobrancaProps = {
   valor: number;
   vencimento?: string;
   numParcelas?: number;
+  tipoCobranca?: string;
 };
 
 export class CobrancaEntity {
@@ -26,6 +27,9 @@ export class CobrancaEntity {
   }
   userUuid(): string {
     return this.props.userUuid;
+  }
+  tipoCobranca(): string {
+    return this.props.tipoCobranca ?? "boleto";
   }
   pagador(): { nome: string; documento: string; email: string; telefone: string } {
     return {

@@ -80,7 +80,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const bodyCobranca = postStub.firstCall.args[1] as any;
     expect(bodyCobranca.customer).toBe(clienteId);
     expect(bodyCobranca.value).toBe(defaultInput.valor);
-    expect(bodyCobranca.billingType).toBe("boleto");
+    expect(bodyCobranca.billingType).toBe("BOLETO");
     expect(bodyCobranca.installmentCount).toBe(1);
 
     // Verifica GET parcelas com installment ID correto
@@ -98,6 +98,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].banco_ref).toBe("pay_000001");
     expect(pagamentos[0].nosso_numero).toBe("123456");
     expect(pagamentos[0].pix).toBe("pix-code");
+    expect(pagamentos[0].link_boleto).toBe("https://boleto.url");
     expect(pagamentos[0].valor).toBe(154.36);
     expect(pagamentos[0].valor_com_desc_gateway).toBe(152.0);
 
@@ -165,7 +166,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test("Deve criar cobrança parcelada enviando installmentCount correto", async () => {
+  test("Deve criar cobrança parcelada enviando installmentCount correto - boleto", async () => {
     const clienteId = "cus_000005113026";
     const installmentId = "ins_000001234567";
     const http = repo.connectionHub.http as any;
@@ -189,6 +190,13 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     // Verifica que installmentCount e totalValue foram enviados corretamente
     expect(postStub.firstCall.args[0]).toContain("v3/payments");
     const bodyCobranca = postStub.firstCall.args[1] as any;
+    expect(postStub.firstCall.args[1].billingType).toBe("BOLETO");
+    expect(postStub.firstCall.args[1].customer).toBe(clienteId);
+    expect(postStub.firstCall.args[1].value).toBe(300);
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
+    expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
+    expect(postStub.firstCall.args[1].installmentCount).toBe(3);
+    expect(postStub.firstCall.args[1].totalValue).toBe(300);
     expect(bodyCobranca.installmentCount).toBe(3);
     expect(bodyCobranca.totalValue).toBe(300);
 
@@ -198,6 +206,61 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].banco_ref).toBe("pay_001");
     expect(pagamentos[1].banco_ref).toBe("pay_002");
     expect(pagamentos[2].banco_ref).toBe("pay_003");
+
+    getStub.restore();
+    postStub.restore();
+  });
+
+  test("Deve criar cobrança parcelada enviando installmentCount correto - Cartáo de Credito", async () => {
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+      return Promise.resolve({
+        data: {
+          data: [{ id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null }],
+        },
+      });
+    });
+    const postStub = stub(http, "post").resolves({ data: { installment: installmentId, invoiceUrl: "invoiceUrl", invoiceNumber: "invoiceNumber" } });
+
+    const input = {
+      companyUuid,
+      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      tipoCobranca: "cartaoCredito",
+      pagadorNome: "Pagador de teste 001",
+      pagadorDocumento: "88247744317",
+      pagadorEmail: "emailpagador@gmail.com",
+      pagadorTelefone: "65985455877",
+      valor: 300,
+      numParcelas: 3,
+      vencimento: "2026-07-12",
+    };
+
+    await new GerarCobrancaUsecase(repo).execute(input);
+
+    // Verifica que installmentCount e totalValue foram enviados corretamente
+    expect(postStub.firstCall.args[0]).toContain("v3/payments");
+    const bodyCobranca = postStub.firstCall.args[1] as any;
+    expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
+    expect(postStub.firstCall.args[1].customer).toBe(clienteId);
+    expect(postStub.firstCall.args[1].value).toBe(300);
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
+    expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
+    expect(postStub.firstCall.args[1].installmentCount).toBe(3);
+    expect(postStub.firstCall.args[1].totalValue).toBe(300);
+    expect(bodyCobranca.installmentCount).toBe(3);
+    expect(bodyCobranca.totalValue).toBe(300);
+
+    // Verifica que 1 pagamentos foram salvos
+    const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentos.length).toBe(1);
+    expect(pagamentos[0].banco_ref).toBe("pay_001");
+    expect(pagamentos[0].link_cartao).toBe("invoiceUrl");
 
     getStub.restore();
     postStub.restore();

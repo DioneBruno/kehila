@@ -7,6 +7,7 @@ export type GerarCobrancaInput = {
   userUuid: string;
   origem: string;
   origemUuid: string;
+  tipoCobranca?: string;
   pagadorNome: string;
   pagadorDocumento: string;
   pagadorEmail: string;
@@ -24,6 +25,7 @@ export class GerarCobrancaUsecase {
       uuid: randomUUID(),
       companyUuid: input.companyUuid,
       userUuid: input.userUuid,
+      tipoCobranca: input.tipoCobranca,
       pagadorNome: input.pagadorNome,
       pagadorDocumento: input.pagadorDocumento,
       pagadorEmail: input.pagadorEmail,
