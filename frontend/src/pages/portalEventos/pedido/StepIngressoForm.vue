@@ -90,7 +90,19 @@
               mask="(##) #####-####"
             />
           </div>
-          <div class="col-12 col-sm-4">
+          <div class="col-12 col-sm-3">
+            <q-select
+              outlined
+              dense
+              stack-label
+              v-model="ingresso.pessoaPais"
+              label="Pais"
+              :options="paises"
+              emit-value
+              map-options
+            />
+          </div>
+          <div class="col-12 col-sm-2">
             <q-select
               outlined
               dense
@@ -108,7 +120,7 @@
               "
             />
           </div>
-          <div class="col-12 col-sm-8">
+          <div class="col-12 col-sm-7">
             <q-select
               outlined
               dense
@@ -133,18 +145,7 @@
               emit-value
               v-model="ingresso.formData.distrito"
               label="Distrito"
-              :options="[
-                { label: 'Distrito01', value: 'Distrito01' },
-                { label: 'Distrito02', value: 'Distrito02' },
-                { label: 'Distrito03', value: 'Distrito03' },
-                { label: 'Distrito04', value: 'Distrito04' },
-                { label: 'Distrito05', value: 'Distrito05' },
-                { label: 'Distrito06', value: 'Distrito06' },
-                { label: 'Distrito07', value: 'Distrito07' },
-                { label: 'Distrito08', value: 'Distrito08' },
-                { label: 'Distrito09', value: 'Distrito09' },
-                { label: 'Distrito10', value: 'Distrito10' },
-              ]"
+              :options="districos"
             />
           </div>
           <div class="col-12 row q-mt-md row items-center justify-center q-gutter-sm">
@@ -213,6 +214,18 @@ import { computed, defineComponent, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
 
+const paises = [
+  { label: "Brasil", value: "BR" },
+  { label: "Argentina", value: "AR" },
+  { label: "Bolívia", value: "BO" },
+  { label: "Chile", value: "CL" },
+  { label: "Colômbia", value: "CO" },
+  { label: "Paraguai", value: "PY" },
+  { label: "Peru", value: "PE" },
+  { label: "Uruguai", value: "UY" },
+  { label: "Venezuela", value: "VE" },
+];
+
 const UFS = [
   "AC",
   "AL",
@@ -241,6 +254,68 @@ const UFS = [
   "SP",
   "SE",
   "TO",
+];
+
+const districos = [
+  "Alto Rio Madeira",
+  "Alto Taquari",
+  "Amazonico",
+  "Bandeirante",
+  "Brasil Centro-Oeste",
+  "Campos Gerais",
+  "Capixaba",
+  "Cataratas",
+  "Centro Serrano",
+  "Concordia",
+  "Espirito Santo Norte",
+  "Espirito Santo Sul",
+  "Fronteira Sul",
+  "Gaucho Central",
+  "Hortensias",
+  "Lago Itaipu",
+  "Leste Catarinense",
+  "Litoral Norte Gaucho",
+  "Mato Grosso",
+  "Mato Grosso do Sul",
+  "Medio Oeste Catarinense",
+  "Mineiro",
+  "Missioneiro",
+  "Nordeste Catarinense",
+  "Nordeste Coqueiros",
+  "Nordeste Verdes Mares",
+  "Noroeste Gaucho",
+  "Norte Mato-Grossense",
+  "Oeste Catarinense",
+  "Para Norte",
+  "Parana Centro",
+  "Parana Leste",
+  "Parana Norte",
+  "Parana Sul",
+  "Parque do Iguacu",
+  "Paulista",
+  "Pioneiro",
+  "Planalto",
+  "Porto-Alegrense",
+  "Rio Aripuana",
+  "Rio de Janeiro",
+  "Rio Doce",
+  "Rio Machado",
+  "Rio Uruguai",
+  "Salto do Yucuma",
+  "Sete Quedas",
+  "Sul I",
+  "Sul II",
+  "Vale do Guapore",
+  "Vale do Iguacu",
+  "Vale do Itajai",
+  "Vale do Rio dos Sinos",
+  "Vale do Rio Gravatai",
+  "Vale do Rio Ijui",
+  "Vale do Rio Pardo",
+  "Vale do Rio do Peixe",
+  "Vale do Tocantins",
+  "Verdes Vales",
+  "Videiras",
 ];
 
 export default defineComponent({
@@ -288,7 +363,9 @@ export default defineComponent({
       todosIngressosValidos: computed(() =>
         ($pedidoStore.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true),
       ),
+      paises: paises.map((pais) => ({ label: pais.label, value: pais.value })),
       ufs: UFS.map((uf) => ({ label: uf, value: uf })),
+      districos: districos.map((districo) => ({ label: districo, value: districo })),
     });
 
     async function editarFormIngresso(ingresso: any) {
@@ -298,6 +375,7 @@ export default defineComponent({
     function copiarDadosPrimeiroIngresso(ingresso: any) {
       const primeiro = ($pedidoStore.$state.pedido.ingressos ?? [])[0];
       if (!primeiro) return;
+      ingresso.pessoaPais = primeiro.pessoaPais;
       ingresso.pessoaEmail = primeiro.pessoaEmail;
       ingresso.pessoaTelefone = primeiro.pessoaTelefone;
       ingresso.pessoaUf = primeiro.pessoaUf;
