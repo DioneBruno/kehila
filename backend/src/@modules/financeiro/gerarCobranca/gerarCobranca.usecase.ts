@@ -27,6 +27,13 @@ export class GerarCobrancaUsecase {
   constructor(readonly repo: GerarCobrancaRepository) {}
 
   async execute(input: GerarCobrancaInput): Promise<any> {
+    if (input.tipoCobranca === "cartaoCredito") {
+      const cc = input.cartaoCredito;
+      if (!cc || !cc.nomeNoCartao || !cc.numeroCartao || !cc.mesVencimento || !cc.anoVencimento || !cc.codigoSeguranca) {
+        throw new Error("Cartão de crédito inválido, todos os campos devem ser informados");
+      }
+    }
+
     const gateway = this.repo.buscarGateway();
     const cobranca = new CobrancaEntity({
       uuid: randomUUID(),
