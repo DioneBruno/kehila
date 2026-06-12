@@ -1,6 +1,7 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
 import { ApiDate } from "src/@modules/shared/apiDate";
+import { ApiError } from "src/@modules/shared/apiError";
 
 export type PagamentoOutput = {
   gatewayRef: string; // id
@@ -202,6 +203,7 @@ export class GerarCobrancaGatewayAsaas {
       `SELECT chave_api FROM financeiro_contas_bancarias WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'ativo'`,
       [cobranca.companyUuid()],
     );
+    if (!contaBancariaModel) throw new ApiError("Conta bancária não encontrada", 400);
     return contaBancariaModel?.chave_api;
   }
 }
