@@ -19,7 +19,16 @@
       </q-card-section>
 
       <q-list separator v-if="pedidos.length > 0">
-        <q-item v-for="pedido in pedidos" :key="pedido.uuid" class="q-py-md">
+        <q-item
+          v-for="pedido in pedidos"
+          :key="pedido.uuid"
+          class="q-py-md"
+          clickable
+          v-ripple
+          :active="pedido.uuid === pedidoAtivoUuid"
+          active-class="bg-primary-soft"
+          @click="selecionarPedido(pedido.uuid)"
+        >
           <q-item-section>
             <div class="row items-center justify-between q-mb-xs">
               <q-chip
@@ -62,7 +71,7 @@
                 label="Cancelar"
                 size="sm"
                 :loading="cancelando === pedido.uuid"
-                @click="confirmarCancelamento(pedido.uuid)"
+                @click.stop="confirmarCancelamento(pedido.uuid)"
               />
             </div>
           </q-item-section>
@@ -147,6 +156,12 @@ export default defineComponent({
       );
     }
 
+    const pedidoAtivoUuid = computed(() => $pedidoStore.$state.pedido.uuid);
+
+    async function selecionarPedido(pedidoUuid: string) {
+      await $service.buscarPedido(pedidoUuid);
+    }
+
     function novoPedido() {
       $pedidoStore.$patch((state) => {
         state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [] };
@@ -156,7 +171,9 @@ export default defineComponent({
     return {
       ...toRefs(data),
       cancelando,
+      pedidoAtivoUuid,
       confirmarCancelamento,
+      selecionarPedido,
       statusColor,
       formatCurrency,
       novoPedido,
@@ -164,4 +181,8 @@ export default defineComponent({
   },
 });
 </script>
-<style></style>
+<style scoped>
+.bg-primary-soft {
+  background-color: rgba(var(--q-primary-rgb, 25, 118, 210), 0.08);
+}
+</style>
