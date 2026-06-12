@@ -163,4 +163,52 @@ describe("Deve testar GerarCobrancaUsecase", () => {
 
     gerarCobrancaStub.restore();
   });
+
+  test("Deve chamar FinanceiroGerarCobrancaUsecase tipo pagamento cartaoCredito", async () => {
+    const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";
+
+    const gerarCobrancaStub = stub(FinanceiroGerarCobrancaUsecase.prototype, "execute").resolves();
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone )
+      VALUES ('${userUuid}', 'nomeUsuario', 'cpfUsuario', 'emailUsuario', 'telefoneUsuario')`);
+
+    await dataSource.query(`INSERT INTO evento_pedidos (uuid, company_uuid, user_uuid, evento_uuid, idempotency_key, valor_bruto, valor_liquido)
+      VALUES ('${pedidoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', '123e4567', 500, 1000)`);
+
+    const ingressoUuidBase = "7a55d33-8c90-4836-a4f8-4b9a69f0a2d5";
+    await dataSource.query(`INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo, pessoa_nome, pessoa_email, pessoa_telefone, pessoa_documento, pessoa_uf, pessoa_cidade)
+      VALUES ('1${ingressoUuidBase}', '${companyUuid}', '${companyUuid}', '${companyUuid}', '${pedidoUuid}', '11111111', 'pessoa1', 'email Pessoa1', 'telefone Pessoa1', '11111111111', '11', 'cidade Pessoa1'),
+      ('2${ingressoUuidBase}', '${companyUuid}', '${companyUuid}', '${companyUuid}', '${pedidoUuid}', '22222222', 'pessoa2', 'email Pessoa2', 'telefone Pessoa2', '22222222222', '22', 'cidade Pessoa2'),
+      ('3${ingressoUuidBase}', '${companyUuid}', '${companyUuid}', '${companyUuid}', '${pedidoUuid}', '33333333', 'pessoa3', 'email Pessoa3', 'telefone Pessoa3', '33333333333', '33', 'cidade Pessoa3')`);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      pedidoUuid,
+      tipoPagador: "usuarioLogado" as const,
+      tipoCobranca: "cartaoCredito" as const,
+      cartaoCredito: {
+        codigoSeguranca: "codigoSeguranca",
+        mesVencimento: "mesVencimento",
+        nomeNoCartao: "nomeNoCartao",
+        numeroCartao: "numeroCartao",
+        anoVencimento: "anoVencimento",
+      },
+    };
+    await usecase.execute(input);
+
+    expect(gerarCobrancaStub.callCount).toBe(1);
+    expect(gerarCobrancaStub.args[0][0].valor).toBe(1000);
+    expect(gerarCobrancaStub.args[0][0].origem).toBe("eventoPedido");
+    expect(gerarCobrancaStub.args[0][0].origemUuid).toBe(pedidoUuid);
+    expect(gerarCobrancaStub.args[0][0].tipoCobranca).toBe("cartaoCredito");
+    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.nomeNoCartao).toBe("nomeNoCartao");
+    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.numeroCartao).toBe("numeroCartao");
+    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.mesVencimento).toBe("mesVencimento");
+    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.anoVencimento).toBe("anoVencimento");
+    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.codigoSeguranca).toBe("codigoSeguranca");
+
+    gerarCobrancaStub.restore();
+  });
 });
