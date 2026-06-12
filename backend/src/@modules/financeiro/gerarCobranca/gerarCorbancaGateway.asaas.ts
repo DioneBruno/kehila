@@ -95,6 +95,13 @@ export class GerarCobrancaGatewayAsaas {
       // daysAfterDueDateToRegistrationCancellation: 1, // Dias após o vencimento para cancelamento do registro (somente para boleto bancário)
       // fine: { type: "PERCENTAGE", value: 2 }, // Informações de multa para pagamento após o vencimento
       // callback: { successUrl: "", autoRedirect: true }, // Informações de redirecionamento automático após pagamento do link de pagamento
+      creditCard: {
+        holderName: cobranca.cartaoCredito()?.nomeNoCartao,
+        number: cobranca.cartaoCredito()?.numeroCartao,
+        expiryMonth: cobranca.cartaoCredito()?.mesVencimento,
+        expiryYear: cobranca.cartaoCredito()?.anoVencimento,
+        ccv: cobranca.cartaoCredito()?.codigoSeguranca,
+      },
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
     const linkCartao = responseCobranca?.data?.invoiceUrl;

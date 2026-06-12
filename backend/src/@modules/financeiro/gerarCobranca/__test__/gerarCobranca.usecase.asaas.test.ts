@@ -262,8 +262,8 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(postStub.firstCall.args[1].totalValue).toBe(300);
     expect(postStub.firstCall.args[1].creditCard.holderName).toBe("holderName");
     expect(postStub.firstCall.args[1].creditCard.number).toBe("number");
-    expect(postStub.firstCall.args[1].creditCard.expiryMonth).toBe("expiryMonth");
-    expect(postStub.firstCall.args[1].creditCard.expiryYear).toBe("expiryYear");
+    expect(postStub.firstCall.args[1].creditCard.expiryMonth).toBe("06");
+    expect(postStub.firstCall.args[1].creditCard.expiryYear).toBe("25");
     expect(postStub.firstCall.args[1].creditCard.ccv).toBe("ccv");
     expect(bodyCobranca.installmentCount).toBe(3);
     expect(bodyCobranca.totalValue).toBe(300);

@@ -1,3 +1,11 @@
+export type CartaoCreditoProps = {
+  nomeNoCartao: string;
+  numeroCartao: string;
+  mesVencimento: string;
+  anoVencimento: string;
+  codigoSeguranca: string;
+};
+
 export type CobrancaProps = {
   companyUuid: string;
   uuid: string;
@@ -12,6 +20,7 @@ export type CobrancaProps = {
   vencimento?: string;
   numParcelas?: number;
   tipoCobranca?: string;
+  cartaoCredito?: CartaoCreditoProps;
 };
 
 export class CobrancaEntity {
@@ -30,6 +39,9 @@ export class CobrancaEntity {
   }
   tipoCobranca(): string {
     return this.props.tipoCobranca ?? "boleto";
+  }
+  cartaoCredito(): CartaoCreditoProps | undefined {
+    return this.props.cartaoCredito;
   }
   pagador(): { nome: string; documento: string; email: string; telefone: string } {
     return {
