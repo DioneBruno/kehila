@@ -2,21 +2,24 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
 import { ApiDate } from "src/@modules/shared/apiDate";
 
+export type PagamentoOutput = {
+  gatewayRef: string; // id
+  nossoNumero: string; // nossoNumero
+  urlBoleto: string; // bankSlipUrl
+  vancimento: string; // dueDate
+  linkBoleto: string; // bankSlipUrl
+  codigoBarras: string; // codigoBarras
+  linhaDigitavel: string; // linhaDigitavel
+  pix: string; // pix
+  linkCartao: string;
+  valorCobranca: number; // value
+  valorComDescontoGateway: number; // netValue
+  status: string;
+};
+
 export type GerarCobrancaOutput = {
   gatewayRef: string; // installment
-  pagamentos: {
-    gatewayRef: string; // id
-    nossoNumero: string; // nossoNumero
-    urlBoleto: string; // bankSlipUrl
-    vancimento: string; // dueDate
-    linkBoleto: string; // bankSlipUrl
-    codigoBarras: string; // codigoBarras
-    linhaDigitavel: string; // linhaDigitavel
-    pix: string; // pix
-    linkCartao?: string;
-    valorCobranca: number; // value
-    valorComDescontoGateway: number; // netValue
-  }[];
+  pagamentos: PagamentoOutput[];
 };
 
 export class GerarCobrancaGatewayAsaas {
@@ -75,7 +78,7 @@ export class GerarCobrancaGatewayAsaas {
   private async formaPagamentoCartaoCredito(cobranca: CobrancaEntity): Promise<GerarCobrancaOutput> {
     const cliente = await this.buscarCliente(cobranca.pagador());
 
-    const url = "https://api-sandbox.asaas.com/v3/lean/payments";
+    const url = "https://api-sandbox.asaas.com/v3/payments";
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",
@@ -104,11 +107,10 @@ export class GerarCobrancaGatewayAsaas {
       },
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    const linkCartao = responseCobranca?.data?.invoiceUrl;
-    const responseParcelas = await this.buscarParcelas(responseCobranca?.data?.installment, linkCartao);
+    const pagamentos = await this.buscarParcelas(responseCobranca?.data?.installment);
     return {
       gatewayRef: responseCobranca?.data?.installment,
-      pagamentos: responseParcelas,
+      pagamentos,
     };
   }
 
@@ -156,24 +158,7 @@ export class GerarCobrancaGatewayAsaas {
     return this.buscarCliente(pagador);
   }
 
-  private async buscarParcelas(
-    installment: string,
-    linkCartao?: string,
-  ): Promise<
-    {
-      gatewayRef: string;
-      nossoNumero: string;
-      urlBoleto: string;
-      vancimento: string;
-      linkBoleto: string;
-      codigoBarras: string;
-      linhaDigitavel: string;
-      pix: string;
-      linkCartao?: string;
-      valorCobranca: number;
-      valorComDescontoGateway: number;
-    }[]
-  > {
+  private async buscarParcelas(installment: string, linkCartao?: string): Promise<PagamentoOutput[]> {
     try {
       const url = `https://api-sandbox.asaas.com/v3/installments/${installment}/payments?limit=24`;
       const headers = {
@@ -191,14 +176,15 @@ export class GerarCobrancaGatewayAsaas {
           urlBoleto: installment.bankSlipUrl,
           vancimento: installment.dueDate,
           linkBoleto: installment.bankSlipUrl,
+          linkCartao: installment.invoiceUrl,
           codigoBarras: null,
           linhaDigitavel: null,
           pix: installment.pixTransaction?.qrCode?.payload,
-          linkCartao,
           valorCobranca: installment.value,
           valorComDescontoGateway: installment.netValue,
+          status: installment.status,
         };
-      });
+      }) as PagamentoOutput[];
     } catch (error: any) {
       console.log(error);
       return [];

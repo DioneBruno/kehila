@@ -34,8 +34,8 @@ export class GerarCobrancaRepository {
   async savarPagamentos(cobranca: CobrancaEntity, pagamentos: GerarCobrancaOutput["pagamentos"]): Promise<void> {
     for (const pagamento of pagamentos) {
       await this.connectionHub.database!.query(
-        `INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, vencimento, valor, valor_com_desc_gateway, banco_ref, nosso_numero, link_boleto, codigo_barras, linha_digitavel, pix, link_cartao)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+        `INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, vencimento, valor, valor_com_desc_gateway, banco_ref, nosso_numero, link_boleto, codigo_barras, linha_digitavel, pix, link_cartao, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
           randomUUID(),
           cobranca.companyUuid(),
@@ -52,6 +52,7 @@ export class GerarCobrancaRepository {
           pagamento.linhaDigitavel,
           pagamento.pix,
           pagamento.linkCartao ?? null,
+          pagamento.status ?? "pendente",
         ],
       );
     }

@@ -220,11 +220,23 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
       if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
       return Promise.resolve({
         data: {
-          data: [{ id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null }],
+          data: [
+            {
+              id: "pay_001",
+              nossoNumero: "001",
+              bankSlipUrl: "url1",
+              dueDate: "2026-07-12",
+              invoiceUrl: "invoiceUrl",
+              value: 100,
+              netValue: 99,
+              pixTransaction: null,
+              status: "confirmed",
+            },
+          ],
         },
       });
     });
-    const postStub = stub(http, "post").resolves({ data: { installment: installmentId, invoiceUrl: "invoiceUrl", invoiceNumber: "invoiceNumber" } });
+    const postStub = stub(http, "post").resolves({ data: { installment: installmentId, invoiceNumber: "invoiceNumber" } });
 
     const input = {
       companyUuid,
@@ -251,7 +263,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     await new GerarCobrancaUsecase(repo).execute(input);
 
     // Verifica que installmentCount e totalValue foram enviados corretamente
-    expect(postStub.firstCall.args[0]).toContain("v3/lean/payments");
+    expect(postStub.firstCall.args[0]).toContain("v3/payments");
     const bodyCobranca = postStub.firstCall.args[1] as any;
     expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
@@ -274,6 +286,9 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].banco_ref).toBe("pay_001");
     expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[0].link_cartao).toBe("invoiceUrl");
+    expect(pagamentos[0].valor).toBe(100);
+    expect(pagamentos[0].status).toBe("confirmed");
+    // expect(pagamentos[0].valor_com_desc_gateway).toBe(152.0);
 
     getStub.restore();
     postStub.restore();
