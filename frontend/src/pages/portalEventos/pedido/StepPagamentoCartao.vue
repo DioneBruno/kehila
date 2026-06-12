@@ -2,12 +2,11 @@
   <div class="row q-col-gutter-md">
     <div class="col-12">
       <q-input
-        :model-value="cartao.numero"
+        :model-value="pagador.cartao.numero"
         label="Número do cartão"
         outlined
         mask="#### #### #### ####"
         placeholder="0000 0000 0000 0000"
-        @update:model-value="updateCartao('numero', $event)"
       >
         <template v-slot:append>
           <q-icon name="credit_card" color="grey-5" />
@@ -16,42 +15,42 @@
     </div>
     <div class="col-12">
       <q-input
-        :model-value="cartao.nome"
+        :model-value="pagador.cartao.nome"
         label="Nome no cartão"
         outlined
         placeholder="Como está impresso"
-        @update:model-value="updateCartao('nome', $event)"
       />
     </div>
     <div class="col-6">
       <q-input
-        :model-value="cartao.validade"
+        :model-value="pagador.cartao.validade"
         label="Validade"
         outlined
         mask="##/##"
         placeholder="MM/AA"
-        @update:model-value="updateCartao('validade', $event)"
       />
     </div>
     <div class="col-6">
-      <q-input
-        :model-value="cartao.cvv"
-        label="CVV"
-        outlined
-        mask="###"
-        type="password"
-        @update:model-value="updateCartao('cvv', $event)"
-      />
+      <q-input :model-value="pagador.cartao.cvv" label="CVV" outlined mask="###" type="password" />
     </div>
     <div class="col-12">
       <q-select
-        :model-value="cartao.parcelas"
+        :model-value="pagador.numParcelas"
         label="Parcelas"
         outlined
         :options="opcoesParcelas"
         emit-value
         map-options
-        @update:model-value="updateCartao('parcelas', $event)"
+      />
+    </div>
+    <div class="col-12 row justify-end">
+      <q-btn
+        no-caps
+        class="full-width"
+        label="Confirmar pagamento"
+        color="primary"
+        icon="credit_card"
+        @click="gerarCobranca"
       />
     </div>
   </div>
@@ -59,15 +58,9 @@
 
 <script lang="ts">
 import type { PropType } from "vue";
-import { defineComponent } from "vue";
-
-interface Cartao {
-  numero: string;
-  nome: string;
-  validade: string;
-  cvv: string;
-  parcelas: number;
-}
+import { computed, defineComponent, reactive, ref, toRefs } from "vue";
+import { PedidoService } from "./pedido.service";
+import { usePedidoStore } from "src/stores/pedido";
 
 interface OpcaoParcela {
   label: string;
@@ -77,15 +70,36 @@ interface OpcaoParcela {
 export default defineComponent({
   name: "StepPagamentoCartao",
   props: {
-    cartao: { type: Object as PropType<Cartao>, required: true },
     opcoesParcelas: { type: Array as PropType<OpcaoParcela[]>, required: true },
   },
   emits: ["update:cartao"],
   setup(props, { emit }) {
-    function updateCartao(campo: keyof Cartao, valor: string | number) {
-      emit("update:cartao", { ...props.cartao, [campo]: valor });
+    const $service = new PedidoService();
+    const $pedidoStore = usePedidoStore();
+
+    const data = reactive({
+      pedido: computed(() => $pedidoStore.$state.pedido),
+      pagador: ref({
+        pedidoUuid: null,
+        numParcelas: 1,
+        tipoPagador: "usuarioLogado",
+        pagadorNome: "",
+        pagadorDocumento: "",
+        pagadorEmail: "",
+        pagadorTelefone: "",
+        cartao: ref({} as any),
+      }),
+    });
+
+    async function gerarCobranca() {
+      data.pagador.pedidoUuid = data.pedido.uuid;
+      await $service.gerarCobranca(data.pagador);
     }
-    return { updateCartao };
+
+    return {
+      ...toRefs(data),
+      gerarCobranca,
+    };
   },
 });
 </script>
