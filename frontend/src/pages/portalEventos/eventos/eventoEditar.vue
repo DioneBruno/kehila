@@ -98,14 +98,45 @@
                   />
                 </div>
                 <div class="col-12">
-                  <q-input
+                  <q-editor
+                    ref="editorRef"
                     v-model="form.descricao"
                     label="Descrição"
-                    filled
                     type="textarea"
-                    autogrow
                     :readonly="!editando"
-                  />
+                    :definitions="editorDefinitions"
+                    :toolbar="[
+                      ['bold', 'italic', 'strike', 'underline', 'textColor'],
+                      ['link', 'unlink'],
+                      ['bold', 'italic', 'strike', 'underline'],
+                      ['unordered', 'ordered'],
+                      ['fullscreen', 'quote', 'message'],
+                      ['insert_img'],
+                      ['hr', 'removeFormat'],
+                      ['undo', 'redo'],
+                      ['fullscreen'],
+                      ['font_size', 'remove_style'],
+                    ]"
+                  >
+                    <template v-slot:textColor>
+                      <q-btn
+                        flat
+                        dense
+                        no-caps
+                        icon="format_color_text"
+                        size="sm"
+                        title="Cor do texto"
+                      >
+                        <q-menu anchor="bottom left" self="top left" @before-show="saveSelection">
+                          <q-color
+                            v-model="selectedTextColor"
+                            no-header-tabs
+                            @change="applyTextColor"
+                          />
+                        </q-menu>
+                      </q-btn>
+                    </template>
+                  </q-editor>
                 </div>
 
                 <!-- Data início -->
@@ -347,7 +378,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
 import { LotesService } from "./lotes.service";
@@ -367,6 +398,37 @@ export default defineComponent({
     const $q = useQuasar();
     const $service = new EventoService();
     const $lotesService = new LotesService();
+
+    const editorRef = ref<any>(null);
+    const selectedTextColor = ref("#000000");
+    let savedRange: Range | null = null;
+
+    const editorDefinitions = {
+      textColor: {
+        tip: "Cor do texto",
+        icon: "format_color_text",
+        handler() {},
+      },
+    };
+
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      }
+    }
+
+    function applyTextColor(color: string) {
+      if (editorRef.value) {
+        editorRef.value.focus();
+      }
+      const sel = window.getSelection();
+      if (savedRange && sel) {
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+      document.execCommand("foreColor", false, color);
+    }
 
     const data = reactive({
       evento: null as any,
@@ -506,6 +568,11 @@ export default defineComponent({
       statusCor,
       formatarData,
       formatarMoeda,
+      editorRef,
+      selectedTextColor,
+      editorDefinitions,
+      saveSelection,
+      applyTextColor,
     };
   },
 });

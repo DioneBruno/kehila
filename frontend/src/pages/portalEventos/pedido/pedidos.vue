@@ -18,21 +18,30 @@
         </div>
       </q-card-section>
 
-      <q-list separator v-if="pedidos.length > 0">
+      <q-list separator dense v-if="pedidos.length > 0">
         <q-item
+          clickable
+          v-ripple
+          dense
           v-for="pedido in pedidos"
           :key="pedido.uuid"
           class="q-py-md"
-          clickable
-          v-ripple
           :active="pedido.uuid === pedidoAtivoUuid"
           active-class="bg-primary-soft"
           @click="selecionarPedido(pedido.uuid)"
         >
+          <q-item-section side>
+            <q-icon
+              name="circle"
+              size="10px"
+              :color="`${pedido.uuid === pedidoAtivoUuid ? `grey-10` : 'grey-3'}`"
+            />
+          </q-item-section>
           <q-item-section>
             <div class="row items-center justify-between q-mb-xs">
               <q-chip
                 dense
+                square
                 size="sm"
                 :color="statusColor(pedido.status)"
                 text-color="white"
