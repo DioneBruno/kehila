@@ -83,62 +83,12 @@
         <strong>30 minutos</strong>.
       </q-banner>
 
-      <div v-if="formaPagamento === 'cartao'" class="row q-col-gutter-md">
-        <div class="col-12">
-          <q-input
-            :model-value="cartao.numero"
-            label="Número do cartão"
-            outlined
-            mask="#### #### #### ####"
-            placeholder="0000 0000 0000 0000"
-            @update:model-value="updateCartao('numero', $event)"
-          >
-            <template v-slot:append>
-              <q-icon name="credit_card" color="grey-5" />
-            </template>
-          </q-input>
-        </div>
-        <div class="col-12">
-          <q-input
-            :model-value="cartao.nome"
-            label="Nome no cartão"
-            outlined
-            placeholder="Como está impresso"
-            @update:model-value="updateCartao('nome', $event)"
-          />
-        </div>
-        <div class="col-6">
-          <q-input
-            :model-value="cartao.validade"
-            label="Validade"
-            outlined
-            mask="##/##"
-            placeholder="MM/AA"
-            @update:model-value="updateCartao('validade', $event)"
-          />
-        </div>
-        <div class="col-6">
-          <q-input
-            :model-value="cartao.cvv"
-            label="CVV"
-            outlined
-            mask="###"
-            type="password"
-            @update:model-value="updateCartao('cvv', $event)"
-          />
-        </div>
-        <div class="col-12">
-          <q-select
-            :model-value="cartao.parcelas"
-            label="Parcelas"
-            outlined
-            :options="opcoesParcelas"
-            emit-value
-            map-options
-            @update:model-value="updateCartao('parcelas', $event)"
-          />
-        </div>
-      </div>
+      <StepPagamentoCartao
+        v-if="formaPagamento === 'cartao'"
+        :cartao="cartao"
+        :opcoes-parcelas="opcoesParcelas"
+        @update:cartao="$emit('update:cartao', $event)"
+      />
     </div>
 
     <q-stepper-navigation class="row">
@@ -152,6 +102,7 @@
 import type { PropType } from "vue";
 import { defineComponent } from "vue";
 import StepPagamentoBoleto from "./StepPagamentoBoleto.vue";
+import StepPagamentoCartao from "./StepPagamentoCartao.vue";
 
 interface Cartao {
   numero: string;
@@ -170,6 +121,7 @@ export default defineComponent({
   name: "StepPagamento",
   components: {
     StepPagamentoBoleto,
+    StepPagamentoCartao,
   },
   props: {
     formaPagamento: { type: String, required: true },
@@ -177,11 +129,8 @@ export default defineComponent({
     opcoesParcelas: { type: Array as PropType<OpcaoParcela[]>, required: true },
   },
   emits: ["update:formaPagamento", "update:cartao", "prev", "confirmar"],
-  setup(props, { emit }) {
-    function updateCartao(campo: keyof Cartao, valor: string | number) {
-      emit("update:cartao", { ...props.cartao, [campo]: valor });
-    }
-    return { updateCartao };
+  setup() {
+    return {};
   },
 });
 </script>
