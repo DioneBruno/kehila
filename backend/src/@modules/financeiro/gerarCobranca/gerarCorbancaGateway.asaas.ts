@@ -97,7 +97,8 @@ export class GerarCobrancaGatewayAsaas {
       // callback: { successUrl: "", autoRedirect: true }, // Informações de redirecionamento automático após pagamento do link de pagamento
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    const responseParcelas = await this.buscarParcelas(responseCobranca?.data?.installment);
+    const linkCartao = responseCobranca?.data?.invoiceUrl;
+    const responseParcelas = await this.buscarParcelas(responseCobranca?.data?.installment, linkCartao);
     return {
       gatewayRef: responseCobranca?.data?.installment,
       pagamentos: responseParcelas,
@@ -148,7 +149,10 @@ export class GerarCobrancaGatewayAsaas {
     return this.buscarCliente(pagador);
   }
 
-  private async buscarParcelas(installment: string): Promise<
+  private async buscarParcelas(
+    installment: string,
+    linkCartao?: string,
+  ): Promise<
     {
       gatewayRef: string;
       nossoNumero: string;
@@ -158,6 +162,7 @@ export class GerarCobrancaGatewayAsaas {
       codigoBarras: string;
       linhaDigitavel: string;
       pix: string;
+      linkCartao?: string;
       valorCobranca: number;
       valorComDescontoGateway: number;
     }[]
@@ -182,6 +187,7 @@ export class GerarCobrancaGatewayAsaas {
           codigoBarras: null,
           linhaDigitavel: null,
           pix: installment.pixTransaction?.qrCode?.payload,
+          linkCartao,
           valorCobranca: installment.value,
           valorComDescontoGateway: installment.netValue,
         };

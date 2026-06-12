@@ -260,6 +260,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentos.length).toBe(1);
     expect(pagamentos[0].banco_ref).toBe("pay_001");
+    expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[0].link_cartao).toBe("invoiceUrl");
 
     getStub.restore();
