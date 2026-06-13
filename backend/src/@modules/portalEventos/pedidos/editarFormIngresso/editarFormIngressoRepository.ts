@@ -17,6 +17,7 @@ export class EditarFormIngressoRepository {
         ingressos.pessoa_documento,
         ingressos.pessoa_email,
         ingressos.pessoa_telefone,
+        ingressos.pessoa_pais,
         ingressos.pessoa_uf,
         ingressos.pessoa_cidade
       FROM evento_ingressos ingressos
@@ -38,6 +39,7 @@ export class EditarFormIngressoRepository {
       pessoaDocumento: ingressoModel.pessoa_documento,
       pessoaEmail: ingressoModel.pessoa_email,
       pessoaTelefone: ingressoModel.pessoa_telefone,
+      pessoaPais: ingressoModel.pessoa_pais,
       pessoaUf: ingressoModel.pessoa_uf,
       pessoaCidade: ingressoModel.pessoa_cidade,
     });
@@ -52,10 +54,11 @@ export class EditarFormIngressoRepository {
         pessoa_documento = $3,
         pessoa_email = $4,
         pessoa_telefone = $5,
-        pessoa_uf = $6,
-        pessoa_cidade = $7,
-        form_data_valido = $8,
-        form_data = $9
+        pessoa_pais = $6,
+        pessoa_uf = $7,
+        pessoa_cidade = $8,
+        form_data_valido = $9,
+        form_data = $10
       WHERE uuid = $1`,
       [
         ingresso.uuid(),
@@ -63,6 +66,7 @@ export class EditarFormIngressoRepository {
         ingresso.pessoaDocumento(),
         ingresso.pessoaEmail(),
         ingresso.pessoaTelefone(),
+        ingresso.pessoaPais(),
         ingresso.pessoaUf(),
         ingresso.pessoaCidade(),
         ingresso.formDataValido(),

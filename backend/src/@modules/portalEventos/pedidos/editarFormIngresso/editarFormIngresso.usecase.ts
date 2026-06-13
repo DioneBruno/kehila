@@ -7,6 +7,7 @@ export interface EditarFormIngressoInput {
   pessoaDocumento?: string;
   pessoaEmail?: string;
   pessoaTelefone?: string;
+  pessoaPais?: string;
   pessoaUf?: string;
   pessoaCidade?: string;
   formData?: object;

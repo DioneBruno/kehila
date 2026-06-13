@@ -79,6 +79,7 @@ export class PedidosController {
       pessoaDocumento: body.pessoaDocumento,
       pessoaEmail: body.pessoaEmail,
       pessoaTelefone: body.pessoaTelefone,
+      pessoaPais: body.pessoaPais,
       pessoaUf: body.pessoaUf,
       pessoaCidade: body.pessoaCidade,
       formData: body.formData,

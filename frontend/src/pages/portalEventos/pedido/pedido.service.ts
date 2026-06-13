@@ -89,6 +89,7 @@ export class PedidoService {
       pessoaDocumento: ingresso.pessoaDocumento,
       pessoaEmail: ingresso.pessoaEmail,
       pessoaTelefone: ingresso.pessoaTelefone,
+      pessoaPais: ingresso.pessoaPais,
       pessoaUf: ingresso.pessoaUf,
       pessoaCidade: ingresso.pessoaCidade,
       formData: ingresso.formData,

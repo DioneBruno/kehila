@@ -257,6 +257,7 @@ const UFS = [
 ];
 
 const districos = [
+  "Visitante",
   "Alto Rio Madeira",
   "Alto Taquari",
   "Amazonico",

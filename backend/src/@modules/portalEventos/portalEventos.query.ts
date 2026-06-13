@@ -125,6 +125,7 @@ export class PortalEventosQuery {
         ingressos.pessoa_email "pessoaEmail",
         ingressos.pessoa_telefone "pessoaTelefone",
         ingressos.pessoa_documento "pessoaDocumento",
+        ingressos.pessoa_pais "pessoaPais",
         ingressos.pessoa_uf "pessoaUf",
         ingressos.pessoa_cidade "pessoaCidade",
         ingressos.form_data "formData",

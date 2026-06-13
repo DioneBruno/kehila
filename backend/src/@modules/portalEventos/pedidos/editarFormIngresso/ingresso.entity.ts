@@ -9,6 +9,7 @@ export type IngressoProps = {
   pessoaDocumento?: string;
   pessoaEmail?: string;
   pessoaTelefone?: string;
+  pessoaPais?: string;
   pessoaUf?: string;
   pessoaCidade?: string;
   formData?: object;
@@ -46,6 +47,9 @@ export class IngressoEntity {
   pessoaTelefone(): string | undefined {
     return this.props.pessoaTelefone;
   }
+  pessoaPais(): string | undefined {
+    return this.props.pessoaPais;
+  }
   pessoaUf(): string | undefined {
     return this.props.pessoaUf;
   }
@@ -71,6 +75,7 @@ export class IngressoEntity {
     pessoaDocumento?: string;
     pessoaEmail?: string;
     pessoaTelefone?: string;
+    pessoaPais?: string;
     pessoaUf?: string;
     pessoaCidade?: string;
     formData?: object;
@@ -79,6 +84,7 @@ export class IngressoEntity {
     this.props.pessoaDocumento = data.pessoaDocumento;
     this.props.pessoaEmail = data.pessoaEmail;
     this.props.pessoaTelefone = data.pessoaTelefone;
+    this.props.pessoaPais = data.pessoaPais;
     this.props.pessoaUf = data.pessoaUf;
     this.props.pessoaCidade = data.pessoaCidade;
     this.props.formData = data.formData;
