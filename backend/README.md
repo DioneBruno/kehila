@@ -58,3 +58,10 @@ npm run test:nomeModulo --watch
 npm run test:e2e
 npm run test:cov
 ```
+
+### Gerando Imagem
+
+```bash
+docker build -t registry.owlcode.com.br/kehila-backend:latest -f Dockerfile.dev .
+docker push registry.owlcode.com.br/kehila-backend:latest
+```

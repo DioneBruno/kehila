@@ -66,7 +66,7 @@ export default defineConfig((/* ctx */) => {
         [
           "vite-plugin-checker",
           {
-            vueTsc: true,
+            vueTsc: !process.env.SKIP_TYPE_CHECK,
             eslint: {
               lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
               useFlatConfig: true,

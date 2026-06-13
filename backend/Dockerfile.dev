@@ -9,4 +9,11 @@ RUN npm i -g @nestjs/cli
 
 WORKDIR /home/node/app
 
-CMD [ "/home/node/app/start.sh" ]
+COPY package.json package-lock.json ./
+COPY src ./src
+COPY tsconfig.json tsconfig.build.json nest-cli.json ./
+COPY .env.example ./
+COPY start.sh ./
+RUN chmod +x start.sh
+
+CMD [ "/bin/bash", "start.sh" ]
