@@ -3,6 +3,7 @@ export type MensagemProps = {
   destinatario: string;
   titulo: string;
   mensagem: string;
+  nomeAmigavel?: string;
 };
 
 export class MensagemEntity {
@@ -19,5 +20,8 @@ export class MensagemEntity {
   }
   mensagem(): string {
     return this.props.mensagem;
+  }
+  nomeAmigavel(): string | undefined {
+    return this.props.nomeAmigavel;
   }
 }

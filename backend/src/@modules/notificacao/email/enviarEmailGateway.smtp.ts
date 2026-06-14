@@ -24,8 +24,9 @@ export class EnviarEmailGatewaySmtp {
     };
 
     const transporter = nodemailer.createTransport(options);
+    const nomeAmigavel = mensagem.nomeAmigavel();
     const message = {
-      from: `"Nome da Sinagoga" <${user}>`,
+      from: nomeAmigavel ? `"${nomeAmigavel}" <${user}>` : user,
       to: mensagem.destinatario(),
       subject: mensagem.titulo(),
       html: mensagem.mensagem(),

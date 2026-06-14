@@ -6,6 +6,7 @@ export type EnviarEmailInput = {
   destinatario: string;
   titulo: string;
   mensagem: string;
+  nomeAmigavel?: string;
 };
 
 export class EnviarEmailUsecase {
@@ -17,6 +18,7 @@ export class EnviarEmailUsecase {
       destinatario: input.destinatario,
       titulo: input.titulo,
       mensagem: input.mensagem,
+      nomeAmigavel: input.nomeAmigavel,
     });
     const gateway = await this.repo.buscarGatewaty(mensagem);
     await gateway.enviar(mensagem);
