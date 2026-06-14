@@ -48,7 +48,7 @@ export class PedidoService {
   async gerarCodigoLogin(username: string) {
     try {
       this.$q.loading.show();
-      return this.loginHttp.randomCodeGenerate({ username });
+      return await this.loginHttp.randomCodeGenerate({ username });
     } catch (error) {
     } finally {
       this.$q.loading.hide();
