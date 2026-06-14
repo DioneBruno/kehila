@@ -34,7 +34,10 @@ export class PortalEventosQuery {
         data_fim "dataFim",
         data_inicio "dataInicio",
         nome
-      FROM evento_lotes WHERE deleted_at IS NULL AND evento_uuid = $1`,
+      FROM evento_lotes
+      WHERE deleted_at IS NULL
+        AND evento_uuid = $1
+      ORDER BY ordem ASC`,
       [eventoUuid],
     );
 
@@ -48,7 +51,10 @@ export class PortalEventosQuery {
         gerar_quantidade_ingressos "gerarQuantidadeIngressos",
         visivel,
         preco
-      FROM evento_lote_tipos_ingresso WHERE deleted_at IS NULL AND evento_uuid = $1`,
+      FROM evento_lote_tipos_ingresso
+      WHERE deleted_at IS NULL
+        AND evento_uuid = $1
+      ORDER BY ordem ASC`,
       [eventoUuid],
     );
 

@@ -39,6 +39,10 @@ import { EditarTipoIngressoRepository } from "src/@modules/portalEventos/lotes/e
 
 import { RemoverTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngresso.usecase";
 import { RemoverTipoIngressoRepository } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngressoRepository";
+import { ReordenarLotesUsecase } from "src/@modules/portalEventos/lotes/reordenarLotes/reordenarLotes.usecase";
+import { ReordenarLotesRepository } from "src/@modules/portalEventos/lotes/reordenarLotes/reordenarLotesRepository";
+import { ReordenarTiposIngressoUsecase } from "src/@modules/portalEventos/lotes/reordenarTiposIngresso/reordenarTiposIngresso.usecase";
+import { ReordenarTiposIngressoRepository } from "src/@modules/portalEventos/lotes/reordenarTiposIngresso/reordenarTiposIngressoRepository";
 import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedido.usecase";
 import { CriarPedidoRepository } from "src/@modules/portalEventos/pedidos/criarPedido/criarPedidoRepository";
 import { GerarCobrancaUsecase } from "src/@modules/portalEventos/pedidos/gerarCobranca/gerarCobranca.usecase";
@@ -78,6 +82,8 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(CriarTipoIngressoUsecase, (hub) => new CriarTipoIngressoUsecase(new CriarTipoIngressoRepository(hub))),
     makeProvider(EditarTipoIngressoUsecase, (hub) => new EditarTipoIngressoUsecase(new EditarTipoIngressoRepository(hub))),
     makeProvider(RemoverTipoIngressoUsecase, (hub) => new RemoverTipoIngressoUsecase(new RemoverTipoIngressoRepository(hub))),
+    makeProvider(ReordenarLotesUsecase, (hub) => new ReordenarLotesUsecase(new ReordenarLotesRepository(hub))),
+    makeProvider(ReordenarTiposIngressoUsecase, (hub) => new ReordenarTiposIngressoUsecase(new ReordenarTiposIngressoRepository(hub))),
     makeProvider(CriarPedidoUsecase, (hub) => new CriarPedidoUsecase(new CriarPedidoRepository(hub))),
     makeProvider(GerarCobrancaUsecase, (hub) => new GerarCobrancaUsecase(new GerarCobrancaRepository(hub))),
     makeProvider(CadastrandoUsuarioUsecase, (hub) => new CadastrandoUsuarioUsecase(new CadastrandoUsuarioRepository(hub))),

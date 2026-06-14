@@ -4,9 +4,11 @@ import { CriarLoteUsecase } from "src/@modules/portalEventos/lotes/criarLote/cri
 import { ListarLotesUsecase } from "src/@modules/portalEventos/lotes/listarLotes/listarLotes.usecase";
 import { EditarLoteUsecase } from "src/@modules/portalEventos/lotes/editarLote/editarLote.usecase";
 import { RemoverLoteUsecase } from "src/@modules/portalEventos/lotes/removerLote/removerLote.usecase";
+import { ReordenarLotesUsecase } from "src/@modules/portalEventos/lotes/reordenarLotes/reordenarLotes.usecase";
 import { CriarTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/criarTipoIngresso/criarTipoIngresso.usecase";
 import { EditarTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/editarTipoIngresso/editarTipoIngresso.usecase";
 import { RemoverTipoIngressoUsecase } from "src/@modules/portalEventos/lotes/removerTipoIngresso/removerTipoIngresso.usecase";
+import { ReordenarTiposIngressoUsecase } from "src/@modules/portalEventos/lotes/reordenarTiposIngresso/reordenarTiposIngresso.usecase";
 
 @Controller("lotes")
 export class LotesController {
@@ -15,9 +17,11 @@ export class LotesController {
     readonly listarLotesUsecase: ListarLotesUsecase,
     readonly editarLoteUsecase: EditarLoteUsecase,
     readonly removerLoteUsecase: RemoverLoteUsecase,
+    readonly reordenarLotesUsecase: ReordenarLotesUsecase,
     readonly criarTipoIngressoUsecase: CriarTipoIngressoUsecase,
     readonly editarTipoIngressoUsecase: EditarTipoIngressoUsecase,
     readonly removerTipoIngressoUsecase: RemoverTipoIngressoUsecase,
+    readonly reordenarTiposIngressoUsecase: ReordenarTiposIngressoUsecase,
   ) {}
 
   @Post()
@@ -43,6 +47,16 @@ export class LotesController {
       eventoUuid: query.eventoUuid,
     });
     return res.status(200).json({ success: true, data: resultado });
+  }
+
+  // rota estática deve vir antes de :uuid
+  @Put("reordenar")
+  async reordenar(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    await this.reordenarLotesUsecase.execute({
+      companyUuid: req.companyUuid,
+      lotes: body.lotes,
+    });
+    return res.status(200).json({ success: true });
   }
 
   @Put(":uuid")
@@ -83,6 +97,16 @@ export class LotesController {
       visivel: body.visivel,
     });
     return res.status(201).json({ success: true, data: resultado });
+  }
+
+  // rota estática deve vir antes de :tipoUuid
+  @Put(":loteUuid/tipos-ingresso/reordenar")
+  async reordenarTipos(@Req() req: Request | any, @Param("loteUuid") loteUuid: string, @Body() body: any, @Res() res: Response) {
+    await this.reordenarTiposIngressoUsecase.execute({
+      companyUuid: req.companyUuid,
+      tipos: body.tipos,
+    });
+    return res.status(200).json({ success: true });
   }
 
   @Put(":loteUuid/tipos-ingresso/:tipoUuid")

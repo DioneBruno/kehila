@@ -67,4 +67,12 @@ export class LotesHttp {
   async removerTipo(loteUuid: string, tipoUuid: string) {
     return this.http.delete(`lotes/${loteUuid}/tipos-ingresso/${tipoUuid}`);
   }
+
+  async reordenarLotes(lotes: { uuid: string; ordem: number }[]) {
+    return this.http.put("lotes/reordenar", { lotes });
+  }
+
+  async reordenarTiposIngresso(loteUuid: string, tipos: { uuid: string; ordem: number }[]) {
+    return this.http.put(`lotes/${loteUuid}/tipos-ingresso/reordenar`, { tipos });
+  }
 }

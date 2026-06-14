@@ -36,11 +36,22 @@
       />
     </div>
 
-    <div v-else class="q-gutter-md">
+    <draggable
+      v-else
+      v-model="lotes"
+      handle=".drag-handle-lote"
+      class="q-gutter-md"
+      @end="onReordenarLotes"
+    >
       <q-card v-for="lote in lotes" :key="lote.uuid" flat bordered>
         <!-- Cabeçalho do lote -->
         <q-card-section>
           <div class="row items-center">
+            <q-icon
+              name="drag_indicator"
+              class="drag-handle-lote q-mr-sm cursor-grab text-grey-5"
+              size="sm"
+            />
             <div class="col">
               <div class="row items-center q-gutter-sm">
                 <span class="text-subtitle1 text-weight-bold">{{ lote.nome }}</span>
@@ -118,8 +129,24 @@
               <span class="text-caption">Nenhum tipo de ingresso neste lote</span>
             </div>
 
-            <q-list v-else separator dense class="rounded-borders">
-              <q-item v-for="tipo in lote.tiposIngresso" :key="tipo.uuid" class="q-px-sm">
+            <draggable
+              v-else
+              v-model="lote.tiposIngresso"
+              handle=".drag-handle-tipo"
+              @end="onReordenarTipos(lote)"
+            >
+              <q-item
+                v-for="tipo in lote.tiposIngresso"
+                :key="tipo.uuid"
+                class="q-px-sm rounded-borders"
+              >
+                <q-item-section avatar>
+                  <q-icon
+                    name="drag_indicator"
+                    class="drag-handle-tipo cursor-grab text-grey-5"
+                    size="sm"
+                  />
+                </q-item-section>
                 <q-item-section>
                   <q-item-label class="row items-center q-gutter-xs">
                     <span>{{ tipo.nome }}</span>
@@ -164,11 +191,11 @@
                   </div>
                 </q-item-section>
               </q-item>
-            </q-list>
+            </draggable>
           </div>
         </q-card-section>
       </q-card>
-    </div>
+    </draggable>
 
     <!-- Dialog: Criar/Editar Lote -->
     <q-dialog v-model="dialogLote.aberto" persistent>
@@ -389,6 +416,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute } from "vue-router";
+import { VueDraggableNext as draggable } from "vue-draggable-next";
 import { LotesService } from "./lotes.service";
 
 const loteFormVazio = () => ({
@@ -413,13 +441,19 @@ const tipoFormVazio = () => ({
 
 export default defineComponent({
   name: "PortalEventosLotes",
+  components: { draggable },
   setup() {
     const $route = useRoute();
     const $service = new LotesService();
     const eventoUuid = $route.params.uuid as string;
 
-    const data = reactive({
-      lotes: [] as any[],
+    const data = reactive<{
+      lotes: any[];
+      tiposVisiveis: Record<string, boolean>;
+      dialogLote: any;
+      dialogTipo: any;
+    }>({
+      lotes: [],
       tiposVisiveis: {},
       dialogLote: {
         aberto: false,
@@ -496,6 +530,17 @@ export default defineComponent({
       if (ok) await carregar();
     }
 
+    async function onReordenarLotes() {
+      const payload = data.lotes.map((lote, index) => ({
+        uuid: lote.uuid,
+        ordem: index + 1,
+      }));
+      data.lotes.forEach((lote, index) => {
+        lote.ordem = index + 1;
+      });
+      await $service.reordenarLotes(payload);
+    }
+
     function abrirDialogTipo(loteUuid: string, tipo?: any) {
       data.dialogTipo.loteUuid = loteUuid;
       if (tipo) {
@@ -545,6 +590,14 @@ export default defineComponent({
       data.tiposVisiveis[loteUuid] = !data.tiposVisiveis[loteUuid];
     }
 
+    async function onReordenarTipos(lote: any) {
+      const payload = lote.tiposIngresso.map((tipo: any, index: number) => ({
+        uuid: tipo.uuid,
+        ordem: index + 1,
+      }));
+      await $service.reordenarTiposIngresso(lote.uuid, payload);
+    }
+
     async function removerTipo(loteUuid: string, tipoUuid: string) {
       const ok = await $service.removerTipo(loteUuid, tipoUuid);
       if (ok) await carregar();
@@ -573,9 +626,11 @@ export default defineComponent({
       abrirDialogLote,
       salvarLote,
       removerLote,
+      onReordenarLotes,
       abrirDialogTipo,
       salvarTipo,
       removerTipo,
+      onReordenarTipos,
       toggleTipos,
       formatarMoeda,
       formatarData,

@@ -96,6 +96,24 @@ export class LotesService {
     }
   }
 
+  async reordenarLotes(lotes: { uuid: string; ordem: number }[]): Promise<boolean> {
+    try {
+      await this.$http.reordenarLotes(lotes);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async reordenarTiposIngresso(loteUuid: string, tipos: { uuid: string; ordem: number }[]): Promise<boolean> {
+    try {
+      await this.$http.reordenarTiposIngresso(loteUuid, tipos);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async removerTipo(loteUuid: string, tipoUuid: string): Promise<boolean> {
     return new Promise((resolve) => {
       this.$q
