@@ -12,11 +12,6 @@ export type EnviarCodigoValidadorOutput = {
   phone: string;
 };
 
-export type CodigoValidadorNotificacoes = {
-  enviarEmail: (destinatario: string, code: string) => Promise<void>;
-  enviarSms: (destinatario: string, code: string) => Promise<void>;
-};
-
 function maskEmail(email: string): string {
   const [local, domain] = email.split("@");
   return `${local[0]}*****${local[local.length - 1]}@${domain}`;
@@ -27,10 +22,7 @@ function maskPhone(phone: string): string {
 }
 
 export class EnviarCodigoValidadorUsecase {
-  constructor(
-    readonly repo: GenerateTokenAuthenticationRandomCodeRepository,
-    readonly notificacoes: CodigoValidadorNotificacoes,
-  ) {}
+  constructor(readonly repo: GenerateTokenAuthenticationRandomCodeRepository) {}
 
   async execute(input: EnviarCodigoValidadorInput): Promise<EnviarCodigoValidadorOutput> {
     const user = await this.repo.buscarUsuarioPorUsername(input.companyUuid, input.username);
@@ -39,8 +31,8 @@ export class EnviarCodigoValidadorUsecase {
     const code = String(Math.floor(100000 + Math.random() * 900000));
 
     await this.repo.salvarCodigoNoCache(input.companyUuid, input.username, code, user.uuid);
-    await this.notificacoes.enviarEmail(user.email, code);
-    await this.notificacoes.enviarSms(user.phone, code);
+    await this.repo.enviarEmail(user.email, code);
+    await this.repo.enviarSms(user.phone, code);
 
     return { code, email: maskEmail(user.email), phone: maskPhone(user.phone) };
   }

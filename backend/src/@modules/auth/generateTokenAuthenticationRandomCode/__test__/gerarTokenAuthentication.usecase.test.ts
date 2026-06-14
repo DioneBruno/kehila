@@ -5,7 +5,6 @@ import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { ApiJwt } from "src/@modules/shared/apiJwt";
 import { GenerateTokenAuthenticationRandomCodeRepository } from "../generateTokenAuthenticationRandomCodeRepository";
-import { GenerateTokenAuthenticationUserRepository } from "../../generateTokenAuthenticationUser/generateTokenAuthenticationUserRepository";
 import { GerarTokenAuthenticationUsecase } from "../gerarTokenAuthentication.usecase";
 
 const companyUuid = "c708be52-396c-49f4-8942-edb513af6b10";
@@ -14,7 +13,6 @@ const username = "nomeUsuario";
 const code = "123456";
 
 let repo: GenerateTokenAuthenticationRandomCodeRepository;
-let generateTokenRepo: GenerateTokenAuthenticationUserRepository;
 
 describe("Deve testar GerarTokenAuthenticationUsecase", () => {
   beforeAll(async () => {
@@ -25,7 +23,6 @@ describe("Deve testar GerarTokenAuthenticationUsecase", () => {
     const cache = new ConnectionCacheRedis(cacheClient);
     const connectionHub = new ConnectionHub({ database: dataSource, cache });
     repo = new GenerateTokenAuthenticationRandomCodeRepository(connectionHub);
-    generateTokenRepo = new GenerateTokenAuthenticationUserRepository(connectionHub);
   });
 
   beforeEach(async () => {
@@ -57,7 +54,7 @@ describe("Deve testar GerarTokenAuthenticationUsecase", () => {
 
     await repo.salvarCodigoNoCache(companyUuid, username, code, userUuid);
 
-    const usecase = new GerarTokenAuthenticationUsecase(repo, generateTokenRepo);
+    const usecase = new GerarTokenAuthenticationUsecase(repo);
     const result = await usecase.execute({ companyUuid, username, code });
 
     expect(result.token).toBeDefined();
@@ -70,14 +67,14 @@ describe("Deve testar GerarTokenAuthenticationUsecase", () => {
   });
 
   test("Deve lançar erro quando código não existe no cache", async () => {
-    const usecase = new GerarTokenAuthenticationUsecase(repo, generateTokenRepo);
+    const usecase = new GerarTokenAuthenticationUsecase(repo);
     await expect(usecase.execute({ companyUuid, username: "usuarioInexistente", code })).rejects.toThrow("Código inválido ou expirado");
   });
 
   test("Deve lançar erro quando código enviado é inválido", async () => {
     await repo.salvarCodigoNoCache(companyUuid, username, "654321", userUuid);
 
-    const usecase = new GerarTokenAuthenticationUsecase(repo, generateTokenRepo);
+    const usecase = new GerarTokenAuthenticationUsecase(repo);
     await expect(usecase.execute({ companyUuid, username, code: "000000" })).rejects.toThrow("Código inválido");
   });
 });

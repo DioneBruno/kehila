@@ -7,6 +7,9 @@ import { DominioMiddleware } from "../middleware/dominio.middleware";
 import { DecoderTokenAuthenticationUsecase } from "src/@modules/auth/decoderTokenAuthentication/decoderTokenAuthentication.uscase";
 import { UserController } from "./user.controller";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
+import { GerarTokenAuthenticationUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/gerarTokenAuthentication.usecase";
+import { GenerateTokenAuthenticationRandomCodeRepository } from "src/@modules/auth/generateTokenAuthenticationRandomCode/generateTokenAuthenticationRandomCodeRepository";
+import { EnviarCodigoValidadorUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/enviarCodigoValidador.usecase";
 
 @Module({
   imports: [],
@@ -26,6 +29,27 @@ import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
         return new DecoderTokenAuthenticationUsecase();
       },
       inject: [],
+    },
+    {
+      provide: GenerateTokenAuthenticationRandomCodeRepository,
+      useFactory: (connectionHub: ConnectionHub) => {
+        return new GenerateTokenAuthenticationRandomCodeRepository(connectionHub);
+      },
+      inject: [ConnectionHub],
+    },
+    {
+      provide: GerarTokenAuthenticationUsecase,
+      useFactory: (repo: GenerateTokenAuthenticationRandomCodeRepository) => {
+        return new GerarTokenAuthenticationUsecase(repo);
+      },
+      inject: [GenerateTokenAuthenticationRandomCodeRepository],
+    },
+    {
+      provide: EnviarCodigoValidadorUsecase,
+      useFactory: (repo: GenerateTokenAuthenticationRandomCodeRepository) => {
+        return new EnviarCodigoValidadorUsecase(repo);
+      },
+      inject: [GenerateTokenAuthenticationRandomCodeRepository],
     },
   ],
 })

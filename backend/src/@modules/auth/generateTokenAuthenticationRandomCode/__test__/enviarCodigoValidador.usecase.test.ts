@@ -44,17 +44,12 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
       ON CONFLICT DO NOTHING`);
   }
 
-  function criarNotificacoes() {
-    const enviarEmailStub = sinon.stub().resolves();
-    const enviarSmsStub = sinon.stub().resolves();
-    return { enviarEmailStub, enviarSmsStub, notificacoes: { enviarEmail: enviarEmailStub, enviarSms: enviarSmsStub } };
-  }
-
   test("Deve gerar um código de 6 dígitos e salvá-lo no cache", async () => {
     await inserirUsuario();
+    sinon.stub(repo, "enviarEmail").resolves();
+    sinon.stub(repo, "enviarSms").resolves();
 
-    const { notificacoes } = criarNotificacoes();
-    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    const usecase = new EnviarCodigoValidadorUsecase(repo);
     const result = await usecase.execute({ companyUuid, username });
 
     expect(result.code).toBeDefined();
@@ -70,9 +65,10 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
 
   test("Deve enviar o código via email com destinatário e código corretos", async () => {
     await inserirUsuario();
+    const enviarEmailStub = sinon.stub(repo, "enviarEmail").resolves();
+    sinon.stub(repo, "enviarSms").resolves();
 
-    const { enviarEmailStub, notificacoes } = criarNotificacoes();
-    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    const usecase = new EnviarCodigoValidadorUsecase(repo);
     const result = await usecase.execute({ companyUuid, username });
 
     expect(enviarEmailStub.calledOnce).toBe(true);
@@ -82,9 +78,10 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
 
   test("Deve enviar o código via SMS com destinatário e código corretos", async () => {
     await inserirUsuario();
+    sinon.stub(repo, "enviarEmail").resolves();
+    const enviarSmsStub = sinon.stub(repo, "enviarSms").resolves();
 
-    const { enviarSmsStub, notificacoes } = criarNotificacoes();
-    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    const usecase = new EnviarCodigoValidadorUsecase(repo);
     const result = await usecase.execute({ companyUuid, username });
 
     expect(enviarSmsStub.calledOnce).toBe(true);
@@ -93,8 +90,10 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
   });
 
   test("Deve lançar erro quando usuário não é encontrado", async () => {
-    const { notificacoes } = criarNotificacoes();
-    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    sinon.stub(repo, "enviarEmail").resolves();
+    sinon.stub(repo, "enviarSms").resolves();
+
+    const usecase = new EnviarCodigoValidadorUsecase(repo);
     await expect(usecase.execute({ companyUuid, username: "cpf_inexistente" })).rejects.toThrow("Usuário não encontrado");
   });
 });
