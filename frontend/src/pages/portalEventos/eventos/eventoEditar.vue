@@ -60,29 +60,7 @@
           <q-card-section>
             <div class="row items-center justify-between q-mb-md">
               <p class="text-subtitle1 text-weight-bold q-ma-none">Dados do Evento</p>
-              <div>
-                <q-btn
-                  v-if="!editando"
-                  flat
-                  dense
-                  icon="edit"
-                  label="Editar"
-                  color="primary"
-                  :disable="!podeEditar"
-                  @click="editando = true"
-                />
-                <div v-else class="row q-gutter-sm">
-                  <q-btn flat dense label="Cancelar" color="grey-7" @click="cancelarEdicao" />
-                  <q-btn
-                    unelevated
-                    dense
-                    label="Salvar"
-                    color="primary"
-                    icon="save"
-                    @click="salvar"
-                  />
-                </div>
-              </div>
+              <q-btn unelevated dense label="Salvar" color="primary" icon="save" @click="salvar" />
             </div>
 
             <q-form greedy>
@@ -92,62 +70,30 @@
                     v-model="form.titulo"
                     label="Título"
                     filled
-                    :readonly="!editando"
                     :rules="[(v) => !!v || 'Obrigatório']"
                     lazy-rules
                   />
                 </div>
-                <div class="col-12">
-                  <q-editor
-                    ref="editorRef"
-                    v-model="form.descricao"
-                    label="Descrição"
-                    type="textarea"
-                    :readonly="!editando"
-                    :definitions="editorDefinitions"
-                    :toolbar="[
-                      ['bold', 'italic', 'strike', 'underline', 'textColor'],
-                      ['link', 'unlink'],
-                      ['bold', 'italic', 'strike', 'underline'],
-                      ['unordered', 'ordered'],
-                      ['fullscreen', 'quote', 'message'],
-                      ['insert_img'],
-                      ['hr', 'removeFormat'],
-                      ['undo', 'redo'],
-                      ['fullscreen'],
-                      ['font_size', 'remove_style'],
-                    ]"
-                  >
-                    <template v-slot:textColor>
-                      <q-btn
-                        flat
-                        dense
-                        no-caps
-                        icon="format_color_text"
-                        size="sm"
-                        title="Cor do texto"
-                      >
-                        <q-menu anchor="bottom left" self="top left" @before-show="saveSelection">
-                          <q-color
-                            v-model="selectedTextColor"
-                            no-header-tabs
-                            @change="applyTextColor"
-                          />
-                        </q-menu>
-                      </q-btn>
-                    </template>
-                  </q-editor>
+                <div class="col-12 q-mb-xl">
+                  <QuillEditor
+                    :content="form.descricao"
+                    content-type="html"
+                    theme="snow"
+                    :toolbar="quillToolbar"
+                    class="quill-editor-field"
+                    @update:content="onDescricaoUpdate"
+                  />
                 </div>
 
                 <!-- Data início -->
                 <div class="col-12 col-sm-6">
                   <q-input
-                    v-model="form.dataInicio"
+                    :model-value="toDisplayDate(form.dataInicio)"
                     label="Data de Início"
                     filled
-                    :readonly="!editando"
+                    readonly
                   >
-                    <template v-if="editando" v-slot:append>
+                    <template v-slot:append>
                       <q-icon name="event" class="cursor-pointer">
                         <q-popup-proxy cover>
                           <q-date v-model="form.dataInicio" mask="YYYY-MM-DDTHH:mm" color="primary">
@@ -178,13 +124,14 @@
                 <!-- Data fim -->
                 <div class="col-12 col-sm-6">
                   <q-input
-                    v-model="form.dataFim"
+                    :model-value="toDisplayDate(form.dataFim)"
                     label="Data de Fim"
                     filled
-                    :readonly="!editando"
+                    readonly
                     clearable
+                    @update:model-value="(v) => { if (!v) form.dataFim = '' }"
                   >
-                    <template v-if="editando" v-slot:append>
+                    <template v-slot:append>
                       <q-icon name="event" class="cursor-pointer">
                         <q-popup-proxy cover>
                           <q-date v-model="form.dataFim" mask="YYYY-MM-DDTHH:mm" color="primary">
@@ -218,7 +165,6 @@
                     label="Capacidade Total"
                     filled
                     type="number"
-                    :readonly="!editando"
                   />
                 </div>
 
@@ -228,7 +174,6 @@
                     v-model="form.online"
                     label="Evento Online"
                     color="primary"
-                    :disable="!editando"
                   />
                 </div>
 
@@ -238,7 +183,6 @@
                       v-model="form.localNome"
                       label="Nome do Local"
                       filled
-                      :readonly="!editando"
                     />
                   </div>
                   <div class="col-12 col-sm-6">
@@ -246,7 +190,6 @@
                       v-model="form.localEndereco"
                       label="Endereço"
                       filled
-                      :readonly="!editando"
                     />
                   </div>
                 </template>
@@ -256,7 +199,6 @@
                     v-model="form.linkOnline"
                     label="Link do Evento"
                     filled
-                    :readonly="!editando"
                   >
                     <template v-slot:prepend><q-icon name="link" /></template>
                   </q-input>
@@ -378,12 +320,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { EventoService, STATUS_CORES, STATUS_LABELS } from "./evento.service";
 import { LotesService } from "./lotes.service";
 import { useQuasar } from "quasar";
 import { ApiDate } from "src/shared/apiDate.service";
+import { QuillEditor } from "@vueup/vue-quill";
+import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
 import EventoFormulario from "./eventoFormulario.vue";
 
@@ -391,6 +335,7 @@ export default defineComponent({
   name: "PortalEventosEventosDetalhe",
   components: {
     EventoFormulario,
+    QuillEditor,
   },
   setup() {
     const $route = useRoute();
@@ -399,41 +344,19 @@ export default defineComponent({
     const $service = new EventoService();
     const $lotesService = new LotesService();
 
-    const editorRef = ref<any>(null);
-    const selectedTextColor = ref("#000000");
-    let savedRange: Range | null = null;
-
-    const editorDefinitions = {
-      textColor: {
-        tip: "Cor do texto",
-        icon: "format_color_text",
-        handler() {},
-      },
-    };
-
-    function saveSelection() {
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        savedRange = sel.getRangeAt(0).cloneRange();
-      }
-    }
-
-    function applyTextColor(color: string) {
-      if (editorRef.value) {
-        editorRef.value.focus();
-      }
-      const sel = window.getSelection();
-      if (savedRange && sel) {
-        sel.removeAllRanges();
-        sel.addRange(savedRange);
-      }
-      document.execCommand("foreColor", false, color);
-    }
+    const quillToolbar = [
+      ["bold", "italic", "underline", "strike"],
+      [{ color: [] }],
+      [{ align: [] }],
+      ["link"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["blockquote"],
+      ["clean"],
+    ];
 
     const data = reactive({
       evento: null as any,
       lotes: [] as any[],
-      editando: false,
       form: {
         titulo: "",
         descricao: "",
@@ -447,7 +370,9 @@ export default defineComponent({
       },
     });
 
-    const podeEditar = computed(() => ["rascunho", "publicado"].includes(data.evento?.status));
+    function onDescricaoUpdate(val: string) {
+      data.form.descricao = val;
+    }
 
     function carregarForm(evento: any) {
       data.form.titulo = evento.titulo;
@@ -488,14 +413,8 @@ export default defineComponent({
         linkOnline: data.form.online ? data.form.linkOnline : undefined,
       });
       if (ok) {
-        data.editando = false;
         await carregar();
       }
-    }
-
-    function cancelarEdicao() {
-      data.editando = false;
-      if (data.evento) carregarForm(data.evento);
     }
 
     async function publicar() {
@@ -532,6 +451,14 @@ export default defineComponent({
       return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
 
+    function toDisplayDate(date: string): string {
+      if (!date) return "";
+      const [datePart, timePart] = date.split("T");
+      if (!datePart) return "";
+      const [year, month, day] = datePart.split("-");
+      return timePart ? `${day}/${month}/${year} ${timePart}` : `${day}/${month}/${year}`;
+    }
+
     function abrirPaginaPublica() {
       const url = montaLinkPublico();
       window.open(url, "_blank");
@@ -556,11 +483,9 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
-      podeEditar,
       copiarLink,
       abrirPaginaPublica,
       salvar,
-      cancelarEdicao,
       publicar,
       cancelar,
       encerrar,
@@ -568,12 +493,19 @@ export default defineComponent({
       statusCor,
       formatarData,
       formatarMoeda,
-      editorRef,
-      selectedTextColor,
-      editorDefinitions,
-      saveSelection,
-      applyTextColor,
+      toDisplayDate,
+      quillToolbar,
+      onDescricaoUpdate,
     };
   },
 });
 </script>
+
+<style>
+.quill-readonly .ql-toolbar {
+  display: none;
+}
+.quill-readonly .ql-container {
+  border-top: 1px solid #ccc;
+}
+</style>

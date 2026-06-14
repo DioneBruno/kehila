@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "@vueup/vue-quill": "^1.5.3",
     "axios": "^1.16.1",
     "driver.js": "^1.4.0",
     "jwt-decode": "^4.0.0",
