@@ -28,9 +28,11 @@ function checkTenant(): string | null {
   return null;
 }
 
+const runtimeEnv = (window as any).__env ?? {};
+
 const urlApi = Platform.is.electron
   ? (localStorage.getItem("URL_API") as string)
-  : (process.env.URL_API as string);
+  : (runtimeEnv.URL_API || process.env.URL_API) as string;
 
 const api = axios.create({
   baseURL: urlApi,
