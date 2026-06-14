@@ -8,12 +8,23 @@ export type EnviarCodigoValidadorInput = {
 
 export type EnviarCodigoValidadorOutput = {
   code: string;
+  email: string;
+  phone: string;
 };
 
 export type CodigoValidadorNotificacoes = {
   enviarEmail: (destinatario: string, code: string) => Promise<void>;
   enviarSms: (destinatario: string, code: string) => Promise<void>;
 };
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  return `${local[0]}*****${local[local.length - 1]}@${domain}`;
+}
+
+function maskPhone(phone: string): string {
+  return `${phone.slice(0, 5)}#####${phone[phone.length - 1]}`;
+}
 
 export class EnviarCodigoValidadorUsecase {
   constructor(
@@ -31,6 +42,6 @@ export class EnviarCodigoValidadorUsecase {
     await this.notificacoes.enviarEmail(user.email, code);
     await this.notificacoes.enviarSms(user.phone, code);
 
-    return { code };
+    return { code, email: maskEmail(user.email), phone: maskPhone(user.phone) };
   }
 }

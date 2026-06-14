@@ -59,6 +59,8 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
 
     expect(result.code).toBeDefined();
     expect(result.code).toMatch(/^\d{6}$/);
+    expect(result.email).toBe("e*****o@endereco.com");
+    expect(result.phone).toBe("65985#####9");
 
     const cached = await repo.buscarCodigoNoCache(companyUuid, username);
     expect(cached).not.toBeNull();
