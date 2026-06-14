@@ -52,7 +52,11 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        URL_API: process.env.URL_API,
+        VITE_SOCKET_URL: process.env.VITE_SOCKET_URL,
+        METABASE_URL: process.env.METABASE_URL,
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
