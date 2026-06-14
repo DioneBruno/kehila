@@ -9,6 +9,8 @@ import { DataSource } from "typeorm";
 import { NotificacaoModule } from "./notificacao/notificacao.module";
 import { FinanceiroModule } from "./financeiro/financeiro.module";
 import axios from "axios";
+import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
+import { RedisClientType, createClient } from "redis";
 
 @Global()
 @Module({
@@ -32,14 +34,22 @@ import axios from "axios";
   providers: [
     {
       provide: ConnectionHub,
-      useFactory: (dataSource: DataSource) => {
+      useFactory: async (dataSource: DataSource) => {
+        // HTTP
         const http = axios.create({
           baseURL: process.env.SYSTEM_URL_API,
           headers: {
             "Content-Type": "application/json",
           },
         });
-        return new ConnectionHub({ database: dataSource, http });
+
+        // CACHE
+        const cacheClient: RedisClientType | any = await createClient({
+          url: process.env.REDIS_URL,
+        }).connect();
+        const cache = new ConnectionCacheRedis(cacheClient);
+
+        return new ConnectionHub({ database: dataSource, http, cache });
       },
       inject: [getDataSourceToken()],
     },
