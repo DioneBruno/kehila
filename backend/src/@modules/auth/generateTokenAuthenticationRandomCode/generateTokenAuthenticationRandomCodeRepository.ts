@@ -60,7 +60,7 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
     try {
       const repo = new EnviarSmsRepository(this.connectionHub);
       const usecase = new EnviarSmsUsecase(repo);
-      await usecase.execute({ gateway: "vonage", destinatario: phone, mensagem: code });
+      await usecase.execute({ gateway: "vonage", destinatario: phone, mensagem: `Código de verificação: ${code}` });
     } catch (error) {
       console.error("Erro ao enviar sms: ", error);
     }
