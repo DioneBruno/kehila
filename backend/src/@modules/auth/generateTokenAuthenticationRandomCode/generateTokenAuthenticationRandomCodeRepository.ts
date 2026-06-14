@@ -1,4 +1,6 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { GenerateTokenAuthenticationUserRepository } from "../generateTokenAuthenticationUser/generateTokenAuthenticationUserRepository";
+import { GenerateTokenAuthenticationUserUsecase } from "../generateTokenAuthenticationUser/generateTokenAuthenticationUser.usecase";
 
 const CACHE_TTL_SECONDS = 300;
 
@@ -28,5 +30,11 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
     const key = `auth_random_code:${companyUuid}:${username}`;
     const result = await this.connectionHub.cache!.findKey(key);
     return result as { code: string; userUuid: string } | null;
+  }
+
+  async gerarTokenAuthentication(companyUuid: string, userUuid: string) {
+    const repo = new GenerateTokenAuthenticationUserRepository(this.connectionHub);
+    const generateTokenUsecase = new GenerateTokenAuthenticationUserUsecase(repo);
+    return generateTokenUsecase.execute({ companyUuid, userUuid });
   }
 }
