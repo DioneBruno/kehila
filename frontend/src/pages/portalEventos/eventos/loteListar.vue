@@ -85,71 +85,87 @@
 
         <!-- Tipos de ingresso -->
         <q-card-section>
-          <div class="row items-center justify-between q-mb-sm">
-            <span class="text-caption text-grey-7 text-weight-medium text-uppercase">
-              Tipos de Ingresso
-            </span>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              icon="add"
-              label="Adicionar"
-              color="primary"
-              @click="abrirDialogTipo(lote.uuid)"
-            />
+          <div class="row items-center q-mb-sm">
+            <div class="col-4" />
+            <div class="col-4 flex flex-center">
+              <q-btn
+                flat
+                dense
+                size="sm"
+                :icon="tiposVisiveis[lote.uuid] ? 'expand_less' : 'expand_more'"
+                :label="`${lote.tiposIngresso.length} Tipo${lote.tiposIngresso.length !== 1 ? 's' : ''} de Ingresso`"
+                color="grey-7"
+                @click="toggleTipos(lote.uuid)"
+              />
+            </div>
+            <div class="col-4 flex justify-end">
+              <q-btn
+                flat
+                dense
+                no-caps
+                size="sm"
+                icon="add"
+                label="Adicionar tipo Ingresso"
+                color="primary"
+                @click="abrirDialogTipo(lote.uuid)"
+              />
+            </div>
           </div>
 
-          <div v-if="lote.tiposIngresso.length === 0" class="text-center text-grey-5 q-py-sm">
-            <q-icon name="info" size="sm" class="q-mr-xs" />
-            <span class="text-caption">Nenhum tipo de ingresso neste lote</span>
-          </div>
+          <div v-show="tiposVisiveis[lote.uuid]">
+            <div v-if="lote.tiposIngresso.length === 0" class="text-center text-grey-5 q-py-sm">
+              <q-icon name="info" size="sm" class="q-mr-xs" />
+              <span class="text-caption">Nenhum tipo de ingresso neste lote</span>
+            </div>
 
-          <q-list v-else separator dense class="rounded-borders">
-            <q-item v-for="tipo in lote.tiposIngresso" :key="tipo.uuid" class="q-px-sm">
-              <q-item-section>
-                <q-item-label class="row items-center q-gutter-xs">
-                  <span>{{ tipo.nome }}</span>
-                  <q-badge v-if="!tipo.visivel" color="grey" label="Oculto" dense />
-                </q-item-label>
-                <q-item-label caption>
-                  {{ formatarMoeda(tipo.preco) }}
-                  · {{ tipo.vendidos }}/{{ tipo.quantidade === 0 ? "∞" : tipo.quantidade }} vendidos
-                  · {{ tipo.quantidade === 0 ? "∞" : tipo.disponivel }} disponíveis
-                  <span v-if="tipo.descricao"> · {{ tipo.descricao }}</span>
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <div class="row q-gutter-xs">
-                  <q-btn
-                    flat
-                    dense
-                    round
-                    size="sm"
-                    icon="edit"
-                    color="primary"
-                    @click="abrirDialogTipo(lote.uuid, tipo)"
-                  >
-                    <q-tooltip>Editar</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    flat
-                    dense
-                    round
-                    size="sm"
-                    icon="delete"
-                    color="negative"
-                    :disable="tipo.vendidos > 0"
-                    @click="removerTipo(lote.uuid, tipo.uuid)"
-                  >
-                    <q-tooltip>{{
-                      tipo.vendidos > 0 ? "Possui ingressos vendidos" : "Remover"
-                    }}</q-tooltip>
-                  </q-btn>
-                </div>
-              </q-item-section>
-            </q-item>
-          </q-list>
+            <q-list v-else separator dense class="rounded-borders">
+              <q-item v-for="tipo in lote.tiposIngresso" :key="tipo.uuid" class="q-px-sm">
+                <q-item-section>
+                  <q-item-label class="row items-center q-gutter-xs">
+                    <span>{{ tipo.nome }}</span>
+                    <q-badge v-if="!tipo.visivel" color="grey" label="Oculto" dense />
+                  </q-item-label>
+                  <q-item-label caption>
+                    {{ formatarMoeda(tipo.preco) }}
+                    · {{ tipo.vendidos }}/{{
+                      tipo.quantidade === 0 ? "∞" : tipo.quantidade
+                    }}
+                    vendidos · {{ tipo.quantidade === 0 ? "∞" : tipo.disponivel }} disponíveis
+                    <span v-if="tipo.descricao"> · {{ tipo.descricao }}</span>
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <div class="row q-gutter-xs">
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="sm"
+                      icon="edit"
+                      color="primary"
+                      @click="abrirDialogTipo(lote.uuid, tipo)"
+                    >
+                      <q-tooltip>Editar</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="sm"
+                      icon="delete"
+                      color="negative"
+                      :disable="tipo.vendidos > 0"
+                      @click="removerTipo(lote.uuid, tipo.uuid)"
+                    >
+                      <q-tooltip>{{
+                        tipo.vendidos > 0 ? "Possui ingressos vendidos" : "Remover"
+                      }}</q-tooltip>
+                    </q-btn>
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
         </q-card-section>
       </q-card>
     </div>
@@ -404,6 +420,7 @@ export default defineComponent({
 
     const data = reactive({
       lotes: [] as any[],
+      tiposVisiveis: {},
       dialogLote: {
         aberto: false,
         editando: false,
@@ -524,6 +541,10 @@ export default defineComponent({
       }
     }
 
+    function toggleTipos(loteUuid: string) {
+      data.tiposVisiveis[loteUuid] = !data.tiposVisiveis[loteUuid];
+    }
+
     async function removerTipo(loteUuid: string, tipoUuid: string) {
       const ok = await $service.removerTipo(loteUuid, tipoUuid);
       if (ok) await carregar();
@@ -555,6 +576,7 @@ export default defineComponent({
       abrirDialogTipo,
       salvarTipo,
       removerTipo,
+      toggleTipos,
       formatarMoeda,
       formatarData,
     };
