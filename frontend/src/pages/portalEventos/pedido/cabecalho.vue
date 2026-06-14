@@ -16,7 +16,10 @@
                 formatDate(evento.dataInicio, "DD/MM/YYYY")
               }}
             </span>
-            <span class="row items-center no-wrap">
+            <span
+              class="row items-center no-wrap"
+              v-if="formatDate(evento.dataInicio, 'HH:mm') != '00:00'"
+            >
               <q-icon name="schedule" size="13px" class="q-mr-xs" />{{
                 formatDate(evento.dataInicio, "HH:mm")
               }}
@@ -32,7 +35,7 @@
           </div> -->
         </div>
         <div class="col-auto">
-          <q-chip color="positive" text-color="white" icon="circle" dense>Em Vendas</q-chip>
+          <!-- <q-chip color="positive" text-color="white" icon="circle" dense>Em Vendas</q-chip> -->
         </div>
       </div>
     </div>
