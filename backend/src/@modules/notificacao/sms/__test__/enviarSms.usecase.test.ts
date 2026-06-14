@@ -5,6 +5,13 @@ import { EnviarSmsGatewayVonage } from "../enviarSmsGateway.vonage";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { MensagemEntity } from "../mensagem.entity";
 
+jest.mock("@vonage/server-sdk", () => ({
+  Vonage: jest.fn().mockImplementation(() => ({
+    messages: { send: jest.fn().mockResolvedValue({}) },
+  })),
+}));
+jest.mock("@vonage/messages", () => ({ Channels: { SMS: "sms" } }));
+
 describe("Deve testar EnviarSmsUsecase", () => {
   let enviarStub: sinon.SinonStub;
 
@@ -23,7 +30,7 @@ describe("Deve testar EnviarSmsUsecase", () => {
 
     const input = {
       gateway: "vonage",
-      destinatario: "65985477589",
+      destinatario: "5565985477589",
       mensagem: "Seu código de acesso é 123456",
     };
 
@@ -43,16 +50,18 @@ describe("Deve testar EnviarSmsUsecase", () => {
 
     await usecase.execute({
       gateway: "vonage",
-      destinatario: "65985477589",
+      destinatario: "5565985477589",
       mensagem: "Mensagem um",
     });
 
     await usecase.execute({
       gateway: "vonage",
-      destinatario: "69984852834",
+      destinatario: "5569984852834",
       mensagem: "Mensagem dois",
     });
 
     expect(enviarStub.callCount).toBe(2);
+    expect(enviarStub.args[0][0].props.destinatario).toBe("5565985477589");
+    expect(enviarStub.args[1][0].props.destinatario).toBe("5569984852834");
   });
 });

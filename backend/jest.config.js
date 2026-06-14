@@ -22,7 +22,7 @@ module.exports = {
     ]
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!@faker-js/)",
+    "/node_modules/(?!@faker-js/|node-fetch/|data-uri-to-buffer/|fetch-blob/|formdata-polyfill/)",
   ],
   moduleNameMapper: {
     "@modules/(.+)$": "<rootDir>/src/@modules/$1",

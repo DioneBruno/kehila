@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-form ref="loginFormRef" greedy v-if="!user.uuid && form == 'login'">
+    <div v-if="!user.uuid && form == 'login'">
       <div class="row q-col-gutter-xs">
         <div class="col-12 q-pb-md text-grey-8">
           <span>Entrar com usuário cadastrado</span>
@@ -24,31 +24,27 @@
             stack-label
             v-model="loginData.username"
             label="Email ou CPF *"
+            :disable="codigoEnviado"
             lazy-rules
           />
         </div>
-        <div class="col-12">
+        <div v-if="codigoEnviado" class="col-12">
           <q-input
             outlined
             dense
             stack-label
-            v-model="loginData.password"
-            label="Senha *"
-            :type="mostrarSenha ? 'text' : 'password'"
+            v-model="loginData.code"
+            label="Código recebido *"
             :rules="[(v) => !!v || 'Obrigatório']"
             lazy-rules
-          >
-            <template #append>
-              <q-icon
-                :name="mostrarSenha ? 'visibility_off' : 'visibility'"
-                class="cursor-pointer"
-                @click="mostrarSenha = !mostrarSenha"
-              />
-            </template>
-          </q-input>
+          />
+          <div class="text-caption text-grey-6 q-mt-xs">
+            Um código foi enviado para o seu email/celular.
+            <a class="cursor-pointer text-primary" @click="reenviarCodigo()">Reenviar</a>
+          </div>
         </div>
       </div>
-    </q-form>
+    </div>
 
     <q-form ref="formRef" greedy v-if="!user.uuid && form == 'novoUsuario'">
       <div class="row q-col-gutter-xs">
@@ -173,9 +169,9 @@
         v-else-if="form == 'login'"
         no-caps
         unelevated
-        label="Entrar"
+        :label="codigoEnviado ? 'Validar código' : 'Enviar código'"
         color="primary"
-        icon-right="login"
+        :icon-right="codigoEnviado ? 'login' : 'send'"
         @click="loginUsuario()"
       />
       <q-btn
@@ -195,6 +191,7 @@
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 import { useAuthStore } from "src/stores/auth";
+import { usePedidoStore } from "src/stores/pedido";
 
 export default defineComponent({
   name: "StepSeusDados",
@@ -203,11 +200,14 @@ export default defineComponent({
   setup(props, { emit }) {
     const $authStore = useAuthStore();
     const $service = new PedidoService();
+    const $pedidoStore = usePedidoStore();
 
     const data = reactive({
       form: ref("novoUsuario"),
+      evento: computed(() => $pedidoStore.$state.evento),
       user: computed(() => $authStore.$state.user),
-      loginData: { username: "", password: "" },
+      loginData: { username: "", password: "", code: "" },
+      codigoEnviado: false,
       mostrarSenha: false,
     });
 
@@ -229,8 +229,21 @@ export default defineComponent({
     }
 
     async function loginUsuario() {
-      await $service.loginUsuario(data.loginData);
+      if (!data.codigoEnviado) {
+        await $service.gerarCodigoLogin(data.loginData.username);
+        data.codigoEnviado = true;
+        return;
+      }
+      await $service.validarCodigoLogin({
+        username: data.loginData.username,
+        code: data.loginData.code,
+        companyUuid: data.evento.companyUuid,
+      });
       await verificaUsuario();
+    }
+
+    async function reenviarCodigo() {
+      await $service.gerarCodigoLogin(data.loginData.username);
     }
 
     function trocarUsuario() {
@@ -256,6 +269,7 @@ export default defineComponent({
       novoUsuario,
       cadastrarUsuario,
       loginUsuario,
+      reenviarCodigo,
       entrarComUsuarioCadastrado,
       trocarUsuario,
       avancar,

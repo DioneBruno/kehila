@@ -45,6 +45,17 @@ export class PedidoService {
     return response;
   }
 
+  async gerarCodigoLogin(username: string) {
+    return this.loginHttp.randomCodeGenerate({ username });
+  }
+
+  async validarCodigoLogin(input: { username: string; code: string; companyUuid: string }) {
+    const authCookies = new AuthCookiesQuasar();
+    const response = await this.loginHttp.randomCodeValidate(input);
+    authCookies.setToken(response.token);
+    return response;
+  }
+
   async criarPedido() {
     const input = {
       eventoUuid: this.$pedidoStore.$state.evento.uuid,

@@ -9,6 +9,7 @@ export class PortalEventosQuery {
   async buscarEvento(companyUuid: string, eventoUuid: string) {
     const [eventoModel] = await this.connectionHub.database!.query(
       `SELECT 
+      eventos.company_uuid "companyUuid",
       eventos.uuid,
       eventos.banner_url "bannerUrl",
       eventos.titulo,

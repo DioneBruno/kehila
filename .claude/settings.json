@@ -4,7 +4,8 @@
       "Bash(node -e \"const s = require\\('sinon'\\); console.log\\(typeof s.stub\\)\")",
       "Bash(python3 -c \"import sys,json; p=json.load\\(sys.stdin\\); print\\('types:', p.get\\('types',''\\), 'typings:', p.get\\('typings',''\\)\\)\")",
       "Bash(python3 -c \"import sys,json; p=json.load\\(sys.stdin\\); [print\\(k,':',v\\) for k,v in p.items\\(\\) if k in ['types','typings','exports','main']]\")",
-      "WebFetch(domain:vueup.github.io)"
+      "WebFetch(domain:vueup.github.io)",
+      "Bash(node node_modules/jest/bin/jest.js 'src/@modules/notificacao/sms/__test__/enviarSms.usecase.test.ts' --no-coverage)"
     ]
   }
 }

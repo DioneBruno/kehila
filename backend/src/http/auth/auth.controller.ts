@@ -12,7 +12,6 @@ export class AuthController {
     readonly gerarTokenAuthenticationUsecase: GerarTokenAuthenticationUsecase,
   ) {}
 
-  // @ApiOperation({ summary: "Buscar cidades" })
   @Post("token-generate")
   async tokenGenerate(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
@@ -39,7 +38,7 @@ export class AuthController {
   @Post("random-code-authentication/validate")
   async validateRandomCode(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
-      companyUuid: req.companyUuid,
+      companyUuid: body.companyUuid,
       username: body.username,
       code: body.code,
     };

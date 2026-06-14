@@ -7,4 +7,14 @@ export class LoginHttp {
     const response = await this.http.post("token-generate", input);
     return response;
   }
+
+  async randomCodeGenerate(input: { username: string }) {
+    const response = await this.http.post("random-code-authentication/generate", input);
+    return response;
+  }
+
+  async randomCodeValidate(input: { username: string; code: string }) {
+    const response = await this.http.post("random-code-authentication/validate", input);
+    return response;
+  }
 }

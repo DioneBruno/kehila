@@ -3,7 +3,7 @@ export type MensagemProps = {
   destinatario: string;
   mensagem: string;
 };
-
+//
 export class MensagemEntity {
   constructor(readonly props: MensagemProps) {}
 
@@ -11,7 +11,8 @@ export class MensagemEntity {
     return this.props.gateway;
   }
   destinatario(): string {
-    return this.props.destinatario;
+    const numero = this.props.destinatario;
+    return numero.startsWith("55") ? numero : `55${numero}`;
   }
   mensagem(): string {
     return this.props.mensagem;

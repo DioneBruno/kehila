@@ -1,10 +1,10 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { GenerateTokenAuthenticationUserRepository } from "../generateTokenAuthenticationUser/generateTokenAuthenticationUserRepository";
 import { GenerateTokenAuthenticationUserUsecase } from "../generateTokenAuthenticationUser/generateTokenAuthenticationUser.usecase";
-import type { EnviarEmailRepository } from "src/@modules/notificacao/email/enviarEmailRepository";
-import type { EnviarEmailUsecase } from "src/@modules/notificacao/email/enviarEmail.usecase";
-import type { EnviarSmsRepository } from "src/@modules/notificacao/sms/enviarSmsRepository";
-import type { EnviarSmsUsecase } from "src/@modules/notificacao/sms/enviarSms.usecase";
+import { EnviarEmailRepository } from "src/@modules/notificacao/email/enviarEmailRepository";
+import { EnviarEmailUsecase } from "src/@modules/notificacao/email/enviarEmail.usecase";
+import { EnviarSmsRepository } from "src/@modules/notificacao/sms/enviarSmsRepository";
+import { EnviarSmsUsecase } from "src/@modules/notificacao/sms/enviarSms.usecase";
 
 const CACHE_TTL_SECONDS = 300;
 
@@ -15,11 +15,10 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
     const [user] = await this.connectionHub.database!.query(
       `SELECT users.uuid, users.email, users.phone
        FROM auth_users users
-         INNER JOIN auth_users_companies "userCompanies"
-           ON users.uuid = "userCompanies".user_uuid
-       WHERE (users.cpf = $2 OR users.email = $2 OR users.phone = $2)
-         AND "userCompanies".company_uuid = $1`,
-      [companyUuid, username],
+       INNER JOIN auth_users_companies "userCompanies"
+         ON users.uuid = "userCompanies".user_uuid
+       WHERE (users.cpf = $1 OR users.email = $1 OR users.phone = $1)`,
+      [username],
     );
     if (!user) return null;
     return { uuid: user.uuid, email: user.email, phone: user.phone };
@@ -43,30 +42,27 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
   }
 
   async enviarEmail(email: string, code: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { EnviarEmailRepository: EmailRepo } = require("src/@modules/notificacao/email/enviarEmailRepository") as {
-      EnviarEmailRepository: new (hub: ConnectionHub) => EnviarEmailRepository;
-    };
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { EnviarEmailUsecase: EmailUsecase } = require("src/@modules/notificacao/email/enviarEmail.usecase") as {
-      EnviarEmailUsecase: new (repo: EnviarEmailRepository) => EnviarEmailUsecase;
-    };
-    const repo = new EmailRepo(this.connectionHub);
-    const usecase = new EmailUsecase(repo);
-    await usecase.execute({ gateway: "smtp", destinatario: email, titulo: "Código de verificação", mensagem: code });
+    try {
+      const repo = new EnviarEmailRepository(this.connectionHub);
+      const usecase = new EnviarEmailUsecase(repo);
+      await usecase.execute({
+        gateway: "smtp",
+        destinatario: email,
+        titulo: "Código de verificação",
+        mensagem: code,
+      });
+    } catch (error) {
+      console.error("Erro ao enviar email: ", error);
+    }
   }
 
   async enviarSms(phone: string, code: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { EnviarSmsRepository: SmsRepo } = require("src/@modules/notificacao/sms/enviarSmsRepository") as {
-      EnviarSmsRepository: new (hub: ConnectionHub) => EnviarSmsRepository;
-    };
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { EnviarSmsUsecase: SmsUsecase } = require("src/@modules/notificacao/sms/enviarSms.usecase") as {
-      EnviarSmsUsecase: new (repo: EnviarSmsRepository) => EnviarSmsUsecase;
-    };
-    const repo = new SmsRepo(this.connectionHub);
-    const usecase = new SmsUsecase(repo);
-    await usecase.execute({ gateway: "vonage", destinatario: phone, mensagem: code });
+    try {
+      const repo = new EnviarSmsRepository(this.connectionHub);
+      const usecase = new EnviarSmsUsecase(repo);
+      await usecase.execute({ gateway: "vonage", destinatario: phone, mensagem: code });
+    } catch (error) {
+      console.error("Erro ao enviar sms: ", error);
+    }
   }
 }
