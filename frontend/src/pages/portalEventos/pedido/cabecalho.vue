@@ -41,7 +41,7 @@
 <script lang="ts">
 import { ApiDate } from "src/shared/apiDate.service";
 import { usePedidoStore } from "src/stores/pedido";
-import { computed, defineComponent, reactive, toRefs } from "vue";
+import { computed, defineComponent, reactive, toRefs, watchEffect } from "vue";
 
 export default defineComponent({
   name: "Cabecalho",
@@ -50,6 +50,12 @@ export default defineComponent({
 
     const data = reactive({
       evento: computed(() => $pedidoStore.$state.evento),
+    });
+
+    watchEffect(() => {
+      if (data.evento?.titulo) {
+        document.title = data.evento.titulo;
+      }
     });
 
     function formatDate(date: string, format?: "DD/MM/YYYY" | "HH:mm") {

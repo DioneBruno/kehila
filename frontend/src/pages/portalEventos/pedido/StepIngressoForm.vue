@@ -53,7 +53,6 @@
               stack-label
               v-model="ingresso.pessoaNome"
               label="Nome completo"
-              :rules="[(v) => !!v || 'Obrigatório']"
               lazy-rules
             />
           </div>
