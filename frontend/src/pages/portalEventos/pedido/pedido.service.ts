@@ -46,14 +46,26 @@ export class PedidoService {
   }
 
   async gerarCodigoLogin(username: string) {
-    return this.loginHttp.randomCodeGenerate({ username });
+    try {
+      this.$q.loading.show();
+      return this.loginHttp.randomCodeGenerate({ username });
+    } catch (error) {
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 
   async validarCodigoLogin(input: { username: string; code: string; companyUuid: string }) {
-    const authCookies = new AuthCookiesQuasar();
-    const response = await this.loginHttp.randomCodeValidate(input);
-    authCookies.setToken(response.token);
-    return response;
+    try {
+      this.$q.loading.show();
+      const authCookies = new AuthCookiesQuasar();
+      const response = await this.loginHttp.randomCodeValidate(input);
+      authCookies.setToken(response.token);
+      return response;
+    } catch (error) {
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 
   async criarPedido() {

@@ -13,6 +13,7 @@ export class ConnectionCacheRedis implements ConnectionCacheInterface {
   }
 
   async saveObject(key: string, object: object, expireSeconds: number): Promise<void> {
+    if (!expireSeconds) expireSeconds = 5;
     for (let i = 0; i < Object.keys(object).length; i++) {
       const objectKey = Object.keys(object)[i];
       if (!object[objectKey]) continue;

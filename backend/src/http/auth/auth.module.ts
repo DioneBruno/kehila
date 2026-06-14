@@ -56,6 +56,7 @@ import { EnviarCodigoValidadorUsecase } from "src/@modules/auth/generateTokenAut
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DominioMiddleware).forRoutes("token-generate");
+    consumer.apply(DominioMiddleware).forRoutes("random-code-authentication");
     consumer.apply(JwtAuthMiddleware).forRoutes(UserController);
   }
 }

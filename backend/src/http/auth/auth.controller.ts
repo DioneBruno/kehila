@@ -38,7 +38,7 @@ export class AuthController {
   @Post("random-code-authentication/validate")
   async validateRandomCode(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
-      companyUuid: body.companyUuid,
+      companyUuid: req.companyUuid,
       username: body.username,
       code: body.code,
     };
