@@ -1,3 +1,4 @@
+import * as sinon from "sinon";
 import dataSource from "src/@infra/database/datasource";
 import { EnviarCodigoValidadorUsecase } from "../enviarCodigoValidador.usecase";
 import { GenerateTokenAuthenticationRandomCodeRepository } from "../generateTokenAuthenticationRandomCodeRepository";
@@ -6,7 +7,12 @@ import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
 import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 
+const companyUuid = "d22ca823-c559-4d91-9a59-7c7a499d6977";
 const userUuid = "7a426c07-7709-4adc-b3f7-4782c9a12b89";
+const username = "A12345678909B";
+const userEmail = "emaildousuario@endereco.com";
+const userPhone = "65985477589";
+
 let repo: GenerateTokenAuthenticationRandomCodeRepository;
 
 describe("Deve testar EnviarCodigoValidadorUsecase", () => {
@@ -20,24 +26,73 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
     repo = new GenerateTokenAuthenticationRandomCodeRepository(connectionHub);
   });
 
-  beforeEach(async () => {});
+  beforeEach(async () => {
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
+    sinon.restore();
+  });
 
   afterAll(async () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
     await dataSource.destroy();
   });
 
-  test("Deve enviar codigo validado", async () => {
-    const companyUuid = "d22ca823-c559-4d91-9a59-7c7a499d6977";
-
+  async function inserirUsuario() {
     await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone)
-      VALUES ('${userUuid}', 'Nome Usuario', 'A12345678909B', 'emaildousuario@endereco.com', '65985477589')`);
+      VALUES ('${userUuid}', 'Nome Usuario', '${username}', '${userEmail}', '${userPhone}')`);
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ('${userUuid}', '${userUuid}', '${companyUuid}', true, 'member')
+      ON CONFLICT DO NOTHING`);
+  }
 
-    const usecase = new EnviarCodigoValidadorUsecase(repo);
-    const input = {
-      companyUuid,
-      username: "A12345678909B",
-    };
-    await usecase.execute(input);
+  function criarNotificacoes() {
+    const enviarEmailStub = sinon.stub().resolves();
+    const enviarSmsStub = sinon.stub().resolves();
+    return { enviarEmailStub, enviarSmsStub, notificacoes: { enviarEmail: enviarEmailStub, enviarSms: enviarSmsStub } };
+  }
+
+  test("Deve gerar um código de 6 dígitos e salvá-lo no cache", async () => {
+    await inserirUsuario();
+
+    const { notificacoes } = criarNotificacoes();
+    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    const result = await usecase.execute({ companyUuid, username });
+
+    expect(result.code).toBeDefined();
+    expect(result.code).toMatch(/^\d{6}$/);
+
+    const cached = await repo.buscarCodigoNoCache(companyUuid, username);
+    expect(cached).not.toBeNull();
+    expect(cached!.code).toBe(result.code);
+    expect(cached!.userUuid).toBe(userUuid);
+  });
+
+  test("Deve enviar o código via email com destinatário e código corretos", async () => {
+    await inserirUsuario();
+
+    const { enviarEmailStub, notificacoes } = criarNotificacoes();
+    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    const result = await usecase.execute({ companyUuid, username });
+
+    expect(enviarEmailStub.calledOnce).toBe(true);
+    expect(enviarEmailStub.firstCall.args[0]).toBe(userEmail);
+    expect(enviarEmailStub.firstCall.args[1]).toBe(result.code);
+  });
+
+  test("Deve enviar o código via SMS com destinatário e código corretos", async () => {
+    await inserirUsuario();
+
+    const { enviarSmsStub, notificacoes } = criarNotificacoes();
+    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    const result = await usecase.execute({ companyUuid, username });
+
+    expect(enviarSmsStub.calledOnce).toBe(true);
+    expect(enviarSmsStub.firstCall.args[0]).toBe(userPhone);
+    expect(enviarSmsStub.firstCall.args[1]).toBe(result.code);
+  });
+
+  test("Deve lançar erro quando usuário não é encontrado", async () => {
+    const { notificacoes } = criarNotificacoes();
+    const usecase = new EnviarCodigoValidadorUsecase(repo, notificacoes);
+    await expect(usecase.execute({ companyUuid, username: "cpf_inexistente" })).rejects.toThrow("Usuário não encontrado");
   });
 });
