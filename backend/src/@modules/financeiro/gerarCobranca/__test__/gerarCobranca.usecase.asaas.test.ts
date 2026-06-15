@@ -31,13 +31,11 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const http = axios.create({ baseURL: "https://api-sandbox.asaas.com" });
     const connectionHub = new ConnectionHub({ database: dataSource, http });
     repo = new GerarCobrancaRepository(connectionHub);
-
-    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
-      VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
   });
   beforeEach(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
   });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
@@ -52,6 +50,9 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   });
 
   test("Deve buscar cliente existente e criar cobrança", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
+
     const clienteId = "cus_000005113026";
     const installmentId = "ins_000001234567";
     const http = repo.connectionHub.http as any;
@@ -118,6 +119,8 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   });
 
   test("Deve cadastrar novo cliente no Asaas quando não existir", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
     const clienteId = "cus_000005113026";
     const installmentId = "ins_000001234567";
     const http = repo.connectionHub.http as any;
@@ -177,7 +180,69 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
+  test("Deve chamar ambiente de homologação", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+      return Promise.resolve({
+        data: {
+          data: [
+            { id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null },
+            { id: "pay_002", nossoNumero: "002", bankSlipUrl: "url2", dueDate: "2026-08-12", value: 100, netValue: 99, pixTransaction: null },
+            { id: "pay_003", nossoNumero: "003", bankSlipUrl: "url3", dueDate: "2026-09-12", value: 100, netValue: 99, pixTransaction: null },
+          ],
+        },
+      });
+    });
+    const postStub = stub(http, "post").resolves({ data: { installment: installmentId } });
+
+    await new GerarCobrancaUsecase(repo).execute({ ...defaultInput, valor: 300, numParcelas: 3 });
+
+    // Verifica que installmentCount e totalValue foram enviados corretamente
+    expect(postStub.firstCall.args[0]).toBe("https://api-sandbox.asaas.com/v3/payments");
+
+    getStub.restore();
+    postStub.restore();
+  });
+
+  test("Deve chamar ambiente de producao", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status, ambiente)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo', 'PROD')`);
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+      return Promise.resolve({
+        data: {
+          data: [
+            { id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null },
+            { id: "pay_002", nossoNumero: "002", bankSlipUrl: "url2", dueDate: "2026-08-12", value: 100, netValue: 99, pixTransaction: null },
+            { id: "pay_003", nossoNumero: "003", bankSlipUrl: "url3", dueDate: "2026-09-12", value: 100, netValue: 99, pixTransaction: null },
+          ],
+        },
+      });
+    });
+    const postStub = stub(http, "post").resolves({ data: { installment: installmentId } });
+
+    await new GerarCobrancaUsecase(repo).execute({ ...defaultInput, valor: 300, numParcelas: 3 });
+
+    // Verifica que installmentCount e totalValue foram enviados corretamente
+    expect(postStub.firstCall.args[0]).toBe("https://api.asaas.com/v3/payments");
+
+    getStub.restore();
+    postStub.restore();
+  });
+
   test("Deve criar cobrança parcelada enviando installmentCount correto - boleto", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
     const clienteId = "cus_000005113026";
     const installmentId = "ins_000001234567";
     const http = repo.connectionHub.http as any;
@@ -223,6 +288,8 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   });
 
   test("Deve criar cobrança parcelada enviando installmentCount correto - Cartáo de Credito", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
     const clienteId = "cus_000005113026";
     const installmentId = "ins_000001234567";
     const http = repo.connectionHub.http as any;
@@ -306,6 +373,8 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   });
 
   test("Caso Cartáo de Credito,  todo objeto cartaoCredito deve ser informado", async () => {
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
     const clienteId = "cus_000005113026";
     const installmentId = "ins_000001234567";
     const http = repo.connectionHub.http as any;

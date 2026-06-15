@@ -23,7 +23,8 @@ export type GerarCobrancaOutput = {
   pagamentos: PagamentoOutput[];
 };
 
-const baseUrl = "https://api-sandbox.asaas.com";
+const ASAAS_SANDBOX_URL = "https://api-sandbox.asaas.com";
+const ASAAS_PROD_URL = "https://api.asaas.com";
 
 export class GerarCobrancaGatewayAsaas {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -48,13 +49,14 @@ export class GerarCobrancaGatewayAsaas {
 
   private async formaPagamentoBoleto(cobranca: CobrancaEntity): Promise<GerarCobrancaOutput> {
     const cliente = await this.buscarCliente(cobranca);
+    const { token, baseUrl } = await this.buscarToken(cobranca);
 
     const url = `${baseUrl}/v3/payments`;
     const headers = {
       accept: "application/json",
       "User-Agent": "NomeDaSuaAplicacao/1.0.0",
       "content-type": "application/json",
-      access_token: process.env.FINANCEIRO_CHAVE_API,
+      access_token: token,
     };
     const body = {
       externalReference: cobranca.uuid(),
@@ -81,7 +83,7 @@ export class GerarCobrancaGatewayAsaas {
   private async formaPagamentoCartaoCredito(cobranca: CobrancaEntity): Promise<GerarCobrancaOutput> {
     const cliente = await this.buscarCliente(cobranca);
 
-    const token = await this.buscarToken(cobranca);
+    const { token, baseUrl } = await this.buscarToken(cobranca);
     const url = `${baseUrl}/v3/payments`;
     const headers = {
       accept: "application/json",
@@ -132,7 +134,7 @@ export class GerarCobrancaGatewayAsaas {
   }
 
   private async buscarCliente(cobranca: CobrancaEntity): Promise<{ id: string }> {
-    const token = await this.buscarToken(cobranca);
+    const { token, baseUrl } = await this.buscarToken(cobranca);
     const url = `${baseUrl}/v3/customers?cpfCnpj=${cobranca.pagador().documento}`;
     const headers = {
       accept: "application/json",
@@ -146,7 +148,7 @@ export class GerarCobrancaGatewayAsaas {
   }
 
   private async cadastrarCliente(cobranca: CobrancaEntity) {
-    const token = await this.buscarToken(cobranca);
+    const { token, baseUrl } = await this.buscarToken(cobranca);
     const url = `${baseUrl}/v3/customers`;
     const headers = {
       accept: "application/json",
@@ -166,7 +168,7 @@ export class GerarCobrancaGatewayAsaas {
 
   private async buscarParcelas(cobranca: CobrancaEntity, installment: string, linkCartao?: string): Promise<PagamentoOutput[]> {
     try {
-      const token = await this.buscarToken(cobranca);
+      const { token, baseUrl } = await this.buscarToken(cobranca);
       const url = `${baseUrl}/v3/installments/${installment}/payments?limit=24`;
       const headers = {
         accept: "application/json",
@@ -198,12 +200,13 @@ export class GerarCobrancaGatewayAsaas {
     }
   }
 
-  private async buscarToken(cobranca: CobrancaEntity) {
+  private async buscarToken(cobranca: CobrancaEntity): Promise<{ token: string; baseUrl: string }> {
     const [contaBancariaModel] = await this.connectionHub.database?.query(
-      `SELECT chave_api FROM financeiro_contas_bancarias WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'ativo'`,
+      `SELECT chave_api, ambiente FROM financeiro_contas_bancarias WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'ativo'`,
       [cobranca.companyUuid()],
     );
     if (!contaBancariaModel) throw new ApiError("Conta bancária não encontrada", 400);
-    return contaBancariaModel?.chave_api;
+    const baseUrl = contaBancariaModel.ambiente === "PROD" ? ASAAS_PROD_URL : ASAAS_SANDBOX_URL;
+    return { token: contaBancariaModel.chave_api, baseUrl };
   }
 }
