@@ -27,7 +27,8 @@ export class DetalharContaBancariaRepository {
         cb.digito,
         cb.status,
         cb.created_at AS "createdAt",
-        cb.updated_at AS "updatedAt"
+        cb.updated_at AS "updatedAt",
+        cb.ambiente
       FROM financeiro_contas_bancarias cb
       WHERE cb.deleted_at IS NULL
         AND cb.company_uuid = $1

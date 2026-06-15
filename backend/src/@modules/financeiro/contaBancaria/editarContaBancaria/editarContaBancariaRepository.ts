@@ -8,6 +8,7 @@ export type EditarContaBancariaData = {
   digito?: string;
   chaveApi?: string;
   status?: string;
+  ambiente?: string;
 };
 
 export class EditarContaBancariaRepository {
@@ -34,6 +35,7 @@ export class EditarContaBancariaRepository {
       digito: "digito",
       chaveApi: "chave_api",
       status: "status",
+      ambiente: "ambiente",
     };
 
     for (const [chave, coluna] of Object.entries(mapeamento)) {

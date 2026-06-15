@@ -68,6 +68,7 @@ export class ContasBancariasController {
       digito: body.digito,
       chaveApi: body.chaveApi,
       status: body.status,
+      ambiente: body.ambiente,
     });
     return res.status(200).json({ success: true });
   }

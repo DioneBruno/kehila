@@ -11,6 +11,7 @@ export type EditarContaBancariaInput = {
   digito?: string;
   chaveApi?: string;
   status?: string;
+  ambiente?: string;
 };
 
 export class EditarContaBancariaUsecase {
@@ -31,6 +32,7 @@ export class EditarContaBancariaUsecase {
       digito: input.digito,
       chaveApi: input.chaveApi,
       status: input.status,
+      ambiente: input.ambiente,
     });
   }
 }
