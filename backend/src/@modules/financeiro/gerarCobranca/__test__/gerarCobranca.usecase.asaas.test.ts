@@ -1,5 +1,5 @@
 import dataSource from "src/@infra/database/datasource";
-import { stub, SinonStub } from "sinon";
+import { stub, SinonStub, useFakeTimers } from "sinon";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
@@ -22,8 +22,11 @@ const defaultInput = {
   vencimento: "2026-07-12",
 };
 
+let clock: sinon.SinonFakeTimers;
+
 describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   beforeAll(async () => {
+    clock = useFakeTimers({ now: new Date("2026-06-13"), toFake: ["Date"] });
     await dataSource.initialize();
     const http = axios.create({ baseURL: "https://api-sandbox.asaas.com" });
     const connectionHub = new ConnectionHub({ database: dataSource, http });
@@ -41,6 +44,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
     await dataSource.destroy();
+    clock.restore();
   });
 
   test.skip("Deve criar cobranca real no asaas (integração)", async () => {
@@ -82,7 +86,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     // Verifica POST payments com dados corretos
     expect(postStub.calledOnce).toBe(true);
     expect(postStub.firstCall.args[0]).toContain("v3/payments");
-    const bodyCobranca = postStub.firstCall.args[1] as any;
+    const bodyCobranca = postStub.firstCall.args[1];
     expect(bodyCobranca.customer).toBe(clienteId);
     expect(bodyCobranca.value).toBe(defaultInput.valor);
     expect(bodyCobranca.billingType).toBe("BOLETO");
@@ -153,7 +157,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
 
     // Verifica que cliente foi cadastrado com dados corretos
     expect(postStub.firstCall.args[0]).toContain("v3/customers");
-    const bodyCliente = postStub.firstCall.args[1] as any;
+    const bodyCliente = postStub.firstCall.args[1];
     expect(bodyCliente.name).toBe(defaultInput.pagadorNome);
     expect(bodyCliente.cpfCnpj).toBe(defaultInput.pagadorDocumento);
     expect(bodyCliente.email).toBe(defaultInput.pagadorEmail);
@@ -161,7 +165,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
 
     // Verifica que cobrança foi criada com o cliente recém-cadastrado
     expect(postStub.secondCall.args[0]).toContain("v3/payments");
-    const bodyCobranca = postStub.secondCall.args[1] as any;
+    const bodyCobranca = postStub.secondCall.args[1];
     expect(bodyCobranca.customer).toBe(clienteId);
 
     // Verifica dados no banco
@@ -196,7 +200,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
 
     // Verifica que installmentCount e totalValue foram enviados corretamente
     expect(postStub.firstCall.args[0]).toContain("v3/payments");
-    const bodyCobranca = postStub.firstCall.args[1] as any;
+    const bodyCobranca = postStub.firstCall.args[1];
     expect(postStub.firstCall.args[1].billingType).toBe("BOLETO");
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].value).toBe(300);
@@ -271,7 +275,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
 
     // Verifica que installmentCount e totalValue foram enviados corretamente
     expect(postStub.firstCall.args[0]).toContain("v3/payments");
-    const bodyCobranca = postStub.firstCall.args[1] as any;
+    const bodyCobranca = postStub.firstCall.args[1];
     expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].value).toBe(300);
