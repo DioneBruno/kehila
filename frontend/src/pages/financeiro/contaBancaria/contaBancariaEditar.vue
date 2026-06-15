@@ -15,16 +15,15 @@
         <p class="text-h5 text-weight-bold q-ma-none text-primary">
           {{ conta?.nome || "Carregando..." }}
         </p>
-        <q-badge v-if="conta" :color="statusCor(conta.status)" :label="statusLabel(conta.status)" class="q-mt-xs" />
+        <q-badge
+          v-if="conta"
+          :color="statusCor(conta.status)"
+          :label="statusLabel(conta.status)"
+          class="q-mt-xs"
+        />
       </div>
       <div v-if="conta" class="col-auto">
-        <q-btn
-          unelevated
-          color="negative"
-          label="Excluir"
-          icon="delete"
-          @click="excluir"
-        />
+        <q-btn unelevated color="negative" label="Excluir" icon="delete" @click="excluir" />
       </div>
     </div>
 
@@ -63,7 +62,9 @@
               <div class="row q-col-gutter-md">
                 <!-- Identificação -->
                 <div class="col-12">
-                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">Identificação</p>
+                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">
+                    Identificação
+                  </p>
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input
@@ -75,7 +76,7 @@
                     lazy-rules
                   />
                 </div>
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-3">
                   <q-select
                     v-model="form.status"
                     label="Status"
@@ -87,10 +88,27 @@
                     :disable="!editando"
                   />
                 </div>
+                <div class="col-12 col-md-3">
+                  <q-select
+                    v-model="form.ambiente"
+                    label="Ambiente"
+                    filled
+                    emit-value
+                    map-options
+                    :options="[
+                      { label: 'Homologação', value: 'HOMOLOG' },
+                      { label: 'Produção', value: 'PROD' },
+                    ]"
+                    :readonly="!editando"
+                    :disable="!editando"
+                  />
+                </div>
 
                 <!-- Dados Bancários -->
                 <div class="col-12 q-mt-sm">
-                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">Dados Bancários</p>
+                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">
+                    Dados Bancários
+                  </p>
                 </div>
                 <div class="col-12 col-sm-4">
                   <q-input
@@ -101,33 +119,20 @@
                   />
                 </div>
                 <div class="col-12 col-sm-4">
-                  <q-input
-                    v-model="form.agencia"
-                    label="Agência"
-                    filled
-                    :readonly="!editando"
-                  />
+                  <q-input v-model="form.agencia" label="Agência" filled :readonly="!editando" />
                 </div>
                 <div class="col-12 col-sm-3">
-                  <q-input
-                    v-model="form.conta"
-                    label="Conta"
-                    filled
-                    :readonly="!editando"
-                  />
+                  <q-input v-model="form.conta" label="Conta" filled :readonly="!editando" />
                 </div>
                 <div class="col-12 col-sm-1">
-                  <q-input
-                    v-model="form.digito"
-                    label="Dígito"
-                    filled
-                    :readonly="!editando"
-                  />
+                  <q-input v-model="form.digito" label="Dígito" filled :readonly="!editando" />
                 </div>
 
                 <!-- Integração -->
                 <div class="col-12 q-mt-sm">
-                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">Integração</p>
+                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">
+                    Integração
+                  </p>
                 </div>
                 <div class="col-12">
                   <q-input
@@ -222,6 +227,7 @@ export default defineComponent({
         conta: "",
         digito: "",
         chaveApi: "",
+        ambiente: "HOMOLOG",
         status: "ativo",
       },
     });
@@ -234,6 +240,7 @@ export default defineComponent({
       data.form.digito = conta.digito ?? "";
       data.form.chaveApi = conta.chaveApi ?? "";
       data.form.status = conta.status ?? "ativo";
+      data.form.ambiente = conta.ambiente ?? "HOMOLOG";
     }
 
     async function carregar() {
@@ -255,6 +262,7 @@ export default defineComponent({
         digito: data.form.digito || undefined,
         chaveApi: data.form.chaveApi || undefined,
         status: data.form.status,
+        ambiente: data.form.ambiente,
       });
       if (ok) {
         data.editando = false;
