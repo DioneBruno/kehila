@@ -165,6 +165,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(bodyCliente.cpfCnpj).toBe(defaultInput.pagadorDocumento);
     expect(bodyCliente.email).toBe(defaultInput.pagadorEmail);
     expect(bodyCliente.phone).toBe(defaultInput.pagadorTelefone);
+    expect(bodyCliente.notificationDisabled).toBe(true);
 
     // Verifica que cobrança foi criada com o cliente recém-cadastrado
     expect(postStub.secondCall.args[0]).toContain("v3/payments");

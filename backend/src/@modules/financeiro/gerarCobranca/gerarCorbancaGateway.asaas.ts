@@ -161,6 +161,7 @@ export class GerarCobrancaGatewayAsaas {
       cpfCnpj: cobranca.pagador().documento,
       email: cobranca.pagador().email,
       phone: cobranca.pagador().telefone,
+      notificationDisabled: true,
     };
     await this.connectionHub.http?.post(url, body, { headers });
     return this.buscarCliente(cobranca);
