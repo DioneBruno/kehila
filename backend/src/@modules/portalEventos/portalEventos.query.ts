@@ -214,8 +214,6 @@ export class PortalEventosQuery {
     const ingressosModel = await this.connectionHub.database!.query(
       `
       SELECT
-        ingressos.uuid,
-        ingressos.codigo,
         ingressos.pessoa_nome "pessoaNome",
         ingressos.pessoa_email "pessoaEmail",
         ingressos.pessoa_telefone "pessoaTelefone",
@@ -223,27 +221,31 @@ export class PortalEventosQuery {
         ingressos.pessoa_pais "pessoaPais",
         ingressos.pessoa_uf "pessoaUf",
         ingressos.pessoa_cidade "pessoaCidade",
-        ingressos.form_data "formData",
-        ingressos.form_data_valido "formDataValido",
-        tipos_ingresso.nome "tipoIngressoNome",
-        lotes.nome "loteNome"
+        ingressos.form_data->>'distrito' "distrito",
+        ingressos.status
       FROM evento_ingressos ingressos
         INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
       WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pessoa_nome IS NOT NULL
+        AND ingressos.pessoa_nome != ''
+        AND ingressos.pessoa_documento IS NOT NULL
+        AND ingressos.pessoa_documento != ''
         AND ingressos.evento_uuid = $1
       ORDER BY tipos_ingresso.uuid, ingressos.index
       `,
       [eventoUuid],
     );
-    console.log(eventoUuid, ingressosModel);
+
     return ingressosModel.map((ingresso) => {
       return {
         ...ingresso,
         pessoaNome: ApiString.ocultarNomePessoa(ingresso.pessoaNome),
         pessoaDocumento: ApiString.ocultarCpfCnpj(ingresso.pessoaDocumento),
+        pessoaEmail: ApiString.ocultarEmail(ingresso.pessoaEmail),
+        pessoaTelefone: ApiString.ocultarTelefone(ingresso.pessoaTelefone),
       };
     });
   }
