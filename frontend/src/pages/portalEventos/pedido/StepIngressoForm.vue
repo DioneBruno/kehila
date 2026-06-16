@@ -157,6 +157,36 @@
               :options="districos"
             />
           </div>
+          <div class="col-12">
+            <div class="text-grey-8 q-mb-xs">
+              Tem alguma deficiência, necessidade específica ou restrição alimentar?
+            </div>
+            <q-btn-toggle
+              dense
+              no-caps
+              unelevated
+              v-model="ingresso.formData.temDeficienciaOuRestricao"
+              :options="[
+                { label: 'Sim', value: true },
+                { label: 'Não', value: false },
+              ]"
+              color="grey-3"
+              text-color="grey-8"
+              toggle-color="primary"
+              toggle-text-color="white"
+            />
+          </div>
+          <div class="col-12" v-if="ingresso.formData.temDeficienciaOuRestricao">
+            <q-input
+              outlined
+              dense
+              stack-label
+              type="textarea"
+              autogrow
+              v-model="ingresso.formData.deficienciaOuRestricaoDescricao"
+              label="Descrever"
+            />
+          </div>
           <div class="col-12 row q-mt-md row items-center justify-center q-gutter-sm">
             <q-space />
             <q-btn
