@@ -206,23 +206,128 @@
           </q-card-section>
         </q-card>
       </div>
+
+      <!-- Domínios -->
+      <div class="col-12">
+        <q-card flat bordered>
+          <q-card-section>
+            <div class="row items-center justify-between q-mb-md">
+              <p class="text-subtitle1 text-weight-bold q-ma-none">Domínios</p>
+              <q-btn
+                unelevated
+                dense
+                color="primary"
+                icon="add"
+                label="Adicionar Domínio"
+                @click="abrirDialogDominio()"
+              />
+            </div>
+
+            <div v-if="dominios.length === 0" class="text-center text-grey-5 q-py-md">
+              <q-icon name="dns" size="32px" color="grey-4" />
+              <p class="text-caption q-mt-sm q-mb-0">Nenhum domínio cadastrado</p>
+            </div>
+
+            <q-list v-else separator>
+              <q-item v-for="dominio in dominios" :key="dominio.uuid">
+                <q-item-section>
+                  <q-item-label>{{ dominio.domain }}</q-item-label>
+                  <q-item-label caption>Criado em {{ formatarData(dominio.createdAt) }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-badge
+                    :color="dominio.active ? 'positive' : 'grey-6'"
+                    :label="dominio.active ? 'Ativo' : 'Inativo'"
+                  />
+                </q-item-section>
+                <q-item-section side>
+                  <div class="row q-gutter-xs">
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      icon="edit"
+                      color="primary"
+                      @click="abrirDialogDominio(dominio)"
+                    >
+                      <q-tooltip>Editar</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      icon="delete"
+                      color="negative"
+                      @click="removerDominio(dominio.uuid)"
+                    >
+                      <q-tooltip>Remover</q-tooltip>
+                    </q-btn>
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
+      </div>
     </div>
+
+    <!-- Dialog: Criar/Editar Domínio -->
+    <q-dialog v-model="dialogDominio.aberto" persistent>
+      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+        <q-card-section class="row items-center">
+          <span class="text-h6">{{ dialogDominio.editando ? "Editar Domínio" : "Novo Domínio" }}</span>
+          <q-space />
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <q-form @submit.prevent="salvarDominio" greedy>
+            <div class="row q-col-gutter-md">
+              <div class="col-12">
+                <q-input
+                  v-model="dialogDominio.form.domain"
+                  label="Domínio *"
+                  filled
+                  :rules="[(v) => !!v || 'Obrigatório']"
+                  lazy-rules
+                  hint="Ex: minhaempresa.com.br"
+                />
+              </div>
+              <div class="col-12">
+                <q-toggle v-model="dialogDominio.form.active" label="Domínio ativo" color="positive" />
+              </div>
+            </div>
+
+            <div class="row justify-end q-gutter-sm q-mt-md">
+              <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+              <q-btn unelevated type="submit" label="Salvar" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { EmpresaService } from "./empresa.service";
+import { DominioService } from "./dominio.service";
 
 const UFS = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
   "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ];
 
+const dominioFormVazio = () => ({ domain: "", active: true });
+
 export default defineComponent({
   name: "EmpresaEditar",
   setup() {
     const $service = new EmpresaService();
+    const $dominioService = new DominioService();
 
     const data = reactive({
       empresa: null as any,
@@ -245,6 +350,13 @@ export default defineComponent({
           bairro: "",
           cidade: "",
         },
+      },
+      dominios: [] as any[],
+      dialogDominio: {
+        aberto: false,
+        editando: false,
+        uuid: "",
+        form: dominioFormVazio(),
       },
     });
 
@@ -309,13 +421,58 @@ export default defineComponent({
       });
     }
 
-    onMounted(() => void carregar());
+    async function carregarDominios() {
+      data.dominios = await $dominioService.listar();
+    }
+
+    function abrirDialogDominio(dominio?: any) {
+      if (dominio) {
+        data.dialogDominio.editando = true;
+        data.dialogDominio.uuid = dominio.uuid;
+        data.dialogDominio.form = { domain: dominio.domain ?? "", active: !!dominio.active };
+      } else {
+        data.dialogDominio.editando = false;
+        data.dialogDominio.uuid = "";
+        data.dialogDominio.form = dominioFormVazio();
+      }
+      data.dialogDominio.aberto = true;
+    }
+
+    async function salvarDominio() {
+      const form = data.dialogDominio.form;
+      let ok: boolean;
+      if (data.dialogDominio.editando) {
+        ok = await $dominioService.editar(data.dialogDominio.uuid, {
+          domain: form.domain,
+          active: form.active,
+        });
+      } else {
+        ok = await $dominioService.criar({ domain: form.domain, active: form.active });
+      }
+      if (ok) {
+        data.dialogDominio.aberto = false;
+        await carregarDominios();
+      }
+    }
+
+    async function removerDominio(uuid: string) {
+      const ok = await $dominioService.deletar(uuid);
+      if (ok) await carregarDominios();
+    }
+
+    onMounted(() => {
+      void carregar();
+      void carregarDominios();
+    });
 
     return {
       ...toRefs(data),
       salvar,
       cancelarEdicao,
       formatarData,
+      abrirDialogDominio,
+      salvarDominio,
+      removerDominio,
     };
   },
 });
