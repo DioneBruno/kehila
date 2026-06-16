@@ -29,7 +29,7 @@ export class PublicoController {
     return res.status(201).json(response);
   }
 
-  @Get("/:eventoUuid/inscritos")
+  @Get(":eventoUuid/inscritos")
   async listaPublicaInscritos(@Param("eventoUuid") eventoUuid: string, @Res() res: Response) {
     const resultado = await this.portalEventosQuery.listaPublicaInscritos(eventoUuid);
     return res.status(200).json({ success: true, data: resultado });

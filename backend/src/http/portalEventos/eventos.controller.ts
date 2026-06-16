@@ -18,12 +18,6 @@ export class EventosController {
     readonly atualizarStatusEventoUsecase: AtualizarStatusEventoUsecase,
   ) {}
 
-  @Get(":uuid/inscritos")
-  async listaPublicaInscritos(@Param("uuid") uuid: string, @Res() res: Response) {
-    const resultado = await this.portalEventosQuery.listaPublicaInscritos(uuid);
-    return res.status(200).json({ success: true, data: resultado });
-  }
-
   @Post()
   async criar(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const resultado = await this.criarEventoUsecase.execute({
