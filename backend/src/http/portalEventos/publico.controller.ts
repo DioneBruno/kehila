@@ -29,9 +29,10 @@ export class PublicoController {
     return res.status(201).json(response);
   }
 
-  @Get(":eventoUuid/inscritos")
-  async listaPublicaInscritos(@Param("eventoUuid") eventoUuid: string, @Res() res: Response) {
-    const resultado = await this.portalEventosQuery.listaPublicaInscritos(eventoUuid);
+  @Post(":eventoUuid/inscritos")
+  async listaPublicaInscritos(@Param("eventoUuid") eventoUuid: string, @Body() body: any, @Res() res: Response) {
+    const filtro = body.filtro;
+    const resultado = await this.portalEventosQuery.listaPublicaInscritos(eventoUuid, filtro);
     return res.status(200).json({ success: true, data: resultado });
   }
 }

@@ -210,7 +210,21 @@ export class PortalEventosQuery {
     return { ...pedidoModel, ingressos: ingressosModel, cobrancas: cobrancasModel };
   }
 
-  async listaPublicaInscritos(eventoUuid: string) {
+  async listaPublicaInscritos(eventoUuid: string, filtro?: string) {
+    const bindings: unknown[] = [eventoUuid];
+    let filterWhere = "";
+
+    if (filtro) {
+      filterWhere = `
+        AND (
+          ingressos.pessoa_nome ILIKE $2
+          OR ingressos.pessoa_email ILIKE $2
+          OR ingressos.pessoa_documento ILIKE $2
+        )
+      `;
+      bindings.push(`%${filtro}%`);
+    }
+
     const ingressosModel = await this.connectionHub.database!.query(
       `
       SELECT
@@ -234,9 +248,10 @@ export class PortalEventosQuery {
         AND ingressos.pessoa_documento IS NOT NULL
         AND ingressos.pessoa_documento != ''
         AND ingressos.evento_uuid = $1
+        ${filterWhere}
       ORDER BY tipos_ingresso.uuid, ingressos.index
       `,
-      [eventoUuid],
+      bindings,
     );
 
     return ingressosModel.map((ingresso) => {
