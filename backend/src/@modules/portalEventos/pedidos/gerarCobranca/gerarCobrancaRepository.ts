@@ -106,4 +106,11 @@ export class GerarCobrancaRepository {
       valor,
     });
   }
+
+  async atualizarStatusPedidoParaPagamentoGerado(pedidoUuid: string): Promise<void> {
+    await this.connectionHub.database!.query(
+      `UPDATE evento_pedidos SET status = 'pagamento_gerado', updated_at = now() WHERE uuid = $1`,
+      [pedidoUuid],
+    );
+  }
 }

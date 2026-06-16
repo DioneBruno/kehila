@@ -37,6 +37,7 @@ export class GerarCobrancaUsecase {
       for (const ingresso of ingressos) {
         await this.repo.criarCobrancaIngresso(pedido, ingresso, valorPorIngresso, input.numParcelas ?? 1);
       }
+      await this.repo.atualizarStatusPedidoParaPagamentoGerado(pedido.uuid());
       return;
     }
 
@@ -51,5 +52,6 @@ export class GerarCobrancaUsecase {
           });
 
     await this.repo.criarCobranca(pedido, pagador, input.numParcelas ?? 1, input.tipoCobranca, input.cartaoCredito);
+    await this.repo.atualizarStatusPedidoParaPagamentoGerado(pedido.uuid());
   }
 }

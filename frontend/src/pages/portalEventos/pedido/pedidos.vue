@@ -40,14 +40,13 @@
           <q-item-section>
             <div class="row items-center justify-between q-mb-xs">
               <q-chip
-                dense
                 square
                 size="sm"
-                :color="statusColor(pedido.status)"
-                text-color="white"
+                :color="statusInfo(pedido.status).color"
+                :text-color="statusInfo(pedido.status).textColor"
                 class="text-capitalize q-ma-none"
               >
-                {{ pedido.status }}
+                {{ statusInfo(pedido.status).label }}
               </q-chip>
               <span class="text-weight-bold text-primary">
                 {{ formatCurrency(pedido.valorLiquido) }}
@@ -56,12 +55,12 @@
 
             <q-item-label caption class="q-mt-xs">
               <q-icon name="event" size="12px" class="q-mr-xs" />
-              Criado em: {{ pedido.createdAt }}
+              Criado em: {{ formatData(pedido.createdAt) }}
             </q-item-label>
 
             <q-item-label caption v-if="pedido.pagoEm">
               <q-icon name="check_circle" size="12px" color="positive" class="q-mr-xs" />
-              Pago em: {{ pedido.pagoEm }}
+              Pago em: {{ formatData(pedido.pagoEm) }}
             </q-item-label>
 
             <q-item-label caption>
@@ -100,6 +99,7 @@ import { useAuthStore } from "src/stores/auth";
 import { usePedidoStore } from "src/stores/pedido";
 import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
+import { ApiDate } from "src/shared/apiDate.service";
 
 export default defineComponent({
   name: "PedidoPedidos",
@@ -150,19 +150,25 @@ export default defineComponent({
       });
     }
 
-    function statusColor(status: string): string {
-      const map: Record<string, string> = {
-        pago: "positive",
-        pendente: "warning",
-        cancelado: "negative",
+    function statusInfo(status: string): { label: string; color: string; textColor: string } {
+      const textColor = "blue-grey-10";
+      const map: Record<string, { label: string; color: string; textColor: string }> = {
+        pago: { label: "Pago", color: "green-2", textColor },
+        pendente: { label: "Pendente", color: "orange-2", textColor },
+        pagamento_gerado: { label: "Pagamento Pendente", color: "blue-2", textColor },
+        cancelado: { label: "Cancelado", color: "red-2", textColor },
       };
-      return map[status] ?? "grey";
+      return map[status] ?? { label: status, color: "grey-3", textColor };
     }
 
     function formatCurrency(value: number): string {
       return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
         value ?? 0,
       );
+    }
+
+    function formatData(data: string) {
+      return ApiDate.format(data, "DD/MM/YYYY HH:mm");
     }
 
     const pedidoAtivoUuid = computed(() => $pedidoStore.$state.pedido.uuid);
@@ -183,9 +189,10 @@ export default defineComponent({
       pedidoAtivoUuid,
       confirmarCancelamento,
       selecionarPedido,
-      statusColor,
+      statusInfo,
       formatCurrency,
       novoPedido,
+      formatData,
     };
   },
 });

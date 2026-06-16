@@ -93,6 +93,7 @@ export class PortalEventosQuery {
         AND pedidos.status NOT IN ('cancelado')
         AND pedidos.evento_uuid = $1
         AND pedidos.user_uuid = $2
+      ORDER BY pedidos.created_at DESC
       `,
       [input.eventoUuid, input.userUuid],
     );
