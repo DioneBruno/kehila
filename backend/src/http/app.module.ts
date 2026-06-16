@@ -8,6 +8,7 @@ import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { NotificacaoModule } from "./notificacao/notificacao.module";
 import { FinanceiroModule } from "./financeiro/financeiro.module";
+import { EmpresaModule } from "./empresa/empresa.module";
 import axios from "axios";
 import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 import { RedisClientType, createClient } from "redis";
@@ -29,6 +30,7 @@ import { RedisClientType, createClient } from "redis";
     PortalEventosModule,
     FinanceiroModule,
     NotificacaoModule,
+    EmpresaModule,
   ],
   controllers: [AppController],
   providers: [

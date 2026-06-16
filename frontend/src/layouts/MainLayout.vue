@@ -76,6 +76,8 @@ const MENU_ITEMS = [
   { label: "Eventos", icon: "event", route: "eventos" },
   { label: "FINANCEIRO", type: "section" },
   { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
+  { label: "EMPRESA", type: "section" },
+  { label: "Minha Empresa", icon: "business", route: "empresa" },
 ];
 
 export default defineComponent({
