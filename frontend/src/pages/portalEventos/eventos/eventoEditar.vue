@@ -129,7 +129,11 @@
                     filled
                     readonly
                     clearable
-                    @update:model-value="(v) => { if (!v) form.dataFim = '' }"
+                    @update:model-value="
+                      (v) => {
+                        if (!v) form.dataFim = '';
+                      }
+                    "
                   >
                     <template v-slot:append>
                       <q-icon name="event" class="cursor-pointer">
@@ -170,37 +174,45 @@
 
                 <!-- Local / Online -->
                 <div class="col-12">
-                  <q-toggle
-                    v-model="form.online"
-                    label="Evento Online"
-                    color="primary"
-                  />
+                  <q-toggle v-model="form.online" label="Evento Online" color="primary" />
                 </div>
 
                 <template v-if="!form.online">
                   <div class="col-12 col-sm-6">
-                    <q-input
-                      v-model="form.localNome"
-                      label="Nome do Local"
-                      filled
-                    />
+                    <q-input v-model="form.localNome" label="Nome do Local" filled />
                   </div>
                   <div class="col-12 col-sm-6">
-                    <q-input
-                      v-model="form.localEndereco"
-                      label="Endereço"
-                      filled
-                    />
+                    <q-input v-model="form.localEndereco" label="Endereço" filled />
                   </div>
                 </template>
 
                 <div v-else class="col-12">
+                  <q-input v-model="form.linkOnline" label="Link do Evento" filled>
+                    <template v-slot:prepend><q-icon name="link" /></template>
+                  </q-input>
+                </div>
+
+                <!-- Suporte -->
+                <div class="col-12 col-sm-6">
                   <q-input
-                    v-model="form.linkOnline"
-                    label="Link do Evento"
+                    v-model="form.suporteEmail"
+                    label="E-mail de Suporte"
+                    type="email"
                     filled
                   >
-                    <template v-slot:prepend><q-icon name="link" /></template>
+                    <template v-slot:prepend><q-icon name="mail" /></template>
+                  </q-input>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <q-input
+                    v-model="form.suporteTelefone"
+                    label="Telefone de Suporte"
+                    filled
+                    unmasked-value
+                    fill-mask
+                    mask="(##) #####-####"
+                  >
+                    <template v-slot:prepend><q-icon name="phone" /></template>
                   </q-input>
                 </div>
               </div>
@@ -373,6 +385,8 @@ export default defineComponent({
         localNome: "",
         localEndereco: "",
         linkOnline: "",
+        suporteEmail: "",
+        suporteTelefone: "",
       },
     });
 
@@ -390,6 +404,8 @@ export default defineComponent({
       data.form.localNome = evento.localNome ?? "";
       data.form.localEndereco = evento.localEndereco ?? "";
       data.form.linkOnline = evento.linkOnline ?? "";
+      data.form.suporteEmail = evento.suporteEmail ?? "";
+      data.form.suporteTelefone = evento.suporteTelefone ?? "";
     }
 
     async function carregar() {
@@ -417,6 +433,8 @@ export default defineComponent({
         localNome: data.form.online ? undefined : data.form.localNome || undefined,
         localEndereco: data.form.online ? undefined : data.form.localEndereco || undefined,
         linkOnline: data.form.online ? data.form.linkOnline : undefined,
+        suporteEmail: data.form.suporteEmail || undefined,
+        suporteTelefone: data.form.suporteTelefone || undefined,
       });
       if (ok) {
         await carregar();

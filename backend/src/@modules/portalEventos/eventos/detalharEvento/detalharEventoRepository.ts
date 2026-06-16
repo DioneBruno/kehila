@@ -15,6 +15,8 @@ export type EventoDetalhe = {
   localLng: number | null;
   online: boolean;
   linkOnline: string | null;
+  suporteEmail: string | null;
+  suporteTelefone: string | null;
   status: string;
   createdAt: string;
   lotes: LoteDetalhe[];
@@ -60,6 +62,8 @@ export class DetalharEventoRepository {
         e.local_lng AS "localLng",
         e.online,
         e.link_online AS "linkOnline",
+        e.suporte_email AS "suporteEmail",
+        e.suporte_telefone AS "suporteTelefone",
         e.status,
         e.created_at AS "createdAt"
       FROM eventos e

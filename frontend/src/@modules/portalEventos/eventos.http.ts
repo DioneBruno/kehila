@@ -13,6 +13,8 @@ export type CriarEventoInput = {
   localLng?: number;
   online?: boolean;
   linkOnline?: string;
+  suporteEmail?: string;
+  suporteTelefone?: string;
 };
 
 export class EventosHttp {

@@ -13,6 +13,8 @@ export type EditarEventoData = {
   localLng?: number;
   online?: boolean;
   linkOnline?: string;
+  suporteEmail?: string;
+  suporteTelefone?: string;
   status?: string;
 };
 
@@ -45,6 +47,8 @@ export class EditarEventoRepository {
       localLng: "local_lng",
       online: "online",
       linkOnline: "link_online",
+      suporteEmail: "suporte_email",
+      suporteTelefone: "suporte_telefone",
       status: "status",
     };
 

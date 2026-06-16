@@ -16,6 +16,8 @@ export type EditarEventoInput = {
   localLng?: number;
   online?: boolean;
   linkOnline?: string;
+  suporteEmail?: string;
+  suporteTelefone?: string;
 };
 
 const STATUS_EDITAVEIS = ["rascunho", "publicado"];
@@ -50,6 +52,8 @@ export class EditarEventoUsecase {
       localLng: input.localLng,
       online: input.online,
       linkOnline: input.linkOnline,
+      suporteEmail: input.suporteEmail,
+      suporteTelefone: input.suporteTelefone,
     });
   }
 }

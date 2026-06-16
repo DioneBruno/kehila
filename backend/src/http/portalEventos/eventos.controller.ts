@@ -81,6 +81,8 @@ export class EventosController {
       localLng: body.localLng,
       online: body.online,
       linkOnline: body.linkOnline,
+      suporteEmail: body.suporteEmail,
+      suporteTelefone: body.suporteTelefone,
     });
     return res.status(200).json({ success: true });
   }
