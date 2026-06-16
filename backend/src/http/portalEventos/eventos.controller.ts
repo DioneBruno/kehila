@@ -5,16 +5,24 @@ import { ListarEventosUsecase } from "src/@modules/portalEventos/eventos/listarE
 import { DetalharEventoUsecase } from "src/@modules/portalEventos/eventos/detalharEvento/detalharEvento.usecase";
 import { EditarEventoUsecase } from "src/@modules/portalEventos/eventos/editarEvento/editarEvento.usecase";
 import { AtualizarStatusEventoUsecase } from "src/@modules/portalEventos/eventos/atualizarStatusEvento/atualizarStatusEvento.usecase";
+import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
 
 @Controller("eventos")
 export class EventosController {
   constructor(
+    readonly portalEventosQuery: PortalEventosQuery,
     readonly criarEventoUsecase: CriarEventoUsecase,
     readonly listarEventosUsecase: ListarEventosUsecase,
     readonly detalharEventoUsecase: DetalharEventoUsecase,
     readonly editarEventoUsecase: EditarEventoUsecase,
     readonly atualizarStatusEventoUsecase: AtualizarStatusEventoUsecase,
   ) {}
+
+  @Get(":uuid/inscritos")
+  async listaPublicaInscritos(@Param("uuid") uuid: string, @Res() res: Response) {
+    const resultado = await this.portalEventosQuery.listaPublicaInscritos(uuid);
+    return res.status(200).json({ success: true, data: resultado });
+  }
 
   @Post()
   async criar(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {

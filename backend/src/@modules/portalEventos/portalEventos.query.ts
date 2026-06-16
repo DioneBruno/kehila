@@ -207,4 +207,40 @@ export class PortalEventosQuery {
 
     return { ...pedidoModel, ingressos: ingressosModel, cobrancas: cobrancasModel };
   }
+
+  async listaPublicaInscritos(eventoUuid: string) {
+    const ingressosModel = await this.connectionHub.database!.query(
+      `
+      SELECT
+        ingressos.uuid,
+        ingressos.codigo,
+        ingressos.pessoa_nome "pessoaNome",
+        ingressos.pessoa_email "pessoaEmail",
+        ingressos.pessoa_telefone "pessoaTelefone",
+        ingressos.pessoa_documento "pessoaDocumento",
+        ingressos.pessoa_pais "pessoaPais",
+        ingressos.pessoa_uf "pessoaUf",
+        ingressos.pessoa_cidade "pessoaCidade",
+        ingressos.form_data "formData",
+        ingressos.form_data_valido "formDataValido",
+        tipos_ingresso.nome "tipoIngressoNome",
+        lotes.nome "loteNome"
+      FROM evento_ingressos ingressos
+        INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
+          ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
+        INNER JOIN evento_lotes lotes
+          ON lotes.uuid = tipos_ingresso.lote_uuid
+      WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pedido_uuid = $1
+      ORDER BY tipos_ingresso.uuid, ingressos.index
+      `,
+      [eventoUuid],
+    );
+    return ingressosModel.map((ingresso) => {
+      return {
+        ...ingresso,
+        pessoaDocumento: ApiString.ocultarCpfCnpj(ingresso.pessoaDocumento),
+      };
+    });
+  }
 }

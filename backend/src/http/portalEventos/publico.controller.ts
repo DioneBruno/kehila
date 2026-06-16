@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { CadastrandoUsuarioUsecase } from "src/@modules/portalEventos/cadastrarUsuario/cadastrandoUsuario.usecase";
 import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
@@ -27,5 +27,11 @@ export class PublicoController {
   async buscarEvento(@Req() req: Request | any, @Param("eventoUuid") eventoUuid: string, @Body() body: any, @Res() res: Response) {
     const response = await this.portalEventosQuery.buscarEvento(req.companyUuid, eventoUuid);
     return res.status(201).json(response);
+  }
+
+  @Get("/:eventoUuid/inscritos")
+  async listaPublicaInscritos(@Param("eventoUuid") eventoUuid: string, @Res() res: Response) {
+    const resultado = await this.portalEventosQuery.listaPublicaInscritos(eventoUuid);
+    return res.status(200).json({ success: true, data: resultado });
   }
 }
