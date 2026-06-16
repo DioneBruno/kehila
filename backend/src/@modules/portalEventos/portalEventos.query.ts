@@ -97,22 +97,6 @@ export class PortalEventosQuery {
       [input.eventoUuid, input.userUuid],
     );
 
-    const ingressosModel = await this.connectionHub.database!.query(
-      `SELECT uuid, pedido_uuid FROM evento_ingressos ingressos WHERE ingressos.deleted_at IS NULL AND evento_uuid = $1 AND user_uuid = $2`,
-      [input.eventoUuid, input.userUuid],
-    );
-
-    const cobrancasOrigemUuids = [...ingressosModel.map((ingresso) => ingresso.uuid), ...pedidosModel.map((pedido) => pedido.uuid)];
-    const cobrancasModel = await this.connectionHub.database?.query(
-      `SELECT
-        cobrancas.uuid
-      FROM financeiro_cobrancas cobrancas
-        WHERE cobrancas.origem_tipo IN ('eventoPedido', 'eventoIngresso')
-        AND cobrancas.origem_uuid = ANY($1)
-      `,
-      [cobrancasOrigemUuids],
-    );
-
     return pedidosModel.map((pedido) => ({
       ...pedido,
       createdAt: ApiDate.format(pedido.createdAt, "YYYY-MM-DD HH:mm"),
