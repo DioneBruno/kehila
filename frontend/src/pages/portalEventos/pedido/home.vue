@@ -115,6 +115,14 @@
         </q-card>
       </div>
     </transition>
+
+    <!-- Botão flutuante: suporte via WhatsApp -->
+    <div v-if="evento?.suporteTelefone" class="suporte-whatsapp-wrapper" @click="abrirWhatsapp">
+      <div class="suporte-whatsapp-label text-grey-9">{{ suporteTelefoneFormatado }}</div>
+      <q-btn round unelevated color="positive" icon="mdi-whatsapp" class="suporte-whatsapp-btn">
+        <q-tooltip anchor="center left" self="center right">Falar com o suporte</q-tooltip>
+      </q-btn>
+    </div>
   </q-page>
 </template>
 
@@ -231,6 +239,20 @@ export default defineComponent({
       // TODO: integrar com API de pedidos
     }
 
+    function abrirWhatsapp() {
+      const telefone = (data.evento?.suporteTelefone ?? "").replace(/\D/g, "");
+      if (!telefone) return;
+      const mensagem = `Olá, vim da página de inscrição:  ${data.evento?.titulo}`;
+      const link = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
+      window.open(link, "_blank");
+    }
+
+    const suporteTelefoneFormatado = computed(() => {
+      const digitos = (data.evento?.suporteTelefone ?? "").replace(/\D/g, "");
+      if (digitos.length !== 11) return digitos;
+      return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 3)} ${digitos.slice(3, 7)}-${digitos.slice(7)}`;
+    });
+
     return {
       ...toRefs(data),
       itensSelecionados,
@@ -240,6 +262,8 @@ export default defineComponent({
       diminuir,
       formatarMoeda,
       confirmar,
+      abrirWhatsapp,
+      suporteTelefoneFormatado,
     };
   },
 });
@@ -264,9 +288,41 @@ export default defineComponent({
   z-index: 100;
 }
 
+.suporte-whatsapp-wrapper {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.suporte-whatsapp-label {
+  background: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.suporte-whatsapp-btn {
+  width: 56px;
+  height: 56px;
+  font-size: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 @media (max-width: 1023px) {
   .page-with-bar {
     padding-bottom: 72px;
+  }
+
+  .page-with-bar .suporte-whatsapp-wrapper {
+    bottom: 88px;
   }
 }
 
