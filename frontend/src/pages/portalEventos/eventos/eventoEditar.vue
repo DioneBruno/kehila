@@ -327,7 +327,7 @@ import { LotesService } from "./lotes.service";
 import { useQuasar } from "quasar";
 import { ApiDate } from "src/shared/apiDate.service";
 import { QuillEditor } from "@vueup/vue-quill";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import "quill/dist/quill.snow.css";
 
 import EventoFormulario from "./eventoFormulario.vue";
 
@@ -345,12 +345,18 @@ export default defineComponent({
     const $lotesService = new LotesService();
 
     const quillToolbar = [
+      [{ header: [1, 2, 3, false] }],
+      [{ font: [] }],
+      [{ size: ["small", false, "large", "huge"] }],
       ["bold", "italic", "underline", "strike"],
-      [{ color: [] }],
+      [{ color: [] }, { background: [] }],
+      [{ script: "sub" }, { script: "super" }],
       [{ align: [] }],
-      ["link"],
       [{ list: "ordered" }, { list: "bullet" }],
-      ["blockquote"],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ direction: "rtl" }],
+      ["blockquote", "code-block"],
+      ["link", "image", "video"],
       ["clean"],
     ];
 

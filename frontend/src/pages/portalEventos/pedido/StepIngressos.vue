@@ -2,11 +2,11 @@
   <div>
     <div v-if="evento.lotes.length === 0" class="text-center q-py-xl">
       <q-icon name="confirmation_number" size="56px" color="grey-4" />
-      <div class="text-subtitle1 text-grey-5 q-mt-md">Nenhum ingresso disponível</div>
+      <div class="text-subtitle1 text-grey-5 q-mt-md">Nenhum tipo de Inscrição disponível</div>
     </div>
 
     <div v-else class="q-gutter-md">
-      <div v-html="evento.descricao" />
+      <div class="ql-editor" style="padding: 0" v-html="evento.descricao" />
       <div v-for="lote in evento.lotes" :key="lote.uuid">
         <!-- <div class="text-grey-8">Opções para ingressos</div> -->
         <div class="row items-center q-mb-sm">
@@ -85,6 +85,7 @@
 <script lang="ts">
 import { usePedidoStore } from "src/stores/pedido";
 import { computed, defineComponent, reactive, toRefs } from "vue";
+import "quill/dist/quill.snow.css";
 
 export default defineComponent({
   name: "StepIngressos",

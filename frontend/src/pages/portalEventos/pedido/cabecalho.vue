@@ -8,7 +8,7 @@
           </q-avatar>
         </div>
         <div class="col">
-          <div class="text-overline q-mb-xs" style="opacity: 0.75">Portal de Ingressos</div>
+          <div class="text-overline q-mb-xs" style="opacity: 0.75">Portal de Inscrição</div>
           <div class="text-h6 text-weight-bold">{{ evento.titulo }}</div>
           <div class="row items-center q-gutter-sm q-mt-xs text-caption flex-wrap">
             <span class="row items-center no-wrap">
