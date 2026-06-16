@@ -34,7 +34,7 @@
                   {{ formatarMoeda(tipo.preco) }}
                 </div>
                 <div class="text-caption text-grey-7">
-                  {{ tipo.gerarQuantidadeIngressos }} ingressos
+                  {{ tipo.gerarQuantidadeIngressos }} {{ tipo.gerarQuantidadeIngressos > 1 ? 'Inscrições' : 'Inscrição' }}
                 </div>
               </div>
               <div class="col-auto">
