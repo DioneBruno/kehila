@@ -32,7 +32,12 @@ export class PublicoController {
   @Post(":eventoUuid/inscritos")
   async listaPublicaInscritos(@Param("eventoUuid") eventoUuid: string, @Body() body: any, @Res() res: Response) {
     const filtro = body.filtro;
-    const resultado = await this.portalEventosQuery.listaPublicaInscritos(eventoUuid, filtro);
-    return res.status(200).json({ success: true, data: resultado });
+    const pagina = body.pagina ? parseInt(body.pagina, 10) : 1;
+    const resultado = await this.portalEventosQuery.listaPublicaInscritos(eventoUuid, filtro, pagina);
+    return res.status(200).json({
+      success: true,
+      data: resultado.dados,
+      meta: { total: resultado.total, pagina: resultado.pagina, porPagina: resultado.porPagina },
+    });
   }
 }

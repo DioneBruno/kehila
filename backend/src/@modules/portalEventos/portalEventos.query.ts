@@ -210,7 +210,11 @@ export class PortalEventosQuery {
     return { ...pedidoModel, ingressos: ingressosModel, cobrancas: cobrancasModel };
   }
 
-  async listaPublicaInscritos(eventoUuid: string, filtro?: string) {
+  async listaPublicaInscritos(eventoUuid: string, filtro?: string, pagina = 1) {
+    const porPagina = 10;
+    const paginaAtual = Math.max(1, pagina);
+    const offset = (paginaAtual - 1) * porPagina;
+
     const bindings: unknown[] = [eventoUuid];
     let filterWhere = "";
 
@@ -224,6 +228,25 @@ export class PortalEventosQuery {
       `;
       bindings.push(`%${filtro}%`);
     }
+
+    const [countRow] = await this.connectionHub.database!.query(
+      `
+      SELECT COUNT(*) "total"
+      FROM evento_ingressos ingressos
+        INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
+          ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
+        INNER JOIN evento_lotes lotes
+          ON lotes.uuid = tipos_ingresso.lote_uuid
+      WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pessoa_nome IS NOT NULL
+        AND ingressos.pessoa_nome != ''
+        AND ingressos.pessoa_documento IS NOT NULL
+        AND ingressos.pessoa_documento != ''
+        AND ingressos.evento_uuid = $1
+        ${filterWhere}
+      `,
+      bindings,
+    );
 
     const ingressosModel = await this.connectionHub.database!.query(
       `
@@ -250,18 +273,24 @@ export class PortalEventosQuery {
         AND ingressos.evento_uuid = $1
         ${filterWhere}
       ORDER BY tipos_ingresso.uuid, ingressos.index
+      LIMIT $${bindings.length + 1} OFFSET $${bindings.length + 2}
       `,
-      bindings,
+      [...bindings, porPagina, offset],
     );
 
-    return ingressosModel.map((ingresso) => {
-      return {
-        ...ingresso,
-        pessoaNome: ApiString.ocultarNomePessoa(ingresso.pessoaNome),
-        pessoaDocumento: ApiString.ocultarCpfCnpj(ingresso.pessoaDocumento),
-        pessoaEmail: ApiString.ocultarEmail(ingresso.pessoaEmail),
-        pessoaTelefone: ApiString.ocultarTelefone(ingresso.pessoaTelefone),
-      };
-    });
+    return {
+      dados: ingressosModel.map((ingresso) => {
+        return {
+          ...ingresso,
+          pessoaNome: ApiString.ocultarNomePessoa(ingresso.pessoaNome),
+          pessoaDocumento: ApiString.ocultarCpfCnpj(ingresso.pessoaDocumento),
+          pessoaEmail: ApiString.ocultarEmail(ingresso.pessoaEmail),
+          pessoaTelefone: ApiString.ocultarTelefone(ingresso.pessoaTelefone),
+        };
+      }),
+      total: parseInt(countRow.total, 10),
+      pagina: paginaAtual,
+      porPagina,
+    };
   }
 }
