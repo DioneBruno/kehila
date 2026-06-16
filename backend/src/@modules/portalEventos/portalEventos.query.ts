@@ -233,14 +233,16 @@ export class PortalEventosQuery {
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
       WHERE ingressos.deleted_at IS NULL
-        AND ingressos.pedido_uuid = $1
+        AND ingressos.evento_uuid = $1
       ORDER BY tipos_ingresso.uuid, ingressos.index
       `,
       [eventoUuid],
     );
+    console.log(eventoUuid, ingressosModel);
     return ingressosModel.map((ingresso) => {
       return {
         ...ingresso,
+        pessoaNome: ApiString.ocultarNomePessoa(ingresso.pessoaNome),
         pessoaDocumento: ApiString.ocultarCpfCnpj(ingresso.pessoaDocumento),
       };
     });

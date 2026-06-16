@@ -65,4 +65,13 @@ export class ApiString {
     if (!text?.length) return null;
     return ApiString.normalizar(text)?.toUpperCase();
   }
+
+  static ocultarNomePessoa(nome: string) {
+    if (!nome) return "";
+    const partes = nome.split(" ").filter(Boolean);
+    if (partes.length === 1) return partes[0];
+    const [primeiro, ...resto] = partes;
+    const iniciais = resto.map((parte) => `${parte[0]}.`);
+    return `${primeiro} ${iniciais.join(" ")}`;
+  }
 }
