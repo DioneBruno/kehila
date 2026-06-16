@@ -135,7 +135,17 @@
               @filter="(val, update) => filterCidades(val, update, ingresso)"
             />
           </div>
-          <div class="col-12">
+          <div class="col-12 col-md-4">
+            <q-input
+              outlined
+              dense
+              stack-label
+              type="date"
+              v-model="ingresso.formData.dataNascimento"
+              label="Nascimento"
+            />
+          </div>
+          <div class="col-12 col-md-8">
             <q-select
               outlined
               dense
