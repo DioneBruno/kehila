@@ -9,13 +9,13 @@
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
           <q-stepper
-            v-model="pedido.etapa"
-            color="primary"
-            class="q-pa-none"
             flat
             bordered
             vertical
             animated
+            v-model="pedido.etapa"
+            color="primary"
+            class="q-pa-none"
           >
             <q-step :name="1" title="Ingressos" icon="confirmation_number" :done="pedido.etapa > 1">
               <StepIngressos
