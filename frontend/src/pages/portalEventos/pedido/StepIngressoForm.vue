@@ -45,7 +45,7 @@
           />
         </div>
 
-        <div class="row q-col-gutter-sm">
+        <q-form :ref="(el) => setFormRef(ingresso.uuid, el)" greedy class="row q-col-gutter-sm">
           <div class="col-12 col-sm-8">
             <q-input
               outlined
@@ -182,9 +182,11 @@
               dense
               stack-label
               type="textarea"
-              autogrow
+              rows="2"
               v-model="ingresso.formData.deficienciaOuRestricaoDescricao"
               label="Descrever deficiência *"
+              :rules="[(v) => !!v || 'Obrigatório']"
+              lazy-rules
             />
           </div>
           <div class="col-12 row q-mt-md row items-center justify-center q-gutter-sm">
@@ -195,7 +197,7 @@
               flat
               color="primary"
               label="Salvar"
-              @click="editarFormIngresso(ingresso)"
+              @click="salvarIngresso(ingresso)"
             />
             <q-btn
               v-if="Number(index) < ingressos.length - 1"
@@ -204,13 +206,10 @@
               color="primary"
               icon-right="chevron_right"
               label="Próximo"
-              @click="
-                editarFormIngresso(ingresso);
-                slide = Number(index) + 1;
-              "
+              @click="avancarIngresso(ingresso, Number(index))"
             />
           </div>
-        </div>
+        </q-form>
       </q-carousel-slide>
     </q-carousel>
 
@@ -375,6 +374,11 @@ export default defineComponent({
 
     const cidadesPorUf = reactive<Record<string, string[]>>({});
     const cidadesFiltradas = reactive<Record<string, string[]>>({});
+    const formRefs: Record<string, any> = {};
+
+    function setFormRef(uuid: string, el: any) {
+      if (el) formRefs[uuid] = el;
+    }
 
     async function fetchCidades(uf: string) {
       if (!uf || cidadesPorUf[uf]) return;
@@ -419,6 +423,19 @@ export default defineComponent({
       await $service.editarFormIngresso(ingresso);
     }
 
+    async function salvarIngresso(ingresso: any) {
+      const valido = await formRefs[ingresso.uuid]?.validate();
+      if (!valido) return;
+      await editarFormIngresso(ingresso);
+    }
+
+    async function avancarIngresso(ingresso: any, index: number) {
+      const valido = await formRefs[ingresso.uuid]?.validate();
+      if (!valido) return;
+      await editarFormIngresso(ingresso);
+      data.slide = index + 1;
+    }
+
     function copiarDadosPrimeiroIngresso(ingresso: any) {
       const primeiro = ($pedidoStore.$state.pedido.ingressos ?? [])[0];
       if (!primeiro) return;
@@ -435,7 +452,9 @@ export default defineComponent({
       cidadesFiltradas,
       fetchCidades,
       filterCidades,
-      editarFormIngresso,
+      setFormRef,
+      salvarIngresso,
+      avancarIngresso,
       copiarDadosPrimeiroIngresso,
     };
   },
