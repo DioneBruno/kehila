@@ -12,7 +12,7 @@ export type IngressoProps = {
   pessoaPais?: string;
   pessoaUf?: string;
   pessoaCidade?: string;
-  formData?: object;
+  formData?: any;
 };
 
 export class IngressoEntity {
@@ -66,7 +66,10 @@ export class IngressoEntity {
       !!this.props.pessoaEmail &&
       !!this.props.pessoaTelefone &&
       !!this.props.pessoaUf &&
-      !!this.props.pessoaCidade
+      !!this.props.pessoaCidade &&
+      !!this.props.formData?.dataNascimento &&
+      !!this.props.formData?.distrito &&
+      !!this.props.formData?.temDeficienciaOuRestricao
     );
   }
 

@@ -70,6 +70,11 @@ describe("Deve testar EditarFormIngressoUsecase", () => {
       pessoaTelefone: "11999999999",
       pessoaUf: "SP",
       pessoaCidade: "São Paulo",
+      formData: {
+        dataNascimento: "2000-01-01",
+        distrito: "Distrito",
+        temDeficienciaOuRestricao: "nao",
+      },
     };
     await usecase.execute(input);
 

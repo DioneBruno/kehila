@@ -166,8 +166,8 @@
                 unelevated
                 v-model="ingresso.formData.temDeficienciaOuRestricao"
                 :options="[
-                  { label: 'Não', value: false },
-                  { label: 'Sim', value: true },
+                  { label: 'Não', value: 'nao' },
+                  { label: 'Sim', value: 'sim' },
                 ]"
                 color="grey-3"
                 text-color="grey-8"
@@ -176,7 +176,7 @@
               />
             </div>
           </div>
-          <div class="col-12" v-if="ingresso.formData.temDeficienciaOuRestricao">
+          <div class="col-12" v-if="ingresso.formData.temDeficienciaOuRestricao === 'sim'">
             <q-input
               outlined
               dense
