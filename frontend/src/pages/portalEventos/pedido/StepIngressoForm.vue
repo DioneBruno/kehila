@@ -52,7 +52,7 @@
               dense
               stack-label
               v-model="ingresso.pessoaNome"
-              label="Nome completo"
+              label="Nome completo *"
               lazy-rules
             />
           </div>
@@ -63,7 +63,7 @@
               stack-label
               unmasked-value
               v-model="ingresso.pessoaDocumento"
-              label="CPF"
+              label="CPF *"
               mask="###.###.###-##"
             />
           </div>
@@ -73,7 +73,7 @@
               dense
               stack-label
               v-model="ingresso.pessoaEmail"
-              label="E-mail"
+              label="E-mail *"
               type="email"
             />
           </div>
@@ -85,7 +85,7 @@
               unmasked-value
               fill-mask
               v-model="ingresso.pessoaTelefone"
-              label="Telefone"
+              label="Telefone *"
               mask="(##) #####-####"
             />
           </div>
@@ -95,7 +95,7 @@
               dense
               stack-label
               v-model="ingresso.pessoaPais"
-              label="Pais"
+              label="Pais *"
               :options="paises"
               emit-value
               map-options
@@ -107,7 +107,7 @@
               dense
               stack-label
               v-model="ingresso.pessoaUf"
-              label="UF"
+              label="UF *"
               :options="ufs"
               emit-value
               map-options
@@ -129,7 +129,7 @@
               fill-input
               input-debounce="0"
               v-model="ingresso.pessoaCidade"
-              label="Cidade"
+              label="Cidade *"
               :options="cidadesFiltradas[ingresso.uuid] || []"
               :disable="!ingresso.pessoaUf"
               @filter="(val, update) => filterCidades(val, update, ingresso)"
@@ -142,7 +142,7 @@
               stack-label
               type="date"
               v-model="ingresso.formData.dataNascimento"
-              label="Nascimento"
+              label="Nascimento *"
             />
           </div>
           <div class="col-12 col-md-8">
@@ -153,7 +153,7 @@
               map-options
               emit-value
               v-model="ingresso.formData.distrito"
-              label="Distrito"
+              label="Distrito *"
               :options="districos"
             />
           </div>
@@ -184,7 +184,7 @@
               type="textarea"
               autogrow
               v-model="ingresso.formData.deficienciaOuRestricaoDescricao"
-              label="Descrever"
+              label="Descrever deficiência *"
             />
           </div>
           <div class="col-12 row q-mt-md row items-center justify-center q-gutter-sm">
@@ -243,6 +243,13 @@
         icon="attach_money"
         label="Avançar para o Pagamento"
         @click="$emit('next')"
+      />
+      <q-btn
+        v-else
+        no-caps
+        flat
+        color="orange-7"
+        label="* Preencher todos os campos das inscrições"
       />
     </q-stepper-navigation>
   </div>
