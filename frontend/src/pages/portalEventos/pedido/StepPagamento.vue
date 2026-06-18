@@ -13,9 +13,9 @@
             @click="$emit('update:formaPagamento', 'boleto')"
           >
             <q-card-section class="text-center q-py-md">
-              <q-icon name="receipt_long" size="32px" color="grey-9" />
-              <div class="text-subtitle2 q-mt-xs">Boleto</div>
-              <div class="text-caption text-grey-6">Até 12x sem juros</div>
+              <q-icon name="receipt_long" size="32px" color="blue-9" />
+              <div class="text-subtitle2 q-mt-xs text-grey-9">Boleto</div>
+              <div class="text-caption text-grey-6">Até 14x sem juros</div>
               <q-icon
                 v-if="formaPagamento === 'boleto'"
                 name="check_circle"
@@ -27,17 +27,17 @@
           </q-card>
         </div>
         <div class="col-4">
+          <!-- class="cursor-pointer"
+          @click="$emit('update:formaPagamento', 'pix')" -->
           <q-card
             flat
             bordered
-            class="cursor-pointer"
             :class="formaPagamento === 'pix' ? 'border-primary bg-green-1' : ''"
-            @click="$emit('update:formaPagamento', 'pix')"
           >
             <q-card-section class="text-center q-py-md">
-              <q-icon name="pix" size="32px" color="positive" />
-              <div class="text-subtitle2 q-mt-xs">PIX</div>
-              <div class="text-caption text-grey-6">Aprovação imediata</div>
+              <q-icon name="pix" size="32px" color="grey-5" />
+              <div class="text-subtitle2 q-mt-xs text-grey-9">PIX</div>
+              <div class="text-caption text-grey-6">Não disponível</div>
               <q-icon
                 v-if="formaPagamento === 'pix'"
                 name="check_circle"
@@ -50,17 +50,17 @@
         </div>
 
         <div class="col-4">
+          <!-- class="cursor-pointer"
+          @click="$emit('update:formaPagamento', 'cartao')" -->
           <q-card
             flat
             bordered
-            class="cursor-pointer"
             :class="formaPagamento === 'cartao' ? 'border-primary bg-blue-1' : ''"
-            @click="$emit('update:formaPagamento', 'cartao')"
           >
             <q-card-section class="text-center q-py-md">
-              <q-icon name="credit_card" size="32px" color="primary" />
-              <div class="text-subtitle2 q-mt-xs">Cartão</div>
-              <div class="text-caption text-grey-6">Até 12× sem juros</div>
+              <q-icon name="credit_card" size="32px" color="grey-5" />
+              <div class="text-subtitle2 q-mt-xs text-grey-9">Cartão</div>
+              <div class="text-caption text-grey-6">Não disponível</div>
               <q-icon
                 v-if="formaPagamento === 'cartao'"
                 name="check_circle"

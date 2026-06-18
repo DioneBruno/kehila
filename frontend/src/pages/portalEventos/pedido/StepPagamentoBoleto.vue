@@ -17,7 +17,7 @@
         stack-label
         v-model.number="pagador.numParcelas"
         label="Número de parcelas"
-        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]"
         lazy-rules
         :rules="[(val) => (val && val > 0) || 'Campo obrigatório']"
       >
@@ -106,7 +106,8 @@
           <q-separator />
           <q-card-section class="q-py-sm text-caption text-grey-8">
             Será gerado <strong>1 carnê</strong> parcelado em
-            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong>.
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+            >.
           </q-card-section>
         </q-card>
       </div>
@@ -130,7 +131,8 @@
           <q-separator />
           <q-card-section class="q-py-sm text-caption text-grey-8">
             Cada carnê será parcelado em
-            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong>.
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+            >.
           </q-card-section>
         </q-card>
       </div>
@@ -212,7 +214,8 @@
           <q-separator />
           <q-card-section class="q-py-sm text-caption text-grey-8">
             Será gerado <strong>1 carnê</strong> parcelado em
-            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong>.
+            <strong>{{ pagador.numParcelas }} vez{{ pagador.numParcelas !== 1 ? "es" : "" }}</strong
+            >.
           </q-card-section>
         </q-card>
       </div>
