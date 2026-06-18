@@ -286,7 +286,7 @@ export class PortalEventosQuery {
         AND ingressos.pessoa_documento != ''
         AND ingressos.evento_uuid = $1
         ${filterWhere}
-      ORDER BY tipos_ingresso.uuid, ingressos.index
+      ORDER BY ingressos.index
       LIMIT $${bindings.length + 1} OFFSET $${bindings.length + 2}
       `,
       [...bindings, porPagina, offset],
