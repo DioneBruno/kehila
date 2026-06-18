@@ -116,18 +116,28 @@
       </div>
     </transition>
 
-    <!-- Botão flutuante: suporte via WhatsApp -->
-    <div v-if="evento?.suporteTelefone" class="suporte-whatsapp-wrapper" @click="abrirWhatsapp">
-      <div class="suporte-whatsapp-label text-grey-9">{{ suporteTelefoneFormatado }}</div>
-      <q-btn round unelevated color="positive" icon="mdi-whatsapp" class="suporte-whatsapp-btn">
-        <q-tooltip anchor="center left" self="center right">Falar com o suporte</q-tooltip>
-      </q-btn>
+    <!-- Botões flutuantes: suporte via e-mail e WhatsApp -->
+    <div v-if="evento?.suporteTelefone || evento?.suporteEmail" class="suporte-flutuante-wrapper">
+      <div v-if="evento?.suporteTelefone" class="suporte-flutuante-row" @click="abrirWhatsapp">
+        <div class="suporte-flutuante-label text-grey-9">{{ suporteTelefoneFormatado }}</div>
+        <q-btn round unelevated color="positive" icon="mdi-whatsapp" class="suporte-whatsapp-btn">
+          <q-tooltip anchor="center left" self="center right">Falar com o suporte</q-tooltip>
+        </q-btn>
+      </div>
+
+      <div v-if="evento?.suporteEmail" class="suporte-flutuante-row q-mt-md" @click="copiarEmail">
+        <div class="suporte-flutuante-label text-grey-9">{{ evento.suporteEmail }}</div>
+        <q-btn round flat color="grey-7" size="sm" icon="content_copy">
+          <q-tooltip anchor="center left" self="center right">Copiar e-mail</q-tooltip>
+        </q-btn>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
+import { useQuasar } from "quasar";
 import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
 import { usePedidoStore } from "src/stores/pedido";
@@ -163,6 +173,7 @@ export default defineComponent({
     StepCobranca,
   },
   setup() {
+    const $q = useQuasar();
     const $authStore = useAuthStore();
     const $route = useRoute();
     const $pedidoStore = usePedidoStore();
@@ -253,6 +264,13 @@ export default defineComponent({
       return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 3)} ${digitos.slice(3, 7)}-${digitos.slice(7)}`;
     });
 
+    function copiarEmail() {
+      const email = data.evento?.suporteEmail;
+      if (!email) return;
+      void navigator.clipboard.writeText(email);
+      $q.notify({ message: "E-mail copiado!", color: "positive" });
+    }
+
     return {
       ...toRefs(data),
       itensSelecionados,
@@ -264,6 +282,7 @@ export default defineComponent({
       confirmar,
       abrirWhatsapp,
       suporteTelefoneFormatado,
+      copiarEmail,
     };
   },
 });
@@ -288,18 +307,25 @@ export default defineComponent({
   z-index: 100;
 }
 
-.suporte-whatsapp-wrapper {
+.suporte-flutuante-wrapper {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.suporte-flutuante-row {
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
 }
 
-.suporte-whatsapp-label {
+.suporte-flutuante-label {
   background: white;
   padding: 6px 12px;
   border-radius: 16px;
@@ -316,12 +342,19 @@ export default defineComponent({
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+.suporte-copy-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 @media (max-width: 1023px) {
   .page-with-bar {
     padding-bottom: 72px;
   }
 
-  .page-with-bar .suporte-whatsapp-wrapper {
+  .page-with-bar .suporte-flutuante-wrapper {
     bottom: 88px;
   }
 }

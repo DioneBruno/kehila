@@ -21,7 +21,8 @@ export class PortalEventosQuery {
       eventos.local_lng "localLng",
       eventos.local_nome "localNome",
       eventos.online,
-      eventos.suporte_telefone "suporteTelefone"
+      eventos.suporte_telefone "suporteTelefone",
+      eventos.suporte_email "suporteEmail"
     FROM eventos
     WHERE deleted_at IS NULL
       AND uuid = $1`,
