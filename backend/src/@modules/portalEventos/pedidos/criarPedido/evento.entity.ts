@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { ApiError } from "src/@modules/shared/apiError";
 import { IngressosEntity } from "./ingressos.entity";
 import { PedidoEntity } from "./pedido.entity";
 import { TipoIngressoEntity } from "./tipoIngresso.entity";
@@ -27,6 +28,9 @@ export class EventoEntity {
     let valorBruto = 0;
     for (const item of input) {
       const tipo = this.props.tiposIngresso.find((t) => t.uuid() === item.tipoIngressoUuid);
+      if (tipo && !tipo.temVagaDisponivel(item.quantidade)) {
+        throw new ApiError(`Não tem vaga disponível para o tipo de ingresso: ${tipo.nome()}`, 400);
+      }
       if (tipo) valorBruto += tipo.preco() * item.quantidade;
       const gerarQtd = tipo?.gerarQuantidadeIngressos() ?? 1;
       for (let i = 0; i < item.quantidade; i++) {

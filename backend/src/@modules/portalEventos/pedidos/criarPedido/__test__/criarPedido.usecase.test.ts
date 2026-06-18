@@ -2,6 +2,7 @@ import dataSource from "src/@infra/database/datasource";
 import { CriarPedidoUsecase } from "../criarPedido.usecase";
 import { CriarPedidoRepository } from "../criarPedidoRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { randomUUID } from "crypto";
 
 const companyUuid = "42c8158d-0132-4a5d-a2f6-10ae38ad5f17";
 let repo: CriarPedidoRepository;
@@ -220,5 +221,72 @@ describe("Deve testar CriarPedidoUsecase", () => {
     expect(ingressosTipo2.length).toBe(12);
     const ingressosTipo3 = ingressosModel.filter((ingresso: any) => ingresso.tipo_ingresso_uuid == `3${tipoIngressoUuidBase}`);
     expect(ingressosTipo3.length).toBe(1);
+  });
+
+  test("Não deve gerar pedido, caso um dos tipos de ingresso não tiver vaga disponível", async () => {
+    const eventoUuid = "e301a3c0-aaf4-42c5-86d0-d8800116b674";
+    await dataSource.query(`INSERT INTO eventos (uuid, company_uuid, user_uuid, titulo, slug, data_inicio)
+      VALUES ('${eventoUuid}', '${companyUuid}', '${companyUuid}', 'Evento Teste', 'evento-teste', now())`);
+
+    const tipoIngressoUuidBase = "5ecdb8b-d83b-42f9-98f4-1b3af475b868";
+
+    await dataSource.query(`INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo)
+      VALUES ('${randomUUID()}', '${companyUuid}', '${eventoUuid}', '1${tipoIngressoUuidBase}', '${randomUUID()}', '1codigo'),
+      ('${randomUUID()}', '${companyUuid}', '${eventoUuid}', '1${tipoIngressoUuidBase}', '${randomUUID()}', '2codigo'),
+      ('${randomUUID()}', '${companyUuid}', '${eventoUuid}', '1${tipoIngressoUuidBase}', '${randomUUID()}', '3codigo')`);
+
+    const loteUuid = "e614d3d2-02b7-43cf-9a17-22794ee175cc";
+    await dataSource.query(`INSERT INTO evento_lotes (uuid, company_uuid, evento_uuid, nome)
+      VALUES ('${loteUuid}', '${companyUuid}', '${eventoUuid}', 'Lote Teste')`);
+
+    const tiposIngressos = [
+      {
+        uuid: `1${tipoIngressoUuidBase}`,
+        nome: "Tipo 01",
+        preco: 12.45,
+        quantidade: 3,
+      },
+      {
+        uuid: `2${tipoIngressoUuidBase}`,
+        nome: "Tipo 02",
+        preco: 45.5,
+        quantidade: 10,
+      },
+      {
+        uuid: `3${tipoIngressoUuidBase}`,
+        nome: "Tipo 03",
+        preco: 123.45,
+        quantidade: 10,
+      },
+    ];
+    for (const tipoIngresso of tiposIngressos) {
+      await dataSource.query(`INSERT INTO evento_lote_tipos_ingresso (uuid, company_uuid, evento_uuid, lote_uuid, nome, preco, quantidade)
+        VALUES ('${tipoIngresso.uuid}', '${companyUuid}', '${eventoUuid}', '${loteUuid}', '${tipoIngresso.nome}', ${tipoIngresso.preco}, ${tipoIngresso.quantidade})`);
+    }
+
+    const usecase = new CriarPedidoUsecase(repo);
+    const input = {
+      companyUuid,
+      eventoUuid,
+      userUuid: "218a2fe4-e343-4bde-8f4e-a32626d1ffde",
+      pedido: [
+        {
+          tipoIngressoUuid: `1${tipoIngressoUuidBase}`,
+          quantidade: 2,
+        },
+        {
+          tipoIngressoUuid: `2${tipoIngressoUuidBase}`,
+          quantidade: 4,
+        },
+        {
+          tipoIngressoUuid: `3${tipoIngressoUuidBase}`,
+          quantidade: 6,
+        },
+      ],
+    };
+
+    await expect(usecase.execute(input)).rejects.toThrow("Não tem vaga disponível para o tipo de ingresso: Tipo 01");
+    const pedidosModel = await dataSource.query(`SELECT * FROM evento_ingressos WHERE company_uuid = '${companyUuid}'`);
+    expect(pedidosModel.length).toBe(3);
   });
 });

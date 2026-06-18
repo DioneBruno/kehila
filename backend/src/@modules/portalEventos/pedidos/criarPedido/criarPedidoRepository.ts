@@ -19,12 +19,25 @@ export class CriarPedidoRepository {
         AND evento_uuid = $2`,
       [companyUuid, eventoUuid],
     );
+
+    const vendidosModel = await this.connectionHub.database!.query(
+      `SELECT tipo_ingresso_uuid, COUNT(*)::int AS quantidade
+      FROM evento_ingressos
+      WHERE deleted_at IS NULL
+        AND company_uuid = $1
+        AND evento_uuid = $2
+      GROUP BY tipo_ingresso_uuid`,
+      [companyUuid, eventoUuid],
+    );
+    const vendidosPorTipo = new Map<string, number>(vendidosModel.map((v: any) => [v.tipo_ingresso_uuid, v.quantidade]));
+
     for (const tipoIngressoModel of tipoIngressosModel) {
       tiposIngresso.push(
         new TipoIngressoEntity({
           uuid: tipoIngressoModel.uuid,
           nome: tipoIngressoModel.nome,
           quantidade: tipoIngressoModel.quantidade,
+          vendidos: vendidosPorTipo.get(tipoIngressoModel.uuid) ?? 0,
           preco: tipoIngressoModel.preco,
           loteUuid: tipoIngressoModel.lote_uuid,
           gerarQuantidadeIngressos: tipoIngressoModel.gerar_quantidade_ingressos ?? 1,
