@@ -1,5 +1,9 @@
 <template>
-  <q-page class="bg-grey-2 q-pb-xl" :class="{ 'page-with-bar': totalIngressos > 0 }">
+  <q-page
+    class="bg-grey-2"
+    style="padding-bottom: 120px"
+    :class="{ 'page-with-bar': totalIngressos > 0 }"
+  >
     <!-- Hero do evento -->
     <Cabecalho />
 
