@@ -24,7 +24,7 @@
           :class="{ 'bg-blue-1': (quantidades[tipo.uuid] ?? 0) > 0 }"
         >
           <q-card-section class="q-py-sm">
-            <div class="row items-center no-wrap">
+            <div class="row items-stretch no-wrap">
               <div class="col">
                 <div class="text-subtitle2 text-weight-medium">{{ tipo.nome }}</div>
                 <div v-if="tipo.descricao" class="text-caption text-grey-6 q-mb-xs">
@@ -34,11 +34,12 @@
                   {{ formatarMoeda(tipo.preco) }}
                 </div>
                 <div class="text-caption text-grey-7">
-                  {{ tipo.gerarQuantidadeIngressos }} {{ tipo.gerarQuantidadeIngressos > 1 ? 'Inscrições' : 'Inscrição' }}
+                  {{ tipo.gerarQuantidadeIngressos }}
+                  {{ tipo.gerarQuantidadeIngressos > 1 ? "Inscrições" : "Inscrição" }}
                 </div>
               </div>
-              <div class="col-auto">
-                <div class="row items-center q-gutter-xs">
+              <div class="col-auto column justify-between items-center">
+                <div class="row items-right q-gutter-xs">
                   <q-btn
                     round
                     unelevated
@@ -57,9 +58,12 @@
                     size="sm"
                     icon="add"
                     color="primary"
-                    :disable="(quantidades[tipo.uuid] ?? 0) >= tipo.disponivel"
+                    :disable="tipo.quantidade > 0 && (quantidades[tipo.uuid] ?? 0) >= tipo.disponivel"
                     @click="aumentar(tipo)"
                   />
+                </div>
+                <div v-if="tipo.quantidade > 0" class="text-caption text-grey-7">
+                  {{ tipo.disponivel }} disponíve{{ tipo.disponivel === 1 ? "l" : "is" }}
                 </div>
               </div>
             </div>

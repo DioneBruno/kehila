@@ -44,19 +44,32 @@ export class PortalEventosQuery {
     );
 
     const tiposIngressoModel = await this.connectionHub.database!.query(
-      `SELECT 
-        uuid,
-        nome,
-        descricao,
-        evento_uuid "eventoUuid",
-        lote_uuid "loteUuid",
-        gerar_quantidade_ingressos "gerarQuantidadeIngressos",
-        visivel,
-        preco
-      FROM evento_lote_tipos_ingresso
-      WHERE deleted_at IS NULL
-        AND evento_uuid = $1
-      ORDER BY ordem ASC`,
+      `SELECT
+        tipos_ingresso.uuid,
+        tipos_ingresso.nome,
+        tipos_ingresso.descricao,
+        tipos_ingresso.evento_uuid "eventoUuid",
+        tipos_ingresso.lote_uuid "loteUuid",
+        tipos_ingresso.gerar_quantidade_ingressos "gerarQuantidadeIngressos",
+        tipos_ingresso.visivel,
+        tipos_ingresso.preco,
+        tipos_ingresso.quantidade,
+        CASE
+          WHEN tipos_ingresso.quantidade = 0 THEN NULL
+          ELSE GREATEST(
+            tipos_ingresso.quantidade - (
+              SELECT COUNT(*)::int
+              FROM evento_ingressos ingressos
+              WHERE ingressos.deleted_at IS NULL
+                AND ingressos.tipo_ingresso_uuid = tipos_ingresso.uuid
+            ),
+            0
+          )
+        END "disponivel"
+      FROM evento_lote_tipos_ingresso tipos_ingresso
+      WHERE tipos_ingresso.deleted_at IS NULL
+        AND tipos_ingresso.evento_uuid = $1
+      ORDER BY tipos_ingresso.ordem ASC`,
       [eventoUuid],
     );
 
