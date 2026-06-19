@@ -307,4 +307,82 @@ export class PortalEventosQuery {
       porPagina,
     };
   }
+
+  async listaPublicaCidade(eventoUuid: string): Promise<{ cidade: string; total: number }[]> {
+    return this.connectionHub.database!.query(
+      `
+      SELECT
+        ingressos.pessoa_cidade "cidade",
+        COUNT(*)::int "total"
+      FROM evento_ingressos ingressos
+        INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
+          ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
+        INNER JOIN evento_lotes lotes
+          ON lotes.uuid = tipos_ingresso.lote_uuid
+      WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pessoa_nome IS NOT NULL
+        AND ingressos.pessoa_nome != ''
+        AND ingressos.pessoa_documento IS NOT NULL
+        AND ingressos.pessoa_documento != ''
+        AND ingressos.pessoa_cidade IS NOT NULL
+        AND ingressos.pessoa_cidade != ''
+        AND ingressos.evento_uuid = $1
+      GROUP BY ingressos.pessoa_cidade
+      ORDER BY "total" DESC
+      `,
+      [eventoUuid],
+    );
+  }
+
+  async listaPublicaUf(eventoUuid: string): Promise<{ uf: string; total: number }[]> {
+    return this.connectionHub.database!.query(
+      `
+      SELECT
+        ingressos.pessoa_uf "uf",
+        COUNT(*)::int "total"
+      FROM evento_ingressos ingressos
+        INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
+          ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
+        INNER JOIN evento_lotes lotes
+          ON lotes.uuid = tipos_ingresso.lote_uuid
+      WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pessoa_nome IS NOT NULL
+        AND ingressos.pessoa_nome != ''
+        AND ingressos.pessoa_documento IS NOT NULL
+        AND ingressos.pessoa_documento != ''
+        AND ingressos.pessoa_uf IS NOT NULL
+        AND ingressos.pessoa_uf != ''
+        AND ingressos.evento_uuid = $1
+      GROUP BY ingressos.pessoa_uf
+      ORDER BY "total" DESC
+      `,
+      [eventoUuid],
+    );
+  }
+
+  async listaPublicaDistrito(eventoUuid: string): Promise<{ distrito: string; total: number }[]> {
+    return this.connectionHub.database!.query(
+      `
+      SELECT
+        ingressos.form_data->>'distrito' "distrito",
+        COUNT(*)::int "total"
+      FROM evento_ingressos ingressos
+        INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
+          ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
+        INNER JOIN evento_lotes lotes
+          ON lotes.uuid = tipos_ingresso.lote_uuid
+      WHERE ingressos.deleted_at IS NULL
+        AND ingressos.pessoa_nome IS NOT NULL
+        AND ingressos.pessoa_nome != ''
+        AND ingressos.pessoa_documento IS NOT NULL
+        AND ingressos.pessoa_documento != ''
+        AND ingressos.form_data->>'distrito' IS NOT NULL
+        AND ingressos.form_data->>'distrito' != ''
+        AND ingressos.evento_uuid = $1
+      GROUP BY ingressos.form_data->>'distrito'
+      ORDER BY "total" DESC
+      `,
+      [eventoUuid],
+    );
+  }
 }

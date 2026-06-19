@@ -40,4 +40,22 @@ export class PublicoController {
       meta: { total: resultado.total, pagina: resultado.pagina, porPagina: resultado.porPagina },
     });
   }
+
+  @Post(":eventoUuid/inscritos/cidade")
+  async listaPublicaCidade(@Param("eventoUuid") eventoUuid: string, @Res() res: Response) {
+    const resultado = await this.portalEventosQuery.listaPublicaCidade(eventoUuid);
+    return res.status(200).json({ success: true, data: resultado });
+  }
+
+  @Post(":eventoUuid/inscritos/uf")
+  async listaPublicaUf(@Param("eventoUuid") eventoUuid: string, @Res() res: Response) {
+    const resultado = await this.portalEventosQuery.listaPublicaUf(eventoUuid);
+    return res.status(200).json({ success: true, data: resultado });
+  }
+
+  @Post(":eventoUuid/inscritos/distrito")
+  async listaPublicaDistrito(@Param("eventoUuid") eventoUuid: string, @Res() res: Response) {
+    const resultado = await this.portalEventosQuery.listaPublicaDistrito(eventoUuid);
+    return res.status(200).json({ success: true, data: resultado });
+  }
 }
