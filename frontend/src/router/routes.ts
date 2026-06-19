@@ -57,6 +57,21 @@ const routes: RouteRecordRaw[] = [
         name: "financeiro.contas-bancarias.detalhe",
         component: () => import("pages/financeiro/contaBancaria/contaBancariaEditar.vue"),
       },
+      {
+        path: "usuarios",
+        name: "usuarios",
+        component: () => import("pages/usuario/usuarioListar.vue"),
+      },
+      {
+        path: "usuarios/criar",
+        name: "usuarios.criar",
+        component: () => import("pages/usuario/usuarioIncluir.vue"),
+      },
+      {
+        path: "usuarios/:uuid",
+        name: "usuarios.detalhe",
+        component: () => import("pages/usuario/usuarioEditar.vue"),
+      },
     ],
   },
   {

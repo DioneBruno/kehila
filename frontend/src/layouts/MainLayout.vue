@@ -79,6 +79,7 @@ const MENU_ITEMS = [
   { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
   { label: "EMPRESA", type: "section" },
   { label: "Minha Empresa", icon: "business", route: "empresa" },
+  { label: "Usuários", icon: "group", route: "usuarios" },
 ];
 
 export default defineComponent({

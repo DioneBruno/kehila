@@ -13,6 +13,7 @@ import axios from "axios";
 import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 import { RedisClientType, createClient } from "redis";
 import { BiModule } from "./bi/bi.module";
+import { UsuarioModule } from "./usuario/usuario.module";
 
 @Global()
 @Module({
@@ -33,6 +34,7 @@ import { BiModule } from "./bi/bi.module";
     NotificacaoModule,
     EmpresaModule,
     BiModule,
+    UsuarioModule,
   ],
   controllers: [AppController],
   providers: [
