@@ -91,6 +91,14 @@
       </q-card-section>
     </q-card>
   </div>
+
+  <q-card v-else flat bordered class="q-pa-md">
+    <div class="text-subtitle1 text-weight-bold row items-center q-mb-md">
+      <q-icon name="login" class="q-mr-sm" color="primary" />
+      Entre ou cadastre-se para ver seus pedidos
+    </div>
+    <LoginCadastro form-inicial="login" />
+  </q-card>
 </template>
 <script lang="ts">
 import { useQuasar } from "quasar";
@@ -100,9 +108,11 @@ import { usePedidoStore } from "src/stores/pedido";
 import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
 import { ApiDate } from "src/shared/apiDate.service";
+import LoginCadastro from "./LoginCadastro.vue";
 
 export default defineComponent({
   name: "PedidoPedidos",
+  components: { LoginCadastro },
   setup() {
     const $authStore = useAuthStore();
     const $pedidoStore = usePedidoStore();
