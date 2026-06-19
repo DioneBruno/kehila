@@ -107,15 +107,14 @@
                 </q-step>
               </q-stepper>
             </q-tab-panel>
+
+            <q-tab-panel name="pedidos">
+              <PedidoPedidos />
+            </q-tab-panel>
           </q-tab-panels>
-          <q-tab-panel name="pedidos">
-            <Pedidos />
-          </q-tab-panel>
         </div>
 
         <div class="col">
-          <PedidoPedidos class="q-mb-xs" />
-
           <!-- Resumo lateral: somente desktop -->
           <PedidoResumo />
         </div>
@@ -174,8 +173,6 @@ import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
 import { usePedidoStore } from "src/stores/pedido";
 import { useAuthStore } from "src/stores/auth";
-
-import Pedidos from "src/pages/portalEventos/pedido/pedidos.vue";
 
 import Cabecalho from "./cabecalho.vue";
 import PedidoResumo from "./resumo.vue";

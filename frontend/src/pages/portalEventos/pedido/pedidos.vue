@@ -1,5 +1,5 @@
 <template>
-  <div class="col-md-4 gt-sm" v-if="user.uuid && pedidos.length">
+  <div v-if="user.uuid">
     <q-card flat bordered class="resumo-sticky">
       <q-card-section>
         <div class="text-subtitle1 text-weight-bold row items-center justify-between">
