@@ -18,6 +18,8 @@
         </div>
       </q-card-section>
 
+      <q-separator class="q-mb-md" />
+
       <q-list separator dense v-if="pedidos.length > 0">
         <q-item
           clickable
@@ -102,7 +104,7 @@
 
   <q-card v-else flat bordered class="q-pa-md">
     <div class="text-subtitle1 text-weight-bold row items-center q-mb-md">
-      <q-icon name="login" class="q-mr-sm" color="primary" />
+      <!-- <q-icon name="login" class="q-mr-sm" color="primary" /> -->
       Entre ou cadastre-se para ver seus pedidos
     </div>
     <LoginCadastro form-inicial="login" />
