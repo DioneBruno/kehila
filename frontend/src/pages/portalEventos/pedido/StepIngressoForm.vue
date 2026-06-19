@@ -47,67 +47,51 @@
 
         <q-form :ref="(el) => setFormRef(ingresso.uuid, el)" greedy class="row q-col-gutter-sm">
           <div class="col-12 col-sm-8">
-            <q-input
-              outlined
-              dense
-              stack-label
-              v-model="ingresso.pessoaNome"
-              label="Nome completo *"
-              lazy-rules
-            />
+            <div class="text-grey-8 q-mb-xs">Nome completo *</div>
+            <q-input outlined dense v-model="ingresso.pessoaNome" lazy-rules />
           </div>
           <div class="col-12 col-sm-4">
+            <div class="text-grey-8 q-mb-xs">CPF *</div>
             <q-input
               outlined
               dense
-              stack-label
               unmasked-value
               v-model="ingresso.pessoaDocumento"
-              label="CPF *"
               mask="###.###.###-##"
             />
           </div>
           <div class="col-12 col-sm-6">
-            <q-input
-              outlined
-              dense
-              stack-label
-              v-model="ingresso.pessoaEmail"
-              label="E-mail *"
-              type="email"
-            />
+            <div class="text-grey-8 q-mb-xs">E-mail *</div>
+            <q-input outlined dense v-model="ingresso.pessoaEmail" type="email" />
           </div>
           <div class="col-12 col-sm-6">
+            <div class="text-grey-8 q-mb-xs">Telefone *</div>
             <q-input
               outlined
               dense
-              stack-label
               unmasked-value
               fill-mask
               v-model="ingresso.pessoaTelefone"
-              label="Telefone *"
               mask="(##) #####-####"
             />
           </div>
           <div class="col-12 col-sm-3">
+            <div class="text-grey-8 q-mb-xs">Pais *</div>
             <q-select
               outlined
               dense
-              stack-label
               v-model="ingresso.pessoaPais"
-              label="Pais *"
               :options="paises"
               emit-value
               map-options
             />
           </div>
           <div class="col-12 col-sm-2">
+            <div class="text-grey-8 q-mb-xs">UF *</div>
             <q-select
               outlined
               dense
-              stack-label
               v-model="ingresso.pessoaUf"
-              label="UF *"
               :options="ufs"
               emit-value
               map-options
@@ -120,43 +104,35 @@
             />
           </div>
           <div class="col-12 col-sm-7">
+            <div class="text-grey-8 q-mb-xs">Cidade *</div>
             <q-select
               outlined
               dense
-              stack-label
               use-input
               hide-selected
               fill-input
               input-debounce="0"
               v-model="ingresso.pessoaCidade"
-              label="Cidade *"
               :options="cidadesFiltradas[ingresso.uuid] || []"
               :disable="!ingresso.pessoaUf"
               @filter="(val, update) => filterCidades(val, update, ingresso)"
             />
           </div>
           <div class="col-12 col-md-4">
-            <q-input
-              v-if="!isMobile"
-              outlined
-              dense
-              stack-label
-              type="date"
-              v-model="ingresso.formData.dataNascimento"
-              label="Nascimento *"
-            />
+            <div v-if="!isMobile">
+              <div class="text-grey-8 q-mb-xs">Nascimento *</div>
+              <q-input outlined dense type="date" v-model="ingresso.formData.dataNascimento" />
+            </div>
             <div v-else>
-              <div class="text-grey-8 q-mb-xs" style="font-size: 11px">Data de Nascimento *</div>
+              <div class="text-grey-8 q-mb-xs">Data de Nascimento *</div>
               <div class="row q-col-gutter-xs">
                 <div class="col-4">
                   <q-input
                     outlined
                     dense
-                    stack-label
                     mask="##"
                     inputmode="numeric"
                     placeholder="DD"
-                    label="Dia"
                     :rules="[(v) => !v || Number(v) <= 31 || 'Dia inválido']"
                     lazy-rules
                     :model-value="getDataParte(ingresso, 'dia')"
@@ -167,11 +143,9 @@
                   <q-input
                     outlined
                     dense
-                    stack-label
                     mask="##"
                     inputmode="numeric"
                     placeholder="MM"
-                    label="Mês"
                     :rules="[(v) => !v || Number(v) <= 12 || 'Mês inválido']"
                     lazy-rules
                     :model-value="getDataParte(ingresso, 'mes')"
@@ -182,11 +156,9 @@
                   <q-input
                     outlined
                     dense
-                    stack-label
                     mask="####"
                     inputmode="numeric"
                     placeholder="AAAA"
-                    label="Ano"
                     :model-value="getDataParte(ingresso, 'ano')"
                     @update:model-value="(v) => setDataParte(ingresso, 'ano', String(v ?? ''))"
                   />
@@ -195,45 +167,47 @@
             </div>
           </div>
           <div class="col-12 col-md-8">
+            <div class="text-grey-8 q-mb-xs">Distrito *</div>
             <q-select
               outlined
               dense
-              stack-label
               map-options
               emit-value
               v-model="ingresso.formData.distrito"
-              label="Distrito *"
               :options="districos"
             />
           </div>
           <div class="col-12">
-            <div class="text-grey-8 q-mb-xs">
-              Tem alguma deficiência, necessidade específica ou restrição alimentar?
-              <q-btn-toggle
-                dense
-                no-caps
-                unelevated
-                v-model="ingresso.formData.temDeficienciaOuRestricao"
-                :options="[
-                  { label: 'Não', value: 'nao' },
-                  { label: 'Sim', value: 'sim' },
-                ]"
-                color="grey-3"
-                text-color="grey-8"
-                toggle-color="primary"
-                toggle-text-color="white"
-              />
+            <div class="row text-grey-8 q-mb-xs">
+              <div class="col-12">
+                Tem alguma deficiência, necessidade específica ou restrição alimentar?
+              </div>
+              <div class="col-auto">
+                <q-btn-toggle
+                  dense
+                  no-caps
+                  unelevated
+                  v-model="ingresso.formData.temDeficienciaOuRestricao"
+                  :options="[
+                    { label: 'Não', value: 'nao' },
+                    { label: 'Sim', value: 'sim' },
+                  ]"
+                  color="grey-3"
+                  text-color="grey-8"
+                  toggle-color="primary"
+                  toggle-text-color="white"
+                />
+              </div>
             </div>
           </div>
           <div class="col-12" v-if="ingresso.formData.temDeficienciaOuRestricao === 'sim'">
+            <div class="text-grey-8 q-mb-xs">Descrever deficiência *</div>
             <q-input
               outlined
               dense
-              stack-label
               type="textarea"
               rows="2"
               v-model="ingresso.formData.deficienciaOuRestricaoDescricao"
-              label="Descrever deficiência *"
               :rules="[(v) => !!v || 'Obrigatório']"
               lazy-rules
             />
@@ -471,9 +445,9 @@ export default defineComponent({
       districos: districos.map((districo) => ({ label: districo, value: districo })),
     });
 
-    const dataNascimentoPartes = reactive<Record<string, { dia: string; mes: string; ano: string }>>(
-      {},
-    );
+    const dataNascimentoPartes = reactive<
+      Record<string, { dia: string; mes: string; ano: string }>
+    >({});
 
     function getPartesIngresso(ingresso: any) {
       let partes = dataNascimentoPartes[ingresso.uuid];
