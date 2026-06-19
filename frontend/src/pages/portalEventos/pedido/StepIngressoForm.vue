@@ -137,6 +137,7 @@
           </div>
           <div class="col-12 col-md-4">
             <q-input
+              v-if="!isMobile"
               outlined
               dense
               stack-label
@@ -144,6 +145,50 @@
               v-model="ingresso.formData.dataNascimento"
               label="Nascimento *"
             />
+            <div v-else>
+              <div class="text-grey-8 q-mb-xs" style="font-size: 11px">Data de Nascimento *</div>
+              <div class="row q-col-gutter-xs">
+                <div class="col-4">
+                  <q-input
+                    outlined
+                    dense
+                    stack-label
+                    mask="##"
+                    inputmode="numeric"
+                    placeholder="DD"
+                    label="Dia"
+                    :model-value="getDataParte(ingresso, 'dia')"
+                    @update:model-value="(v) => setDataParte(ingresso, 'dia', String(v ?? ''))"
+                  />
+                </div>
+                <div class="col-4">
+                  <q-input
+                    outlined
+                    dense
+                    stack-label
+                    mask="##"
+                    inputmode="numeric"
+                    placeholder="MM"
+                    label="Mês"
+                    :model-value="getDataParte(ingresso, 'mes')"
+                    @update:model-value="(v) => setDataParte(ingresso, 'mes', String(v ?? ''))"
+                  />
+                </div>
+                <div class="col-4">
+                  <q-input
+                    outlined
+                    dense
+                    stack-label
+                    mask="####"
+                    inputmode="numeric"
+                    placeholder="AAAA"
+                    label="Ano"
+                    :model-value="getDataParte(ingresso, 'ano')"
+                    @update:model-value="(v) => setDataParte(ingresso, 'ano', String(v ?? ''))"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
           <div class="col-12 col-md-8">
             <q-select
@@ -256,6 +301,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, toRefs } from "vue";
+import { useQuasar } from "quasar";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
 
@@ -369,6 +415,7 @@ export default defineComponent({
   components: {},
   emits: ["prev", "confirmar"],
   setup() {
+    const $q = useQuasar();
     const $service = new PedidoService();
     const $pedidoStore = usePedidoStore();
 
@@ -414,10 +461,29 @@ export default defineComponent({
       todosIngressosValidos: computed(() =>
         ($pedidoStore.pedido.ingressos ?? []).every((i: any) => i.formDataValido === true),
       ),
+      isMobile: computed(() => $q.platform.is.mobile),
       paises: paises.map((pais) => ({ label: pais.label, value: pais.value })),
       ufs: UFS.map((uf) => ({ label: uf, value: uf })),
       districos: districos.map((districo) => ({ label: districo, value: districo })),
     });
+
+    function getDataParte(ingresso: any, parte: "dia" | "mes" | "ano") {
+      const [ano = "", mes = "", dia = ""] = (ingresso.formData.dataNascimento || "").split("-");
+      if (parte === "ano") return ano;
+      if (parte === "mes") return mes;
+      return dia;
+    }
+
+    function setDataParte(ingresso: any, parte: "dia" | "mes" | "ano", valor: string) {
+      const [ano = "", mes = "", dia = ""] = (ingresso.formData.dataNascimento || "").split("-");
+      const partes = { ano, mes, dia };
+      partes[parte] = valor;
+      const anoFmt = partes.ano ? partes.ano.padStart(4, "0") : "";
+      const mesFmt = partes.mes ? partes.mes.padStart(2, "0") : "";
+      const diaFmt = partes.dia ? partes.dia.padStart(2, "0") : "";
+      ingresso.formData.dataNascimento =
+        anoFmt || mesFmt || diaFmt ? `${anoFmt}-${mesFmt}-${diaFmt}` : "";
+    }
 
     async function editarFormIngresso(ingresso: any) {
       await $service.editarFormIngresso(ingresso);
@@ -456,6 +522,8 @@ export default defineComponent({
       salvarIngresso,
       avancarIngresso,
       copiarDadosPrimeiroIngresso,
+      getDataParte,
+      setDataParte,
     };
   },
 });
