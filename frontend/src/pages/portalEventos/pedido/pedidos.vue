@@ -122,6 +122,7 @@ export default defineComponent({
 
     const data = reactive({
       user: computed(() => $authStore.$state.user),
+      pedido: computed(() => $pedidoStore.$state.pedido),
       pedidos: ref([] as any),
     });
 
@@ -191,6 +192,7 @@ export default defineComponent({
       $pedidoStore.$patch((state) => {
         state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [] };
       });
+      data.pedido.tab = "ingressos";
     }
 
     return {

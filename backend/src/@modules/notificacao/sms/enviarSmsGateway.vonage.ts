@@ -12,12 +12,16 @@ export class EnviarSmsGatewayVonage {
       apiSecret: process.env.NOTIFICACAO_VONAGE_APISECRET,
     });
 
-    await vonage.messages.send({
-      from: "Vonage APIs",
-      messageType: "text",
-      channel: Channels.SMS,
-      text: mensagem.mensagem(),
-      to: mensagem.destinatario(),
-    });
+    try {
+      await vonage.messages.send({
+        from: "Vonage APIs",
+        messageType: "text",
+        channel: Channels.SMS,
+        text: mensagem.mensagem(),
+        to: mensagem.destinatario(),
+      });
+    } catch (error) {
+      console.error("Erro ao enviar SMS", error);
+    }
   }
 }
