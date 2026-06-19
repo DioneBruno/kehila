@@ -4,8 +4,24 @@
       <q-card-section>
         <div class="text-subtitle1 text-weight-bold row items-center justify-between">
           <div class="row items-center">
-            <q-icon name="shopping_bag" class="q-mr-sm" color="primary" />
-            Meus pedidos
+            <div class="row items-center">
+              <div class="col-12">
+                <q-icon name="shopping_bag" class="q-mr-sm" color="primary" />
+                Meus pedidos
+              </div>
+              <div class="col-12">
+                <q-btn
+                  flat
+                  dense
+                  unelevated
+                  no-caps
+                  color="grey-7"
+                  icon="change_circle"
+                  label="Alterar usuário, entrar com outra conta"
+                  @click="user.uuid = null"
+                />
+              </div>
+            </div>
           </div>
           <q-btn
             unelevated
