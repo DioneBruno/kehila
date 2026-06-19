@@ -89,7 +89,18 @@
                 v-show="pedido.uuid === pedidoAtivoUuid"
                 class="bg-grey-1 q-mt-sm q-pa-md rounded-borders"
               >
-                <StepCobranca />
+                <div v-if="pedido.status === 'pendente'" class="text-center">
+                  <q-btn
+                    outline
+                    unelevated
+                    no-caps
+                    color="primary"
+                    icon="edit"
+                    label="Continuar pedido"
+                    @click.stop="continuarPedido(pedido.uuid)"
+                  />
+                </div>
+                <StepCobranca v-else />
               </div>
             </q-slide-transition>
           </q-item-section>
@@ -206,6 +217,11 @@ export default defineComponent({
       await $service.buscarPedido(pedidoUuid);
     }
 
+    async function continuarPedido(pedidoUuid: string) {
+      await selecionarPedido(pedidoUuid);
+      data.pedido.tab = "ingressos";
+    }
+
     function novoPedido() {
       $pedidoStore.$patch((state) => {
         state.pedido = { uuid: "", etapa: 1, itens: [], ingressos: [] };
@@ -219,6 +235,7 @@ export default defineComponent({
       pedidoAtivoUuid,
       confirmarCancelamento,
       selecionarPedido,
+      continuarPedido,
       statusInfo,
       formatCurrency,
       novoPedido,
