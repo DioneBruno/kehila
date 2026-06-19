@@ -12,10 +12,6 @@
       <div class="row q-col-gutter-md">
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
-          <!-- <q-tabs dense v-model="tab" align="left" class="text-grey-9" :breakpoint="0">
-            <q-tab no-caps name="ingressos" icon="confirmation_number" label="Incrição" />
-            <q-tab no-caps name="pedidos" icon="list" label="Meus Pedidos" />
-          </q-tabs> -->
           <div class="q-pa-sm">
             <q-btn
               :flat="pedido.tab !== 'ingressos'"
@@ -112,6 +108,9 @@
               </q-stepper>
             </q-tab-panel>
           </q-tab-panels>
+          <q-tab-panel name="pedidos">
+            <Pedidos />
+          </q-tab-panel>
         </div>
 
         <div class="col">
@@ -174,6 +173,9 @@ import { useQuasar } from "quasar";
 import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
 import { usePedidoStore } from "src/stores/pedido";
+import { useAuthStore } from "src/stores/auth";
+
+import Pedidos from "src/pages/portalEventos/pedido/pedidos.vue";
 
 import Cabecalho from "./cabecalho.vue";
 import PedidoResumo from "./resumo.vue";
@@ -184,7 +186,6 @@ import StepSeusDados from "./StepSeusDados.vue";
 import StepResumo from "./StepResumo.vue";
 import StepPagamento from "./StepPagamento.vue";
 import StepCobranca from "./StepCobranca.vue";
-import { useAuthStore } from "src/stores/auth";
 
 const OPCOES_PARCELAS = [
   { label: "1× de R$ 80,00 (sem juros)", value: 1 },
