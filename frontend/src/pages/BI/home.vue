@@ -1,6 +1,5 @@
 <template>
   <q-page class="q-pa-md">
-    {{ metabaseBaseUrl }} dfdsdf
     <div class="row q-col-gutter-sm" style="height: calc(100vh - 78px)">
       <div class="col row full-height">
         <div class="col-12">
@@ -105,7 +104,7 @@
           </q-card>
         </q-scroll-area>
       </div>
-      <div class="col-12 col-md-8 full-height text-center">
+      <div class="col-12 col-md-9 full-height text-center">
         <span class="text-h6 text-grey-7" v-if="!metabaseUrl"
           >Selecione um Dashboard ou Relatório</span
         >
@@ -211,7 +210,8 @@ import { computed } from "vue";
 // import { useAuthMeStore } from "src/stores/auth/me";
 import { BiService } from "./bi.service";
 
-const metabaseBaseUrl = process.env.METABASE_URL;
+const runtimeEnv = (window as any).__env ?? {};
+const metabaseBaseUrl = runtimeEnv.METABASE_URL || process.env.METABASE_URL;
 
 export default defineComponent({
   name: "BiHome",

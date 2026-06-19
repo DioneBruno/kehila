@@ -3,5 +3,5 @@
 window.__env = {
   URL_API: "http://localhost:3007",
   VITE_SOCKET_URL: "http://localhost:4000",
-  METABASE_URL: "http://localhost:3005",
+  METABASE_URL: "https://bi.owlcode.com.br",
 };

@@ -16,7 +16,7 @@ export class BiGatewayMetabase {
       params: {},
       exp: Math.round(Date.now() / 1000) + 600,
     };
-    console.log(payload);
+    // console.log(payload);
     return jwt.sign(payload, METABASE_SECRET_KEY);
   }
 }
