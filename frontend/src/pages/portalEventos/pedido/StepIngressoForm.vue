@@ -467,22 +467,31 @@ export default defineComponent({
       districos: districos.map((districo) => ({ label: districo, value: districo })),
     });
 
+    const dataNascimentoPartes = reactive<Record<string, { dia: string; mes: string; ano: string }>>(
+      {},
+    );
+
+    function getPartesIngresso(ingresso: any) {
+      let partes = dataNascimentoPartes[ingresso.uuid];
+      if (!partes) {
+        const [ano = "", mes = "", dia = ""] = (ingresso.formData.dataNascimento || "").split("-");
+        partes = { dia, mes, ano };
+        dataNascimentoPartes[ingresso.uuid] = partes;
+      }
+      return partes;
+    }
+
     function getDataParte(ingresso: any, parte: "dia" | "mes" | "ano") {
-      const [ano = "", mes = "", dia = ""] = (ingresso.formData.dataNascimento || "").split("-");
-      if (parte === "ano") return ano;
-      if (parte === "mes") return mes;
-      return dia;
+      return getPartesIngresso(ingresso)[parte];
     }
 
     function setDataParte(ingresso: any, parte: "dia" | "mes" | "ano", valor: string) {
-      const [ano = "", mes = "", dia = ""] = (ingresso.formData.dataNascimento || "").split("-");
-      const partes = { ano, mes, dia };
+      const partes = getPartesIngresso(ingresso);
       partes[parte] = valor;
-      const anoFmt = partes.ano ? partes.ano.padStart(4, "0") : "";
-      const mesFmt = partes.mes ? partes.mes.padStart(2, "0") : "";
-      const diaFmt = partes.dia ? partes.dia.padStart(2, "0") : "";
-      ingresso.formData.dataNascimento =
-        anoFmt || mesFmt || diaFmt ? `${anoFmt}-${mesFmt}-${diaFmt}` : "";
+      const dia = partes.dia ? partes.dia.padStart(2, "0") : "";
+      const mes = partes.mes ? partes.mes.padStart(2, "0") : "";
+      const ano = partes.ano ? partes.ano.padStart(4, "0") : "";
+      ingresso.formData.dataNascimento = dia || mes || ano ? `${ano}-${mes}-${dia}` : "";
     }
 
     async function editarFormIngresso(ingresso: any) {
@@ -511,6 +520,7 @@ export default defineComponent({
       ingresso.pessoaUf = primeiro.pessoaUf;
       ingresso.pessoaCidade = primeiro.pessoaCidade;
       ingresso.formData = primeiro.formData;
+      delete dataNascimentoPartes[ingresso.uuid];
     }
 
     return {
