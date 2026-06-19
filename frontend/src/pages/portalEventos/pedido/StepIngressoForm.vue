@@ -157,6 +157,8 @@
                     inputmode="numeric"
                     placeholder="DD"
                     label="Dia"
+                    :rules="[(v) => !v || Number(v) <= 31 || 'Dia inválido']"
+                    lazy-rules
                     :model-value="getDataParte(ingresso, 'dia')"
                     @update:model-value="(v) => setDataParte(ingresso, 'dia', String(v ?? ''))"
                   />
@@ -170,6 +172,8 @@
                     inputmode="numeric"
                     placeholder="MM"
                     label="Mês"
+                    :rules="[(v) => !v || Number(v) <= 12 || 'Mês inválido']"
+                    lazy-rules
                     :model-value="getDataParte(ingresso, 'mes')"
                     @update:model-value="(v) => setDataParte(ingresso, 'mes', String(v ?? ''))"
                   />
