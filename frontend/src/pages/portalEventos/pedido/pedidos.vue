@@ -110,7 +110,7 @@
 </template>
 <script lang="ts">
 import { useQuasar } from "quasar";
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { usePedidoStore } from "src/stores/pedido";
 import { PedidoService } from "./pedido.service";
@@ -140,6 +140,13 @@ export default defineComponent({
     onMounted(() => {
       listarPedidos();
     });
+
+    watch(
+      () => data.user.uuid,
+      (uuid, uuidAnterior) => {
+        if (uuid && !uuidAnterior) void listarPedidos();
+      },
+    );
 
     async function listarPedidos() {
       const eventoUuid = $route.params.eventoUuid as string;
