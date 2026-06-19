@@ -49,12 +49,14 @@
             </q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-icon
-              name="expand_more"
-              color="grey-6"
-              class="toggle-icon"
-              :class="{ 'toggle-icon--open': pagamentosVisiveis[cobranca.uuid] }"
-            />
+            <div class="toggle-icon">
+              <span>Listar parcelas</span>
+              <q-icon
+                name="expand_more"
+                color="grey-6"
+                :class="{ 'toggle-icon--open': pagamentosVisiveis[cobranca.uuid] }"
+              />
+            </div>
           </q-item-section>
         </q-item>
 
@@ -123,8 +125,8 @@ export default defineComponent({
 
     const data = reactive({
       pedido: computed(() => $pedidoStore.$state.pedido),
-      cobrancas: computed(() => ($pedidoStore.$state.pedido as any)?.cobrancas ?? []),
-      pagamentosVisiveis: {} as Record<string, boolean>,
+      cobrancas: computed(() => $pedidoStore.$state.pedido?.cobrancas ?? []),
+      pagamentosVisiveis: {},
     });
 
     function togglePagamentos(uuid: string) {

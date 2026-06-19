@@ -21,7 +21,6 @@
       <q-list separator dense v-if="pedidos.length > 0">
         <q-item
           clickable
-          v-ripple
           dense
           v-for="pedido in pedidos"
           :key="pedido.uuid"
@@ -82,6 +81,15 @@
                 @click.stop="confirmarCancelamento(pedido.uuid)"
               />
             </div>
+
+            <q-slide-transition>
+              <div
+                v-show="pedido.uuid === pedidoAtivoUuid"
+                class="bg-grey-1 q-mt-sm q-pa-md rounded-borders"
+              >
+                <StepCobranca />
+              </div>
+            </q-slide-transition>
           </q-item-section>
         </q-item>
       </q-list>
@@ -109,10 +117,11 @@ import { PedidoService } from "./pedido.service";
 import { useRoute } from "vue-router";
 import { ApiDate } from "src/shared/apiDate.service";
 import LoginCadastro from "./LoginCadastro.vue";
+import StepCobranca from "./StepCobranca.vue";
 
 export default defineComponent({
   name: "PedidoPedidos",
-  components: { LoginCadastro },
+  components: { LoginCadastro, StepCobranca },
   setup() {
     const $authStore = useAuthStore();
     const $pedidoStore = usePedidoStore();
