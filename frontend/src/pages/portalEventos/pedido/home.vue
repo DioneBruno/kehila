@@ -12,77 +12,106 @@
       <div class="row q-col-gutter-md">
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
-          <q-stepper
-            flat
-            bordered
-            vertical
-            animated
-            v-model="pedido.etapa"
-            color="primary"
-            class="q-pa-none"
-          >
-            <q-step :name="1" title="Ingressos" icon="confirmation_number" :done="pedido.etapa > 1">
-              <StepIngressos
-                :lotes="lotes"
-                :quantidades="quantidades"
-                :total-ingressos="totalIngressos"
-                @aumentar="aumentar"
-                @diminuir="diminuir"
-                @next="pedido.etapa = 2"
-              />
-            </q-step>
+          <!-- <q-tabs dense v-model="tab" align="left" class="text-grey-9" :breakpoint="0">
+            <q-tab no-caps name="ingressos" icon="confirmation_number" label="Incrição" />
+            <q-tab no-caps name="pedidos" icon="list" label="Meus Pedidos" />
+          </q-tabs> -->
+          <div class="q-pa-sm">
+            <q-btn
+              :flat="tab !== 'ingressos'"
+              color="grey-8"
+              label="Incrição"
+              icon="confirmation_number"
+              @click="tab = 'ingressos'"
+            />
+            <q-btn
+              :flat="tab !== 'pedidos'"
+              color="grey-8"
+              label="Meus Pedidos"
+              icon="list"
+              @click="tab = 'pedidos'"
+            />
+          </div>
+          <q-tab-panels v-model="tab" animated class="">
+            <q-tab-panel name="ingressos" class="q-pa-none">
+              <q-stepper
+                flat
+                bordered
+                vertical
+                animated
+                v-model="pedido.etapa"
+                color="primary"
+                class="q-pa-none"
+              >
+                <q-step
+                  :name="1"
+                  title="Ingressos"
+                  icon="confirmation_number"
+                  :done="pedido.etapa > 1"
+                >
+                  <StepIngressos
+                    :lotes="lotes"
+                    :quantidades="quantidades"
+                    :total-ingressos="totalIngressos"
+                    @aumentar="aumentar"
+                    @diminuir="diminuir"
+                    @next="pedido.etapa = 2"
+                  />
+                </q-step>
 
-            <q-step :name="2" title="Seus Dados" icon="person" :done="pedido.etapa > 2">
-              <StepSeusDados
-                @update:form="Object.assign(form, $event)"
-                @prev="pedido.etapa = 1"
-                @next="pedido.etapa = 3"
-              />
-            </q-step>
+                <q-step :name="2" title="Seus Dados" icon="person" :done="pedido.etapa > 2">
+                  <StepSeusDados
+                    @update:form="Object.assign(form, $event)"
+                    @prev="pedido.etapa = 1"
+                    @next="pedido.etapa = 3"
+                  />
+                </q-step>
 
-            <q-step :name="3" title="Resumo" icon="receipt_long" :done="pedido.etapa > 3">
-              <StepResumo
-                :itens="itensSelecionados"
-                :total-valor="totalValor"
-                @prev="pedido.etapa = 2"
-                @next="pedido.etapa = 4"
-              />
-            </q-step>
+                <q-step :name="3" title="Resumo" icon="receipt_long" :done="pedido.etapa > 3">
+                  <StepResumo
+                    :itens="itensSelecionados"
+                    :total-valor="totalValor"
+                    @prev="pedido.etapa = 2"
+                    @next="pedido.etapa = 4"
+                  />
+                </q-step>
 
-            <q-step :name="4" title="Formulário" icon="assignment" :done="pedido.etapa > 4">
-              <StepIngressoForm
-                :itens="itensSelecionados"
-                :total-valor="totalValor"
-                @prev="pedido.etapa = 3"
-                @next="pedido.etapa = 5"
-              />
-            </q-step>
+                <q-step :name="4" title="Formulário" icon="assignment" :done="pedido.etapa > 4">
+                  <StepIngressoForm
+                    :itens="itensSelecionados"
+                    :total-valor="totalValor"
+                    @prev="pedido.etapa = 3"
+                    @next="pedido.etapa = 5"
+                  />
+                </q-step>
 
-            <q-step :name="5" title="Gerando Pagamento" icon="payment" :done="pedido.etapa > 5">
-              <StepPagamento
-                :forma-pagamento="formaPagamento"
-                :cartao="cartao"
-                :opcoes-parcelas="opcoesParcelas"
-                @update:forma-pagamento="formaPagamento = $event"
-                @update:cartao="Object.assign(cartao, $event)"
-                @prev="pedido.etapa = 4"
-                @next="pedido.etapa = 6"
-                @confirmar="confirmar"
-              />
-            </q-step>
+                <q-step :name="5" title="Gerando Pagamento" icon="payment" :done="pedido.etapa > 5">
+                  <StepPagamento
+                    :forma-pagamento="formaPagamento"
+                    :cartao="cartao"
+                    :opcoes-parcelas="opcoesParcelas"
+                    @update:forma-pagamento="formaPagamento = $event"
+                    @update:cartao="Object.assign(cartao, $event)"
+                    @prev="pedido.etapa = 4"
+                    @next="pedido.etapa = 6"
+                    @confirmar="confirmar"
+                  />
+                </q-step>
 
-            <q-step :name="6" title="Aguardando pagamento" icon="currency_exchange">
-              <StepCobranca
-                :forma-pagamento="formaPagamento"
-                :cartao="cartao"
-                :opcoes-parcelas="opcoesParcelas"
-                @update:forma-pagamento="formaPagamento = $event"
-                @update:cartao="Object.assign(cartao, $event)"
-                @prev="pedido.etapa = 5"
-                @confirmar="confirmar"
-              />
-            </q-step>
-          </q-stepper>
+                <q-step :name="6" title="Aguardando pagamento" icon="currency_exchange">
+                  <StepCobranca
+                    :forma-pagamento="formaPagamento"
+                    :cartao="cartao"
+                    :opcoes-parcelas="opcoesParcelas"
+                    @update:forma-pagamento="formaPagamento = $event"
+                    @update:cartao="Object.assign(cartao, $event)"
+                    @prev="pedido.etapa = 5"
+                    @confirmar="confirmar"
+                  />
+                </q-step>
+              </q-stepper>
+            </q-tab-panel>
+          </q-tab-panels>
         </div>
 
         <div class="col">
@@ -184,6 +213,7 @@ export default defineComponent({
     const $service = new PedidoService();
 
     const data = reactive({
+      tab: "ingressos",
       resumoAberto: false,
       evento: computed(() => $pedidoStore.$state.evento),
       pedido: computed(() => $pedidoStore.$state.pedido),
