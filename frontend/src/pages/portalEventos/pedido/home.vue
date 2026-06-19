@@ -18,21 +18,21 @@
           </q-tabs> -->
           <div class="q-pa-sm">
             <q-btn
-              :flat="tab !== 'ingressos'"
+              :flat="pedido.tab !== 'ingressos'"
               color="grey-8"
               label="Incrição"
               icon="confirmation_number"
-              @click="tab = 'ingressos'"
+              @click="pedido.tab = 'ingressos'"
             />
             <q-btn
-              :flat="tab !== 'pedidos'"
+              :flat="pedido.tab !== 'pedidos'"
               color="grey-8"
               label="Meus Pedidos"
               icon="list"
-              @click="tab = 'pedidos'"
+              @click="pedido.tab = 'pedidos'"
             />
           </div>
-          <q-tab-panels v-model="tab" animated class="">
+          <q-tab-panels v-model="pedido.tab" animated class="">
             <q-tab-panel name="ingressos" class="q-pa-none">
               <q-stepper
                 flat

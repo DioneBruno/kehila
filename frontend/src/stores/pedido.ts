@@ -7,6 +7,7 @@ export const usePedidoStore = defineStore("pedidoStore", {
     } as any,
     pedido: {
       uuid: "",
+      tab: "ingressos",
       etapa: 1,
       itens: [] as {
         tipoIngressoUuid: string;
