@@ -58,12 +58,16 @@
                     size="sm"
                     icon="add"
                     color="primary"
-                    :disable="tipo.quantidade > 0 && (quantidades[tipo.uuid] ?? 0) >= tipo.disponivel"
+                    :disable="
+                      tipo.quantidade > 0 && (quantidades[tipo.uuid] ?? 0) >= tipo.disponivel
+                    "
                     @click="aumentar(tipo)"
                   />
                 </div>
                 <div v-if="tipo.quantidade > 0" class="text-caption text-grey-7">
-                  {{ tipo.disponivel }} disponíve{{ tipo.disponivel === 1 ? "l" : "is" }}
+                  {{ tipo.disponivel / tipo.gerarQuantidadeIngressos }} disponíve{{
+                    tipo.disponivel === 1 ? "l" : "is"
+                  }}
                 </div>
               </div>
             </div>
