@@ -211,7 +211,6 @@ export default defineComponent({
     const $service = new PedidoService();
 
     const data = reactive({
-      tab: "ingressos",
       resumoAberto: false,
       evento: computed(() => $pedidoStore.$state.evento),
       pedido: computed(() => $pedidoStore.$state.pedido),
@@ -232,6 +231,8 @@ export default defineComponent({
     onMounted(async () => {
       await verificaUsuario();
       await buscaEvento();
+
+      if ($route.query.tab == "pedidos") data.pedido.tab = "pedidos";
     });
 
     async function verificaUsuario() {
