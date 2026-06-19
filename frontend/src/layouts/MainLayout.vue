@@ -74,6 +74,7 @@ import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 const MENU_ITEMS = [
   { label: "Início", icon: "home", route: "home" },
   { label: "Eventos", icon: "event", route: "eventos" },
+  { label: "BI", icon: "dashboard", route: "bi" },
   { label: "FINANCEIRO", type: "section" },
   { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
   { label: "EMPRESA", type: "section" },
