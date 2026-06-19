@@ -20,11 +20,11 @@
 
       <q-separator class="q-mb-md" />
 
-      <q-list separator dense v-if="pedidos.length > 0">
+      <q-list separator v-if="pedidos.length > 0">
         <q-item
           clickable
           dense
-          v-for="pedido in pedidos"
+          v-for="(pedido, i) in pedidos"
           :key="pedido.uuid"
           class="q-py-md"
           :active="pedido.uuid === pedidoAtivoUuid"
@@ -32,15 +32,18 @@
           @click="selecionarPedido(pedido.uuid)"
         >
           <q-item-section side>
-            <q-icon
+            <!-- <q-icon
               name="circle"
               size="10px"
               :color="`${pedido.uuid === pedidoAtivoUuid ? `grey-10` : 'grey-3'}`"
-            />
+            /> -->
+            <span>
+              {{ i + 1 }}
+            </span>
           </q-item-section>
           <q-item-section>
             <div class="row items-center justify-between q-mb-xs">
-              <q-chip
+              <!-- <q-chip
                 square
                 size="sm"
                 :color="statusInfo(pedido.status).color"
@@ -48,7 +51,8 @@
                 class="text-capitalize q-ma-none"
               >
                 {{ statusInfo(pedido.status).label }}
-              </q-chip>
+              </q-chip> -->
+              <q-space />
               <span class="text-weight-bold text-primary">
                 {{ formatCurrency(pedido.valorLiquido) }}
               </span>
@@ -71,6 +75,38 @@
               }}
             </q-item-label>
 
+            <div v-if="pedido.status === 'pagamento_gerado'" class="text-right">
+              <q-btn
+                flat
+                unelevated
+                no-caps
+                color="green-7"
+                icon="check"
+                label="Pedido confirmado !"
+              />
+            </div>
+            <div v-if="pedido.status === 'pagamento_gerado'" class="text-right">
+              <q-btn flat unelevated no-caps color="grey-7" icon="info" label="Mais informações" />
+            </div>
+            <q-slide-transition v-if="pedido.status === 'pagamento_gerado'">
+              <div
+                v-show="pedido.uuid === pedidoAtivoUuid"
+                class="bg-grey-1 q-mt-sm q-pa-md rounded-borders"
+              >
+                <StepCobranca />
+              </div>
+            </q-slide-transition>
+            <div v-if="pedido.status === 'pendente'" class="text-center">
+              <q-btn
+                outline
+                unelevated
+                no-caps
+                color="primary"
+                icon="edit"
+                label="Continuar pedido"
+                @click.stop="continuarPedido(pedido.uuid)"
+              />
+            </div>
             <div v-if="pedido.status === 'pendente'" class="q-mt-sm text-right">
               <q-btn
                 flat
@@ -83,26 +119,6 @@
                 @click.stop="confirmarCancelamento(pedido.uuid)"
               />
             </div>
-
-            <q-slide-transition>
-              <div
-                v-show="pedido.uuid === pedidoAtivoUuid"
-                class="bg-grey-1 q-mt-sm q-pa-md rounded-borders"
-              >
-                <div v-if="pedido.status === 'pendente'" class="text-center">
-                  <q-btn
-                    outline
-                    unelevated
-                    no-caps
-                    color="primary"
-                    icon="edit"
-                    label="Continuar pedido"
-                    @click.stop="continuarPedido(pedido.uuid)"
-                  />
-                </div>
-                <StepCobranca v-else />
-              </div>
-            </q-slide-transition>
           </q-item-section>
         </q-item>
       </q-list>
