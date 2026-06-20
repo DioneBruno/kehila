@@ -27,13 +27,13 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
     await dataSource.destroy();
   });
 
-  test("Deve alterar status do pagamento caso gateway identificar como RECEIVED", async () => {
+  test("Deve alterar status do pagamento caso gateway identificar como pago", async () => {
     const pagamentoUuid = "407cb594-4574-4824-acc3-75a68ece3155";
     const cobrancaUuid = "407cb594-4574-4824-acc3-75a68ece3155";
     const contaBancariaUuid = "3fba0036-f55d-4cd1-a853-6d5f2bedf792";
 
     const verificaPagamentoStub = stub(gateway, "verificarPagamento").resolves({
-      status: "RECEIVED",
+      status: "pago",
       dataPagamento: "2026-06-18",
       dataCreditado: "2026-06-19",
       valorPago: 101.5,
@@ -54,7 +54,7 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
     await usecase.execute(input);
 
     const [pagamentoModel] = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE uuid = '${pagamentoUuid}'`);
-    expect(pagamentoModel.status).toBe("RECEIVED");
+    expect(pagamentoModel.status).toBe("pago");
     expect(ApiDate.format(pagamentoModel.updated_at, "YYYY-MM-DD")).toBe("2026-06-20");
     expect(ApiDate.format(pagamentoModel.pago_em, "YYYY-MM-DD")).toBe("2026-06-18");
     expect(pagamentoModel.valor_pago).toBe("101.50");

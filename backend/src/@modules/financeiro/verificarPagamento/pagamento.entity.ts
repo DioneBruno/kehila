@@ -30,7 +30,7 @@ export class PagamentoEntity {
   }
 
   receber(dataPagamento: string, valorPago: number): void {
-    this.props.status = "RECEIVED";
+    this.props.status = "pago";
     this.props.pagoEm = dataPagamento;
     this.props.valorPago = valorPago;
   }
