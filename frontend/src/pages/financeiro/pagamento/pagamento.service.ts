@@ -31,4 +31,16 @@ export class PagamentoService {
       this.$q.loading.hide();
     }
   }
+
+  async verificarPagamento(uuid: string) {
+    try {
+      this.$q.loading.show();
+      await this.$http.verificarPagamento(uuid);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
 }

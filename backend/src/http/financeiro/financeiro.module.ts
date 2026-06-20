@@ -27,6 +27,10 @@ import { PagamentosController } from "./pagamentos.controller";
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
 import { ListaPagamentoRepository } from "src/@modules/financeiro/listaPagamento/listaPagamentoRepository";
 
+import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
+import { VerificarPagamentoRepostiory } from "src/@modules/financeiro/verificarPagamento/verificarPagamentoRepository";
+import { VerificarPagamentoGateway } from "src/@modules/financeiro/verificarPagamento/verificarPagamentoGateway";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -45,6 +49,10 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(DeletarContaBancariaUsecase, (hub) => new DeletarContaBancariaUsecase(new DeletarContaBancariaRepository(hub))),
     makeProvider(ListarCobrancaUsecase, (hub) => new ListarCobrancaUsecase(new ListarCobrancaRepository(hub))),
     makeProvider(ListaPagamentoUsecase, (hub) => new ListaPagamentoUsecase(new ListaPagamentoRepository(hub))),
+    makeProvider(
+      VerificarPagamentoUsecase,
+      (hub) => new VerificarPagamentoUsecase(new VerificarPagamentoRepostiory(hub), new VerificarPagamentoGateway(hub)),
+    ),
   ],
 })
 export class FinanceiroModule implements NestModule {

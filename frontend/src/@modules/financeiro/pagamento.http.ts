@@ -12,4 +12,8 @@ export class PagamentoHttp {
     const qs = query.toString();
     return this.http.get(`pagamentos${qs ? `?${qs}` : ""}`);
   }
+
+  async verificarPagamento(uuid: string) {
+    return this.http.post(`pagamentos/${uuid}/verificarPagamento`, {});
+  }
 }

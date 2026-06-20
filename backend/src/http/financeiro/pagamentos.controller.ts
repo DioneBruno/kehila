@@ -1,10 +1,14 @@
-import { Controller, Get, Query, Req, Res } from "@nestjs/common";
+import { Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
+import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
 
 @Controller("pagamentos")
 export class PagamentosController {
-  constructor(readonly listaPagamentoUsecase: ListaPagamentoUsecase) {}
+  constructor(
+    readonly listaPagamentoUsecase: ListaPagamentoUsecase,
+    readonly verificarPagamentoUsecase: VerificarPagamentoUsecase,
+  ) {}
 
   @Get()
   async listar(@Req() req: Request | any, @Query() query: any, @Res() res: Response) {
@@ -20,5 +24,14 @@ export class PagamentosController {
       data: resultado.dados,
       meta: { total: resultado.total },
     });
+  }
+
+  @Post(":uuid/verificarPagamento")
+  async verificarPagamento(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    await this.verificarPagamentoUsecase.execute({
+      companyUuid: req.companyUuid,
+      pagamentoUuid: uuid,
+    });
+    return res.status(200).json({ success: true });
   }
 }

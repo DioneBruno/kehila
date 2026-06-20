@@ -118,6 +118,17 @@
                 >
                   <q-tooltip>Copiar código Pix</q-tooltip>
                 </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  size="sm"
+                  icon="sync"
+                  color="primary"
+                  @click="verificarPagamento(pagamento.uuid)"
+                >
+                  <q-tooltip>Verificar pagamento</q-tooltip>
+                </q-btn>
               </div>
             </td>
           </tr>
@@ -242,6 +253,16 @@ export default defineComponent({
       Notify.create({ type: "positive", message: "Código Pix copiado", position: "top" });
     }
 
+    async function verificarPagamento(uuid: string) {
+      const ok = await $service.verificarPagamento(uuid);
+      if (ok) {
+        Notify.create({ type: "positive", message: "Pagamento verificado", position: "top" });
+        await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      } else {
+        Notify.create({ type: "negative", message: "Não foi possível verificar o pagamento", position: "top" });
+      }
+    }
+
     onMounted(() => void carregar());
 
     return {
@@ -256,6 +277,7 @@ export default defineComponent({
       formatarData,
       formatarDataSimples,
       copiarPix,
+      verificarPagamento,
     };
   },
 });
