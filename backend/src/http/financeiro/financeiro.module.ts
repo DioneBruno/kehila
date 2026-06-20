@@ -30,6 +30,7 @@ import { ListaPagamentoRepository } from "src/@modules/financeiro/listaPagamento
 import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
 import { VerificarPagamentoRepostiory } from "src/@modules/financeiro/verificarPagamento/verificarPagamentoRepository";
 import { VerificarPagamentoGateway } from "src/@modules/financeiro/verificarPagamento/verificarPagamentoGateway";
+import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -53,6 +54,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
       VerificarPagamentoUsecase,
       (hub) => new VerificarPagamentoUsecase(new VerificarPagamentoRepostiory(hub), new VerificarPagamentoGateway(hub)),
     ),
+    makeProvider(FinanceiroQuery, (hub) => new FinanceiroQuery(hub)),
   ],
 })
 export class FinanceiroModule implements NestModule {
