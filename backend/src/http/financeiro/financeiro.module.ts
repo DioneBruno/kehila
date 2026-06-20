@@ -23,6 +23,7 @@ import { DeletarContaBancariaRepository } from "src/@modules/financeiro/contaBan
 import { ListarCobrancaUsecase } from "src/@modules/financeiro/listarCobranca/listarCobranca.usecase";
 import { ListarCobrancaRepository } from "src/@modules/financeiro/listarCobranca/listarCobrancaRepository";
 import { PagamentosController } from "./pagamentos.controller";
+import { CartaoCreditoController } from "./cartaoCredito.controller";
 
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
 import { ListaPagamentoRepository } from "src/@modules/financeiro/listaPagamento/listaPagamentoRepository";
@@ -31,6 +32,8 @@ import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPaga
 import { VerificarPagamentoRepostiory } from "src/@modules/financeiro/verificarPagamento/verificarPagamentoRepository";
 import { VerificarPagamentoGateway } from "src/@modules/financeiro/verificarPagamento/verificarPagamentoGateway";
 import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
+import { IncluirCartaoCreditoUsecase } from "src/@modules/financeiro/incluirCartaoCredito/incluirCartaoCredito.usecase";
+import { IncluirCartaoCreditoRepository } from "src/@modules/financeiro/incluirCartaoCredito/incluirCartaoCreditoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -41,8 +44,9 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 }
 
 @Module({
-  controllers: [ContasBancariasController, CobrancasController, PagamentosController],
+  controllers: [ContasBancariasController, CobrancasController, PagamentosController, CartaoCreditoController],
   providers: [
+    makeProvider(IncluirCartaoCreditoUsecase, (hub) => new IncluirCartaoCreditoUsecase(new IncluirCartaoCreditoRepository(hub))),
     makeProvider(CriarContaBancariaUsecase, (hub) => new CriarContaBancariaUsecase(new CriarContaBancariaRepository(hub))),
     makeProvider(ListarContasBancariasUsecase, (hub) => new ListarContasBancariasUsecase(new ListarContasBancariasRepository(hub))),
     makeProvider(DetalharContaBancariaUsecase, (hub) => new DetalharContaBancariaUsecase(new DetalharContaBancariaRepository(hub))),
@@ -59,6 +63,6 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class FinanceiroModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(ContasBancariasController, CobrancasController, PagamentosController);
+    consumer.apply(JwtAuthMiddleware).forRoutes(ContasBancariasController, CobrancasController, PagamentosController, CartaoCreditoController);
   }
 }

@@ -66,11 +66,7 @@ export class GerarCobrancaGatewayAsaas {
       dueDate: ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD"),
       description: `Breve descrição para a cobrança`,
       installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
-      // installmentValue: cobranca.valor(), // Valor de cada parcela (somente no caso de cobrança parcelada). Envie este campo em caso de querer definir o valor de cada parcela.
       totalValue: cobranca.valor(), // Informe o valor total de uma cobrança que será parcelada (somente no caso de cobrança parcelada). Caso enviado este campo o installmentValue não é necessário, o cálculo por parcela será automático.
-      // daysAfterDueDateToRegistrationCancellation: 1, // Dias após o vencimento para cancelamento do registro (somente para boleto bancário)
-      // fine: { type: "PERCENTAGE", value: 2 }, // Informações de multa para pagamento após o vencimento
-      // callback: { successUrl: "", autoRedirect: true }, // Informações de redirecionamento automático após pagamento do link de pagamento
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
     const responseParcelas = await this.buscarParcelas(cobranca, responseCobranca?.data?.installment);
@@ -99,11 +95,7 @@ export class GerarCobrancaGatewayAsaas {
       dueDate: ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD"),
       description: `Breve descrição para a cobrança`,
       installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
-      // installmentValue: cobranca.valor(), // Valor de cada parcela (somente no caso de cobrança parcelada). Envie este campo em caso de querer definir o valor de cada parcela.
       totalValue: cobranca.valor(), // Informe o valor total de uma cobrança que será parcelada (somente no caso de cobrança parcelada). Caso enviado este campo o installmentValue não é necessário, o cálculo por parcela será automático.
-      // daysAfterDueDateToRegistrationCancellation: 1, // Dias após o vencimento para cancelamento do registro (somente para boleto bancário)
-      // fine: { type: "PERCENTAGE", value: 2 }, // Informações de multa para pagamento após o vencimento
-      // callback: { successUrl: "", autoRedirect: true }, // Informações de redirecionamento automático após pagamento do link de pagamento
       creditCard: {
         holderName: cobranca.cartaoCredito()?.nomeNoCartao,
         number: cobranca.cartaoCredito()?.numeroCartao,
