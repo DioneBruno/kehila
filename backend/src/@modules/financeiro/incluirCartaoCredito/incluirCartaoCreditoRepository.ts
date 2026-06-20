@@ -1,5 +1,6 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { ContaBancariaEntity } from "./contabancaria.entity";
+import { IncluirCartaoCreditoGateway } from "./incluirCartaoCreditoGateway";
 
 export class IncluirCartaoCreditoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -18,5 +19,10 @@ export class IncluirCartaoCreditoRepository {
       ambiente: contaBancariaModel.ambiente,
     });
     return contaBancaria;
+  }
+
+  buscarGateway(contaBancaria: ContaBancariaEntity): IncluirCartaoCreditoGateway {
+    const gateway = new IncluirCartaoCreditoGateway(this.connectionHub);
+    return gateway;
   }
 }

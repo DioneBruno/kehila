@@ -19,6 +19,7 @@ export class IncluirCartaoCreditoUsecase {
   async execute(input: IncluirCartaoCreditoInput) {
     const contaBancaria = await this.repo.buscarContaBancaria(input.companyUuid);
     if (!contaBancaria) throw new ApiError("Conta bancária não encontrada");
-    const usuario = await this.repo.buscarUsuario(input.userUuid);
+    const gateway = this.repo.buscarGateway(contaBancaria);
+    const usuario = this.repo.buscarUsuario(input.userUuid);
   }
 }
