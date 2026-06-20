@@ -54,7 +54,7 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
     const [cartaoModel] = await dataSource.query(`SELECT * FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
     expect(cartaoModel.user_uuid).toBe(userUuid);
     expect(cartaoModel.conta_bancaria_uuid).toBe(contaBancariaUuid);
-    expect(cartaoModel.numero).toBe(contaBancariaUuid);
+    expect(cartaoModel.numero).toBe("numeroCartao");
     expect(cartaoModel.bandeira).toBe("bandeira");
     expect(cartaoModel.token).toBe("token");
 

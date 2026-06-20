@@ -12,4 +12,8 @@ type UsuarioProps = {
 
 export class UsuarioEntity {
   constructor(readonly props: UsuarioProps) {}
+
+  uuid(): string {
+    return this.props.uuid;
+  }
 }
