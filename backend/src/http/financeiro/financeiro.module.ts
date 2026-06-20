@@ -22,6 +22,10 @@ import { DeletarContaBancariaRepository } from "src/@modules/financeiro/contaBan
 
 import { ListarCobrancaUsecase } from "src/@modules/financeiro/listarCobranca/listarCobranca.usecase";
 import { ListarCobrancaRepository } from "src/@modules/financeiro/listarCobranca/listarCobrancaRepository";
+import { PagamentosController } from "./pagamentos.controller";
+
+import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
+import { ListaPagamentoRepository } from "src/@modules/financeiro/listaPagamento/listaPagamentoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -32,7 +36,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 }
 
 @Module({
-  controllers: [ContasBancariasController, CobrancasController],
+  controllers: [ContasBancariasController, CobrancasController, PagamentosController],
   providers: [
     makeProvider(CriarContaBancariaUsecase, (hub) => new CriarContaBancariaUsecase(new CriarContaBancariaRepository(hub))),
     makeProvider(ListarContasBancariasUsecase, (hub) => new ListarContasBancariasUsecase(new ListarContasBancariasRepository(hub))),
@@ -40,10 +44,11 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(EditarContaBancariaUsecase, (hub) => new EditarContaBancariaUsecase(new EditarContaBancariaRepository(hub))),
     makeProvider(DeletarContaBancariaUsecase, (hub) => new DeletarContaBancariaUsecase(new DeletarContaBancariaRepository(hub))),
     makeProvider(ListarCobrancaUsecase, (hub) => new ListarCobrancaUsecase(new ListarCobrancaRepository(hub))),
+    makeProvider(ListaPagamentoUsecase, (hub) => new ListaPagamentoUsecase(new ListaPagamentoRepository(hub))),
   ],
 })
 export class FinanceiroModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(ContasBancariasController, CobrancasController);
+    consumer.apply(JwtAuthMiddleware).forRoutes(ContasBancariasController, CobrancasController, PagamentosController);
   }
 }
