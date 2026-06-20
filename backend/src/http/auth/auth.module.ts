@@ -10,11 +10,19 @@ import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 import { GerarTokenAuthenticationUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/gerarTokenAuthentication.usecase";
 import { GenerateTokenAuthenticationRandomCodeRepository } from "src/@modules/auth/generateTokenAuthenticationRandomCode/generateTokenAuthenticationRandomCodeRepository";
 import { EnviarCodigoValidadorUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/enviarCodigoValidador.usecase";
+import { UsuarioQuery } from "src/@modules/usuario/usuario.query";
 
 @Module({
   imports: [],
   controllers: [AuthController, UserController],
   providers: [
+    {
+      provide: UsuarioQuery,
+      useFactory: (connectionHub: ConnectionHub) => {
+        return new UsuarioQuery(connectionHub);
+      },
+      inject: [ConnectionHub],
+    },
     {
       provide: TokenGenerateUseCase,
       useFactory: (connectionHub: ConnectionHub) => {
