@@ -77,6 +77,7 @@ const MENU_ITEMS = [
   { label: "BI", icon: "dashboard", route: "bi" },
   { label: "FINANCEIRO", type: "section" },
   { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
+  { label: "Cobranças", icon: "receipt_long", route: "financeiro.cobrancas" },
   { label: "EMPRESA", type: "section" },
   { label: "Minha Empresa", icon: "business", route: "empresa" },
   { label: "Usuários", icon: "group", route: "usuarios" },
