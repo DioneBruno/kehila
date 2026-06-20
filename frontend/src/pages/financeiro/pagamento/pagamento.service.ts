@@ -43,4 +43,16 @@ export class PagamentoService {
       this.$q.loading.hide();
     }
   }
+
+  async verificarPagamentoPeriodo(dataInicial: string, dataFinal: string) {
+    try {
+      this.$q.loading.show();
+      await this.$http.verificarPagamentoPeriodo(dataInicial, dataFinal);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
 }

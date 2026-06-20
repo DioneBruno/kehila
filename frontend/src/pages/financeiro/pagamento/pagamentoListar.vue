@@ -6,7 +6,87 @@
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Pagamentos</p>
         <p class="text-caption text-grey-6 q-ma-none">Acompanhe os pagamentos gerados</p>
       </div>
+      <div class="col-auto">
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          icon="sync"
+          label="Verificar Pagamentos Período"
+          @click="abrirDialogPeriodo"
+        />
+      </div>
     </div>
+
+    <!-- Dialog: Verificar Pagamentos Período -->
+    <q-dialog v-model="dialogPeriodo.aberto" persistent>
+      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+        <q-card-section class="row items-center">
+          <span class="text-h6">Verificar Pagamentos Período</span>
+          <q-space />
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <q-form @submit.prevent="verificarPagamentoPeriodo" greedy>
+            <div class="row q-col-gutter-md">
+              <div class="col-12">
+                <q-input
+                  v-model="dialogPeriodo.dataInicial"
+                  label="Data inicial"
+                  filled
+                  readonly
+                  clearable
+                  :rules="[(val) => !!val || 'Campo obrigatório']"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy cover>
+                        <q-date
+                          v-model="dialogPeriodo.dataInicial"
+                          mask="YYYY-MM-DD"
+                          color="primary"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn v-close-popup label="OK" color="primary" flat />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12">
+                <q-input
+                  v-model="dialogPeriodo.dataFinal"
+                  label="Data final"
+                  filled
+                  readonly
+                  clearable
+                  :rules="[(val) => !!val || 'Campo obrigatório']"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy cover>
+                        <q-date v-model="dialogPeriodo.dataFinal" mask="YYYY-MM-DD" color="primary">
+                          <div class="row items-center justify-end">
+                            <q-btn v-close-popup label="OK" color="primary" flat />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+            </div>
+            <div class="row justify-end q-gutter-sm q-mt-md">
+              <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+              <q-btn unelevated type="submit" label="Verificar" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
 
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
@@ -75,7 +155,10 @@
             <td class="text-right">{{ formatarMoeda(pagamento.valor) }}</td>
             <td class="text-right">{{ formatarMoeda(pagamento.valorPago) }}</td>
             <td>
-              <q-badge :color="statusCor(pagamento.status)" :label="statusLabel(pagamento.status)" />
+              <q-badge
+                :color="statusCor(pagamento.status)"
+                :label="statusLabel(pagamento.status)"
+              />
             </td>
             <td>{{ formatarData(pagamento.createdAt) }}</td>
             <td>
@@ -185,6 +268,11 @@ export default defineComponent({
         rowsPerPage: 20,
         rowsNumber: 0,
       },
+      dialogPeriodo: {
+        aberto: false,
+        dataInicial: "",
+        dataFinal: "",
+      },
     });
 
     const totalPaginas = computed(() =>
@@ -259,7 +347,37 @@ export default defineComponent({
         Notify.create({ type: "positive", message: "Pagamento verificado", position: "top" });
         await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
       } else {
-        Notify.create({ type: "negative", message: "Não foi possível verificar o pagamento", position: "top" });
+        Notify.create({
+          type: "negative",
+          message: "Não foi possível verificar o pagamento",
+          position: "top",
+        });
+      }
+    }
+
+    function abrirDialogPeriodo() {
+      data.dialogPeriodo.dataInicial = "";
+      data.dialogPeriodo.dataFinal = "";
+      data.dialogPeriodo.aberto = true;
+    }
+
+    async function verificarPagamentoPeriodo() {
+      const { dataInicial, dataFinal } = data.dialogPeriodo;
+      const ok = await $service.verificarPagamentoPeriodo(dataInicial, dataFinal);
+      if (ok) {
+        data.dialogPeriodo.aberto = false;
+        Notify.create({
+          type: "positive",
+          message: "Pagamentos do período verificados",
+          position: "top",
+        });
+        await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      } else {
+        Notify.create({
+          type: "negative",
+          message: "Não foi possível verificar os pagamentos do período",
+          position: "top",
+        });
       }
     }
 
@@ -278,6 +396,8 @@ export default defineComponent({
       formatarDataSimples,
       copiarPix,
       verificarPagamento,
+      abrirDialogPeriodo,
+      verificarPagamentoPeriodo,
     };
   },
 });

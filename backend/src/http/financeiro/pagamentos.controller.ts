@@ -37,8 +37,8 @@ export class PagamentosController {
     return res.status(200).json({ success: true });
   }
 
-  @Post(":uuid/verificarPagamentoPeriodo")
-  async verificarPagamentoPeriodo(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+  @Post("verificarPagamentoPeriodo")
+  async verificarPagamentoPeriodo(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const { dataInicial, dataFinal } = body;
     await this.financeiroQuery.verificarPagamentoPeriodo(req.companyUuid, dataInicial, dataFinal);
     return res.status(200).json({ success: true });

@@ -16,4 +16,8 @@ export class PagamentoHttp {
   async verificarPagamento(uuid: string) {
     return this.http.post(`pagamentos/${uuid}/verificarPagamento`, {});
   }
+
+  async verificarPagamentoPeriodo(dataInicial: string, dataFinal: string) {
+    return this.http.post("pagamentos/verificarPagamentoPeriodo", { dataInicial, dataFinal });
+  }
 }
