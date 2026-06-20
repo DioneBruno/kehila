@@ -7,6 +7,8 @@ type UsuarioProps = {
   endereco: string;
   enderecoNumero: string;
   bairro: string;
+  cidade: string;
+  uf: string;
   telefone: string;
 };
 
@@ -15,5 +17,23 @@ export class UsuarioEntity {
 
   uuid(): string {
     return this.props.uuid;
+  }
+  telefone(): string {
+    return this.props.telefone;
+  }
+  cep(): string {
+    return this.props.cep;
+  }
+  endereco(): string {
+    return this.props.endereco;
+  }
+  bairro(): string {
+    return this.props.bairro;
+  }
+  cidade(): string {
+    return this.props.cidade;
+  }
+  uf(): string {
+    return this.props.uf;
   }
 }

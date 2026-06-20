@@ -40,6 +40,8 @@ export class IncluirCartaoCreditoRepository {
       endereco: usuarioModel.endereco,
       enderecoNumero: usuarioModel.endereco_numero,
       bairro: usuarioModel.bairro,
+      cidade: usuarioModel.cidade,
+      uf: usuarioModel.uf,
       telefone: usuarioModel.phone,
     });
     return usuario;
