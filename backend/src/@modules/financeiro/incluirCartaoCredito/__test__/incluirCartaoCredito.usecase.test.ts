@@ -15,6 +15,13 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
     const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new IncluirCartaoCreditoRepository(connectionHub);
   });
+
+  beforeEach(async () => {
+    await dataSource.query(`DELETE FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
+  });
+
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
@@ -57,6 +64,39 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
     expect(cartaoModel.numero).toBe("numeroCartao");
     expect(cartaoModel.bandeira).toBe("bandeira");
     expect(cartaoModel.token).toBe("token");
+
+    registrarCartaoStub.restore();
+  });
+
+  test("Deve validar dados do usuário", async () => {
+    const contaBancariaUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
+
+    const registrarCartaoStub = stub(IncluirCartaoCreditoGateway.prototype, "registrarCartao").resolves({
+      numeroCartao: "numeroCartao",
+      bandeira: "bandeira",
+      token: "token",
+    });
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, email)
+      VALUES ('${userUuid}', 'usuarioNome', 'usuariEmail')`);
+
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, banco_numero, chave_api, ambiente)
+      VALUES ('${contaBancariaUuid}', '${companyUuid}', '461', 'ChaveDeApi', 'HOMOLOG')`);
+
+    const usecase = new IncluirCartaoCreditoUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      cartaoCredito: {
+        nomeNoCartao: "nomeNoCartao",
+        numeroCartao: "numeroCartao",
+        mesVencimento: "mesVencimento",
+        anoVencimento: "anoVencimento",
+        codigoSeguranca: "codigoSeguranca",
+      },
+    };
+
+    await expect(usecase.execute(input)).rejects.toThrow("Dados incompletos, (Telefone, Cep, Endereco, Bairro, Cidade, UF)");
 
     registrarCartaoStub.restore();
   });
