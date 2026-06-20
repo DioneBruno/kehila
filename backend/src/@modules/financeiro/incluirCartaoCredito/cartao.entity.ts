@@ -1,8 +1,10 @@
+import { ContaBancariaEntity } from "./contabancaria.entity";
 import { UsuarioEntity } from "./usuario.entity";
 
 export type CartaoProps = {
   companyUuid: string;
   usuario: UsuarioEntity;
+  contaBancaria: ContaBancariaEntity;
   nome: string;
   numero: string;
   mesVencimento: string;
@@ -18,6 +20,9 @@ export class CartaoEntity {
   }
   usuario(): UsuarioEntity {
     return this.props.usuario;
+  }
+  contaBancaria(): ContaBancariaEntity {
+    return this.props.contaBancaria;
   }
   nome(): string {
     return this.props.nome;

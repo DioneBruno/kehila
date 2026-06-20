@@ -34,8 +34,8 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
     await dataSource.query(`INSERT INTO auth_users (uuid, name, email, phone, cep, endereco, endereco_numero, bairro, cidade, uf)
       VALUES ('${userUuid}', 'usuarioNome', 'usuariEmail', '69984578458', '76962030', 'usuarioEndereco', 'Numero', 'Bairro', 'Cidade', 'UF')`);
 
-    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, banco_numero, chave_api)
-      VALUES ('${contaBancariaUuid}', '${companyUuid}', '461', 'ChaveDeApi')`);
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, banco_numero, chave_api, ambiente)
+      VALUES ('${contaBancariaUuid}', '${companyUuid}', '461', 'ChaveDeApi', 'HOMOLOG')`);
 
     const usecase = new IncluirCartaoCreditoUsecase(repo);
     const input = {
