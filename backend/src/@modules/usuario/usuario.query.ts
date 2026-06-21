@@ -1,4 +1,3 @@
-import dataSource from "src/@infra/database/datasource";
 import { ConnectionHub } from "../shared/connections/connectionHub";
 
 export type EditarPerfilUsuarioInput = {
@@ -19,7 +18,7 @@ export class UsuarioQuery {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async editarPerfilUsuario(input: EditarPerfilUsuarioInput) {
-    await dataSource.query(
+    await this.connectionHub.database?.query(
       `UPDATE auth_users SET
       name = COALESCE($2, name),
       cpf = COALESCE($3, cpf),

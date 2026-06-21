@@ -81,6 +81,7 @@
                   mask="#####-###"
                   v-model="formDados.cep"
                   label="CEP"
+                  :loading="buscandoCep"
                 />
               </div>
               <div class="col-12 col-sm-9">
@@ -110,11 +111,13 @@
               </div>
               <div class="col-12 row justify-end q-mt-sm">
                 <q-btn
+                  flat
                   no-caps
                   unelevated
                   color="primary"
                   icon="save"
                   label="Salvar dados"
+                  class="full-width"
                   @click="salvarMeusDados"
                 />
               </div>
@@ -162,7 +165,7 @@
                   type="password"
                 />
               </div>
-              <div class="col-12">
+              <!-- <div class="col-12">
                 <q-select
                   v-model="pagador.numParcelas"
                   label="Parcelas"
@@ -171,13 +174,14 @@
                   emit-value
                   map-options
                 />
-              </div>
+              </div> -->
               <div class="col-12 row justify-end q-mt-sm">
                 <q-btn
                   no-caps
                   unelevated
+                  flat
                   class="full-width"
-                  label="Confirmar pagamento"
+                  label="Incluir Cartão"
                   color="primary"
                   icon="credit_card"
                   @click="confirmarPagamentoCartao"
@@ -193,7 +197,8 @@
 
 <script lang="ts">
 import type { PropType } from "vue";
-import { computed, defineComponent, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, reactive, ref, toRefs, watch } from "vue";
+import { Notify } from "quasar";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
 import { useAuthStore } from "src/stores/auth";
@@ -253,6 +258,7 @@ export default defineComponent({
       mostrarDialog: ref(false),
       tab: ref("dados"),
       ufs: UFS,
+      buscandoCep: ref(false),
       formDados: reactive({
         nome: "",
         email: "",
@@ -291,6 +297,32 @@ export default defineComponent({
       data.tab = "dados";
       data.mostrarDialog = true;
     }
+
+    async function buscarEndereco(cep: string) {
+      data.buscandoCep = true;
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const endereco = await response.json();
+        if (endereco.erro) {
+          Notify.create({ color: "negative", message: "CEP não encontrado", position: "bottom" });
+          return;
+        }
+        data.formDados.endereco = endereco.logradouro ?? "";
+        data.formDados.cidade = endereco.localidade ?? "";
+        data.formDados.uf = endereco.uf ?? "";
+      } catch {
+        Notify.create({ color: "negative", message: "Erro ao buscar o CEP", position: "bottom" });
+      } finally {
+        data.buscandoCep = false;
+      }
+    }
+
+    watch(
+      () => data.formDados.cep,
+      (cep) => {
+        if (cep?.length === 8) void buscarEndereco(cep);
+      },
+    );
 
     async function salvarMeusDados() {
       const valido = await formDadosRef.value?.validate();
