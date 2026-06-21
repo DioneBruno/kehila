@@ -2,6 +2,7 @@ import { useQuasar } from "quasar";
 import type { AuthHttp, EditarPerfilInput } from "src/@modules/auth/auth.http";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import type { LoginHttp } from "src/@modules/auth/login.http";
+import type { CartaoHttp } from "src/@modules/financeiro/cartao.http";
 import type { PedidoHttp } from "src/@modules/portalEventos/pedido.http";
 import { useAuthStore } from "src/stores/auth";
 import { usePedidoStore } from "src/stores/pedido";
@@ -14,6 +15,7 @@ export class PedidoService {
   private loginHttp: LoginHttp = inject("loginHttp") as LoginHttp;
   private $authStore = useAuthStore();
   private $pedidoStore = usePedidoStore();
+  private cartaoHttp: CartaoHttp = inject("cartaoHttp") as CartaoHttp;
 
   constructor() {}
 
@@ -99,6 +101,18 @@ export class PedidoService {
       await this.pedidoHttp.gerarCobranca(input);
       await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
     } catch (error) {
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async incluirCartao(input: any) {
+    try {
+      this.$q.loading.show();
+      await this.cartaoHttp.incluirCartao(input);
+      // await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
+    } catch (error) {
+      console.error(error);
     } finally {
       this.$q.loading.hide();
     }

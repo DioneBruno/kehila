@@ -93,7 +93,7 @@
                   label="Endereço *"
                 />
               </div>
-              <div class="col-12 col-sm-3">
+              <div class="col-12 col-sm-2">
                 <q-input
                   outlined
                   stack-label
@@ -101,6 +101,9 @@
                   v-model="formDados.enderecoNumero"
                   label="Número *"
                 />
+              </div>
+              <div class="col-12 col-sm-4">
+                <q-input outlined stack-label dense v-model="formDados.bairro" label="Bairro *" />
               </div>
               <div class="col-12 col-sm-2">
                 <q-select
@@ -118,7 +121,7 @@
                   "
                 />
               </div>
-              <div class="col-12 col-sm-7">
+              <div class="col-12 col-sm-4">
                 <q-select
                   outlined
                   stack-label
@@ -134,7 +137,7 @@
                   @filter="filterCidades"
                 />
               </div>
-              <div class="col-12 col-sm-4 text-orange">* Preenchimento todos os campos</div>
+              <div class="col-12 text-orange text-right">* Preenchimento todos os campos</div>
               <div class="col-12 row justify-end q-mt-sm">
                 <q-btn
                   flat
@@ -154,9 +157,12 @@
             <q-form class="row q-col-gutter-md">
               <div class="col-12">
                 <q-input
-                  v-model="pagador.cartao.numero"
-                  label="Número do cartão"
                   outlined
+                  stack-label
+                  dense
+                  unmasked-value
+                  v-model="cartao.numero"
+                  label="Número do cartão"
                   mask="#### #### #### ####"
                   placeholder="0000 0000 0000 0000"
                 >
@@ -167,29 +173,27 @@
               </div>
               <div class="col-12">
                 <q-input
-                  v-model="pagador.cartao.nome"
-                  label="Nome no cartão"
                   outlined
+                  stack-label
+                  dense
+                  v-model="cartao.nome"
+                  label="Nome no cartão"
                   placeholder="Como está impresso"
                 />
               </div>
               <div class="col-6">
                 <q-input
-                  v-model="pagador.cartao.validade"
-                  label="Validade"
                   outlined
+                  stack-label
+                  dense
+                  v-model="cartao.validade"
+                  label="Validade"
                   mask="##/##"
                   placeholder="MM/AA"
                 />
               </div>
               <div class="col-6">
-                <q-input
-                  v-model="pagador.cartao.cvv"
-                  label="CVV"
-                  outlined
-                  mask="###"
-                  type="password"
-                />
+                <q-input outlined stack-label dense v-model="cartao.cvv" label="CVV" mask="###" />
               </div>
               <!-- <div class="col-12">
                 <q-select
@@ -210,7 +214,7 @@
                   label="Incluir Cartão"
                   color="primary"
                   icon="credit_card"
-                  @click="confirmarPagamentoCartao"
+                  @click="incluirCartao"
                 />
               </div>
             </q-form>
@@ -295,8 +299,15 @@ export default defineComponent({
         cep: "",
         endereco: "",
         enderecoNumero: "",
+        bairro: "",
         cidade: "",
         uf: "",
+      }),
+      cartao: reactive({
+        numero: "",
+        nome: "",
+        validade: "",
+        cvv: "",
       }),
       pagador: ref({
         pedidoUuid: null as string | null,
@@ -306,12 +317,6 @@ export default defineComponent({
         pagadorDocumento: "",
         pagadorEmail: "",
         pagadorTelefone: "",
-        cartao: reactive({
-          numero: "",
-          nome: "",
-          validade: "",
-          cvv: "",
-        }),
       }),
     });
 
@@ -366,10 +371,12 @@ export default defineComponent({
           Notify.create({ color: "negative", message: "CEP não encontrado", position: "bottom" });
           return;
         }
+        data.formDados.bairro = endereco.bairro ?? "";
         data.formDados.endereco = endereco.logradouro ?? "";
         data.formDados.cidade = endereco.localidade ?? "";
         data.formDados.uf = endereco.uf ?? "";
         void fetchCidades(data.formDados.uf);
+        salvarMeusDados();
       } catch {
         Notify.create({ color: "negative", message: "Erro ao buscar o CEP", position: "bottom" });
       } finally {
@@ -412,9 +419,8 @@ export default defineComponent({
       await $service.gerarCobranca(payload);
     }
 
-    async function confirmarPagamentoCartao() {
-      await gerarCobranca();
-      data.mostrarDialog = false;
+    async function incluirCartao() {
+      await $service.incluirCartao(data.cartao);
     }
 
     return {
@@ -427,7 +433,7 @@ export default defineComponent({
       filterCidades,
       salvarMeusDados,
       gerarCobranca,
-      confirmarPagamentoCartao,
+      incluirCartao,
     };
   },
 });
