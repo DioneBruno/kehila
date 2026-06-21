@@ -20,17 +20,17 @@ export class UsuarioQuery {
 
   async editarPerfilUsuario(input: EditarPerfilUsuarioInput) {
     await dataSource.query(
-      `UPDATE FROM auth_users SET
-      name = $2,
-      cpf = $3,
-      email = $4,
-      telefone = $5,
-      cep = $6,
-      endereco = $7,
-      enderecoNumero = $8,
-      bairro = $9,
-      cidade = $10,
-      uf = $11
+      `UPDATE auth_users SET
+      name = COALESCE($2, name),
+      cpf = COALESCE($3, cpf),
+      email = COALESCE($4, email),
+      phone = COALESCE($5, phone),
+      cep = COALESCE($6, cep),
+      endereco = COALESCE($7, endereco),
+      endereco_numero = COALESCE($8, endereco_numero),
+      bairro = COALESCE($9, bairro),
+      cidade = COALESCE($10, cidade),
+      uf = COALESCE($11, uf)
       WHERE uuid = $1`,
       [
         input.uuid,
@@ -46,6 +46,7 @@ export class UsuarioQuery {
         input.uf,
       ],
     );
+    return this.buscarUsuarioPorUuid(input.uuid);
   }
   async buscarUsuarioPorUuid(userUuid: string) {
     const [usuarioModel] = await this.connectionHub.database?.query(

@@ -1,5 +1,5 @@
 import { useQuasar } from "quasar";
-import type { AuthHttp } from "src/@modules/auth/auth.http";
+import type { AuthHttp, EditarPerfilInput } from "src/@modules/auth/auth.http";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import type { LoginHttp } from "src/@modules/auth/login.http";
 import type { PedidoHttp } from "src/@modules/portalEventos/pedido.http";
@@ -120,6 +120,17 @@ export class PedidoService {
     await this.pedidoHttp.editarFormIngresso(input);
     ingresso.formDataValido = true;
     await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
+  }
+
+  async editarPerfil(input: EditarPerfilInput) {
+    try {
+      this.$q.loading.show();
+      const response = await this.authHttp.editarPerfil(input);
+      this.$authStore.setUser({ ...this.$authStore.$state.user, ...response.user });
+      return response;
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 
   async cancelarPedido(pedidoUuid: string) {

@@ -36,7 +36,7 @@ export class UserController {
       cidade: body.cidade,
       uf: body.uf,
     };
-    const payload = await this.usuarioQuery.editarPerfilUsuario(input);
-    return res.status(200).json(payload);
+    const usuario = await this.usuarioQuery.editarPerfilUsuario(input);
+    return res.status(200).json({ message: "Perfil atualizado com sucesso", user: usuario });
   }
 }
