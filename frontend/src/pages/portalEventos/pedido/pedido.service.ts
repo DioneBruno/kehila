@@ -109,7 +109,15 @@ export class PedidoService {
   async incluirCartao(input: any) {
     try {
       this.$q.loading.show();
-      await this.cartaoHttp.incluirCartao(input);
+      const [mesVencimento, anoVencimento] = input.validade.split("/");
+      const payload = {
+        nomeNoCartao: input.nome,
+        numeroCartao: input.numero,
+        mesVencimento,
+        anoVencimento,
+        codigoSeguranca: input.cvv,
+      };
+      await this.cartaoHttp.incluirCartao(payload);
       // await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
     } catch (error) {
       console.error(error);

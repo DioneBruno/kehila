@@ -64,6 +64,7 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
     expect(cartaoModel.numero).toBe("numeroCartao");
     expect(cartaoModel.bandeira).toBe("bandeira");
     expect(cartaoModel.token).toBe("token");
+    expect(cartaoModel.atual).toBe(false);
 
     registrarCartaoStub.restore();
   });

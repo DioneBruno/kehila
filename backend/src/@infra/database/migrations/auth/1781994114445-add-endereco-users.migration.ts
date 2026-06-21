@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class MigrationCreateMigration1781994114445 implements MigrationInterface {
+export class MigrationAddEnderecoUsers1781994114445 implements MigrationInterface {
   name?: string | undefined;
   transaction?: boolean | undefined;
   public async up(queryRunner: QueryRunner): Promise<void> {

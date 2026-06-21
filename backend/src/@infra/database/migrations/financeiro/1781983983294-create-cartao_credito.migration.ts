@@ -28,6 +28,7 @@ export class MigrationCreateCartaoCredito1781983983294 implements MigrationInter
           { name: "bandeira", type: "varchar", isNullable: true },
           { name: "token", type: "varchar", isNullable: true },
           { name: "status", type: "varchar", isNullable: true },
+          { name: "atual", type: "boolean", isNullable: true, default: false },
         ],
       }),
     );

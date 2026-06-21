@@ -12,7 +12,7 @@ export class CartaoCreditoController {
 
   @Post()
   async incluir(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
-    await this.incluirCartaoCreditoUsecase.execute({
+    const input = {
       companyUuid: req.companyUuid,
       userUuid: req.userUuid,
       cartaoCredito: {
@@ -22,7 +22,8 @@ export class CartaoCreditoController {
         anoVencimento: body.anoVencimento,
         codigoSeguranca: body.codigoSeguranca,
       },
-    });
+    };
+    await this.incluirCartaoCreditoUsecase.execute(input);
     return res.status(201).json({ success: true });
   }
 
