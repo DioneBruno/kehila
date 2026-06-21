@@ -1,6 +1,6 @@
 import dataSource from "src/@infra/database/datasource";
 import { stub } from "sinon";
-import { IncluirCartaoCreditoGateway } from "../incluirCartaoCreditoGateway";
+import { IncluirCartaoCreditoGatewayAsaas } from "../incluirCartaoCreditoGateway.asaas";
 import { IncluirCartaoCreditoUsecase } from "../incluirCartaoCredito.usecase";
 import { IncluirCartaoCreditoRepository } from "../incluirCartaoCreditoRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
@@ -32,7 +32,7 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
   test("Deve incluir cartao para usuário", async () => {
     const contaBancariaUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
 
-    const registrarCartaoStub = stub(IncluirCartaoCreditoGateway.prototype, "registrarCartao").resolves({
+    const registrarCartaoStub = stub(IncluirCartaoCreditoGatewayAsaas.prototype, "registrarCartao").resolves({
       numeroCartao: "numeroCartao",
       bandeira: "bandeira",
       token: "token",
@@ -72,7 +72,7 @@ describe("Deve testar IncluirCartaoCreditoUsecase", () => {
   test("Deve validar dados do usuário", async () => {
     const contaBancariaUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
 
-    const registrarCartaoStub = stub(IncluirCartaoCreditoGateway.prototype, "registrarCartao").resolves({
+    const registrarCartaoStub = stub(IncluirCartaoCreditoGatewayAsaas.prototype, "registrarCartao").resolves({
       numeroCartao: "numeroCartao",
       bandeira: "bandeira",
       token: "token",

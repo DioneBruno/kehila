@@ -18,6 +18,15 @@ export class UsuarioEntity {
   uuid(): string {
     return this.props.uuid;
   }
+  nome(): string {
+    return this.props.nome;
+  }
+  email(): string {
+    return this.props.email;
+  }
+  cpf(): string {
+    return this.props.cpf;
+  }
   telefone(): string {
     return this.props.telefone;
   }
@@ -26,6 +35,9 @@ export class UsuarioEntity {
   }
   endereco(): string {
     return this.props.endereco;
+  }
+  enderecoNumero(): string {
+    return this.props.enderecoNumero;
   }
   bairro(): string {
     return this.props.bairro;

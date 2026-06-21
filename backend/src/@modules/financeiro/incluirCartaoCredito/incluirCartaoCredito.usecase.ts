@@ -5,6 +5,7 @@ import { IncluirCartaoCreditoRepository } from "./incluirCartaoCreditoRepository
 export type IncluirCartaoCreditoInput = {
   companyUuid: string;
   userUuid: string;
+  remoteIp?: string;
   cartaoCredito: {
     nomeNoCartao: string;
     numeroCartao: string;
@@ -43,6 +44,7 @@ export class IncluirCartaoCreditoUsecase {
       mesVencimento: input.cartaoCredito.mesVencimento,
       anoVencimento: input.cartaoCredito.anoVencimento,
       codigoSeguranca: input.cartaoCredito.codigoSeguranca,
+      remoteIp: input.remoteIp,
     });
 
     const registro = await gateway.registrarCartao(cartao);

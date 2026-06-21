@@ -15,6 +15,7 @@ export class CartaoCreditoController {
     const input = {
       companyUuid: req.companyUuid,
       userUuid: req.userUuid,
+      remoteIp: req.ip,
       cartaoCredito: {
         nomeNoCartao: body.nomeNoCartao,
         numeroCartao: body.numeroCartao,

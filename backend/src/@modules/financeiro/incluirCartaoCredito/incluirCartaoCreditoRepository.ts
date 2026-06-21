@@ -1,11 +1,16 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CartaoEntity } from "./cartao.entity";
 import { ContaBancariaEntity } from "./contabancaria.entity";
-import { IncluirCartaoCreditoGateway } from "./incluirCartaoCreditoGateway";
+import { IncluirCartaoCreditoGatewayAsaas } from "./incluirCartaoCreditoGateway.asaas";
 import { UsuarioEntity } from "./usuario.entity";
 
 export class IncluirCartaoCreditoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
+
+  buscarGateway(contaBancaria: ContaBancariaEntity): IncluirCartaoCreditoGatewayAsaas {
+    const gateway = new IncluirCartaoCreditoGatewayAsaas(this.connectionHub);
+    return gateway;
+  }
 
   async buscarContaBancaria(companyUuid: string): Promise<ContaBancariaEntity | null> {
     const [contaBancariaModel] = await this.connectionHub.database!.query(
@@ -45,11 +50,6 @@ export class IncluirCartaoCreditoRepository {
       telefone: usuarioModel.phone,
     });
     return usuario;
-  }
-
-  buscarGateway(contaBancaria: ContaBancariaEntity): IncluirCartaoCreditoGateway {
-    const gateway = new IncluirCartaoCreditoGateway(this.connectionHub);
-    return gateway;
   }
 
   async salvarCartao(cartao: CartaoEntity): Promise<void> {

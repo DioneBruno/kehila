@@ -10,6 +10,7 @@ export type CartaoProps = {
   mesVencimento: string;
   anoVencimento: string;
   codigoSeguranca: string;
+  remoteIp?: string;
 };
 
 export class CartaoEntity {
@@ -53,5 +54,8 @@ export class CartaoEntity {
   }
   codigoSeguranca(): string {
     return this.props.codigoSeguranca;
+  }
+  remoteIp(): string | undefined {
+    return this.props.remoteIp;
   }
 }
