@@ -34,7 +34,7 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ c.bandeira }} #### #### #### {{ c.numero }}</q-item-label>
-            <q-item-label caption>Status: {{ c.status }}</q-item-label>
+            <!-- <q-item-label caption>Status: {{ c.status }}</q-item-label> -->
           </q-item-section>
           <q-item-section side>
             <q-btn
@@ -51,7 +51,19 @@
       </q-list>
     </div>
     <div class="col-12" v-else>
-      <q-banner rounded class="bg-grey-2 text-grey-7"> Nenhum cartão cadastrado. </q-banner>
+      <q-banner rounded class="bg-grey-2 text-grey-7">
+        Nenhum cartão cadastrado.
+        <q-btn
+          flat
+          dense
+          no-caps
+          size="sm"
+          color="primary"
+          icon="add"
+          label="Incluir"
+          @click="abrirDialog"
+        />
+      </q-banner>
     </div>
 
     <q-dialog v-model="mostrarDialog">
@@ -363,6 +375,7 @@ export default defineComponent({
     });
 
     function abrirDialog() {
+      data.cartao = {} as any;
       data.formDados.nome = data.user.name ?? "";
       data.formDados.email = data.user.email ?? "";
       data.formDados.telefone = data.user.telefone ?? "";
@@ -463,6 +476,8 @@ export default defineComponent({
 
     async function incluirCartao() {
       await $service.incluirCartao(data.cartao);
+      await $service.verificaUsuario();
+      data.mostrarDialog = false;
     }
 
     async function removerCartao(cartao: any) {
