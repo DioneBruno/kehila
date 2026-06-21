@@ -1,6 +1,9 @@
 <template>
-  <div class="row q-col-gutter-md">
+  <div class="row q-col-gutter-md q-mt-md">
     <div class="col-12">
+      <q-separator />
+    </div>
+    <!-- <div class="col-12">
       <q-input
         v-model="pagador.cartao.numero"
         label="Número do cartão"
@@ -52,6 +55,16 @@
         icon="credit_card"
         @click="gerarCobranca"
       />
+    </div> -->
+    <div class="col-12">
+      <q-btn
+        no-caps
+        flat
+        color="primary"
+        icon="add"
+        label="Incluir Cartão de Credito"
+        class="full-width"
+      />
     </div>
   </div>
 </template>
@@ -61,6 +74,7 @@ import type { PropType } from "vue";
 import { computed, defineComponent, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
+import { useAuthStore } from "src/stores/auth";
 
 interface OpcaoParcela {
   label: string;
@@ -76,8 +90,10 @@ export default defineComponent({
   setup(props, { emit }) {
     const $service = new PedidoService();
     const $pedidoStore = usePedidoStore();
+    const $authStore = useAuthStore();
 
     const data = reactive({
+      user: computed(() => $authStore.$state.user),
       pedido: computed(() => $pedidoStore.$state.pedido),
       pagador: ref({
         pedidoUuid: null as string | null,

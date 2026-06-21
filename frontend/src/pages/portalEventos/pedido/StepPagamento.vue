@@ -50,12 +50,12 @@
         </div>
 
         <div class="col-4">
-          <!-- class="cursor-pointer"
-          @click="$emit('update:formaPagamento', 'cartao')" -->
           <q-card
             flat
             bordered
             :class="formaPagamento === 'cartao' ? 'border-primary bg-blue-1' : ''"
+            class="cursor-pointer"
+            @click="$emit('update:formaPagamento', 'cartao')"
           >
             <q-card-section class="text-center q-py-md">
               <q-icon name="credit_card" size="32px" color="grey-5" />
