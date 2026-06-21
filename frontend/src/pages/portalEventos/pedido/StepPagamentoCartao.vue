@@ -45,7 +45,7 @@
                   dense
                   stack-label
                   v-model="formDados.nome"
-                  label="Nome completo"
+                  label="Nome completo *"
                   lazy-rules
                 />
               </div>
@@ -55,7 +55,7 @@
                   dense
                   stack-label
                   v-model="formDados.email"
-                  label="E-mail"
+                  label="E-mail *"
                   type="email"
                   lazy-rules
                 />
@@ -67,7 +67,7 @@
                   fill-mask
                   dense
                   v-model="formDados.telefone"
-                  label="Telefone"
+                  label="Telefone *"
                   mask="(##) #####-####"
                 />
               </div>
@@ -80,12 +80,18 @@
                   fill-mask
                   mask="#####-###"
                   v-model="formDados.cep"
-                  label="CEP"
+                  label="CEP *"
                   :loading="buscandoCep"
                 />
               </div>
               <div class="col-12 col-sm-9">
-                <q-input outlined stack-label dense v-model="formDados.endereco" label="Endereço" />
+                <q-input
+                  outlined
+                  stack-label
+                  dense
+                  v-model="formDados.endereco"
+                  label="Endereço *"
+                />
               </div>
               <div class="col-12 col-sm-3">
                 <q-input
@@ -93,7 +99,7 @@
                   stack-label
                   dense
                   v-model="formDados.enderecoNumero"
-                  label="Número"
+                  label="Número *"
                 />
               </div>
               <div class="col-12 col-sm-2">
@@ -102,13 +108,14 @@
                   stack-label
                   dense
                   v-model="formDados.uf"
-                  label="UF"
+                  label="UF *"
                   :options="ufs"
                 />
               </div>
               <div class="col-12 col-sm-7">
-                <q-input outlined stack-label dense v-model="formDados.cidade" label="Cidade" />
+                <q-input outlined stack-label dense v-model="formDados.cidade" label="Cidade *" />
               </div>
+              <div class="col-12 col-sm-4 text-orange">* Preenchimento todos os campos</div>
               <div class="col-12 row justify-end q-mt-sm">
                 <q-btn
                   flat
@@ -290,11 +297,14 @@ export default defineComponent({
       data.formDados.nome = data.user.name ?? "";
       data.formDados.email = data.user.email ?? "";
       data.formDados.telefone = data.user.telefone ?? "";
+      data.formDados.cep = data.user.cep ?? "";
       data.formDados.endereco = data.user.endereco ?? "";
       data.formDados.enderecoNumero = data.user.endereco_numero ?? "";
       data.formDados.cidade = data.user.cidade ?? "";
       data.formDados.uf = data.user.uf ?? "";
-      data.tab = "dados";
+
+      const todosPreenchidos = Object.values(data.formDados).every((valor) => !!valor);
+      data.tab = todosPreenchidos ? "cartao" : "dados";
       data.mostrarDialog = true;
     }
 
@@ -328,6 +338,9 @@ export default defineComponent({
       const valido = await formDadosRef.value?.validate();
       if (!valido) return;
       await $service.editarPerfil(data.formDados);
+
+      const todosPreenchidos = Object.values(data.formDados).every((valor) => !!valor);
+      if (todosPreenchidos) data.tab = "cartao";
     }
 
     async function gerarCobranca() {
