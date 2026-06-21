@@ -65,6 +65,18 @@ export class UsuarioQuery {
       [userUuid],
     );
     if (!usuarioModel) return null;
-    return usuarioModel;
+    const cartoes = await this.connectionHub.database?.query(
+      `SELECT 
+        uuid,
+        numero,
+        bandeira,
+        status
+      FROM financeiro_cartao_credito
+      WHERE deleted_at IS NULL
+        AND user_uuid = $1`,
+      [userUuid],
+    );
+
+    return { ...usuarioModel, cartoes  };
   }
 }
