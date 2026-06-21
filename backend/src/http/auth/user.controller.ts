@@ -37,6 +37,6 @@ export class UserController {
       uf: body.uf,
     };
     const usuario = await this.usuarioQuery.editarPerfilUsuario(input);
-    return res.status(200).json({ message: "Perfil atualizado com sucesso", user: usuario });
+    return res.status(200).json({ message: "", user: usuario });
   }
 }

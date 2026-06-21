@@ -110,10 +110,29 @@
                   v-model="formDados.uf"
                   label="UF *"
                   :options="ufs"
+                  @update:model-value="
+                    (uf) => {
+                      formDados.cidade = '';
+                      fetchCidades(uf);
+                    }
+                  "
                 />
               </div>
               <div class="col-12 col-sm-7">
-                <q-input outlined stack-label dense v-model="formDados.cidade" label="Cidade *" />
+                <q-select
+                  outlined
+                  stack-label
+                  dense
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="0"
+                  v-model="formDados.cidade"
+                  label="Cidade *"
+                  :options="cidadesFiltradas"
+                  :disable="!formDados.uf"
+                  @filter="filterCidades"
+                />
               </div>
               <div class="col-12 col-sm-4 text-orange">* Preenchimento todos os campos</div>
               <div class="col-12 row justify-end q-mt-sm">
@@ -259,6 +278,9 @@ export default defineComponent({
     const obrigatorio = (v: unknown) => !!v || "Obrigatório";
     const formDadosRef = ref<any>(null);
 
+    const cidadesPorUf = reactive<Record<string, string[]>>({});
+    const cidadesFiltradas = ref<string[]>([]);
+
     const data = reactive({
       user: computed(() => $authStore.$state.user),
       pedido: computed(() => $pedidoStore.$state.pedido),
@@ -306,6 +328,33 @@ export default defineComponent({
       const todosPreenchidos = Object.values(data.formDados).every((valor) => !!valor);
       data.tab = todosPreenchidos ? "cartao" : "dados";
       data.mostrarDialog = true;
+      void fetchCidades(data.formDados.uf);
+    }
+
+    async function fetchCidades(uf: string) {
+      if (!uf || cidadesPorUf[uf]) return;
+      const response = await fetch(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`,
+      );
+      const cidades: { nome: string }[] = await response.json();
+      cidadesPorUf[uf] = cidades.map((m) => m.nome).sort();
+    }
+
+    function filterCidades(val: string, update: (fn: () => void) => void) {
+      const uf = data.formDados.uf;
+      const doFilter = () => {
+        update(() => {
+          const all = cidadesPorUf[uf] || [];
+          cidadesFiltradas.value = val
+            ? all.filter((c) => c.toLowerCase().includes(val.toLowerCase()))
+            : all;
+        });
+      };
+      if (uf && !cidadesPorUf[uf]) {
+        void fetchCidades(uf).then(doFilter);
+      } else {
+        doFilter();
+      }
     }
 
     async function buscarEndereco(cep: string) {
@@ -320,6 +369,7 @@ export default defineComponent({
         data.formDados.endereco = endereco.logradouro ?? "";
         data.formDados.cidade = endereco.localidade ?? "";
         data.formDados.uf = endereco.uf ?? "";
+        void fetchCidades(data.formDados.uf);
       } catch {
         Notify.create({ color: "negative", message: "Erro ao buscar o CEP", position: "bottom" });
       } finally {
@@ -370,8 +420,11 @@ export default defineComponent({
     return {
       ...toRefs(data),
       formDadosRef,
+      cidadesFiltradas,
       obrigatorio,
       abrirDialog,
+      fetchCidades,
+      filterCidades,
       salvarMeusDados,
       gerarCobranca,
       confirmarPagamentoCartao,
