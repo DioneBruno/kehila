@@ -66,9 +66,9 @@ export class UsuarioQuery {
     );
     if (!usuarioModel) return null;
     const cartoes = await this.connectionHub.database?.query(
-      `SELECT 
+      `SELECT
         uuid,
-        numero,
+        RIGHT(numero, 4) AS numero,
         bandeira,
         status
       FROM financeiro_cartao_credito

@@ -118,6 +118,18 @@ export class PedidoService {
     }
   }
 
+  async removerCartao(cartaoUuid: string) {
+    try {
+      this.$q.loading.show();
+      await this.cartaoHttp.removerCartao(cartaoUuid);
+      await this.verificaUsuario();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
   async editarFormIngresso(ingresso: any) {
     const input = {
       pedidoUuid: this.$pedidoStore.$state.pedido.uuid,

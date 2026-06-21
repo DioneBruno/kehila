@@ -15,6 +15,45 @@
       />
     </div>
 
+    <div class="col-12" v-if="user.cartoes?.length">
+      <q-list bordered separator>
+        <q-item
+          v-for="c in user.cartoes"
+          :key="c.uuid"
+          clickable
+          v-ripple
+          :active="cartaoSelecionadoUuid === c.uuid"
+          active-class="bg-blue-1 text-primary"
+          @click="cartaoSelecionadoUuid = c.uuid"
+        >
+          <q-item-section side>
+            <q-radio v-model="cartaoSelecionadoUuid" :val="c.uuid" color="primary" />
+          </q-item-section>
+          <q-item-section avatar>
+            <q-icon name="credit_card" size="28px" color="grey-7" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ c.bandeira }} #### #### #### {{ c.numero }}</q-item-label>
+            <q-item-label caption>Status: {{ c.status }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-btn
+              flat
+              round
+              dense
+              size="sm"
+              icon="delete"
+              color="negative"
+              @click.stop="removerCartao(c)"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+    <div class="col-12" v-else>
+      <q-banner rounded class="bg-grey-2 text-grey-7"> Nenhum cartão cadastrado. </q-banner>
+    </div>
+
     <q-dialog v-model="mostrarDialog">
       <q-card style="width: 700px; max-width: 95vw">
         <q-card-section class="row items-center q-pb-none">
@@ -232,6 +271,7 @@ import { Notify } from "quasar";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
 import { useAuthStore } from "src/stores/auth";
+import { MessageConfirmationService } from "src/shared/message.service";
 
 interface OpcaoParcela {
   label: string;
@@ -276,6 +316,7 @@ export default defineComponent({
   emits: ["update:cartao"],
   setup(props, { emit }) {
     const $service = new PedidoService();
+    const $messageConfirmationService = new MessageConfirmationService();
     const $pedidoStore = usePedidoStore();
     const $authStore = useAuthStore();
 
@@ -289,6 +330,7 @@ export default defineComponent({
       user: computed(() => $authStore.$state.user),
       pedido: computed(() => $pedidoStore.$state.pedido),
       mostrarDialog: ref(false),
+      cartaoSelecionadoUuid: ref<string | null>(null),
       tab: ref("dados"),
       ufs: UFS,
       buscandoCep: ref(false),
@@ -423,10 +465,19 @@ export default defineComponent({
       await $service.incluirCartao(data.cartao);
     }
 
+    async function removerCartao(cartao: any) {
+      const confirmacao = await $messageConfirmationService.execute(
+        `Deseja realmente remover este cartão, ${cartao.bandeira} •••• ${cartao.numero} ?`,
+      );
+      if (!confirmacao) return;
+      await $service.removerCartao(cartao.uuid);
+    }
+
     return {
       ...toRefs(data),
       formDadosRef,
       cidadesFiltradas,
+      removerCartao,
       obrigatorio,
       abrirDialog,
       fetchCidades,

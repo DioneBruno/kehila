@@ -6,4 +6,8 @@ export class CartaoHttp {
   async incluirCartao(input: any) {
     return this.http.post(`cartao-credito`, input);
   }
+
+  async removerCartao(cartaoUuid: string) {
+    return this.http.delete(`cartao-credito/${cartaoUuid}`);
+  }
 }

@@ -22,4 +22,8 @@ export class FinanceiroQuery {
       await usecase.execute({ companyUuid, pagamentoUuid: pagamento.uuid });
     }
   }
+
+  async removerCartaoCredito(cartaoUuid: string) {
+    await this.connectionHub.database?.query(`UPDATE financeiro_cartao_credito SET deleted_at = now() WHERE uuid = $1`, [cartaoUuid]);
+  }
 }
