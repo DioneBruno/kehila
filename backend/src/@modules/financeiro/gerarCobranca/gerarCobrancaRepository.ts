@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { ConnectionHub } from "../../shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
 import { GerarCobrancaGatewayAsaas, GerarCobrancaOutput } from "./gerarCorbancaGateway.asaas";
+import { UsuarioEntity } from "./usuario.entity";
 
 export class GerarCobrancaRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -9,6 +10,22 @@ export class GerarCobrancaRepository {
   buscarGateway() {
     const gateway = new GerarCobrancaGatewayAsaas(this.connectionHub);
     return gateway;
+  }
+
+  async buscarUsuario(userUuid: string): Promise<UsuarioEntity | null> {
+    const [usuarioModel] = await this.connectionHub.database!.query(`SELECT * FROM auth_users WHERE uuid = '${userUuid}'`);
+    if (!usuarioModel) return null;
+    const cartoes = await this.connectionHub.database?.query(
+      `SELECT uuid
+      FROM financeiro_cartao_credito
+      WHERE deleted_at IS NULL
+        AND user_uuid = $1`,
+      [userUuid],
+    );
+    return new UsuarioEntity({
+      uuid: userUuid,
+      cartoes,
+    });
   }
 
   async savarCobranca(cobranca: CobrancaEntity): Promise<void> {

@@ -3,24 +3,34 @@ import { stub } from "sinon";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
+import axios from "axios";
 
 const companyUuid = "e8d34640-f273-4d62-8b06-5bb19d6169ad";
+const userUuid = "f3c16fee-6691-460c-a870-e160c1921580";
 let repo: GerarCobrancaRepository;
 
 describe("Deve testar GerarCobrancaUsecas", () => {
   beforeAll(async () => {
     await dataSource.initialize();
-    const http = {} as any;
+    const http = axios;
     const connectionHub = new ConnectionHub({ database: dataSource, http });
     repo = new GerarCobrancaRepository(connectionHub);
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name) VALUES ('${userUuid}', 'Nome');`);
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, status)
+      VALUES ('${companyUuid}', '${companyUuid}', 'ativo');`);
   });
   beforeEach(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
   });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
     await dataSource.destroy();
   });
 
@@ -203,6 +213,86 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(pagamentosModel[2].pix).toBe("pix3");
 
     buscarGatewayStub.restore();
+  });
+
+  test("Pagamento com cartao - Deve verificar se usuário tem cartao cadastrado", async () => {
+    const cartaoUuid = "8eaa5057-f6d4-4bc1-b72f-5a0a633fc30a";
+
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid)
+      VALUES ('f096fa1c-3f71-4c2c-9c33-62f5df953d35', '${companyUuid}', '${userUuid}', '${companyUuid}');`);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      pagadorNome: "nome do pagador",
+      pagadorDocumento: "12345678909",
+      pagadorEmail: "email@dopagador.com",
+      pagadorTelefone: "1199999999",
+      valor: 154.36,
+      vencimento: "2026-06-10",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+    };
+    await expect(usecase.execute(input)).rejects.toThrow("Cartão não encontrado.");
+  });
+
+  test.only("Pagamento com cartao - Deve tentar pagar com cartao ", async () => {
+    const cartaoUuid = "8eaa5057-f6d4-4bc1-b72f-5a0a633fc30a";
+    const clienteId = "cus_000005113026";
+
+    const getStub = stub(axios, "get");
+    getStub.callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+      // return Promise.resolve({
+      //   data: {
+      //     data: [
+      //       {
+      //         id: "pay_000001",
+      //         nossoNumero: "123456",
+      //         bankSlipUrl: "https://boleto.url",
+      //         dueDate: "2026-07-12",
+      //         value: 154.36,
+      //         netValue: 152.0,
+      //         pixTransaction: { qrCode: { payload: "pix-code" } },
+      //       },
+      //     ],
+      //   },
+      // });
+      return Promise.resolve(undefined);
+    });
+
+    const axiosStub = stub(axios, "post");
+    axiosStub.callsFake((url: string, body: any) => {
+      console.log(url);
+      if (url.includes("v3/payments")) return Promise.resolve({ data: { data: [{ id: "pay_000001" }] } });
+      return Promise.resolve(undefined);
+    });
+
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid)
+      VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}');`);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      pagadorNome: "nome do pagador",
+      pagadorDocumento: "12345678909",
+      pagadorEmail: "email@dopagador.com",
+      pagadorTelefone: "1199999999",
+      valor: 154.36,
+      vencimento: "2026-06-10",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+    };
+    await expect(usecase.execute(input)).rejects.toThrow("Cartão não encontrado.");
+
+    axiosStub.restore();
+    getStub.restore();
   });
 
   test("Deve incluir nova cobranca tipo cartao de credito", async () => {

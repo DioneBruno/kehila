@@ -69,7 +69,7 @@ export class GerarCobrancaRepository {
     pagador: PagadorEntity,
     numParcelas: number,
     tipoCobranca?: string,
-    cartaoCredito?: { nomeNoCartao: string; numeroCartao: string; mesVencimento: string; anoVencimento: string; codigoSeguranca: string },
+    cartaoUuid?: string,
   ): Promise<void> {
     const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
@@ -85,7 +85,7 @@ export class GerarCobrancaRepository {
       pagadorTelefone: pagador.telefone(),
       valor: pedido.valorTotal(),
       tipoCobranca,
-      cartaoCredito,
+      cartaoUuid,
     };
     await usecase.execute(input);
   }

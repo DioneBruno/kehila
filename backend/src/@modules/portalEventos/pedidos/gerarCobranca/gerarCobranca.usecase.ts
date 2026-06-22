@@ -13,13 +13,7 @@ export type GerarCobrancaInput = {
   pagadorEmail?: string;
   pagadorTelefone?: string;
   tipoCobranca?: string;
-  cartaoCredito?: {
-    nomeNoCartao: string;
-    numeroCartao: string;
-    mesVencimento: string;
-    anoVencimento: string;
-    codigoSeguranca: string;
-  };
+  cartaoUuid?: string;
 };
 
 export class GerarCobrancaUsecase {
@@ -51,7 +45,7 @@ export class GerarCobrancaUsecase {
             telefone: input.pagadorTelefone || "",
           });
 
-    await this.repo.criarCobranca(pedido, pagador, input.numParcelas ?? 1, input.tipoCobranca, input.cartaoCredito);
+    await this.repo.criarCobranca(pedido, pagador, input.numParcelas ?? 1, input.tipoCobranca, input.cartaoUuid);
     await this.repo.atualizarStatusPedidoParaPagamentoGerado(pedido.uuid());
   }
 }

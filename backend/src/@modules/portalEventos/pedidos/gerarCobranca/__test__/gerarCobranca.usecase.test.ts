@@ -220,13 +220,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
       pedidoUuid,
       tipoPagador: "usuarioLogado" as const,
       tipoCobranca: "cartaoCredito" as const,
-      cartaoCredito: {
-        codigoSeguranca: "codigoSeguranca",
-        mesVencimento: "mesVencimento",
-        nomeNoCartao: "nomeNoCartao",
-        numeroCartao: "numeroCartao",
-        anoVencimento: "anoVencimento",
-      },
+      cartaoUuid: "8eaa5057-f6d4-4bc1-b72f-5a0a633fc30a",
     };
     await usecase.execute(input);
 
@@ -235,11 +229,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     expect(gerarCobrancaStub.args[0][0].origem).toBe("eventoPedido");
     expect(gerarCobrancaStub.args[0][0].origemUuid).toBe(pedidoUuid);
     expect(gerarCobrancaStub.args[0][0].tipoCobranca).toBe("cartaoCredito");
-    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.nomeNoCartao).toBe("nomeNoCartao");
-    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.numeroCartao).toBe("numeroCartao");
-    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.mesVencimento).toBe("mesVencimento");
-    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.anoVencimento).toBe("anoVencimento");
-    expect(gerarCobrancaStub.args[0][0].cartaoCredito?.codigoSeguranca).toBe("codigoSeguranca");
+    expect(gerarCobrancaStub.args[0][0].cartaoUuid).toBe("8eaa5057-f6d4-4bc1-b72f-5a0a633fc30a");
 
     gerarCobrancaStub.restore();
   });

@@ -8,13 +8,7 @@ export type GerarCobrancaInput = {
   origem: string;
   origemUuid: string;
   tipoCobranca?: string;
-  cartaoCredito?: {
-    nomeNoCartao: string;
-    numeroCartao: string;
-    mesVencimento: string;
-    anoVencimento: string;
-    codigoSeguranca: string;
-  };
+  cartaoUuid?: string;
   pagadorNome: string;
   pagadorDocumento: string;
   pagadorEmail: string;
@@ -27,11 +21,10 @@ export class GerarCobrancaUsecase {
   constructor(readonly repo: GerarCobrancaRepository) {}
 
   async execute(input: GerarCobrancaInput): Promise<any> {
+    const usuario = await this.repo.buscarUsuario(input.userUuid);
+    if (!usuario) throw new Error("Usuário não encontrado.");
     if (input.tipoCobranca === "cartaoCredito") {
-      const cc = input.cartaoCredito;
-      if (!cc || !cc.nomeNoCartao || !cc.numeroCartao || !cc.mesVencimento || !cc.anoVencimento || !cc.codigoSeguranca) {
-        throw new Error("Cartão de crédito inválido, todos os campos devem ser informados");
-      }
+      const cartao = usuario.buscarCartao(input?.cartaoUuid as string);
     }
 
     const gateway = this.repo.buscarGateway();
@@ -40,7 +33,6 @@ export class GerarCobrancaUsecase {
       companyUuid: input.companyUuid,
       userUuid: input.userUuid,
       tipoCobranca: input.tipoCobranca,
-      cartaoCredito: input.cartaoCredito,
       pagadorNome: input.pagadorNome,
       pagadorDocumento: input.pagadorDocumento,
       pagadorEmail: input.pagadorEmail,
