@@ -252,7 +252,11 @@ export class PortalEventosQuery {
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
-      WHERE ingressos.deleted_at IS NULL
+        INNER JOIN evento_pedidos pedidos
+          ON pedidos.uuid = ingressos.pedido_uuid
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.status IN ('pago', 'pagamento_gerado')
+        AND ingressos.deleted_at IS NULL
         AND ingressos.pessoa_nome IS NOT NULL
         AND ingressos.pessoa_nome != ''
         AND ingressos.pessoa_documento IS NOT NULL
@@ -280,7 +284,11 @@ export class PortalEventosQuery {
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
-      WHERE ingressos.deleted_at IS NULL
+        INNER JOIN evento_pedidos pedidos
+          ON pedidos.uuid = ingressos.pedido_uuid
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.status IN ('pago', 'pagamento_gerado')
+        AND ingressos.deleted_at IS NULL
         AND ingressos.pessoa_nome IS NOT NULL
         AND ingressos.pessoa_nome != ''
         AND ingressos.pessoa_documento IS NOT NULL
@@ -320,7 +328,11 @@ export class PortalEventosQuery {
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
-      WHERE ingressos.deleted_at IS NULL
+        INNER JOIN evento_pedidos pedidos
+          ON pedidos.uuid = ingressos.pedido_uuid
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.status IN ('pago', 'pagamento_gerado')
+        AND ingressos.deleted_at IS NULL
         AND ingressos.pessoa_nome IS NOT NULL
         AND ingressos.pessoa_nome != ''
         AND ingressos.pessoa_documento IS NOT NULL
@@ -346,7 +358,11 @@ export class PortalEventosQuery {
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
-      WHERE ingressos.deleted_at IS NULL
+        INNER JOIN evento_pedidos pedidos
+          ON pedidos.uuid = ingressos.pedido_uuid
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.status IN ('pago', 'pagamento_gerado')
+        AND ingressos.deleted_at IS NULL
         AND ingressos.pessoa_nome IS NOT NULL
         AND ingressos.pessoa_nome != ''
         AND ingressos.pessoa_documento IS NOT NULL
@@ -372,7 +388,11 @@ export class PortalEventosQuery {
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
         INNER JOIN evento_lotes lotes
           ON lotes.uuid = tipos_ingresso.lote_uuid
-      WHERE ingressos.deleted_at IS NULL
+        INNER JOIN evento_pedidos pedidos
+          ON pedidos.uuid = ingressos.pedido_uuid
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.status IN ('pago', 'pagamento_gerado')
+        AND ingressos.deleted_at IS NULL
         AND ingressos.pessoa_nome IS NOT NULL
         AND ingressos.pessoa_nome != ''
         AND ingressos.pessoa_documento IS NOT NULL
