@@ -68,7 +68,8 @@ export class PortalEventosQuery {
           )
         END "disponivel"
       FROM evento_lote_tipos_ingresso tipos_ingresso
-      WHERE tipos_ingresso.deleted_at IS NULL
+      WHERE tipos_ingresso.visivel = true
+        AND tipos_ingresso.deleted_at IS NULL
         AND tipos_ingresso.evento_uuid = $1
       ORDER BY tipos_ingresso.ordem ASC`,
       [eventoUuid],
