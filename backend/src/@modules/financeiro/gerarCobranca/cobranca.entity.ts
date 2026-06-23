@@ -1,3 +1,6 @@
+import { randomUUID } from "crypto";
+import { PagamentoEntity } from "./pagamento.entity";
+
 export type CartaoCreditoProps = {
   cartaoUuid?: string;
   token?: string;
@@ -86,16 +89,22 @@ export class CobrancaEntity {
   bancoRef(): string | undefined {
     return this._bancoRef;
   }
-  geraCartaoPagamentos(primeiraParcela: { bancoRef: string; valor: number; valorComDescGateway: number; status: string }): any[] {
-    const pagamentos: any[] = [];
-    // for (let i = 0; i < this.props.numParcelas; i++) {
-    //   pagamentos.push({
-    //     codigo: this.props.uuid,
-    //     numero: i + 1,
-    //     vencimento: this.props.vencimento,
-    //     valor: this.props.valor,
-    //   });
-    // }
-    return pagamentos;
+  geraCartaoPagamentos(primeiraParcela: { bancoRef: string; valor: number; valorComDescGateway: number; status: string }): PagamentoEntity[] {
+    return [
+      new PagamentoEntity({
+        uuid: randomUUID(),
+        bancoRef: primeiraParcela.bancoRef,
+        vencimento: this.props.vencimento ?? "",
+        nossoNumero: "",
+        pix: "",
+        linkBoleto: "",
+        codigoBarras: "",
+        linhaDigitavel: "",
+        valor: primeiraParcela.valor,
+        valorComDescGateway: primeiraParcela.valorComDescGateway,
+        valorPago: 0,
+        status: primeiraParcela.status,
+      }),
+    ];
   }
 }

@@ -298,7 +298,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test.only("Tipo cobrança Cartão - Deve tentar pagamento unico - com sucesso", async () => {
+  test("Tipo cobrança Cartão - Deve tentar pagamento unico - com sucesso", async () => {
     const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
     await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
       VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
@@ -360,6 +360,80 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[0].valor).toBe(250);
     expect(pagamentos[0].valor_com_desc_gateway).toBe(242.04);
+
+    getStub.restore();
+    postStub.restore();
+  });
+
+  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado - com sucesso", async () => {
+    const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
+      VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+    });
+    const postStub = stub(http, "post").resolves({
+      data: {
+        installment: installmentId,
+        id: "pay_dqwiqn2ag1fqxrb8",
+        value: 125,
+        netValue: 121.02,
+        status: "CONFIRMED",
+        clientPaymentDate: "2026-06-23",
+      },
+    });
+
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+      pagadorNome: "Pagador de teste 001",
+      pagadorDocumento: "88247744317",
+      pagadorEmail: "emailpagador@gmail.com",
+      pagadorTelefone: "65985455877",
+      vencimento: "2026-07-12",
+      valor: 250,
+      numParcelas: 2,
+    };
+    await new GerarCobrancaUsecase(repo).execute(input);
+
+    // Verifica se request foi feita corretamente
+    expect(postStub.firstCall.args[0]).toContain("v3/payments");
+    const bodyCobranca = postStub.firstCall.args[1];
+    expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
+    expect(postStub.firstCall.args[1].creditCardToken).toBe("Token-do-cartao");
+    expect(postStub.firstCall.args[1].value).toBe(125);
+    expect(postStub.firstCall.args[1].customer).toBe(clienteId);
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
+    expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
+    expect(postStub.firstCall.args[1].installmentCount).toBeUndefined();
+    expect(postStub.firstCall.args[1].totalValue).toBeUndefined();
+    expect(bodyCobranca.installmentCount).toBeUndefined();
+    expect(bodyCobranca.totalValue).toBeUndefined();
+
+    // Verifica que 2 pagamentos foram salvos
+    const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentos.length).toBe(2);
+    expect(pagamentos[0].banco_ref).toBe("pay_dqwiqn2ag1fqxrb8");
+    expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[0].valor).toBe(125);
+    expect(pagamentos[0].valor_com_desc_gateway).toBe(121.02);
+    expect(pagamentos[0].status).toBe("CONFIRMED");
+
+    expect(pagamentos[1].banco_ref).toBeNull();
+    expect(pagamentos[1].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[1].valor).toBe(125);
+    expect(pagamentos[1].valor_com_desc_gateway).toBe(121.02);
+    expect(pagamentos[1].status).toBe("pendente");
 
     getStub.restore();
     postStub.restore();
