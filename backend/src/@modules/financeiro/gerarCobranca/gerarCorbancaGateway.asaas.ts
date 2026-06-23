@@ -108,10 +108,16 @@ export class GerarCobrancaGatewayAsaas {
       creditCardToken: cobranca.cartaoCredito()?.token,
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    // const pagamentos = await this.buscarParcelas(cobranca, responseCobranca?.data?.installment);
+    if (responseCobranca?.data?.status !== "CONFIRMED") throw new ApiError("Tivemos problemas para identificar o pagamento", 400);
+    const primeiroPagamento = {
+      bancoRef: responseCobranca?.data?.id,
+      valor: responseCobranca?.data?.value,
+      valorComDescGateway: responseCobranca?.data?.netValue,
+      status: responseCobranca?.data?.status,
+    };
     return {
       gatewayRef: responseCobranca?.data?.installment,
-      pagamentos: cobranca.geraPagamentos(),
+      pagamentos: cobranca.geraCartaoPagamentos(primeiroPagamento),
     };
   }
 
@@ -139,7 +145,7 @@ export class GerarCobrancaGatewayAsaas {
     };
     const response = await this.connectionHub.http?.get(url, { headers });
     if (!response?.data?.data.length) return await this.cadastrarCliente(cobranca);
-    return response?.data?.data[0];
+    return { id: response?.data?.data[0]?.id };
   }
 
   private async cadastrarCliente(cobranca: CobrancaEntity) {
@@ -198,7 +204,11 @@ export class GerarCobrancaGatewayAsaas {
 
   private async buscarToken(cobranca: CobrancaEntity): Promise<{ token: string; baseUrl: string }> {
     const [contaBancariaModel] = await this.connectionHub.database?.query(
-      `SELECT chave_api, ambiente FROM financeiro_contas_bancarias WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'ativo'`,
+      `SELECT chave_api, ambiente
+       FROM financeiro_contas_bancarias
+       WHERE deleted_at IS NULL
+       AND company_uuid = $1
+       AND status = 'ativo'`,
       [cobranca.companyUuid()],
     );
     if (!contaBancariaModel) throw new ApiError("Conta bancária não encontrada", 400);

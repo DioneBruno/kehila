@@ -1,10 +1,10 @@
-import dataSource from "src/@infra/database/datasource";
+import axios from "axios";
+import { randomUUID } from "crypto";
 import { stub, SinonStub, useFakeTimers } from "sinon";
+import dataSource from "src/@infra/database/datasource";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
-import axios from "axios";
-import { randomUUID } from "crypto";
 
 const companyUuid = "e8d34640-f273-4d62-8b06-5bb19d6169ad";
 const userUuid = "f3c16fee-6691-460c-a870-e160c1921580";
@@ -298,7 +298,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test.skip("Tipo cobrança Cartão - Deve tentar pagamento unico - com sucesso", async () => {
+  test.only("Tipo cobrança Cartão - Deve tentar pagamento unico - com sucesso", async () => {
     const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
     await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
       VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
@@ -353,10 +353,13 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(bodyCobranca.installmentCount).toBeUndefined();
     expect(bodyCobranca.totalValue).toBeUndefined();
 
-    // Verifica que 1 pagamentos foram salvos
+    // Verifica que 1 pagamentos foi salvo
     const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentos.length).toBe(1);
-    console.log(pagamentos[0]);
+    expect(pagamentos[0].banco_ref).toBe("pay_dqwiqn2ag1fqxrb8");
+    expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[0].valor).toBe(250);
+    expect(pagamentos[0].valor_com_desc_gateway).toBe(242.04);
 
     getStub.restore();
     postStub.restore();

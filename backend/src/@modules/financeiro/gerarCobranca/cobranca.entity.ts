@@ -86,7 +86,7 @@ export class CobrancaEntity {
   bancoRef(): string | undefined {
     return this._bancoRef;
   }
-  geraPagamentos(): any[] {
+  geraCartaoPagamentos(primeiraParcela: { bancoRef: string; valor: number; valorComDescGateway: number; status: string }): any[] {
     const pagamentos: any[] = [];
     // for (let i = 0; i < this.props.numParcelas; i++) {
     //   pagamentos.push({
