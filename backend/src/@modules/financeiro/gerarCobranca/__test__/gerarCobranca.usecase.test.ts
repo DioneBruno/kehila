@@ -60,7 +60,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
       companyUuid,
-      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
+      userUuid,
       origem: "origem",
       origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
       pagadorNome: "nome do pagador",
@@ -149,7 +149,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     const usecase = new GerarCobrancaUsecase(repo);
     const input = {
       companyUuid,
-      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
+      userUuid,
       origem: "origem",
       origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
       pagadorNome: "nome do pagador",
