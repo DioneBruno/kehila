@@ -34,7 +34,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     await dataSource.destroy();
   });
 
-  test("Deve incluir nova cobranca padrão - Boleto uma parcela", async () => {
+  test("Pagamento com boleto - Deve incluir nova cobranca padrão, parcela unica", async () => {
     const gateway = {
       gerarCobranca: () => {
         return {
@@ -101,7 +101,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     buscarGatewayStub.restore();
   });
 
-  test("Deve incluir nova cobranca padrão - Boleto parcelada", async () => {
+  test("Pagamento com boleto - Deve incluir nova cobranca padrão, parcelado", async () => {
     const gateway = {
       gerarCobranca: () => {
         return {

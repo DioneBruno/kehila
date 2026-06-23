@@ -2,6 +2,8 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
 import { ApiDate } from "src/@modules/shared/apiDate";
 import { ApiError } from "src/@modules/shared/apiError";
+import { PagamentoEntity } from "./pagamento.entity";
+import { randomUUID } from "crypto";
 
 export type PagamentoOutput = {
   gatewayRef: string; // id
@@ -20,7 +22,7 @@ export type PagamentoOutput = {
 
 export type GerarCobrancaOutput = {
   gatewayRef: string; // installment
-  pagamentos: PagamentoOutput[];
+  pagamentos: PagamentoEntity[];
 };
 
 const ASAAS_SANDBOX_URL = "https://api-sandbox.asaas.com";
@@ -94,8 +96,8 @@ export class GerarCobrancaGatewayAsaas {
       value: cobranca.valor(),
       dueDate: ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD"),
       description: `Breve descrição para a cobrança`,
-      installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
-      totalValue: cobranca.valor(), // Informe o valor total de uma cobrança que será parcelada (somente no caso de cobrança parcelada). Caso enviado este campo o installmentValue não é necessário, o cálculo por parcela será automático.
+      // installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
+      // totalValue: cobranca.valor(), // Informe o valor total de uma cobrança que será parcelada (somente no caso de cobrança parcelada). Caso enviado este campo o installmentValue não é necessário, o cálculo por parcela será automático.
       creditCard: {
         holderName: cobranca.cartaoCredito()?.nomeNoCartao,
         number: cobranca.cartaoCredito()?.numeroCartao,
@@ -103,12 +105,13 @@ export class GerarCobrancaGatewayAsaas {
         expiryYear: cobranca.cartaoCredito()?.anoVencimento,
         ccv: cobranca.cartaoCredito()?.codigoSeguranca,
       },
+      creditCardToken: cobranca.cartaoCredito()?.token,
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    const pagamentos = await this.buscarParcelas(cobranca, responseCobranca?.data?.installment);
+    // const pagamentos = await this.buscarParcelas(cobranca, responseCobranca?.data?.installment);
     return {
       gatewayRef: responseCobranca?.data?.installment,
-      pagamentos,
+      pagamentos: cobranca.geraPagamentos(),
     };
   }
 
@@ -159,7 +162,7 @@ export class GerarCobrancaGatewayAsaas {
     return this.buscarCliente(cobranca);
   }
 
-  private async buscarParcelas(cobranca: CobrancaEntity, installment: string, linkCartao?: string): Promise<PagamentoOutput[]> {
+  private async buscarParcelas(cobranca: CobrancaEntity, installment: string, linkCartao?: string): Promise<PagamentoEntity[]> {
     try {
       const { token, baseUrl } = await this.buscarToken(cobranca);
       const url = `${baseUrl}/v3/installments/${installment}/payments?limit=24`;
@@ -172,21 +175,21 @@ export class GerarCobrancaGatewayAsaas {
       const response = await this.connectionHub.http?.get(url, { headers });
 
       return response?.data?.data?.map((installment: any) => {
-        return {
-          gatewayRef: installment.id,
+        return new PagamentoEntity({
+          uuid: randomUUID(),
+          bancoRef: installment.id,
+          vencimento: installment.dueDate,
           nossoNumero: installment.nossoNumero,
-          urlBoleto: installment.bankSlipUrl,
-          vancimento: installment.dueDate,
-          linkBoleto: installment.bankSlipUrl,
-          linkCartao: installment.invoiceUrl,
-          codigoBarras: null,
-          linhaDigitavel: null,
           pix: installment.pixTransaction?.qrCode?.payload,
-          valorCobranca: installment.value,
-          valorComDescontoGateway: installment.netValue,
+          linkBoleto: installment.bankSlipUrl,
+          codigoBarras: "",
+          linhaDigitavel: "",
+          valor: cobranca.valor(),
+          valorComDescGateway: installment.netValue,
+          valorPago: 0,
           status: installment.status,
-        };
-      }) as PagamentoOutput[];
+        });
+      }) as PagamentoEntity[];
     } catch (error: any) {
       console.log(error);
       return [];

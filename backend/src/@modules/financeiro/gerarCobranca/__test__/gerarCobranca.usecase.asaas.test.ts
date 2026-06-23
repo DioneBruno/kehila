@@ -39,11 +39,13 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
   });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
     await dataSource.destroy();
     clock.restore();
@@ -245,7 +247,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test("Deve criar cobrança parcelada enviando installmentCount correto - boleto", async () => {
+  test("Tipo cobrança Boleto - Deve criar cobrança parcelada enviando installmentCount", async () => {
     await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
     VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
     const clienteId = "cus_000005113026";
@@ -253,16 +255,20 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const http = repo.connectionHub.http as any;
 
     const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
-      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
-      return Promise.resolve({
-        data: {
-          data: [
-            { id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null },
-            { id: "pay_002", nossoNumero: "002", bankSlipUrl: "url2", dueDate: "2026-08-12", value: 100, netValue: 99, pixTransaction: null },
-            { id: "pay_003", nossoNumero: "003", bankSlipUrl: "url3", dueDate: "2026-09-12", value: 100, netValue: 99, pixTransaction: null },
-          ],
-        },
-      });
+      if (url.includes("v3/customers")) {
+        return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+      }
+      if (url.includes("v3/installments")) {
+        return Promise.resolve({
+          data: {
+            data: [
+              { id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null },
+              { id: "pay_002", nossoNumero: "002", bankSlipUrl: "url2", dueDate: "2026-08-12", value: 100, netValue: 99, pixTransaction: null },
+              { id: "pay_003", nossoNumero: "003", bankSlipUrl: "url3", dueDate: "2026-09-12", value: 100, netValue: 99, pixTransaction: null },
+            ],
+          },
+        });
+      }
     });
     const postStub = stub(http, "post").resolves({ data: { installment: installmentId } });
 
@@ -287,6 +293,70 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].banco_ref).toBe("pay_001");
     expect(pagamentos[1].banco_ref).toBe("pay_002");
     expect(pagamentos[2].banco_ref).toBe("pay_003");
+
+    getStub.restore();
+    postStub.restore();
+  });
+
+  test.skip("Tipo cobrança Cartão - Deve tentar pagamento unico - com sucesso", async () => {
+    const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
+      VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+    });
+    const postStub = stub(http, "post").resolves({
+      data: {
+        installment: installmentId,
+        id: "pay_dqwiqn2ag1fqxrb8",
+        value: 250,
+        netValue: 242.04,
+        status: "CONFIRMED",
+        clientPaymentDate: "2026-06-23",
+      },
+    });
+
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+      pagadorNome: "Pagador de teste 001",
+      pagadorDocumento: "88247744317",
+      pagadorEmail: "emailpagador@gmail.com",
+      pagadorTelefone: "65985455877",
+      vencimento: "2026-07-12",
+      valor: 250,
+      numParcelas: 1,
+    };
+    await new GerarCobrancaUsecase(repo).execute(input);
+
+    // Verifica se request foi feita corretamente
+    expect(postStub.firstCall.args[0]).toContain("v3/payments");
+    const bodyCobranca = postStub.firstCall.args[1];
+    expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
+    expect(postStub.firstCall.args[1].creditCardToken).toBe("Token-do-cartao");
+    expect(postStub.firstCall.args[1].value).toBe(250);
+    expect(postStub.firstCall.args[1].customer).toBe(clienteId);
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
+    expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
+    expect(postStub.firstCall.args[1].installmentCount).toBeUndefined();
+    expect(postStub.firstCall.args[1].totalValue).toBeUndefined();
+    expect(bodyCobranca.installmentCount).toBeUndefined();
+    expect(bodyCobranca.totalValue).toBeUndefined();
+
+    // Verifica que 1 pagamentos foram salvos
+    const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentos.length).toBe(1);
+    console.log(pagamentos[0]);
 
     getStub.restore();
     postStub.restore();

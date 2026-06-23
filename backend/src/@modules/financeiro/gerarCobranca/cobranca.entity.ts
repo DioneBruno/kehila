@@ -1,9 +1,11 @@
 export type CartaoCreditoProps = {
-  nomeNoCartao: string;
-  numeroCartao: string;
-  mesVencimento: string;
-  anoVencimento: string;
-  codigoSeguranca: string;
+  cartaoUuid?: string;
+  token?: string;
+  nomeNoCartao?: string;
+  numeroCartao?: string;
+  mesVencimento?: string;
+  anoVencimento?: string;
+  codigoSeguranca?: string;
 };
 
 export type CobrancaProps = {
@@ -83,5 +85,17 @@ export class CobrancaEntity {
   }
   bancoRef(): string | undefined {
     return this._bancoRef;
+  }
+  geraPagamentos(): any[] {
+    const pagamentos: any[] = [];
+    // for (let i = 0; i < this.props.numParcelas; i++) {
+    //   pagamentos.push({
+    //     codigo: this.props.uuid,
+    //     numero: i + 1,
+    //     vencimento: this.props.vencimento,
+    //     valor: this.props.valor,
+    //   });
+    // }
+    return pagamentos;
   }
 }
