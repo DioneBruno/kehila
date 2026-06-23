@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { CobrancaEntity } from "./cobranca.entity";
 import { GerarCobrancaRepository } from "./gerarCobrancaRepository";
+import { ApiError } from "src/@modules/shared/apiError";
 
 export type GerarCobrancaInput = {
   companyUuid: string;
@@ -25,6 +26,7 @@ export class GerarCobrancaUsecase {
     if (!usuario) throw new Error("Usuário não encontrado.");
     if (input.tipoCobranca === "cartaoCredito") {
       const cartao = usuario.buscarCartao(input?.cartaoUuid as string);
+      if (!cartao) throw new ApiError("Cartão não encontrado");
     }
 
     const gateway = this.repo.buscarGateway();

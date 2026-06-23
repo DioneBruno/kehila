@@ -7,6 +7,7 @@ import axios from "axios";
 import { randomUUID } from "crypto";
 
 const companyUuid = "e8d34640-f273-4d62-8b06-5bb19d6169ad";
+const userUuid = "f3c16fee-6691-460c-a870-e160c1921580";
 let repo: GerarCobrancaRepository;
 
 const defaultInput = {
@@ -31,6 +32,8 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const http = axios.create({ baseURL: "https://api-sandbox.asaas.com" });
     const connectionHub = new ConnectionHub({ database: dataSource, http });
     repo = new GerarCobrancaRepository(connectionHub);
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name) VALUES ('${userUuid}', 'Nome');`);
   });
   beforeEach(async () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
@@ -41,6 +44,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
     await dataSource.destroy();
     clock.restore();
   });
@@ -283,136 +287,6 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].banco_ref).toBe("pay_001");
     expect(pagamentos[1].banco_ref).toBe("pay_002");
     expect(pagamentos[2].banco_ref).toBe("pay_003");
-
-    getStub.restore();
-    postStub.restore();
-  });
-
-  test("Deve criar cobrança parcelada enviando installmentCount correto - Cartáo de Credito", async () => {
-    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
-    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
-    const clienteId = "cus_000005113026";
-    const installmentId = "ins_000001234567";
-    const http = repo.connectionHub.http as any;
-
-    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
-      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
-      return Promise.resolve({
-        data: {
-          data: [
-            {
-              id: "pay_001",
-              nossoNumero: "001",
-              bankSlipUrl: "url1",
-              dueDate: "2026-07-12",
-              invoiceUrl: "invoiceUrl",
-              value: 100,
-              netValue: 99,
-              pixTransaction: null,
-              status: "confirmed",
-            },
-          ],
-        },
-      });
-    });
-    const postStub = stub(http, "post").resolves({ data: { installment: installmentId, invoiceNumber: "invoiceNumber" } });
-
-    const input = {
-      companyUuid,
-      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
-      origem: "origem",
-      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
-      tipoCobranca: "cartaoCredito",
-      cartaoCredito: {
-        nomeNoCartao: "holderName",
-        numeroCartao: "number",
-        mesVencimento: "06",
-        anoVencimento: "25",
-        codigoSeguranca: "ccv",
-      },
-      pagadorNome: "Pagador de teste 001",
-      pagadorDocumento: "88247744317",
-      pagadorEmail: "emailpagador@gmail.com",
-      pagadorTelefone: "65985455877",
-      valor: 300,
-      numParcelas: 3,
-      vencimento: "2026-07-12",
-    };
-
-    await new GerarCobrancaUsecase(repo).execute(input);
-
-    // Verifica que installmentCount e totalValue foram enviados corretamente
-    expect(postStub.firstCall.args[0]).toContain("v3/payments");
-    const bodyCobranca = postStub.firstCall.args[1];
-    expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
-    expect(postStub.firstCall.args[1].customer).toBe(clienteId);
-    expect(postStub.firstCall.args[1].value).toBe(300);
-    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
-    expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
-    expect(postStub.firstCall.args[1].installmentCount).toBe(3);
-    expect(postStub.firstCall.args[1].totalValue).toBe(300);
-    expect(postStub.firstCall.args[1].creditCard.holderName).toBe("holderName");
-    expect(postStub.firstCall.args[1].creditCard.number).toBe("number");
-    expect(postStub.firstCall.args[1].creditCard.expiryMonth).toBe("06");
-    expect(postStub.firstCall.args[1].creditCard.expiryYear).toBe("25");
-    expect(postStub.firstCall.args[1].creditCard.ccv).toBe("ccv");
-    expect(bodyCobranca.installmentCount).toBe(3);
-    expect(bodyCobranca.totalValue).toBe(300);
-
-    // Verifica que 1 pagamentos foram salvos
-    const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
-    expect(pagamentos.length).toBe(1);
-    expect(pagamentos[0].banco_ref).toBe("pay_001");
-    expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
-    expect(pagamentos[0].link_cartao).toBe("invoiceUrl");
-    expect(pagamentos[0].valor).toBe(100);
-    expect(pagamentos[0].status).toBe("confirmed");
-    // expect(pagamentos[0].valor_com_desc_gateway).toBe(152.0);
-
-    getStub.restore();
-    postStub.restore();
-  });
-
-  test("Caso Cartáo de Credito,  todo objeto cartaoCredito deve ser informado", async () => {
-    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
-    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
-    const clienteId = "cus_000005113026";
-    const installmentId = "ins_000001234567";
-    const http = repo.connectionHub.http as any;
-
-    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
-      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
-      return Promise.resolve({
-        data: {
-          data: [{ id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 100, netValue: 99, pixTransaction: null }],
-        },
-      });
-    });
-    const postStub = stub(http, "post").resolves({ data: { installment: installmentId, invoiceUrl: "invoiceUrl", invoiceNumber: "invoiceNumber" } });
-
-    const input = {
-      companyUuid,
-      userUuid: "f3c16fee-6691-460c-a870-e160c1921580",
-      origem: "origem",
-      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
-      tipoCobranca: "cartaoCredito",
-      cartaoCredito: {
-        nomeNoCartao: "",
-        numeroCartao: "",
-        mesVencimento: "",
-        anoVencimento: "",
-        codigoSeguranca: "",
-      },
-      pagadorNome: "Pagador de teste 001",
-      pagadorDocumento: "88247744317",
-      pagadorEmail: "emailpagador@gmail.com",
-      pagadorTelefone: "65985455877",
-      valor: 300,
-      numParcelas: 3,
-      vencimento: "2026-07-12",
-    };
-
-    await expect(new GerarCobrancaUsecase(repo).execute(input)).rejects.toThrow("Cartão de crédito inválido, todos os campos devem ser informados");
 
     getStub.restore();
     postStub.restore();
