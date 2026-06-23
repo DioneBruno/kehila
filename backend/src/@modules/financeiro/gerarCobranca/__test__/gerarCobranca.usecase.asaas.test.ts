@@ -438,4 +438,118 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     getStub.restore();
     postStub.restore();
   });
+
+  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado - com sucesso", async () => {
+    const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
+      VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
+    const clienteId = "cus_000005113026";
+    const installmentId = "ins_000001234567";
+    const http = repo.connectionHub.http as any;
+
+    const getStub: SinonStub = stub(http, "get").callsFake((url: string) => {
+      if (url.includes("v3/customers")) return Promise.resolve({ data: { data: [{ id: clienteId }] } });
+    });
+    const postStub = stub(http, "post").resolves({
+      data: {
+        installment: installmentId,
+        id: "pay_dqwiqn2ag1fqxrb8",
+        value: 125,
+        netValue: 121.02,
+        status: "CONFIRMED",
+        clientPaymentDate: "2026-06-23",
+      },
+    });
+
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+      pagadorNome: "Pagador de teste 001",
+      pagadorDocumento: "88247744317",
+      pagadorEmail: "emailpagador@gmail.com",
+      pagadorTelefone: "65985455877",
+      vencimento: "2026-07-12",
+      valor: 250,
+      numParcelas: 12,
+    };
+    await new GerarCobrancaUsecase(repo).execute(input);
+
+    // Verifica se request foi feita corretamente
+    expect(postStub.firstCall.args[0]).toContain("v3/payments");
+    const bodyCobranca = postStub.firstCall.args[1];
+    expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
+    expect(postStub.firstCall.args[1].creditCardToken).toBe("Token-do-cartao");
+    expect(postStub.firstCall.args[1].value).toBe(20.83);
+    expect(postStub.firstCall.args[1].customer).toBe(clienteId);
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
+    expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
+    expect(postStub.firstCall.args[1].installmentCount).toBeUndefined();
+    expect(postStub.firstCall.args[1].totalValue).toBeUndefined();
+    expect(bodyCobranca.installmentCount).toBeUndefined();
+    expect(bodyCobranca.totalValue).toBeUndefined();
+
+    // Verifica que 2 pagamentos foram salvos
+    const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentos.length).toBe(12);
+    expect(pagamentos[0].banco_ref).toBe("pay_dqwiqn2ag1fqxrb8");
+    expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[0].valor).toBe(20.83);
+    expect(pagamentos[0].valor_com_desc_gateway).toBe(121.02);
+    expect(pagamentos[0].status).toBe("CONFIRMED");
+    expect(pagamentos[0].vencimento).toBe("2026-06-13");
+
+    expect(pagamentos[1].banco_ref).toBeNull();
+    expect(pagamentos[1].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[1].valor).toBe(20.83);
+    expect(pagamentos[1].valor_com_desc_gateway).toBe(0);
+    expect(pagamentos[1].status).toBe("pendente");
+    expect(pagamentos[1].vencimento).toBe("2026-07-13");
+
+    expect(pagamentos[2].banco_ref).toBeNull();
+    expect(pagamentos[2].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[2].valor).toBe(20.83);
+    expect(pagamentos[2].valor_com_desc_gateway).toBe(0);
+    expect(pagamentos[2].status).toBe("pendente");
+    expect(pagamentos[2].vencimento).toBe("2026-08-13");
+
+    expect(pagamentos[3].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[3].valor).toBe(20.83);
+    expect(pagamentos[3].status).toBe("pendente");
+    expect(pagamentos[3].vencimento).toBe("2026-09-13");
+
+    expect(pagamentos[4].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentos[4].valor).toBe(20.83);
+    expect(pagamentos[4].status).toBe("pendente");
+    expect(pagamentos[4].vencimento).toBe("2026-10-13");
+
+    expect(pagamentos[5].valor).toBe(20.83);
+    expect(pagamentos[5].vencimento).toBe("2026-11-13");
+
+    expect(pagamentos[6].valor).toBe(20.83);
+    expect(pagamentos[6].vencimento).toBe("2026-12-13");
+
+    expect(pagamentos[7].valor).toBe(20.83);
+    expect(pagamentos[7].vencimento).toBe("2027-01-13");
+
+    expect(pagamentos[8].valor).toBe(20.83);
+    expect(pagamentos[8].vencimento).toBe("2027-02-13");
+
+    expect(pagamentos[9].valor).toBe(20.83);
+    expect(pagamentos[9].vencimento).toBe("2027-03-13");
+
+    expect(pagamentos[10].valor).toBe(20.83);
+    expect(pagamentos[10].vencimento).toBe("2027-04-13");
+
+    expect(pagamentos[11].valor).toBe(20.87);
+    expect(pagamentos[11].vencimento).toBe("2027-05-13");
+
+    getStub.restore();
+    postStub.restore();
+  });
 });

@@ -90,7 +90,7 @@ export class CobrancaEntity {
     return this._bancoRef;
   }
   geraCartaoPagamentos(primeiraParcela: { bancoRef: string; valor: number; valorComDescGateway: number; status: string }): PagamentoEntity[] {
-    return [
+    const pagamentos = [
       new PagamentoEntity({
         uuid: randomUUID(),
         bancoRef: primeiraParcela.bancoRef,
@@ -106,5 +106,23 @@ export class CobrancaEntity {
         status: primeiraParcela.status,
       }),
     ];
+    for (let i = 1; i < this.totalParcelas(); i++) {
+      pagamentos.push(
+        new PagamentoEntity({
+          uuid: randomUUID(),
+          vencimento: this.props.vencimento ?? "",
+          nossoNumero: "",
+          pix: "",
+          linkBoleto: "",
+          codigoBarras: "",
+          linhaDigitavel: "",
+          valor: primeiraParcela.valor,
+          valorComDescGateway: primeiraParcela.valorComDescGateway,
+          valorPago: 0,
+          status: "pendente",
+        }),
+      );
+    }
+    return pagamentos;
   }
 }

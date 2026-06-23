@@ -1,6 +1,6 @@
 export type PagamentoProps = {
   uuid: string;
-  bancoRef: string;
+  bancoRef?: string;
   vencimento: string;
   nossoNumero: string;
   pix: string;
@@ -19,7 +19,7 @@ export class PagamentoEntity {
   uuid(): string {
     return this.props.uuid;
   }
-  bancoRef(): string {
+  bancoRef(): string | undefined {
     return this.props.bancoRef;
   }
   vencimento(): string {

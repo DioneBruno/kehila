@@ -93,7 +93,7 @@ export class GerarCobrancaGatewayAsaas {
       externalReference: cobranca.uuid(),
       billingType: this.tipoCobranca(cobranca), //BOLETO, CREDIT_CARD, PIX
       customer: cliente.id,
-      value: cobranca.valor(),
+      value: cobranca.valor() / cobranca.totalParcelas(),
       dueDate: ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD"),
       description: `Breve descrição para a cobrança`,
       // installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
