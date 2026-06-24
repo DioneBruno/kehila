@@ -75,4 +75,18 @@ export class GerarCobrancaRepository {
       );
     }
   }
+
+  async setarCartaoAtual(cobranca: CobrancaEntity, cartaoUuid: string) {
+    await this.connectionHub.database!.query(
+      `UPDATE financeiro_cartao_credito
+      SET atual = false
+      WHERE user_uuid = '${cobranca.userUuid()}'`,
+    );
+    await this.connectionHub.database!.query(
+      `UPDATE financeiro_cartao_credito
+      SET atual = true
+      WHERE user_uuid = '${cobranca.userUuid()}'
+        AND uuid = '${cartaoUuid}'`,
+    );
+  }
 }

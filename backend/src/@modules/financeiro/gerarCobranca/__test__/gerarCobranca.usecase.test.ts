@@ -254,4 +254,141 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     };
     await expect(usecase.execute(input)).rejects.toThrow("Cartão não encontrado");
   });
+
+  test("Pagamento com cartao - Deve realizar pagamento setar cartão como atual", async () => {
+    const cartaoUuid = "8eaa5057-f6d4-4bc1-b72f-5a0a633fc30a";
+
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token, atual)
+      VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'token1', false),
+      ('${randomUUID()}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'token2', true),
+      ('${randomUUID()}', '${companyUuid}', '${companyUuid}', '${companyUuid}', 'token3', true);`);
+
+    const gateway = {
+      gerarCobranca: () => {
+        return {
+          gatewayRef: "cobancaBancoRef",
+          pagamentos: [
+            new PagamentoEntity({
+              uuid: randomUUID(),
+              bancoRef: "pagamentoBancoRef1",
+              nossoNumero: "nossoNumero1",
+              linkBoleto: "urlBoleto1",
+              vencimento: "2026-06-10",
+              codigoBarras: "codigoBarras1",
+              linhaDigitavel: "linhaDigitavel1",
+              pix: "pix1",
+              valor: 250,
+              valorComDescGateway: 245,
+              valorPago: 0,
+              status: "CONFIRMED",
+            }),
+          ],
+        };
+      },
+    };
+    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway as any);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      pagadorNome: "nome do pagador",
+      pagadorDocumento: "12345678909",
+      pagadorEmail: "email@dopagador.com",
+      pagadorTelefone: "1199999999",
+      valor: 250,
+      vencimento: "2026-06-10",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+    };
+    await usecase.execute(input);
+
+    const cartoesModel = await dataSource.query(`SELECT * FROM financeiro_cartao_credito WHERE company_uuid = '${companyUuid}' ORDER BY index`);
+    expect(cartoesModel.length).toBe(3);
+    expect(cartoesModel[0].atual).toBe(true);
+    expect(cartoesModel[1].atual).toBe(false);
+    expect(cartoesModel[2].atual).toBe(true);
+
+    buscarGatewayStub.restore();
+  });
+
+  test("Pagamento com cartao - Deve realizar pagamento pagamento unico", async () => {
+    const cartaoUuid = "8eaa5057-f6d4-4bc1-b72f-5a0a633fc30a";
+
+    await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
+      VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'token1');`);
+
+    const gateway = {
+      gerarCobranca: () => {
+        return {
+          gatewayRef: "cobancaBancoRef",
+          pagamentos: [
+            new PagamentoEntity({
+              uuid: randomUUID(),
+              bancoRef: "pagamentoBancoRef1",
+              nossoNumero: "nossoNumero1",
+              linkBoleto: "urlBoleto1",
+              vencimento: "2026-06-10",
+              codigoBarras: "codigoBarras1",
+              linhaDigitavel: "linhaDigitavel1",
+              pix: "pix1",
+              valor: 250,
+              valorComDescGateway: 245,
+              valorPago: 0,
+              status: "CONFIRMED",
+            }),
+          ],
+        };
+      },
+    };
+    const buscarGatewayStub = stub(repo, "buscarGateway").returns(gateway as any);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      origem: "origem",
+      origemUuid: "4355c2d0-b479-4c57-b6b2-b97ed086e467",
+      pagadorNome: "nome do pagador",
+      pagadorDocumento: "12345678909",
+      pagadorEmail: "email@dopagador.com",
+      pagadorTelefone: "1199999999",
+      valor: 250,
+      vencimento: "2026-06-10",
+      tipoCobranca: "cartaoCredito",
+      cartaoUuid,
+    };
+    await usecase.execute(input);
+
+    const cobrancaModel = await dataSource.query(`SELECT * FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
+    expect(cobrancaModel.length).toBe(1);
+    expect(cobrancaModel[0].user_uuid).toBe(input.userUuid);
+    expect(cobrancaModel[0].origem_tipo).toBe(input.origem);
+    expect(cobrancaModel[0].origem_uuid).toBe(input.origemUuid);
+    expect(cobrancaModel[0].banco_ref).toBe("cobancaBancoRef");
+    expect(cobrancaModel[0].valor).toBe("250.00");
+    expect(cobrancaModel[0].status).toBe("pendente");
+    expect(cobrancaModel[0].pagador_nome).toBe("nome do pagador");
+    expect(cobrancaModel[0].pagador_documento).toBe("12345678909");
+    expect(cobrancaModel[0].pagador_email).toBe("email@dopagador.com");
+    expect(cobrancaModel[0].pagamentos_quantidade).toBe(1);
+
+    const pagamentosModel = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentosModel.length).toBe(1);
+    expect(pagamentosModel[0].forma_pagamento).toBe("cartaoCredito");
+    expect(pagamentosModel[0].banco_ref).toBe("pagamentoBancoRef1");
+    expect(pagamentosModel[0].status).toBe("CONFIRMED");
+    expect(pagamentosModel[0].vencimento).toBe("2026-06-10");
+    expect(pagamentosModel[0].valor).toBe(250);
+    expect(pagamentosModel[0].valor_com_desc_gateway).toBe(245);
+    expect(pagamentosModel[0].status).toBe("CONFIRMED");
+    expect(pagamentosModel[0].nosso_numero).toBe("nossoNumero1");
+    expect(pagamentosModel[0].codigo_barras).toBe("codigoBarras1");
+    expect(pagamentosModel[0].linha_digitavel).toBe("linhaDigitavel1");
+    expect(pagamentosModel[0].pix).toBe("pix1");
+
+    buscarGatewayStub.restore();
+  });
 });

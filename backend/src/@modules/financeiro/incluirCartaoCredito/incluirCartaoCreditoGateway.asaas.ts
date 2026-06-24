@@ -49,7 +49,7 @@ export class IncluirCartaoCreditoGatewayAsaas {
       };
     } catch (error: any) {
       console.log(error.response?.data);
-      throw error;
+      throw new ApiError(error.response?.data?.errors[0].description, 400);
     }
   }
 

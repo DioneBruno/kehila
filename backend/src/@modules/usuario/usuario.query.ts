@@ -70,13 +70,14 @@ export class UsuarioQuery {
         uuid,
         RIGHT(numero, 4) AS numero,
         bandeira,
-        status
+        status,
+        atual
       FROM financeiro_cartao_credito
       WHERE deleted_at IS NULL
         AND user_uuid = $1`,
       [userUuid],
     );
 
-    return { ...usuarioModel, cartoes  };
+    return { ...usuarioModel, cartoes };
   }
 }

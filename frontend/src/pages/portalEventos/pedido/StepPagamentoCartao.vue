@@ -82,10 +82,15 @@
       </q-select>
     </div>
 
+    <div class="col-12" v-if="cartaoSelecionadoUuid === null">
+      <span class="text-negative">* Selecione um cartão para continuar</span>
+    </div>
+
     <div class="col-12">
       <q-btn
         no-caps
         unelevated
+        :disable="cartaoSelecionadoUuid === null"
         class="full-width"
         color="primary"
         icon="credit_card"
@@ -308,7 +313,7 @@
 
 <script lang="ts">
 import type { PropType } from "vue";
-import { computed, defineComponent, reactive, ref, toRefs, watch } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue";
 import { Notify } from "quasar";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
@@ -404,6 +409,13 @@ export default defineComponent({
         pagadorEmail: "",
         pagadorTelefone: "",
       }),
+    });
+
+    onMounted(() => {
+      const cartaoAtual = data.user.cartoes.find((c: any) => c.atual);
+      if (cartaoAtual) {
+        data.cartaoSelecionadoUuid = cartaoAtual.uuid;
+      }
     });
 
     function abrirDialog() {
