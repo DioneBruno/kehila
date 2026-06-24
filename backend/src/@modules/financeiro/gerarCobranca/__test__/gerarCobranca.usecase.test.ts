@@ -4,6 +4,8 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 import axios from "axios";
+import { PagamentoEntity } from "../pagamento.entity";
+import { randomUUID } from "crypto";
 
 const companyUuid = "e4d4e1a7-53d4-4c25-9ebf-614c28bfb4e4";
 const userUuid = "14433838-52a6-4802-9d79-13fbb2e447e0";
@@ -40,17 +42,20 @@ describe("Deve testar GerarCobrancaUsecas", () => {
         return {
           gatewayRef: "cobancaBancoRef",
           pagamentos: [
-            {
-              gatewayRef: "pagamentoBancoRef",
+            new PagamentoEntity({
+              uuid: randomUUID(),
+              bancoRef: "pagamentoBancoRef",
               nossoNumero: "nossoNumero",
-              urlBoleto: "urlBoleto",
-              vancimento: "2026-06-10",
+              linkBoleto: "urlBoleto",
+              vencimento: "2026-06-10",
               codigoBarras: "codigoBarras",
               linhaDigitavel: "linhaDigitavel",
               pix: "pix",
-              valorCobranca: 154.36,
-              valorComDescontoGateway: 144.36,
-            },
+              valor: 154.36,
+              valorComDescGateway: 144.36,
+              valorPago: 0,
+              status: "pendente",
+            }),
           ],
         };
       },
@@ -107,39 +112,48 @@ describe("Deve testar GerarCobrancaUsecas", () => {
         return {
           gatewayRef: "cobancaBancoRef",
           pagamentos: [
-            {
-              gatewayRef: "pagamentoBancoRef1",
+            new PagamentoEntity({
+              uuid: randomUUID(),
+              bancoRef: "pagamentoBancoRef1",
               nossoNumero: "nossoNumero1",
-              urlBoleto: "urlBoleto1",
-              vancimento: "2026-06-10",
+              linkBoleto: "urlBoleto1",
+              vencimento: "2026-06-10",
               codigoBarras: "codigoBarras1",
               linhaDigitavel: "linhaDigitavel1",
               pix: "pix1",
-              valorCobranca: 100,
-              valorComDescontoGateway: 99,
-            },
-            {
-              gatewayRef: "pagamentoBancoRef2",
+              valor: 100,
+              valorComDescGateway: 99,
+              valorPago: 0,
+              status: "pendente",
+            }),
+            new PagamentoEntity({
+              uuid: randomUUID(),
+              bancoRef: "pagamentoBancoRef2",
               nossoNumero: "nossoNumero2",
-              urlBoleto: "urlBoleto2",
-              vancimento: "2026-07-10",
+              linkBoleto: "urlBoleto2",
+              vencimento: "2026-07-10",
               codigoBarras: "codigoBarras2",
               linhaDigitavel: "linhaDigitavel2",
               pix: "pix2",
-              valorCobranca: 100,
-              valorComDescontoGateway: 99,
-            },
-            {
-              gatewayRef: "pagamentoBancoRef3",
+              valor: 100,
+              valorComDescGateway: 99,
+              valorPago: 0,
+              status: "pendente",
+            }),
+            new PagamentoEntity({
+              uuid: randomUUID(),
+              bancoRef: "pagamentoBancoRef3",
               nossoNumero: "nossoNumero3",
-              urlBoleto: "urlBoleto3",
-              vancimento: "2026-08-10",
+              linkBoleto: "urlBoleto3",
+              vencimento: "2026-08-10",
               codigoBarras: "codigoBarras3",
               linhaDigitavel: "linhaDigitavel3",
               pix: "pix3",
-              valorCobranca: 100,
-              valorComDescontoGateway: 99,
-            },
+              valor: 100,
+              valorComDescGateway: 99,
+              valorPago: 0,
+              status: "pendente",
+            }),
           ],
         };
       },
