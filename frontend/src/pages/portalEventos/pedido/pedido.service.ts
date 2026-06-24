@@ -101,6 +101,7 @@ export class PedidoService {
       await this.pedidoHttp.gerarCobranca(input);
       await this.buscarPedido(this.$pedidoStore.$state.pedido.uuid);
     } catch (error) {
+      console.log(error);
     } finally {
       this.$q.loading.hide();
     }

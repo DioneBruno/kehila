@@ -65,6 +65,36 @@
         />
       </q-banner>
     </div>
+    <div class="col-12">
+      <q-select
+        dense
+        outlined
+        stack-label
+        v-model.number="pagador.numParcelas"
+        label="Número de parcelas"
+        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]"
+        lazy-rules
+        :rules="[(val) => (val && val > 0) || 'Campo obrigatório']"
+      >
+        <template #prepend>
+          <q-icon name="splitscreen" color="grey-6" size="18px" />
+        </template>
+      </q-select>
+    </div>
+
+    <div class="col-12">
+      <q-btn
+        no-caps
+        unelevated
+        class="full-width"
+        color="primary"
+        icon="credit_card"
+        label="Pagar com Cartão"
+        size="md"
+        padding="sm md"
+        @click="gerarCobranca"
+      />
+    </div>
 
     <q-dialog v-model="mostrarDialog">
       <q-card style="width: 700px; max-width: 95vw">
@@ -326,7 +356,7 @@ export default defineComponent({
     opcoesParcelas: { type: Array as PropType<OpcaoParcela[]>, required: true },
   },
   emits: ["update:cartao"],
-  setup(props, { emit }) {
+  setup() {
     const $service = new PedidoService();
     const $messageConfirmationService = new MessageConfirmationService();
     const $pedidoStore = usePedidoStore();
@@ -365,6 +395,8 @@ export default defineComponent({
       }),
       pagador: ref({
         pedidoUuid: null as string | null,
+        tipoCobranca: "cartaoCredito",
+        cartaoUuid: "",
         numParcelas: 1,
         tipoPagador: "usuarioLogado",
         pagadorNome: "",
@@ -457,19 +489,20 @@ export default defineComponent({
 
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
-      const [mes, ano] = data.pagador.cartao.validade.split("/");
+      // const [mes, ano] = data.pagador.cartao.validade.split("/");
       const payload = {
         pedidoUuid: data.pagador.pedidoUuid,
         numParcelas: data.pagador.numParcelas,
         tipoPagador: data.pagador.tipoPagador,
         tipoCobranca: "cartaoCredito",
-        cartaoCredito: {
-          numeroCartao: data.pagador.cartao.numero.replace(/\s/g, ""),
-          nomeNoCartao: data.pagador.cartao.nome,
-          mesVencimento: mes,
-          anoVencimento: ano,
-          codigoSeguranca: data.pagador.cartao.cvv,
-        },
+        cartaoUuid: data.cartaoSelecionadoUuid,
+        // cartaoCredito: {
+        //   numeroCartao: data.pagador.cartao.numero.replace(/\s/g, ""),
+        //   nomeNoCartao: data.pagador.cartao.nome,
+        //   mesVencimento: mes,
+        //   anoVencimento: ano,
+        //   codigoSeguranca: data.pagador.cartao.cvv,
+        // },
       };
       await $service.gerarCobranca(payload);
     }

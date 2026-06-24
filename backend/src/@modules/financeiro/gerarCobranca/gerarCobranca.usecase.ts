@@ -23,11 +23,11 @@ export class GerarCobrancaUsecase {
 
   async execute(input: GerarCobrancaInput): Promise<any> {
     const usuario = await this.repo.buscarUsuario(input.userUuid);
-    if (!usuario) throw new Error("Usuário não encontrado.");
+    if (!usuario) throw new ApiError("Usuário não encontrado.", 400);
     let cartao;
     if (input.tipoCobranca === "cartaoCredito") {
       cartao = usuario.buscarCartao(input?.cartaoUuid as string);
-      if (!cartao) throw new ApiError("Cartão não encontrado");
+      if (!cartao) throw new ApiError("Cartão não encontrado", 400);
     }
 
     const gateway = this.repo.buscarGateway();

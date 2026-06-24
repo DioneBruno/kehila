@@ -45,7 +45,13 @@ export class GerarCobrancaUsecase {
             telefone: input.pagadorTelefone || "",
           });
 
-    await this.repo.criarCobranca(pedido, pagador, input.numParcelas ?? 1, input.tipoCobranca, input.cartaoUuid);
+    await this.repo.criarCobranca({
+      pedido,
+      pagador,
+      numParcelas: input.numParcelas ?? 1,
+      tipoCobranca: input.tipoCobranca,
+      cartaoUuid: input.cartaoUuid,
+    });
     await this.repo.atualizarStatusPedidoParaPagamentoGerado(pedido.uuid());
   }
 }

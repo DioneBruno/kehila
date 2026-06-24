@@ -89,7 +89,7 @@ export class GerarCobrancaGatewayAsaas {
       "content-type": "application/json",
       access_token: token,
     };
-    const dueDate = ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD") as string;
+    const dueDate = ApiDate.format(ApiDate.addDay(ApiDate.now(), 0), "YYYY-MM-DD") as string;
     const valorParcela = Math.round((cobranca.valor() / cobranca.totalParcelas()) * 100) / 100;
     const body = {
       externalReference: cobranca.uuid(),
@@ -100,17 +100,20 @@ export class GerarCobrancaGatewayAsaas {
       description: `Breve descrição para a cobrança`,
       // installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
       // totalValue: cobranca.valor(), // Informe o valor total de uma cobrança que será parcelada (somente no caso de cobrança parcelada). Caso enviado este campo o installmentValue não é necessário, o cálculo por parcela será automático.
-      creditCard: {
-        holderName: cobranca.cartaoCredito()?.nomeNoCartao,
-        number: cobranca.cartaoCredito()?.numeroCartao,
-        expiryMonth: cobranca.cartaoCredito()?.mesVencimento,
-        expiryYear: cobranca.cartaoCredito()?.anoVencimento,
-        ccv: cobranca.cartaoCredito()?.codigoSeguranca,
-      },
+      // creditCard: {
+      //   holderName: cobranca.cartaoCredito()?.nomeNoCartao,
+      //   number: cobranca.cartaoCredito()?.numeroCartao,
+      //   expiryMonth: cobranca.cartaoCredito()?.mesVencimento,
+      //   expiryYear: cobranca.cartaoCredito()?.anoVencimento,
+      //   ccv: cobranca.cartaoCredito()?.codigoSeguranca,
+      // },
       creditCardToken: cobranca.cartaoCredito()?.token,
     };
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    if (responseCobranca?.data?.status !== "CONFIRMED") throw new ApiError("Tivemos problemas para identificar o pagamento", 400);
+    if (responseCobranca?.data?.status !== "CONFIRMED") {
+      // console.error(responseCobranca?.data);
+      throw new ApiError("Tivemos problemas para identificar o pagamento", 400);
+    }
     const primeiroPagamento = {
       bancoRef: responseCobranca?.data?.id,
       valor: valorParcela,

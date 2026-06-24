@@ -64,30 +64,30 @@ export class GerarCobrancaRepository {
     );
   }
 
-  async criarCobranca(
-    pedido: PedidoEntity,
-    pagador: PagadorEntity,
-    numParcelas: number,
-    tipoCobranca?: string,
-    cartaoUuid?: string,
-  ): Promise<void> {
+  async criarCobranca(input: {
+    pedido: PedidoEntity;
+    pagador: PagadorEntity;
+    numParcelas: number;
+    tipoCobranca?: string;
+    cartaoUuid?: string;
+  }): Promise<void> {
     const repo = new FinanceiroGerarCobrancaRepository(this.connectionHub);
     const usecase = new GerarCobrancaUsecase(repo);
-    const input = {
-      companyUuid: pedido.companyUuid(),
-      userUuid: pedido.userUuid(),
+    const inputGerarCobranca = {
+      companyUuid: input.pedido.companyUuid(),
+      userUuid: input.pedido.userUuid(),
       origem: "eventoPedido",
-      origemUuid: pedido.uuid(),
-      pagadorNome: pagador.nome(),
-      numParcelas,
-      pagadorDocumento: pagador.documento(),
-      pagadorEmail: pagador.email(),
-      pagadorTelefone: pagador.telefone(),
-      valor: pedido.valorTotal(),
-      tipoCobranca,
-      cartaoUuid,
+      origemUuid: input.pedido.uuid(),
+      pagadorNome: input.pagador.nome(),
+      numParcelas: input.numParcelas,
+      pagadorDocumento: input.pagador.documento(),
+      pagadorEmail: input.pagador.email(),
+      pagadorTelefone: input.pagador.telefone(),
+      valor: input.pedido.valorTotal(),
+      tipoCobranca: input.tipoCobranca,
+      cartaoUuid: input.cartaoUuid,
     };
-    await usecase.execute(input);
+    await usecase.execute(inputGerarCobranca);
   }
 
   async criarCobrancaIngresso(pedido: PedidoEntity, ingresso: IngressoEntity, valor: number, numParcelas: number): Promise<void> {
@@ -108,9 +108,8 @@ export class GerarCobrancaRepository {
   }
 
   async atualizarStatusPedidoParaPagamentoGerado(pedidoUuid: string): Promise<void> {
-    await this.connectionHub.database!.query(
-      `UPDATE evento_pedidos SET status = 'pagamento_gerado', updated_at = now() WHERE uuid = $1`,
-      [pedidoUuid],
-    );
+    await this.connectionHub.database!.query(`UPDATE evento_pedidos SET status = 'pagamento_gerado', updated_at = now() WHERE uuid = $1`, [
+      pedidoUuid,
+    ]);
   }
 }
