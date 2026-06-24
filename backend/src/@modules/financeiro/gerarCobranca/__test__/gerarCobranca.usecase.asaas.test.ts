@@ -27,7 +27,7 @@ let clock: sinon.SinonFakeTimers;
 
 describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
   beforeAll(async () => {
-    clock = useFakeTimers({ now: new Date("2026-06-13"), toFake: ["Date"] });
+    clock = useFakeTimers({ now: new Date("2026-06-13 01:00:00"), toFake: ["Date"] });
     await dataSource.initialize();
     const http = axios.create({ baseURL: "https://api-sandbox.asaas.com" });
     const connectionHub = new ConnectionHub({ database: dataSource, http });
@@ -280,7 +280,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(postStub.firstCall.args[1].billingType).toBe("BOLETO");
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].value).toBe(300);
-    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-14");
     expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
     expect(postStub.firstCall.args[1].installmentCount).toBe(3);
     expect(postStub.firstCall.args[1].totalValue).toBe(300);
@@ -291,8 +291,14 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const pagamentos = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentos.length).toBe(3);
     expect(pagamentos[0].banco_ref).toBe("pay_001");
+    expect(pagamentos[0].valor).toBe(100);
+    expect(pagamentos[0].valor_com_desc_gateway).toBe(99);
     expect(pagamentos[1].banco_ref).toBe("pay_002");
+    expect(pagamentos[1].valor).toBe(100);
+    expect(pagamentos[1].valor_com_desc_gateway).toBe(99);
     expect(pagamentos[2].banco_ref).toBe("pay_003");
+    expect(pagamentos[2].valor).toBe(100);
+    expect(pagamentos[2].valor_com_desc_gateway).toBe(99);
 
     getStub.restore();
     postStub.restore();
