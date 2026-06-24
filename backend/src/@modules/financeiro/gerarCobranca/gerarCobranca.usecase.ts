@@ -52,7 +52,7 @@ export class GerarCobrancaUsecase {
     });
     const result = await gateway.gerarCobranca(cobranca);
     cobranca.setBancoRef(result.gatewayRef);
-    await this.repo.savarCobranca(cobranca);
+    await this.repo.savarCobranca(cobranca, result.pagamentos.length);
     await this.repo.savarPagamentos(cobranca, result.pagamentos);
   }
 }

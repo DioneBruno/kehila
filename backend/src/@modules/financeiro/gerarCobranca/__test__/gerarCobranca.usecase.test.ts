@@ -88,6 +88,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(cobrancaModel[0].pagador_nome).toBe("nome do pagador");
     expect(cobrancaModel[0].pagador_documento).toBe("12345678909");
     expect(cobrancaModel[0].pagador_email).toBe("email@dopagador.com");
+    expect(cobrancaModel[0].pagamentos_quantidade).toBe(1);
 
     const pagamentosModel = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentosModel.length).toBe(1);
@@ -187,6 +188,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(cobrancaModel[0].pagador_nome).toBe("nome do pagador");
     expect(cobrancaModel[0].pagador_documento).toBe("12345678909");
     expect(cobrancaModel[0].pagador_email).toBe("email@dopagador.com");
+    expect(cobrancaModel[0].pagamentos_quantidade).toBe(3);
 
     const pagamentosModel = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     expect(pagamentosModel.length).toBe(3);
@@ -250,6 +252,6 @@ describe("Deve testar GerarCobrancaUsecas", () => {
       tipoCobranca: "cartaoCredito",
       cartaoUuid,
     };
-    await expect(usecase.execute(input)).rejects.toThrow("Cartão não encontrado.");
+    await expect(usecase.execute(input)).rejects.toThrow("Cartão não encontrado");
   });
 });

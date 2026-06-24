@@ -29,10 +29,10 @@ export class GerarCobrancaRepository {
     });
   }
 
-  async savarCobranca(cobranca: CobrancaEntity): Promise<void> {
+  async savarCobranca(cobranca: CobrancaEntity, quantidadeParcelas: number): Promise<void> {
     await this.connectionHub.database!.query(
-      `INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid, origem_tipo, origem_uuid, pagador_nome, pagador_documento, pagador_email, pagador_telefone, valor, banco_ref)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      `INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid, origem_tipo, origem_uuid, pagador_nome, pagador_documento, pagador_email, pagador_telefone, valor, banco_ref, pagamentos_quantidade)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         cobranca.uuid(),
         cobranca.companyUuid(),
@@ -45,6 +45,7 @@ export class GerarCobrancaRepository {
         cobranca.pagadorTelefone(),
         cobranca.valor(),
         cobranca.bancoRef(),
+        quantidadeParcelas,
       ],
     );
   }
