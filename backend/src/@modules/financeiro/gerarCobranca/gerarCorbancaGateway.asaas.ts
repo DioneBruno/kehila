@@ -193,7 +193,7 @@ export class GerarCobrancaGatewayAsaas {
           linkBoleto: installment.bankSlipUrl,
           codigoBarras: "",
           linhaDigitavel: "",
-          valor: cobranca.valor(),
+          valor: installment.value,
           valorComDescGateway: installment.netValue,
           valorPago: 0,
           status: installment.status,
