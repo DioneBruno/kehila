@@ -173,7 +173,16 @@ export class PortalEventosQuery {
         cobrancas.pagador_nome "pagadorNome",
         cobrancas.pagador_documento "pagadorDocumento",
         cobrancas.valor "valor",
-        cobrancas.valor_pago "valorPago",
+        COALESCE(
+          (
+            SELECT SUM(p.valor_pago)
+            FROM financeiro_pagamentos p
+            WHERE p.deleted_at IS NULL
+              AND p.cobanca_uuid = cobrancas.uuid
+              AND p.status IN ('pago', 'CONFIRMED')
+          ),
+          0
+        ) "valorPago",
         cobrancas.status,
         COALESCE(
           (

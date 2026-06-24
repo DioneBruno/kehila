@@ -336,7 +336,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
               pix: "pix1",
               valor: 250,
               valorComDescGateway: 245,
-              valorPago: 0,
+              valorPago: 250,
               status: "CONFIRMED",
             }),
           ],
@@ -383,6 +383,7 @@ describe("Deve testar GerarCobrancaUsecas", () => {
     expect(pagamentosModel[0].vencimento).toBe("2026-06-10");
     expect(pagamentosModel[0].valor).toBe(250);
     expect(pagamentosModel[0].valor_com_desc_gateway).toBe(245);
+    expect(pagamentosModel[0].valor_pago).toBe("250.00");
     expect(pagamentosModel[0].status).toBe("CONFIRMED");
     expect(pagamentosModel[0].nosso_numero).toBe("nossoNumero1");
     expect(pagamentosModel[0].codigo_barras).toBe("codigoBarras1");

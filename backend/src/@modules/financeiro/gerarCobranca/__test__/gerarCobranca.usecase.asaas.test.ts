@@ -366,6 +366,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[0].valor).toBe(250);
     expect(pagamentos[0].valor_com_desc_gateway).toBe(242.04);
+    expect(pagamentos[0].valor_pago).toBe("250.00");
 
     getStub.restore();
     postStub.restore();
@@ -433,12 +434,14 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[0].valor).toBe(125);
     expect(pagamentos[0].valor_com_desc_gateway).toBe(121.02);
+    expect(pagamentos[0].valor_pago).toBe("125.00");
     expect(pagamentos[0].status).toBe("CONFIRMED");
 
     expect(pagamentos[1].banco_ref).toBeNull();
     expect(pagamentos[1].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[1].valor).toBe(125);
     expect(pagamentos[1].valor_com_desc_gateway).toBe(0);
+    expect(pagamentos[1].valor_pago).toBe("0.00");
     expect(pagamentos[1].status).toBe("pendente");
 
     getStub.restore();
@@ -507,6 +510,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[0].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[0].valor).toBe(20.83);
     expect(pagamentos[0].valor_com_desc_gateway).toBe(121.02);
+    expect(pagamentos[0].valor_pago).toBe("20.83");
     expect(pagamentos[0].status).toBe("CONFIRMED");
     expect(pagamentos[0].vencimento).toBe("2026-06-13");
 
@@ -514,6 +518,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[1].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[1].valor).toBe(20.83);
     expect(pagamentos[1].valor_com_desc_gateway).toBe(0);
+    expect(pagamentos[1].valor_pago).toBe("0.00");
     expect(pagamentos[1].status).toBe("pendente");
     expect(pagamentos[1].vencimento).toBe("2026-07-13");
 
@@ -521,11 +526,14 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[2].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[2].valor).toBe(20.83);
     expect(pagamentos[2].valor_com_desc_gateway).toBe(0);
+    expect(pagamentos[2].valor_pago).toBe("0.00");
     expect(pagamentos[2].status).toBe("pendente");
     expect(pagamentos[2].vencimento).toBe("2026-08-13");
 
     expect(pagamentos[3].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[3].valor).toBe(20.83);
+    expect(pagamentos[3].valor_com_desc_gateway).toBe(0);
+    expect(pagamentos[3].valor_pago).toBe("0.00");
     expect(pagamentos[3].status).toBe("pendente");
     expect(pagamentos[3].vencimento).toBe("2026-09-13");
 

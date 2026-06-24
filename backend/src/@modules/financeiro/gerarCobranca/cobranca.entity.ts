@@ -112,7 +112,7 @@ export class CobrancaEntity {
         linhaDigitavel: "",
         valor: primeiraParcela.valor,
         valorComDescGateway: primeiraParcela.valorComDescGateway,
-        valorPago: 0,
+        valorPago: primeiraParcela.valor,
         status: primeiraParcela.status,
       }),
     ];
