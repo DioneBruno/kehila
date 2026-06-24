@@ -20,12 +20,18 @@ export class PedidoService {
   constructor() {}
 
   async verificaUsuario() {
-    const authCookies = new AuthCookiesQuasar();
-    const token = authCookies.getToken();
-    if (!token) return;
-    const response = await this.authHttp.me();
-    this.$authStore.setUser(response.user);
-    return response;
+    try {
+      this.$q.loading.show();
+      const authCookies = new AuthCookiesQuasar();
+      const token = authCookies.getToken();
+      if (!token) return;
+      const response = await this.authHttp.me();
+      this.$authStore.setUser(response.user);
+      return response;
+    } catch (error) {
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 
   async buscaEvento(eventoUuid: string) {

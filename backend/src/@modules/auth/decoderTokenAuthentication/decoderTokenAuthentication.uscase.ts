@@ -1,3 +1,4 @@
+import { ApiError } from "src/@modules/shared/apiError";
 import { ApiJwt } from "src/@modules/shared/apiJwt";
 
 export type DecoderTokenAuthenticationInput = {
@@ -22,6 +23,7 @@ export class DecoderTokenAuthenticationUsecase {
 
   execute(input: DecoderTokenAuthenticationInput): DecoderTokenAuthenticationOutput {
     const payload = ApiJwt.tokenDecoding(input.token);
+    if (!payload) throw new ApiError("", 401);
     return {
       company: {
         uuid: payload?.company?.uuid || "",
