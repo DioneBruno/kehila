@@ -365,7 +365,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado - com sucesso", async () => {
+  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado 2x - com sucesso", async () => {
     const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
     await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
       VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
@@ -432,14 +432,14 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     expect(pagamentos[1].banco_ref).toBeNull();
     expect(pagamentos[1].forma_pagamento).toBe("cartaoCredito");
     expect(pagamentos[1].valor).toBe(125);
-    expect(pagamentos[1].valor_com_desc_gateway).toBe(121.02);
+    expect(pagamentos[1].valor_com_desc_gateway).toBe(0);
     expect(pagamentos[1].status).toBe("pendente");
 
     getStub.restore();
     postStub.restore();
   });
 
-  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado - com sucesso", async () => {
+  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado 12x - com sucesso", async () => {
     const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
     await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
       VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);

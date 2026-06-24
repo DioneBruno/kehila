@@ -1,5 +1,14 @@
 import { randomUUID } from "crypto";
 import { PagamentoEntity } from "./pagamento.entity";
+import { ApiDate } from "src/@modules/shared/apiDate";
+
+export type PrimeiraParcelaCartao = {
+  bancoRef: string;
+  valor: number;
+  valorComDescGateway: number;
+  status: string;
+  vencimento: string;
+};
 
 export type CartaoCreditoProps = {
   cartaoUuid?: string;
@@ -89,12 +98,13 @@ export class CobrancaEntity {
   bancoRef(): string | undefined {
     return this._bancoRef;
   }
-  geraCartaoPagamentos(primeiraParcela: { bancoRef: string; valor: number; valorComDescGateway: number; status: string }): PagamentoEntity[] {
+  geraCartaoPagamentos(primeiraParcela: PrimeiraParcelaCartao): PagamentoEntity[] {
+    const totalParcelas = this.totalParcelas();
     const pagamentos = [
       new PagamentoEntity({
         uuid: randomUUID(),
         bancoRef: primeiraParcela.bancoRef,
-        vencimento: this.props.vencimento ?? "",
+        vencimento: primeiraParcela.vencimento,
         nossoNumero: "",
         pix: "",
         linkBoleto: "",
@@ -106,18 +116,20 @@ export class CobrancaEntity {
         status: primeiraParcela.status,
       }),
     ];
-    for (let i = 1; i < this.totalParcelas(); i++) {
+    for (let i = 1; i < totalParcelas; i++) {
+      const isUltimaParcela = i === totalParcelas - 1;
+      const valor = isUltimaParcela ? Math.round((this.valor() - primeiraParcela.valor * (totalParcelas - 1)) * 100) / 100 : primeiraParcela.valor;
       pagamentos.push(
         new PagamentoEntity({
           uuid: randomUUID(),
-          vencimento: this.props.vencimento ?? "",
+          vencimento: ApiDate.addMonth(primeiraParcela.vencimento, i, "YYYY-MM-DD"),
           nossoNumero: "",
           pix: "",
           linkBoleto: "",
           codigoBarras: "",
           linhaDigitavel: "",
-          valor: primeiraParcela.valor,
-          valorComDescGateway: primeiraParcela.valorComDescGateway,
+          valor,
+          valorComDescGateway: 0,
           valorPago: 0,
           status: "pendente",
         }),

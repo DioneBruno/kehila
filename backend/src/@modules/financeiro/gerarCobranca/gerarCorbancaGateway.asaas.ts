@@ -89,12 +89,14 @@ export class GerarCobrancaGatewayAsaas {
       "content-type": "application/json",
       access_token: token,
     };
+    const dueDate = ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD") as string;
+    const valorParcela = Math.round((cobranca.valor() / cobranca.totalParcelas()) * 100) / 100;
     const body = {
       externalReference: cobranca.uuid(),
       billingType: this.tipoCobranca(cobranca), //BOLETO, CREDIT_CARD, PIX
       customer: cliente.id,
-      value: cobranca.valor() / cobranca.totalParcelas(),
-      dueDate: ApiDate.format(ApiDate.addDay(ApiDate.now(), 1), "YYYY-MM-DD"),
+      value: valorParcela,
+      dueDate,
       description: `Breve descrição para a cobrança`,
       // installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)
       // totalValue: cobranca.valor(), // Informe o valor total de uma cobrança que será parcelada (somente no caso de cobrança parcelada). Caso enviado este campo o installmentValue não é necessário, o cálculo por parcela será automático.
@@ -111,9 +113,10 @@ export class GerarCobrancaGatewayAsaas {
     if (responseCobranca?.data?.status !== "CONFIRMED") throw new ApiError("Tivemos problemas para identificar o pagamento", 400);
     const primeiroPagamento = {
       bancoRef: responseCobranca?.data?.id,
-      valor: responseCobranca?.data?.value,
+      valor: valorParcela,
       valorComDescGateway: responseCobranca?.data?.netValue,
       status: responseCobranca?.data?.status,
+      vencimento: dueDate,
     };
     return {
       gatewayRef: responseCobranca?.data?.installment,

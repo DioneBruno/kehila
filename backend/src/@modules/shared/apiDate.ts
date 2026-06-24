@@ -80,6 +80,11 @@ export class ApiDate {
     return newDate.format(format);
   }
 
+  static addMonth(date: string, monthAmount: number = 1, format: string = "YYYY-MM-DD HH:mm:ss") {
+    const newDate = moment(date, format).add(monthAmount, "months");
+    return newDate.format(format);
+  }
+
   static subtractHour(date: string, hourAmount: number = 1, format: string = "YYYY-MM-DD HH:mm:ss") {
     const newDate = moment(date, format).subtract(hourAmount, "hours");
     return newDate.format(format);
