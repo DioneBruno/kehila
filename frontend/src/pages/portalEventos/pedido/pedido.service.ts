@@ -26,9 +26,10 @@ export class PedidoService {
       const token = authCookies.getToken();
       if (!token) return;
       const response = await this.authHttp.me();
-      this.$authStore.setUser(response.user);
+      if (response.user) this.$authStore.setUser(response.user);
       return response;
     } catch (error) {
+      this.$authStore.setUser({});
     } finally {
       this.$q.loading.hide();
     }
