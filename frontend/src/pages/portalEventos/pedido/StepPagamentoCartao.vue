@@ -531,6 +531,7 @@ export default defineComponent({
       );
       if (!confirmacao) return;
       await $service.removerCartao(cartao.uuid);
+      if (data.cartaoSelecionadoUuid === cartao.uuid) data.cartaoSelecionadoUuid = null;
     }
 
     return {
