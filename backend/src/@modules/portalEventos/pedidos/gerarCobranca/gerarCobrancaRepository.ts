@@ -46,10 +46,12 @@ export class GerarCobrancaRepository {
 
   async buscarIngressos(companyUuid: string, pedidoUuid: string): Promise<IngressoEntity[]> {
     const rows = await this.connectionHub.database!.query(
-      `SELECT uuid, pessoa_nome, pessoa_documento, pessoa_email, pessoa_telefone
-       FROM evento_ingressos
-       WHERE company_uuid = $1
-         AND pedido_uuid = $2`,
+      `SELECT i.uuid, i.pessoa_nome, i.pessoa_documento, i.pessoa_email, i.pessoa_telefone, t.preco
+       FROM evento_ingressos i
+       JOIN evento_lote_tipos_ingresso t ON t.uuid = i.tipo_ingresso_uuid
+       WHERE i.company_uuid = $1
+         AND i.pedido_uuid = $2
+       ORDER BY i.index`,
       [companyUuid, pedidoUuid],
     );
     return rows.map(
@@ -60,6 +62,7 @@ export class GerarCobrancaRepository {
           pessoaDocumento: r.pessoa_documento,
           pessoaEmail: r.pessoa_email,
           pessoaTelefone: r.pessoa_telefone,
+          valor: Number(r.preco),
         }),
     );
   }

@@ -4,6 +4,7 @@ export type IngressoProps = {
   pessoaDocumento: string;
   pessoaEmail: string;
   pessoaTelefone: string;
+  valor: number;
 };
 
 export class IngressoEntity {
@@ -23,5 +24,8 @@ export class IngressoEntity {
   }
   pessoaTelefone(): string {
     return this.props.pessoaTelefone;
+  }
+  valor(): number {
+    return this.props.valor;
   }
 }
