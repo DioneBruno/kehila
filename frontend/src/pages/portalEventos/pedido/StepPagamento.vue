@@ -50,17 +50,17 @@
         </div>
 
         <div class="col-4">
+          <!-- @click="$emit('update:formaPagamento', 'cartao')" -->
           <q-card
             flat
             bordered
             :class="formaPagamento === 'cartao' ? 'border-primary bg-blue-1' : ''"
             class="cursor-pointer"
-            @click="$emit('update:formaPagamento', 'cartao')"
           >
             <q-card-section class="text-center q-py-md">
-              <q-icon name="credit_card" size="32px" color="green-5" />
+              <q-icon name="credit_card" size="32px" color="grey-5" />
               <div class="text-subtitle2 q-mt-xs text-grey-9">Cartão</div>
-              <div class="text-caption text-grey-6">Até 14x com juros</div>
+              <div class="text-caption text-grey-6">Não disponível</div>
               <q-icon
                 v-if="formaPagamento === 'cartao'"
                 name="check_circle"
