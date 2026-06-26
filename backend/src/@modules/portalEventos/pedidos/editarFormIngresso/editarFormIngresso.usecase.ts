@@ -1,4 +1,6 @@
+import { ApiValidate } from "src/@modules/shared/apiValidate";
 import { EditarFormIngressoRepository } from "./editarFormIngressoRepository";
+import { ApiError } from "src/@modules/shared/apiError";
 
 export interface EditarFormIngressoInput {
   pedidoUuid: string;
@@ -17,6 +19,7 @@ export class EditarFormIngressoUsecase {
   constructor(readonly repo: EditarFormIngressoRepository) {}
 
   async execute(input: EditarFormIngressoInput) {
+    if (!ApiValidate.validateCpfCnpj(input.pessoaDocumento as string)) throw new ApiError("CPF/CNPJ inválido", 400);
     const ingresso = await this.repo.buscarIngresso(input.ingressoUuid);
     if (!ingresso) throw new Error("Ingresso não encontrado");
 
