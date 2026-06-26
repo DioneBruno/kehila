@@ -304,7 +304,9 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test("Tipo cobrança Cartão - Deve tentar pagamento unico - com sucesso", async () => {
+  test("Tipo cobrança Cartão - Deve tentar pagamento unico repassando acrescimos e taxas do cartão - com sucesso", async () => {
+    // acrescimos de 2,99% + R$ 0,49;
+
     const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
     await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
       VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
@@ -350,7 +352,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const bodyCobranca = postStub.firstCall.args[1];
     expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
     expect(postStub.firstCall.args[1].creditCardToken).toBe("Token-do-cartao");
-    expect(postStub.firstCall.args[1].value).toBe(250);
+    expect(postStub.firstCall.args[1].value).toBe(257.97);
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
     expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
@@ -372,7 +374,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     postStub.restore();
   });
 
-  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado 2x - com sucesso", async () => {
+  test("Tipo cobrança Cartão - Deve tentar pagamento parcelado 2x incluindo acrescimos e taxas do cartão apenas na primeira parcela paga - com sucesso", async () => {
     const cartaoUuid = "859b6215-bf0e-4792-acab-5138636d393e";
     await dataSource.query(`INSERT INTO financeiro_cartao_credito (uuid, company_uuid, user_uuid, conta_bancaria_uuid, token)
       VALUES ('${cartaoUuid}', '${companyUuid}', '${userUuid}', '${companyUuid}', 'Token-do-cartao');`);
@@ -418,7 +420,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const bodyCobranca = postStub.firstCall.args[1];
     expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
     expect(postStub.firstCall.args[1].creditCardToken).toBe("Token-do-cartao");
-    expect(postStub.firstCall.args[1].value).toBe(125);
+    expect(postStub.firstCall.args[1].value).toBe(129.23);
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
     expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
@@ -494,7 +496,7 @@ describe("Deve testar GerarCobrancaUsecase com Gateway Asaas", () => {
     const bodyCobranca = postStub.firstCall.args[1];
     expect(postStub.firstCall.args[1].billingType).toBe("CREDIT_CARD");
     expect(postStub.firstCall.args[1].creditCardToken).toBe("Token-do-cartao");
-    expect(postStub.firstCall.args[1].value).toBe(20.83);
+    expect(postStub.firstCall.args[1].value).toBe(21.94);
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].dueDate).toBe("2026-06-13");
     expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");

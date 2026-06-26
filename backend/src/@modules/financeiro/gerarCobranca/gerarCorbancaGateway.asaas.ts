@@ -91,11 +91,12 @@ export class GerarCobrancaGatewayAsaas {
     };
     const dueDate = ApiDate.format(ApiDate.addDay(ApiDate.now(), 0), "YYYY-MM-DD") as string;
     const valorParcela = Math.round((cobranca.valor() / cobranca.totalParcelas()) * 100) / 100;
+    const valorPrimeiraParcela = Math.round((valorParcela * 1.0299 + 0.49) * 100) / 100;
     const body = {
       externalReference: cobranca.uuid(),
       billingType: this.tipoCobranca(cobranca), //BOLETO, CREDIT_CARD, PIX
       customer: cliente.id,
-      value: valorParcela,
+      value: valorPrimeiraParcela,
       dueDate,
       description: `Breve descrição para a cobrança`,
       // installmentCount: cobranca.totalParcelas(), // Número de parcelas (somente no caso de cobrança parcelada)

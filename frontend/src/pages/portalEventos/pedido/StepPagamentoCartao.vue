@@ -85,6 +85,12 @@
     <div class="col-12" v-if="cartaoSelecionadoUuid === null">
       <span class="text-negative">* Selecione um cartão para continuar</span>
     </div>
+    <div class="col-12 cursor-pointer q-mb-lg">
+      <span class="text-negative"
+        >* As taxas do cartão de crédito são repassadas integralmente.</span
+      >
+      <span class="text-blue-9">Ver valores </span>
+    </div>
 
     <div class="col-12">
       <q-btn
