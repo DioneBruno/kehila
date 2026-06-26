@@ -66,7 +66,7 @@ export class BiRepository {
     };
   }
 
-  async findBi(uuid: string): Promise<BiEntity | null> {
+  async findBi(companyUuid: string, uuid: string): Promise<BiEntity | null> {
     const [biModel] = await this.dataSource.query(
       `SELECT
       gateway,
@@ -80,7 +80,7 @@ export class BiRepository {
     );
     if (!biModel) return null;
     const bi = new BiEntity({
-      companyUuid: biModel.company_uuid,
+      companyUuid: companyUuid,
       uuid: biModel.uuid,
       gateway: biModel.gateway,
       referencia: biModel.referencia,

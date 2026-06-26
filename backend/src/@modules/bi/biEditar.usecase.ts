@@ -16,7 +16,7 @@ export class BiEditarUsecase {
   constructor(readonly biRepository: BiRepository) {}
 
   async execute(input: any): Promise<void> {
-    const bi = await this.biRepository.findBi(input.uuid);
+    const bi = await this.biRepository.findBi(input.companyUuid, input.uuid);
     if (!bi) throw new ApiError("BI não encontrado");
 
     bi.setGateway(input.gateway);

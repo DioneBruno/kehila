@@ -52,8 +52,8 @@ export class BiController {
   }
 
   @Get(":uuid/montar")
-  async biMontar(@Req() request: Request, @Res() response: Response, @Param("uuid") uuid: string) {
-    const companyUuid = request["tokenPayload"]?.companyUuid;
+  async biMontar(@Req() request: Request | any, @Res() response: Response, @Param("uuid") uuid: string) {
+    const companyUuid = request?.companyUuid;
     const input = {
       companyUuid,
       uuid,

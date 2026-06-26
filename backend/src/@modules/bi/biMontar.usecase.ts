@@ -14,7 +14,7 @@ export class BiMontarUsecase {
   ) {}
 
   async execute(input: BiMontarInput): Promise<any> {
-    const bi = await this.biRepository.findBi(input.uuid);
+    const bi = await this.biRepository.findBi(input.companyUuid, input.uuid);
     if (!bi) throw new ApiError("BI não encontrado");
     const response = await this.biGatewayMetabase.montar(bi);
     return response;
