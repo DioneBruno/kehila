@@ -263,7 +263,9 @@ export default defineComponent({
         pagadorEmail: "",
         pagadorTelefone: "",
       }),
-      totalIngressos: computed(() => ($pedidoStore.$state.pedido.ingressos ?? []).length),
+      totalIngressos: computed(
+        () => ($pedidoStore.$state.pedido.ingressos ?? []).filter((ingresso: any) => ingresso.preco > 0).length,
+      ),
       usuarioLogado: computed(() => {
         const token = TokenDecode.execute();
         return { nome: token?.user?.name ?? "", cpf: token?.user?.cpf ?? "" };

@@ -154,7 +154,8 @@ export class PortalEventosQuery {
         ingressos.pessoa_cidade "pessoaCidade",
         ingressos.form_data "formData",
         ingressos.form_data_valido "formDataValido",
-        tipos_ingresso.nome "tipoIngressoNome"
+        tipos_ingresso.nome "tipoIngressoNome",
+        tipos_ingresso.preco
       FROM evento_ingressos ingressos
         INNER JOIN evento_lote_tipos_ingresso tipos_ingresso
           ON tipos_ingresso.uuid = ingressos.tipo_ingresso_uuid
