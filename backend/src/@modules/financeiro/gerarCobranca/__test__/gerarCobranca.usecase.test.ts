@@ -1,11 +1,11 @@
-import dataSource from "src/@infra/database/datasource";
-import { stub } from "sinon";
-import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
-import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
-import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 import axios from "axios";
-import { PagamentoEntity } from "../pagamento.entity";
+import { stub } from "sinon";
 import { randomUUID } from "crypto";
+import { PagamentoEntity } from "../pagamento.entity";
+import dataSource from "src/@infra/database/datasource";
+import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
+import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 const companyUuid = "e4d4e1a7-53d4-4c25-9ebf-614c28bfb4e4";
 const userUuid = "14433838-52a6-4802-9d79-13fbb2e447e0";

@@ -54,8 +54,6 @@ export class GerarCobrancaUsecase {
     cobranca.setBancoRef(result.gatewayRef);
     await this.repo.savarCobranca(cobranca, result.pagamentos.length);
     await this.repo.savarPagamentos(cobranca, result.pagamentos);
-    if (input.tipoCobranca === "cartaoCredito") {
-      await this.repo.setarCartaoAtual(cobranca, input.cartaoUuid as string);
-    }
+    if (input.tipoCobranca === "cartaoCredito") await this.repo.setarCartaoAtual(cobranca, input.cartaoUuid as string);
   }
 }
