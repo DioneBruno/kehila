@@ -2,6 +2,7 @@ import dataSource from "src/@infra/database/datasource";
 import { EditarFormIngressoUsecase } from "../editarFormIngresso.usecase";
 import { EditarFormIngressoRepository } from "../editarFormIngressoRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { randomUUID } from "crypto";
 
 const companyUuid = "9ca1bb79-f51e-4441-8a0a-ace75c01fab6";
 let repo: EditarFormIngressoRepository;
@@ -50,6 +51,56 @@ describe("Deve testar EditarFormIngressoUsecase", () => {
     expect(ingressoModel.pessoa_uf).toBe(input.pessoaUf);
     expect(ingressoModel.pessoa_cidade).toBe(input.pessoaCidade);
     expect(ingressoModel.form_data).toEqual(input.formData);
+  });
+
+  test("Não deve incluir ingresos com cpf duplicado", async () => {
+    const eventoUuid = "c31e5f9d-d8cd-4f9a-b9fe-80dd671dc0b8";
+    const pedidoUuid = "90a62a60-4a7e-4fec-803b-58f8f225bf44";
+    const ingressoUuid = "014c8ceb-46d5-465f-b934-9ebc03559a7b";
+    const ingressoUuid2 = "014c8ceb-46d5-465f-b934-9ebc03559a7c";
+
+    await dataSource.query(`INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo, pessoa_documento)
+      VALUES ('${ingressoUuid}', '${companyUuid}', '${eventoUuid}', '${eventoUuid}', '${pedidoUuid}', 1001, '15874521548'),
+      ('${ingressoUuid2}', '${companyUuid}', '${eventoUuid}', '${eventoUuid}', '${pedidoUuid}', 1002, '12345678909')`);
+
+    const usecase = new EditarFormIngressoUsecase(repo);
+    const input = {
+      pedidoUuid,
+      ingressoUuid,
+      pessoaNome: "Dione Almeida",
+      pessoaDocumento: "12345678909",
+      pessoaEmail: "pessoaEmail",
+      pessoaTelefone: "11999999999",
+      pessoaUf: "SP",
+      pessoaCidade: "São Paulo",
+      formData: { teste: "DadosTeste" },
+    };
+    await expect(usecase.execute(input)).rejects.toThrow("CPF já informado para este pedido");
+  });
+
+  test("Pode incluir ingresos com cpf duplicado no mesmo evendo mas pedido diferente", async () => {
+    const eventoUuid = "c31e5f9d-d8cd-4f9a-b9fe-80dd671dc0b8";
+    const pedidoUuid = "90a62a60-4a7e-4fec-803b-58f8f225bf44";
+    const ingressoUuid = "014c8ceb-46d5-465f-b934-9ebc03559a7b";
+    const ingressoUuid2 = "014c8ceb-46d5-465f-b934-9ebc03559a7c";
+
+    await dataSource.query(`INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo, pessoa_documento)
+      VALUES ('${ingressoUuid}', '${companyUuid}', '${eventoUuid}', '${eventoUuid}', '${pedidoUuid}', 1001, '15874521548'),
+      ('${ingressoUuid2}', '${companyUuid}', '${eventoUuid}', '${eventoUuid}', '${randomUUID()}', 1002, '12345678909')`);
+
+    const usecase = new EditarFormIngressoUsecase(repo);
+    const input = {
+      pedidoUuid,
+      ingressoUuid,
+      pessoaNome: "Dione Almeida",
+      pessoaDocumento: "12345678909",
+      pessoaEmail: "pessoaEmail",
+      pessoaTelefone: "11999999999",
+      pessoaUf: "SP",
+      pessoaCidade: "São Paulo",
+      formData: { teste: "DadosTeste" },
+    };
+    await usecase.execute(input);
   });
 
   test("Caso todos os campos tiverem preenchidos, deve validar o form e marcar como valido", async () => {

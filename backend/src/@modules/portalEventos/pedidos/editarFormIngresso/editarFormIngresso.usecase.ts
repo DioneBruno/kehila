@@ -19,6 +19,12 @@ export class EditarFormIngressoUsecase {
   async execute(input: EditarFormIngressoInput) {
     const ingresso = await this.repo.buscarIngresso(input.ingressoUuid);
     if (!ingresso) throw new Error("Ingresso não encontrado");
+
+    if (input.pessoaDocumento) {
+      const cpfDuplicado = await this.repo.existeOutroIngressoComDocumento(input.pedidoUuid, input.pessoaDocumento, input.ingressoUuid);
+      if (cpfDuplicado) throw new Error("CPF já informado para este pedido");
+    }
+
     ingresso.setData(input);
     await this.repo.salvarIngresso(ingresso);
   }

@@ -47,6 +47,19 @@ export class EditarFormIngressoRepository {
     return ingresso;
   }
 
+  async existeOutroIngressoComDocumento(pedidoUuid: string, pessoaDocumento: string, ingressoUuid: string): Promise<boolean> {
+    const [ingressoModel] = await this.connectionHub.database!.query(
+      `SELECT uuid FROM evento_ingressos
+      WHERE deleted_at IS NULL
+      AND pedido_uuid = $1
+      AND pessoa_documento = $2
+      AND uuid != $3`,
+      [pedidoUuid, pessoaDocumento, ingressoUuid],
+    );
+
+    return !!ingressoModel;
+  }
+
   async salvarIngresso(ingresso: IngressoEntity) {
     await this.connectionHub.database!.query(
       `UPDATE evento_ingressos SET
