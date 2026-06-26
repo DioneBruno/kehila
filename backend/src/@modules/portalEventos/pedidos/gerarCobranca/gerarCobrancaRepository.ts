@@ -46,7 +46,7 @@ export class GerarCobrancaRepository {
 
   async buscarIngressos(companyUuid: string, pedidoUuid: string): Promise<IngressoEntity[]> {
     const rows = await this.connectionHub.database!.query(
-      `SELECT i.uuid, i.pessoa_nome, i.pessoa_documento, i.pessoa_email, i.pessoa_telefone, t.preco
+      `SELECT i.uuid, i.pessoa_nome, i.pessoa_documento, i.pessoa_email, i.pessoa_telefone, t.preco, t.gerar_quantidade_ingressos
        FROM evento_ingressos i
        JOIN evento_lote_tipos_ingresso t ON t.uuid = i.tipo_ingresso_uuid
        WHERE i.company_uuid = $1
@@ -62,7 +62,7 @@ export class GerarCobrancaRepository {
           pessoaDocumento: r.pessoa_documento,
           pessoaEmail: r.pessoa_email,
           pessoaTelefone: r.pessoa_telefone,
-          valor: Number(r.preco),
+          valor: Number(r.preco) / Number(r.gerar_quantidade_ingressos),
         }),
     );
   }

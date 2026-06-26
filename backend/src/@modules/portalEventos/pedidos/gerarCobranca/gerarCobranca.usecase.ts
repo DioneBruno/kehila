@@ -28,6 +28,7 @@ export class GerarCobrancaUsecase {
     if (input.tipoPagador === "ingresso") {
       const ingressos = await this.repo.buscarIngressos(input.companyUuid, input.pedidoUuid);
       for (const ingresso of ingressos) {
+        if (ingresso.valor() <= 0) continue;
         await this.repo.criarCobrancaIngresso(pedido, ingresso, ingresso.valor(), input.numParcelas ?? 1);
       }
       await this.repo.atualizarStatusPedidoParaPagamentoGerado(pedido.uuid());
