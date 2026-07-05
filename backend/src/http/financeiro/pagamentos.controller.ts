@@ -40,9 +40,10 @@ export class PagamentosController {
   }
 
   @Post(":uuid/gerarBoleto")
-  async gerarBoletoPagamento(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+  async gerarBoletoPagamento(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
     await this.gerarBoletoPagamentoUsecase.execute({
       pagamentoUuid: uuid,
+      vencimento: body.vencimento,
     });
     return res.status(200).json({ success: true });
   }

@@ -8,6 +8,7 @@ import { ApiError } from "src/@modules/shared/apiError";
 
 export type GerarBoletoPagamentoInput = {
   pagamentoUuid: string;
+  vencimento?: string;
 };
 
 export class GerarBoletoPagamentoUsecase {
@@ -16,6 +17,7 @@ export class GerarBoletoPagamentoUsecase {
   async execute(input: GerarBoletoPagamentoInput) {
     const pagamento = await this.repo.buscarPagamento(input.pagamentoUuid);
     if (!pagamento) throw new ApiError("Pagamento não encontrado", 450);
+    if (input.vencimento) pagamento.setVencimento(input.vencimento);
     const dias = ApiDate.diff(ApiDate.now(), pagamento.vencimento(), "days");
     if (dias < 0) throw new ApiError("Data de vencimento deve ser maior que hoje.", 400);
     const gateway = this.repo.buscarGateway(pagamento);

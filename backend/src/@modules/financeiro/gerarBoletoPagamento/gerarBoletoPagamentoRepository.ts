@@ -57,9 +57,10 @@ export class GerarBoletoPagamentoRepository {
         banco_ref = $2,
         link_boleto = $3,
         valor = $4,
-        valor_com_desc_gateway = $5        
+        valor_com_desc_gateway = $5,
+        vencimento = $6
       WHERE uuid = $1`,
-      [pagamento.uuid(), pagamento.bancoRef(), pagamento.linkBoleto(), pagamento.valor(), pagamento.valorComDescGateway()],
+      [pagamento.uuid(), pagamento.bancoRef(), pagamento.linkBoleto(), pagamento.valor(), pagamento.valorComDescGateway(), pagamento.vencimento()],
     );
   }
 }

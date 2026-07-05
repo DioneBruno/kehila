@@ -37,6 +37,9 @@ export class PagamentoEntity {
   vencimento(): string {
     return this.props.vencimento;
   }
+  setVencimento(vencimento: string) {
+    this.props.vencimento = vencimento;
+  }
   valor(): number {
     return this.props.valor;
   }
