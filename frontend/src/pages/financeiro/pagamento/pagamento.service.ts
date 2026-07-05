@@ -32,6 +32,18 @@ export class PagamentoService {
     }
   }
 
+  async gerarBoleto(uuid: string) {
+    try {
+      this.$q.loading.show();
+      await this.$http.gerarBoleto(uuid);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
   async verificarPagamento(uuid: string) {
     try {
       this.$q.loading.show();

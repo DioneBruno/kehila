@@ -177,6 +177,18 @@
                   <q-tooltip>Ver boleto</q-tooltip>
                 </q-btn>
                 <q-btn
+                  v-if="pagamento.linkBoleto"
+                  flat
+                  dense
+                  round
+                  size="sm"
+                  icon="refresh"
+                  color="primary"
+                  @click="gerarBoleto(pagamento.uuid)"
+                >
+                  <q-tooltip>Gerar novo boleto</q-tooltip>
+                </q-btn>
+                <q-btn
                   v-if="pagamento.linkCartao"
                   flat
                   dense
@@ -206,8 +218,8 @@
                   dense
                   round
                   size="sm"
-                  icon="sync"
-                  color="primary"
+                  icon="monetization_on"
+                  color="green-7"
                   @click="verificarPagamento(pagamento.uuid)"
                 >
                   <q-tooltip>Verificar pagamento</q-tooltip>
@@ -294,6 +306,17 @@ export default defineComponent({
         data.paginacao.rowsPerPage = porPagina;
       }
       data.carregando = false;
+    }
+
+    async function gerarBoleto(uuid: string) {
+      const response = await $service.gerarBoleto(uuid);
+      await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      if (response) {
+        Notify.create({
+          type: "positive",
+          message: "Boleto gerado com sucesso!",
+        });
+      }
     }
 
     function buscar() {
@@ -386,6 +409,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       totalPaginas,
+      gerarBoleto,
       irParaPagina,
       alterarPorPagina,
       buscar,

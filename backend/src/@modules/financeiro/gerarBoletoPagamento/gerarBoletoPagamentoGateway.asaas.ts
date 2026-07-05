@@ -29,8 +29,9 @@ export class GerarBoletoPagamentoGatewayAsaas {
       description: `Breve descrição para a cobrança`,
       totalValue: pagamento.valor(),
     };
+
     const responseCobranca = await this.connectionHub.http?.post(url, body, { headers });
-    // console.log(responseCobranca);
+
     pagamento.setDadosBanco({
       bancoRef: responseCobranca?.data?.id,
       linkBoleto: responseCobranca?.data?.bankSlipUrl,
