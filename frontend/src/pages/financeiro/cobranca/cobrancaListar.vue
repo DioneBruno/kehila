@@ -22,25 +22,11 @@
         <q-card-section>
           <q-form @submit.prevent="confirmarGerarBoleto" greedy>
             <q-input
+              outlined
+              type="date"
               v-model="dialogBoleto.vencimento"
               label="Nova data de vencimento"
-              filled
-              readonly
-              clearable
-              :rules="[(val) => !!val || 'Campo obrigatório']"
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy cover>
-                    <q-date v-model="dialogBoleto.vencimento" mask="YYYY-MM-DD" color="primary">
-                      <div class="row items-center justify-end">
-                        <q-btn v-close-popup label="OK" color="primary" flat />
-                      </div>
-                    </q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
+            />
             <div class="row justify-end q-gutter-sm q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Gerar" color="primary" />
@@ -257,6 +243,7 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { Notify } from "quasar";
 import { CobrancaService, STATUS_CORES, STATUS_LABELS } from "./cobranca.service";
+import { ApiDate } from "src/shared/apiDate.service";
 
 const OPCOES_STATUS = Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const OPCOES_POR_PAGINA = [10, 20, 50];
@@ -319,6 +306,9 @@ export default defineComponent({
       const { pagamentoUuid, vencimento } = data.dialogBoleto;
       await $service.pagamentoGerarBoleto(pagamentoUuid, vencimento);
       await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      data.dialogBoleto.aberto = false;
+      data.dialogBoleto.vencimento = "";
+      data.dialogBoleto.pagamentoUuid = "";
     }
 
     function buscar() {
@@ -361,8 +351,7 @@ export default defineComponent({
     }
 
     function formatarDataSimples(data: string | null) {
-      if (!data) return "-";
-      return new Date(data).toLocaleDateString("pt-BR");
+      return ApiDate.format(data, "DD/MM/YYYY");
     }
 
     function copiarPix(codigo: string) {
