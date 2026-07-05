@@ -1,5 +1,6 @@
 import { useQuasar } from "quasar";
 import type { CobrancaHttp } from "src/@modules/financeiro/cobranca.http";
+import type { PagamentoHttp } from "src/@modules/financeiro/pagamento.http";
 import { inject } from "vue";
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -17,13 +18,26 @@ export const STATUS_CORES: Record<string, string> = {
 };
 
 export class CobrancaService {
-  private $http = inject("cobrancaHttp") as CobrancaHttp;
+  private $cobrancaHttp = inject("cobrancaHttp") as CobrancaHttp;
+  private $pagamentoHttp = inject("pagamentoHttp") as PagamentoHttp;
   private $q = useQuasar();
 
   async listar(params?: { busca?: string; status?: string; pagina?: number; porPagina?: number }) {
     try {
       this.$q.loading.show();
-      const response = await this.$http.listar(params);
+      const response = await this.$cobrancaHttp.listar(params);
+      return response;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async pagamentoGerarBoleto(uuid: string) {
+    try {
+      this.$q.loading.show();
+      const response = await this.$pagamentoHttp.gerarBoleto(uuid);
       return response;
     } catch {
       return null;

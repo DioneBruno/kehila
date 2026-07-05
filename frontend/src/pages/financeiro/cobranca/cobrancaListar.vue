@@ -64,9 +64,7 @@
         </template>
         <template v-else-if="cobrancas.length === 0">
           <tr>
-            <td colspan="8" class="text-center text-grey-6 q-py-md">
-              Nenhuma cobrança encontrada
-            </td>
+            <td colspan="8" class="text-center text-grey-6 q-py-md">Nenhuma cobrança encontrada</td>
           </tr>
         </template>
         <template v-else>
@@ -89,7 +87,10 @@
               <td class="text-right">{{ formatarMoeda(cobranca.valor) }}</td>
               <td class="text-right">{{ formatarMoeda(cobranca.valorPago) }}</td>
               <td>
-                <q-badge :color="statusCor(cobranca.status)" :label="statusLabel(cobranca.status)" />
+                <q-badge
+                  :color="statusCor(cobranca.status)"
+                  :label="statusLabel(cobranca.status)"
+                />
               </td>
               <td>{{ formatarData(cobranca.createdAt) }}</td>
               <td>
@@ -101,7 +102,10 @@
             </tr>
             <tr v-show="expandido[cobranca.uuid]">
               <td colspan="8">
-                <div v-if="cobranca.pagamentos.length === 0" class="text-grey-6 text-caption q-py-sm">
+                <div
+                  v-if="cobranca.pagamentos.length === 0"
+                  class="text-grey-6 text-caption q-py-sm"
+                >
                   Nenhum pagamento gerado para esta cobrança
                 </div>
                 <q-list v-else dense bordered separator class="rounded-borders">
@@ -164,6 +168,18 @@
                         >
                           <q-tooltip>Copiar código Pix</q-tooltip>
                         </q-btn>
+                        <q-btn
+                          v-if="pagamento.linkBoleto"
+                          flat
+                          dense
+                          round
+                          size="sm"
+                          icon="refresh"
+                          color="primary"
+                          @click="pagamentoGerarBoleto(pagamento.uuid)"
+                        >
+                          <q-tooltip>Gerar novo boleto</q-tooltip>
+                        </q-btn>
                       </div>
                     </q-item-section>
                   </q-item>
@@ -215,7 +231,7 @@ export default defineComponent({
       opcoesStatus: OPCOES_STATUS,
       opcoesPorPagina: OPCOES_POR_PAGINA,
       cobrancas: [] as any[],
-      expandido: {} as Record<string, boolean>,
+      expandido: {},
       filtros: {
         busca: "",
         status: null as string | null,
@@ -246,6 +262,17 @@ export default defineComponent({
         data.paginacao.rowsPerPage = porPagina;
       }
       data.carregando = false;
+    }
+
+    async function pagamentoGerarBoleto(uuid: string) {
+      const response = await $service.pagamentoGerarBoleto(uuid);
+      await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      if (response) {
+        Notify.create({
+          type: "positive",
+          message: "Boleto gerado com sucesso!",
+        });
+      }
     }
 
     function buscar() {
@@ -302,6 +329,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       totalPaginas,
+      pagamentoGerarBoleto,
       irParaPagina,
       alterarPorPagina,
       alternarExpansao,

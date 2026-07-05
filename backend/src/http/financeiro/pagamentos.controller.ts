@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
+import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamento.usecase";
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
 import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
 
@@ -10,6 +11,7 @@ export class PagamentosController {
     readonly financeiroQuery: FinanceiroQuery,
     readonly listaPagamentoUsecase: ListaPagamentoUsecase,
     readonly verificarPagamentoUsecase: VerificarPagamentoUsecase,
+    readonly gerarBoletoPagamentoUsecase: GerarBoletoPagamentoUsecase,
   ) {}
 
   @Get()
@@ -32,6 +34,14 @@ export class PagamentosController {
   async verificarPagamento(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
     await this.verificarPagamentoUsecase.execute({
       companyUuid: req.companyUuid,
+      pagamentoUuid: uuid,
+    });
+    return res.status(200).json({ success: true });
+  }
+
+  @Post(":uuid/gerarBoleto")
+  async gerarBoletoPagamento(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    await this.gerarBoletoPagamentoUsecase.execute({
       pagamentoUuid: uuid,
     });
     return res.status(200).json({ success: true });

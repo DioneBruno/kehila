@@ -34,6 +34,8 @@ import { VerificarPagamentoGateway } from "src/@modules/financeiro/verificarPaga
 import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
 import { IncluirCartaoCreditoUsecase } from "src/@modules/financeiro/incluirCartaoCredito/incluirCartaoCredito.usecase";
 import { IncluirCartaoCreditoRepository } from "src/@modules/financeiro/incluirCartaoCredito/incluirCartaoCreditoRepository";
+import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamento.usecase";
+import { GerarBoletoPagamentoRepository } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamentoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -54,6 +56,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(DeletarContaBancariaUsecase, (hub) => new DeletarContaBancariaUsecase(new DeletarContaBancariaRepository(hub))),
     makeProvider(ListarCobrancaUsecase, (hub) => new ListarCobrancaUsecase(new ListarCobrancaRepository(hub))),
     makeProvider(ListaPagamentoUsecase, (hub) => new ListaPagamentoUsecase(new ListaPagamentoRepository(hub))),
+    makeProvider(GerarBoletoPagamentoUsecase, (hub) => new GerarBoletoPagamentoUsecase(new GerarBoletoPagamentoRepository(hub))),
     makeProvider(
       VerificarPagamentoUsecase,
       (hub) => new VerificarPagamentoUsecase(new VerificarPagamentoRepostiory(hub), new VerificarPagamentoGateway(hub)),

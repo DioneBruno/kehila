@@ -3,6 +3,10 @@ import type HttpClient from "../http/httpClient.interface";
 export class PagamentoHttp {
   constructor(readonly http: HttpClient) {}
 
+  async gerarBoleto(uuid: string) {
+    return this.http.post(`pagamentos/${uuid}/gerarBoleto`, {});
+  }
+
   async listar(params?: { busca?: string; status?: string; pagina?: number; porPagina?: number }) {
     const query = new URLSearchParams();
     if (params?.busca) query.set("busca", params.busca);
