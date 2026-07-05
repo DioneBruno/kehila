@@ -34,10 +34,10 @@ export class CobrancaService {
     }
   }
 
-  async pagamentoGerarBoleto(uuid: string) {
+  async pagamentoGerarBoleto(uuid: string, vencimento?: string) {
     try {
       this.$q.loading.show();
-      const response = await this.$pagamentoHttp.gerarBoleto(uuid);
+      const response = await this.$pagamentoHttp.gerarBoleto(uuid, vencimento);
       return response;
     } catch {
       return null;

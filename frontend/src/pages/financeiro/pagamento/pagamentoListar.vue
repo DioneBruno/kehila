@@ -88,6 +88,46 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialog: Gerar Novo Boleto -->
+    <q-dialog v-model="dialogBoleto.aberto" persistent>
+      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+        <q-card-section class="row items-center">
+          <span class="text-h6">Gerar Novo Boleto</span>
+          <q-space />
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <q-form @submit.prevent="confirmarGerarBoleto" greedy>
+            <q-input
+              v-model="dialogBoleto.vencimento"
+              label="Nova data de vencimento"
+              filled
+              readonly
+              clearable
+              :rules="[(val) => !!val || 'Campo obrigatório']"
+            >
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover>
+                    <q-date v-model="dialogBoleto.vencimento" mask="YYYY-MM-DD" color="primary">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="OK" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+            <div class="row justify-end q-gutter-sm q-mt-md">
+              <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+              <q-btn unelevated type="submit" label="Gerar" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
       <q-card-section class="row q-gutter-md items-center">
@@ -184,7 +224,7 @@
                   size="sm"
                   icon="refresh"
                   color="primary"
-                  @click="gerarBoleto(pagamento.uuid)"
+                  @click="abrirDialogBoleto(pagamento)"
                 >
                   <q-tooltip>Gerar novo boleto</q-tooltip>
                 </q-btn>
@@ -285,6 +325,11 @@ export default defineComponent({
         dataInicial: "",
         dataFinal: "",
       },
+      dialogBoleto: {
+        aberto: false,
+        pagamentoUuid: "",
+        vencimento: "",
+      },
     });
 
     const totalPaginas = computed(() =>
@@ -308,15 +353,16 @@ export default defineComponent({
       data.carregando = false;
     }
 
-    async function gerarBoleto(uuid: string) {
-      const response = await $service.gerarBoleto(uuid);
+    function abrirDialogBoleto(pagamento: any) {
+      data.dialogBoleto.pagamentoUuid = pagamento.uuid;
+      data.dialogBoleto.vencimento = pagamento.vencimento;
+      data.dialogBoleto.aberto = true;
+    }
+
+    async function confirmarGerarBoleto() {
+      const { pagamentoUuid, vencimento } = data.dialogBoleto;
+      await $service.gerarBoleto(pagamentoUuid, vencimento);
       await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
-      if (response) {
-        Notify.create({
-          type: "positive",
-          message: "Boleto gerado com sucesso!",
-        });
-      }
     }
 
     function buscar() {
@@ -409,7 +455,8 @@ export default defineComponent({
     return {
       ...toRefs(data),
       totalPaginas,
-      gerarBoleto,
+      abrirDialogBoleto,
+      confirmarGerarBoleto,
       irParaPagina,
       alterarPorPagina,
       buscar,

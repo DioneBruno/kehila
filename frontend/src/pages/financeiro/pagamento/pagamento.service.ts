@@ -32,10 +32,10 @@ export class PagamentoService {
     }
   }
 
-  async gerarBoleto(uuid: string) {
+  async gerarBoleto(uuid: string, vencimento?: string) {
     try {
       this.$q.loading.show();
-      await this.$http.gerarBoleto(uuid);
+      await this.$http.gerarBoleto(uuid, vencimento);
       return true;
     } catch {
       return false;

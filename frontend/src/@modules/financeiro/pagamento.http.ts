@@ -3,8 +3,8 @@ import type HttpClient from "../http/httpClient.interface";
 export class PagamentoHttp {
   constructor(readonly http: HttpClient) {}
 
-  async gerarBoleto(uuid: string) {
-    return this.http.post(`pagamentos/${uuid}/gerarBoleto`, {});
+  async gerarBoleto(uuid: string, vencimento?: string) {
+    return this.http.post(`pagamentos/${uuid}/gerarBoleto`, { vencimento });
   }
 
   async listar(params?: { busca?: string; status?: string; pagina?: number; porPagina?: number }) {
