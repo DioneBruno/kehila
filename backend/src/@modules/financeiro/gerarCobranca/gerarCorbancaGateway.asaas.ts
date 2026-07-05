@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-optional-chaining */
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { CobrancaEntity } from "./cobranca.entity";
 import { ApiDate } from "src/@modules/shared/apiDate";

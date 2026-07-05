@@ -1,9 +1,10 @@
 import axios from "axios";
 import dataSource from "src/@infra/database/datasource";
-import { stub, SinonStub, useFakeTimers } from "sinon";
+import { stub, SinonStub } from "sinon";
 import { GerarBoletoPagamentoUsecase } from "../gerarBoletoPagamento.usecase";
 import { GerarBoletoPagamentoRepository } from "../gerarBoletoPagamentoRepository";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { randomUUID } from "crypto";
 
 const companyUuid = "76cea2ee-8ab0-4e9d-98ea-2a9977697465";
 let repo: GerarBoletoPagamentoRepository;
@@ -18,6 +19,7 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
   afterAll(async () => {
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
     await dataSource.destroy();
   });
 
@@ -51,8 +53,10 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
       data: { id: "pay_001", nossoNumero: "001", bankSlipUrl: "url1", dueDate: "2026-07-12", value: 145.78, netValue: 144.18, pixTransaction: null },
     });
 
-    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid)
-      VALUES ('${cobrancaUuid}', '${companyUuid}', '${companyUuid}')`);
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, chave_api, status)
+    VALUES ('${randomUUID()}', '${companyUuid}', 'FINANCEIRO_CHAVE_API', 'ativo')`);
+    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid, pagador_nome, pagador_documento, pagador_email, pagador_telefone)
+      VALUES ('${cobrancaUuid}', '${companyUuid}', '${companyUuid}', 'Pagador de teste 001', '88247744317', 'EMAIL_ADDRESS', '65985455877')`);
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, vencimento, valor)
       VALUES ('${pagamentoUuid}', '${companyUuid}', '${companyUuid}', '${cobrancaUuid}', 'boleto', '2026-07-04', 145.78)`);
 
@@ -67,7 +71,7 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
     expect(postStub.firstCall.args[1].billingType).toBe("BOLETO");
     expect(postStub.firstCall.args[1].customer).toBe(clienteId);
     expect(postStub.firstCall.args[1].value).toBe(145.78);
-    expect(postStub.firstCall.args[1].dueDate).toBe("2026-07-12");
+    expect(postStub.firstCall.args[1].dueDate).toBe("2026-07-04");
     expect(postStub.firstCall.args[1].description).toBe("Breve descrição para a cobrança");
 
     const [pagamentoModel] = await dataSource.query(`SELECT * FROM financeiro_pagamentos WHERE uuid = '${pagamentoUuid}'`);
@@ -75,7 +79,7 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
     expect(pagamentoModel.valor).toBe(145.78);
     expect(pagamentoModel.valor_com_desc_gateway).toBe(144.18);
     expect(pagamentoModel.link_boleto).toBe("url1");
-    expect(pagamentoModel.vencimento).toBe("2026-07-12");
+    expect(pagamentoModel.vencimento).toBe("2026-07-04");
 
     getStub.restore();
     postStub.restore();

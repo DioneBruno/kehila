@@ -11,5 +11,11 @@ export type GerarBoletoPagamentoInput = {
 export class GerarBoletoPagamentoUsecase {
   constructor(readonly repo: GerarBoletoPagamentoRepository) {}
 
-  async execute(input: GerarBoletoPagamentoInput) {}
+  async execute(input: GerarBoletoPagamentoInput) {
+    const pagamento = await this.repo.buscarPagamento(input.pagamentoUuid);
+    if (!pagamento) throw new Error("Pagamento não encontrado");
+    const gateway = this.repo.buscarGateway(pagamento);
+    await gateway.gerarBoleto(pagamento);
+    await this.repo.salvarPagamento(pagamento);
+  }
 }
