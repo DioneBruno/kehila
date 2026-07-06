@@ -91,7 +91,8 @@ export class ListaPagamentoRepository {
         p.link_boleto AS "linkBoleto",
         p.link_cartao AS "linkCartao",
         p.pix,
-        p.created_at AS "createdAt"
+        p.created_at AS "createdAt",
+        p.pago_manual_descricao AS "pagoManualDescricao"
       FROM financeiro_pagamentos p
       LEFT JOIN financeiro_cobrancas c ON c.uuid = p.cobanca_uuid
       ${filterWhere}
@@ -110,6 +111,7 @@ export class ListaPagamentoRepository {
       vencimento: p.vencimento,
       valor: parseFloat(p.valor),
       valorComDescGateway: parseFloat(p.valorComDescGateway),
+      pagoManualDescricao: p.pagoManualDescricao,
       pagoEm: p.pagoEm,
       valorPago: parseFloat(p.valorPago),
       status: p.status,

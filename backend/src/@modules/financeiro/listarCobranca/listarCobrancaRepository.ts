@@ -6,6 +6,7 @@ export type PagamentoListItem = {
   vencimento: string | null;
   valor: number;
   valorComDescGateway: number;
+  pagoManualDescricao: string | null;
   pagoEm: string | null;
   valorPago: number;
   status: string;
@@ -125,7 +126,8 @@ export class ListarCobrancaRepository {
         p.link_boleto AS "linkBoleto",
         p.link_cartao AS "linkCartao",
         p.pix,
-        p.created_at AS "createdAt"
+        p.created_at AS "createdAt",
+        p.pago_manual_descricao AS "pagoManualDescricao"
       FROM financeiro_pagamentos p
       WHERE p.deleted_at IS NULL AND p.company_uuid = $1 AND p.cobanca_uuid = ANY($2)
       ORDER BY p.created_at ASC
@@ -154,6 +156,7 @@ export class ListarCobrancaRepository {
         linkCartao: pagamento.linkCartao,
         pix: pagamento.pix,
         createdAt: pagamento.createdAt,
+        pagoManualDescricao: pagamento.pagoManualDescricao,
       });
       pagamentosPorCobranca.set(pagamento.cobrancaUuid, lista);
     }

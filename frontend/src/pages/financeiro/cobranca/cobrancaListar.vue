@@ -206,6 +206,13 @@
                           · Pago em {{ formatarDataSimples(pagamento.pagoEm) }}</span
                         >
                       </q-item-label>
+                      <q-item-label
+                        caption
+                        v-if="pagamento.pagoManualDescricao"
+                        class="text-orange-9"
+                      >
+                        * {{ pagamento.pagoManualDescricao }}
+                      </q-item-label>
                     </q-item-section>
                     <q-item-section side>
                       <div class="row q-gutter-xs">
