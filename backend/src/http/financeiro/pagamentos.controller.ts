@@ -51,14 +51,15 @@ export class PagamentosController {
   }
 
   @Post(":uuid/informarPagamentoManual")
-  async informarPagamentoManual(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
-    await this.informarPagamentoManualUsecase.execute({
+  async informarPagamentoManual(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    const input = {
       userUuid: req.userUuid,
-      pagamentoUuid: body.pagamentoUuid,
+      pagamentoUuid: uuid,
       valorPago: body.valorPago,
       pagoEm: body.pagoEm,
       pagoDescricao: body.pagoDescricao,
-    });
+    };
+    await this.informarPagamentoManualUsecase.execute(input);
     return res.status(200).json({ success: true });
   }
 

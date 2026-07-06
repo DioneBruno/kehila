@@ -114,6 +114,59 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialog: Informar Pagamento Manual -->
+    <q-dialog v-model="dialogPagamentoManual.aberto" persistent>
+      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+        <q-card-section class="row items-center">
+          <span class="text-h6">Informar Pagamento Manual</span>
+          <q-space />
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <q-form @submit.prevent="confirmarPagamentoManual" greedy>
+            <div class="row q-col-gutter-md">
+              <div class="col-12">
+                <q-input
+                  outlined
+                  stack-label
+                  v-model.number="dialogPagamentoManual.valorPago"
+                  label="Valor pago"
+                  prefix="R$"
+                  type="number"
+                  step="0.01"
+                />
+              </div>
+              <div class="col-12">
+                <q-input
+                  outlined
+                  clearable
+                  stack-label
+                  v-model="dialogPagamentoManual.pagoEm"
+                  label="Data do pagamento"
+                  type="date"
+                />
+              </div>
+              <div class="col-12">
+                <q-input
+                  outlined
+                  stack-label
+                  v-model="dialogPagamentoManual.pagoDescricao"
+                  label="Descrição"
+                  type="textarea"
+                  autogrow
+                />
+              </div>
+            </div>
+            <div class="row justify-end q-gutter-sm q-mt-md">
+              <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+              <q-btn unelevated type="submit" label="Confirmar" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
       <q-card-section class="row q-gutter-md items-center">
@@ -250,6 +303,17 @@
                 >
                   <q-tooltip>Verificar pagamento</q-tooltip>
                 </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  size="sm"
+                  icon="request_quote"
+                  color="blue-7"
+                  @click="abrirDialogPagamentoManual(pagamento)"
+                >
+                  <q-tooltip>Informar pagamento manual</q-tooltip>
+                </q-btn>
               </div>
             </td>
           </tr>
@@ -317,6 +381,13 @@ export default defineComponent({
         pagamentoUuid: "",
         vencimento: "",
       },
+      dialogPagamentoManual: {
+        aberto: false,
+        pagamentoUuid: "",
+        valorPago: null as number | null,
+        pagoEm: "",
+        pagoDescricao: "",
+      },
     });
 
     const totalPaginas = computed(() =>
@@ -353,6 +424,27 @@ export default defineComponent({
       data.dialogBoleto.aberto = false;
       data.dialogBoleto.vencimento = "";
       data.dialogBoleto.pagamentoUuid = "";
+    }
+
+    function abrirDialogPagamentoManual(pagamento: any) {
+      data.dialogPagamentoManual.pagamentoUuid = pagamento.uuid;
+      data.dialogPagamentoManual.valorPago = pagamento.valor;
+      data.dialogPagamentoManual.pagoEm =
+        ApiDate.format(new Date().toISOString(), "YYYY-MM-DD") ?? "";
+      data.dialogPagamentoManual.pagoDescricao = "";
+      data.dialogPagamentoManual.aberto = true;
+    }
+
+    async function confirmarPagamentoManual() {
+      const { pagamentoUuid, valorPago, pagoEm, pagoDescricao } = data.dialogPagamentoManual;
+      await $service.pagamentoManual({
+        uuid: pagamentoUuid,
+        valorPago: Number(valorPago),
+        pagoEm,
+        pagoDescricao,
+      });
+      await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      data.dialogPagamentoManual.aberto = false;
     }
 
     function buscar() {
@@ -458,6 +550,8 @@ export default defineComponent({
       verificarPagamento,
       abrirDialogPeriodo,
       verificarPagamentoPeriodo,
+      abrirDialogPagamentoManual,
+      confirmarPagamentoManual,
     };
   },
 });
