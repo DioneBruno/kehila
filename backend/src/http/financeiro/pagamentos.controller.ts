@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/com
 import type { Request, Response } from "express";
 import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
 import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamento.usecase";
+import { InformarPagamentoManualUsecase } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManual.usecase";
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
 import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
 
@@ -12,6 +13,7 @@ export class PagamentosController {
     readonly listaPagamentoUsecase: ListaPagamentoUsecase,
     readonly verificarPagamentoUsecase: VerificarPagamentoUsecase,
     readonly gerarBoletoPagamentoUsecase: GerarBoletoPagamentoUsecase,
+    readonly informarPagamentoManualUsecase: InformarPagamentoManualUsecase,
   ) {}
 
   @Get()
@@ -44,6 +46,18 @@ export class PagamentosController {
     await this.gerarBoletoPagamentoUsecase.execute({
       pagamentoUuid: uuid,
       vencimento: body.vencimento,
+    });
+    return res.status(200).json({ success: true });
+  }
+
+  @Post(":uuid/informarPagamentoManual")
+  async informarPagamentoManual(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    await this.informarPagamentoManualUsecase.execute({
+      userUuid: req.userUuid,
+      pagamentoUuid: body.pagamentoUuid,
+      valorPago: body.valorPago,
+      pagoEm: body.pagoEm,
+      pagoDescricao: body.pagoDescricao,
     });
     return res.status(200).json({ success: true });
   }
