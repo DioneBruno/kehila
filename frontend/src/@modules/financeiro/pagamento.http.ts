@@ -7,6 +7,15 @@ export class PagamentoHttp {
     return this.http.post(`pagamentos/${uuid}/gerarBoleto`, { vencimento });
   }
 
+  async pagamentoManual(input: {
+    uuid: string;
+    valorPago: number;
+    pagoEm: string;
+    pagoDescricao: string;
+  }) {
+    return this.http.post(`pagamentos/${input.uuid}/informarPagamentoManual`, input);
+  }
+
   async listar(params?: { busca?: string; status?: string; pagina?: number; porPagina?: number }) {
     const query = new URLSearchParams();
     if (params?.busca) query.set("busca", params.busca);

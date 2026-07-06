@@ -44,6 +44,23 @@ export class PagamentoService {
     }
   }
 
+  async pagamentoManual(input: {
+    uuid: string;
+    valorPago: number;
+    pagoEm: string;
+    pagoDescricao: string;
+  }) {
+    try {
+      this.$q.loading.show();
+      await this.$http.pagamentoManual(input);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
   async verificarPagamento(uuid: string) {
     try {
       this.$q.loading.show();
