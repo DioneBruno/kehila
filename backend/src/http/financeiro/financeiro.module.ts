@@ -36,6 +36,8 @@ import { IncluirCartaoCreditoUsecase } from "src/@modules/financeiro/incluirCart
 import { IncluirCartaoCreditoRepository } from "src/@modules/financeiro/incluirCartaoCredito/incluirCartaoCreditoRepository";
 import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamento.usecase";
 import { GerarBoletoPagamentoRepository } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamentoRepository";
+import { InformarPagamentoManualUsecase } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManual.usecase";
+import { InformarPagamentoManualRepository } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManualRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -48,6 +50,8 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 @Module({
   controllers: [ContasBancariasController, CobrancasController, PagamentosController, CartaoCreditoController],
   providers: [
+    makeProvider(FinanceiroQuery, (hub) => new FinanceiroQuery(hub)),
+    makeProvider(InformarPagamentoManualUsecase, (hub) => new InformarPagamentoManualUsecase(new InformarPagamentoManualRepository(hub))),
     makeProvider(IncluirCartaoCreditoUsecase, (hub) => new IncluirCartaoCreditoUsecase(new IncluirCartaoCreditoRepository(hub))),
     makeProvider(CriarContaBancariaUsecase, (hub) => new CriarContaBancariaUsecase(new CriarContaBancariaRepository(hub))),
     makeProvider(ListarContasBancariasUsecase, (hub) => new ListarContasBancariasUsecase(new ListarContasBancariasRepository(hub))),
@@ -61,7 +65,6 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
       VerificarPagamentoUsecase,
       (hub) => new VerificarPagamentoUsecase(new VerificarPagamentoRepostiory(hub), new VerificarPagamentoGateway(hub)),
     ),
-    makeProvider(FinanceiroQuery, (hub) => new FinanceiroQuery(hub)),
   ],
 })
 export class FinanceiroModule implements NestModule {
