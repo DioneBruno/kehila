@@ -78,4 +78,25 @@ describe("Deve testar InformarPagamentoManualUsecase", () => {
     };
     await expect(usecase.execute(input)).rejects.toThrow("Valor pago não pode ser menor que valor cobrado");
   });
+
+  test("Valor pago não pode ser menor que valor cobrado", async () => {
+    const userUuid = "c5224d43-f8d4-46c8-9a5c-3760ccfe33a5";
+    const cobrancaUuid = "cc6cd87e-f591-4ded-bca0-2d198dc96677";
+    const pagamentoUuid = "7205bda9-89a0-48c2-baa8-82fa435a4b79";
+
+    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid, pagador_nome, pagador_documento, pagador_email, pagador_telefone)
+      VALUES ('${cobrancaUuid}', '${companyUuid}', '${companyUuid}', 'Pagador de teste 001', '88247744317', 'EMAIL_ADDRESS', '65985455877')`);
+    await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, vencimento, valor, status)
+      VALUES ('${pagamentoUuid}', '${companyUuid}', '${companyUuid}', '${cobrancaUuid}', 'boleto', '2026-07-15', 145, 'pago')`);
+
+    const usecase = new InformarPagamentoManualUsecase(repo);
+    const input = {
+      userUuid,
+      pagamentoUuid,
+      valorPago: 145.0,
+      pagoDescricao: "Descrição para o pagamento",
+      pagoEm: "2026-06-25",
+    };
+    await expect(usecase.execute(input)).rejects.toThrow("Pagamento já pago");
+  });
 });

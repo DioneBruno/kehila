@@ -50,48 +50,33 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <q-input
+                  outlined
+                  stack-label
                   v-model.number="dialogPagamentoManual.valorPago"
                   label="Valor pago"
-                  filled
                   prefix="R$"
                   type="number"
                   step="0.01"
-                  :rules="[(val) => (val !== null && val !== '') || 'Campo obrigatório']"
                 />
               </div>
               <div class="col-12">
                 <q-input
+                  outlined
+                  stack-label
+                  clearable
+                  type="date"
                   v-model="dialogPagamentoManual.pagoEm"
                   label="Data do pagamento"
-                  filled
-                  readonly
-                  clearable
-                  :rules="[(val) => !!val || 'Campo obrigatório']"
-                >
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy cover>
-                        <q-date
-                          v-model="dialogPagamentoManual.pagoEm"
-                          mask="YYYY-MM-DD"
-                          color="primary"
-                        >
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="OK" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
+                />
               </div>
               <div class="col-12">
                 <q-input
+                  outlined
+                  stack-label
+                  autogrow
                   v-model="dialogPagamentoManual.pagoDescricao"
                   label="Descrição"
-                  filled
                   type="textarea"
-                  autogrow
                 />
               </div>
             </div>
@@ -408,27 +393,14 @@ export default defineComponent({
 
     async function confirmarPagamentoManual() {
       const { pagamentoUuid, valorPago, pagoEm, pagoDescricao } = data.dialogPagamentoManual;
-      const ok = await $service.pagamentoManual({
+      await $service.pagamentoManual({
         uuid: pagamentoUuid,
         valorPago: Number(valorPago),
         pagoEm,
         pagoDescricao,
       });
-      if (ok) {
-        data.dialogPagamentoManual.aberto = false;
-        Notify.create({
-          type: "positive",
-          message: "Pagamento manual informado",
-          position: "top",
-        });
-        await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
-      } else {
-        Notify.create({
-          type: "negative",
-          message: "Não foi possível informar o pagamento manual",
-          position: "top",
-        });
-      }
+      await carregar(data.paginacao.page, data.paginacao.rowsPerPage);
+      data.dialogPagamentoManual.aberto = false;
     }
 
     function buscar() {

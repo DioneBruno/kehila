@@ -45,6 +45,7 @@ export class PagamentoEntity {
     return "manual";
   }
   informarPagamentoManual(input: InformarPagamentoManualInput): void {
+    if (this.props.status === "pago") throw new ApiError("Pagamento já pago");
     if (input.valorPago < this.props.valor) throw new ApiError("Valor pago não pode ser menor que valor cobrado");
     this.props.pagoEm = input.pagoEm;
     this.props.valorPago = input.valorPago;
