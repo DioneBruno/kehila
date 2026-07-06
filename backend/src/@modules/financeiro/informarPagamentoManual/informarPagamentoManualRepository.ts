@@ -10,6 +10,7 @@ export class InformarPagamentoManualRepository {
     if (!pagamentoModel) return;
     const pagamento = new PagamentoEntity({
       uuid: pagamentoModel.uuid,
+      valor: pagamentoModel.valor,
       pagoEm: pagamentoModel.pago_em,
       valorPago: pagamentoModel.valor_pago,
       pagoDescricao: pagamentoModel.pago_descricao,

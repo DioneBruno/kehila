@@ -1,5 +1,8 @@
+import { ApiError } from "src/@modules/shared/apiError";
+
 export type PagamentoProps = {
   uuid: string;
+  valor: number;
   pagoEm: string;
   valorPago: number;
   pagoDescricao: string;
@@ -20,6 +23,9 @@ export class PagamentoEntity {
   uuid(): string {
     return this.props.uuid;
   }
+  valor(): number {
+    return this.props.valor;
+  }
   pagoEm(): string {
     return this.props.pagoEm;
   }
@@ -39,6 +45,7 @@ export class PagamentoEntity {
     return "manual";
   }
   informarPagamentoManual(input: InformarPagamentoManualInput): void {
+    if (input.valorPago < this.props.valor) throw new ApiError("Valor pago não pode ser menor que valor cobrado");
     this.props.pagoEm = input.pagoEm;
     this.props.valorPago = input.valorPago;
     this.props.pagoDescricao = input.pagoDescricao;
