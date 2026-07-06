@@ -34,6 +34,23 @@ export class CobrancaService {
     }
   }
 
+  async pagamentoManual(input: {
+    uuid: string;
+    valorPago: number;
+    pagoEm: string;
+    pagoDescricao: string;
+  }) {
+    try {
+      this.$q.loading.show();
+      await this.$pagamentoHttp.pagamentoManual(input);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
   async pagamentoGerarBoleto(uuid: string, vencimento?: string) {
     try {
       this.$q.loading.show();
