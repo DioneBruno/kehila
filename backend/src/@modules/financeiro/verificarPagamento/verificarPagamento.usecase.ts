@@ -15,6 +15,7 @@ export class VerificarPagamentoUsecase {
   async execute(input: VerificarPagamentoInput): Promise<void> {
     const pagamento = await this.verificarPagamentoRepository.buscarPagamento(input.companyUuid, input.pagamentoUuid);
 
+    if (pagamento.status() === "pago") return;
     const resultado = await this.verificarPagamentoGateway.verificarPagamento(pagamento);
     if (!resultado) return;
 

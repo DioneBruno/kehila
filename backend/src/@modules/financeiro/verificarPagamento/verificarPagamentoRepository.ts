@@ -16,7 +16,7 @@ export class VerificarPagamentoRepostiory {
           pagamentos.status,
           pagamentos.banco_ref,
           pagamentos.pago_em,
-          pagamentos.venicmento,
+          pagamentos.vencimento,
           pagamentos.valor_pago,
           cobrancas.user_uuid
         FROM financeiro_pagamentos pagamentos
@@ -37,7 +37,7 @@ export class VerificarPagamentoRepostiory {
       companyUuid: pagamentoModel.company_uuid,
       status: pagamentoModel.status,
       bancoRef: pagamentoModel.banco_ref,
-      vencimento: pagamentoModel.venicmento,
+      vencimento: pagamentoModel.vencimento,
       pagoEm: pagamentoModel.pago_em,
       valorPago: parseFloat(pagamentoModel.valor_pago),
     });
@@ -54,7 +54,34 @@ export class VerificarPagamentoRepostiory {
     if (!pagamento.usuario()?.email) return;
     const repo = new EnviarEmailRepository(this.connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
-    const template = `Em ${ApiDate.format(pagamento.pagoEm(), "DD/MM/YYYY")} Recebemos o valor de R$ ${pagamento.valorPago()}, referente ao vencimento de ${ApiDate.format(pagamento.vencimento(), "DD/MM/YYYY")}`;
+
+    const valorFormatado = (pagamento.valorPago() ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const template = `
+      <div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background-color: #f5f5f5;">
+        <div style="background-color: #ffffff; border-radius: 8px; padding: 32px; text-align: center;">
+          <h1 style="color: #1a1a1a; font-size: 20px; margin: 0 0 16px;">Pagamento recebido</h1>
+          <p style="color: #4a4a4a; font-size: 14px; margin: 0 0 24px;">
+            Olá, ${pagamento.usuario().name}! Confirmamos o recebimento do seu pagamento.
+          </p>
+          <div style="display: inline-block; background-color: #f0f0f0; border-radius: 6px; padding: 16px 32px; margin-bottom: 24px;">
+            <span style="font-size: 32px; font-weight: bold; color: #1a1a1a;">R$ ${valorFormatado}</span>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; text-align: left; margin-bottom: 8px;">
+            <tr>
+              <td style="color: #8a8a8a; font-size: 12px; padding: 8px 0; border-top: 1px solid #eeeeee;">Vencimento</td>
+              <td style="color: #1a1a1a; font-size: 12px; padding: 8px 0; border-top: 1px solid #eeeeee; text-align: right;">${ApiDate.format(pagamento.vencimento(), "DD/MM/YYYY")}</td>
+            </tr>
+            <tr>
+              <td style="color: #8a8a8a; font-size: 12px; padding: 8px 0; border-top: 1px solid #eeeeee;">Pago em</td>
+              <td style="color: #1a1a1a; font-size: 12px; padding: 8px 0; border-top: 1px solid #eeeeee; text-align: right;">${ApiDate.format(pagamento.pagoEm(), "DD/MM/YYYY")}</td>
+            </tr>
+          </table>
+          <p style="color: #8a8a8a; font-size: 12px; margin: 16px 0 0;">
+            Obrigado por manter seu pagamento em dia.
+          </p>
+        </div>
+      </div>
+    `;
 
     await usecase.execute({
       companyUuid: pagamento.companyUuid(),
