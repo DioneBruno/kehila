@@ -5,15 +5,23 @@ import { EnviarEmailGatewaySmtp } from "../enviarEmailGateway.smtp";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { MensagemEntity } from "../mensagem.entity";
 import * as nodemailer from "nodemailer";
+import dataSource from "src/@infra/database/datasource";
+import { randomUUID } from "crypto";
+
+const companyUuid = "10ffe698-d9d6-4778-97e8-482ff7de221b";
 
 jest.mock("nodemailer", () => ({
   createTransport: jest.fn(),
 }));
 
 describe("Deve testar EnviarEmailUsecase", () => {
-  beforeEach(() => {});
+  beforeEach(async () => {
+    await dataSource.initialize();
+  });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await dataSource.query(`DELETE FROM notificacao_gateways WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.destroy();
     sinon.restore();
     jest.clearAllMocks();
   });
@@ -25,11 +33,12 @@ describe("Deve testar EnviarEmailUsecase", () => {
     const sendMailMock = jest.fn().mockResolvedValue({});
     (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
 
-    const connectionHub = new ConnectionHub({});
+    const connectionHub = new ConnectionHub({ database: dataSource });
     const repo = new EnviarEmailRepository(connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
 
     const input = {
+      companyUuid,
       gateway: "smtp",
       destinatario: "usuario@exemplo.com",
       titulo: "Código de validação",
@@ -58,11 +67,12 @@ describe("Deve testar EnviarEmailUsecase", () => {
     const sendMailMock = jest.fn().mockResolvedValue({});
     (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
 
-    const connectionHub = new ConnectionHub({});
+    const connectionHub = new ConnectionHub({ database: dataSource });
     const repo = new EnviarEmailRepository(connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
 
     const input = {
+      companyUuid,
       gateway: "smtp",
       nomeAmigavel: "Nome da Sinagoga",
       destinatario: "usuario@exemplo.com",
@@ -95,11 +105,12 @@ describe("Deve testar EnviarEmailUsecase", () => {
     const sendMailMock = jest.fn().mockResolvedValue({});
     (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
 
-    const connectionHub = new ConnectionHub({});
+    const connectionHub = new ConnectionHub({ database: dataSource });
     const repo = new EnviarEmailRepository(connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
 
     await usecase.execute({
+      companyUuid,
       gateway: "smtp",
       destinatario: "usuario@exemplo.com",
       titulo: "Código de validação",
@@ -135,11 +146,12 @@ describe("Deve testar EnviarEmailUsecase", () => {
     const sendMailMock = jest.fn().mockResolvedValue({});
     (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
 
-    const connectionHub = new ConnectionHub({});
+    const connectionHub = new ConnectionHub({ database: dataSource });
     const repo = new EnviarEmailRepository(connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
 
     await usecase.execute({
+      companyUuid,
       gateway: "smtp",
       destinatario: "usuario@exemplo.com",
       titulo: "Código de validação",
@@ -159,11 +171,12 @@ describe("Deve testar EnviarEmailUsecase", () => {
   test("Deve chamar o gateway SMTP com os dados corretos", async () => {
     const enviarStub = sinon.stub(EnviarEmailGatewaySmtp.prototype, "enviar").resolves();
 
-    const connectionHub = new ConnectionHub({});
+    const connectionHub = new ConnectionHub({ database: dataSource });
     const repo = new EnviarEmailRepository(connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
 
     const input = {
+      companyUuid,
       gateway: "smtp",
       destinatario: "usuario@exemplo.com",
       titulo: "Código de validação",
@@ -185,11 +198,12 @@ describe("Deve testar EnviarEmailUsecase", () => {
   test("Deve chamar o gateway SMTP exatamente uma vez por envio", async () => {
     const enviarStub = sinon.stub(EnviarEmailGatewaySmtp.prototype, "enviar").resolves();
 
-    const connectionHub = new ConnectionHub({});
+    const connectionHub = new ConnectionHub({ database: dataSource });
     const repo = new EnviarEmailRepository(connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
 
     await usecase.execute({
+      companyUuid,
       gateway: "smtp",
       destinatario: "a@b.com",
       titulo: "Título",
@@ -197,6 +211,7 @@ describe("Deve testar EnviarEmailUsecase", () => {
     });
 
     await usecase.execute({
+      companyUuid,
       gateway: "smtp",
       destinatario: "c@d.com",
       titulo: "Outro título",
@@ -206,5 +221,37 @@ describe("Deve testar EnviarEmailUsecase", () => {
     expect(enviarStub.callCount).toBe(2);
 
     enviarStub.restore();
+  });
+
+  test("Caso encontrado um Gateway SMTP ativo para a Empresa, Deve pedar os dados do Gateway cadastrado", async () => {
+    await dataSource.query(`INSERT INTO notificacao_gateways (uuid, company_uuid, type, name, usuario, senha, meta, status)
+      VALUES ('${randomUUID()}', '${companyUuid}', 'email', 'smtp-gmail', 'nomedousuario', 'senhadousuario', '{ "host": "host-smtp-gmail", "port": "port-587", "secure": "true" }', 'ativo')`);
+
+    const sendMailMock = jest.fn().mockResolvedValue({});
+    (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
+
+    const connectionHub = new ConnectionHub({ database: dataSource });
+    const repo = new EnviarEmailRepository(connectionHub);
+    const usecase = new EnviarEmailUsecase(repo);
+
+    await usecase.execute({
+      companyUuid,
+      gateway: "smtp",
+      destinatario: "usuario@exemplo.com",
+      titulo: "Código de validação",
+      mensagem: "Seu código é 123456",
+    });
+
+    expect(nodemailer.createTransport).toHaveBeenCalledTimes(1);
+    expect(nodemailer.createTransport).toHaveBeenCalledWith({
+      host: "host-smtp-gmail",
+      port: "port-587",
+      secure: true,
+      auth: {
+        user: "nomedousuario",
+        pass: "senhadousuario",
+      },
+      tls: { rejectUnauthorized: false },
+    });
   });
 });

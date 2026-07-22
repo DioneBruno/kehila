@@ -1,4 +1,5 @@
 export type MensagemProps = {
+  companyUuid: string;
   gateway: string;
   destinatario: string;
   titulo: string;
@@ -9,6 +10,9 @@ export type MensagemProps = {
 export class MensagemEntity {
   constructor(readonly props: MensagemProps) {}
 
+  companyUuid(): string {
+    return this.props.companyUuid;
+  }
   gateway(): string {
     return this.props.gateway;
   }

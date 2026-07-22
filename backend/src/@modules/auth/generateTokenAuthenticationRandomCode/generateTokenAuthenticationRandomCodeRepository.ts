@@ -41,11 +41,12 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
     return generateTokenUsecase.execute({ companyUuid, userUuid });
   }
 
-  async enviarEmail(email: string, code: string): Promise<void> {
+  async enviarEmail(companyUuid: string, email: string, code: string): Promise<void> {
     try {
       const repo = new EnviarEmailRepository(this.connectionHub);
       const usecase = new EnviarEmailUsecase(repo);
       await usecase.execute({
+        companyUuid,
         gateway: "smtp",
         destinatario: email,
         titulo: "Código de verificação",

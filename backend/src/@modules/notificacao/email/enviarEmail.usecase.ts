@@ -2,6 +2,7 @@ import { EnviarEmailRepository } from "./enviarEmailRepository";
 import { MensagemEntity } from "./mensagem.entity";
 
 export type EnviarEmailInput = {
+  companyUuid: string;
   gateway: string;
   destinatario: string;
   titulo: string;
@@ -14,6 +15,7 @@ export class EnviarEmailUsecase {
 
   async execute(input: EnviarEmailInput) {
     const mensagem = new MensagemEntity({
+      companyUuid: input.companyUuid,
       gateway: input.gateway,
       destinatario: input.destinatario,
       titulo: input.titulo,

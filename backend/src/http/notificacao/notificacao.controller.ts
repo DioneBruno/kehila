@@ -11,7 +11,7 @@ export class NotificacaoController {
   ) {}
 
   @Post("enviar-sms")
-  async enviarSms(@Req() req: Request, @Body() body: any, @Res() res: Response) {
+  async enviarSms(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
       gateway: body.gateway,
       destinatario: body.destinatario,
@@ -25,8 +25,9 @@ export class NotificacaoController {
   }
 
   @Post("enviar-email")
-  async enviarEmail(@Req() req: Request, @Body() body: any, @Res() res: Response) {
+  async enviarEmail(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
+      companyUuid: req.companyUuid,
       gateway: body.gateway,
       destinatario: body.destinatario,
       titulo: body.titulo,
