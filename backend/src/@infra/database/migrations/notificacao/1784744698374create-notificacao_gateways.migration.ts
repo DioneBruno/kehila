@@ -18,6 +18,7 @@ export class MigrationCreateNotificacaoGatewayMigration1784744698374 implements 
           {
             name: "uuid",
             type: "uuid",
+            isPrimary: true,
             primaryKeyConstraintName: "PK_notificacao_gateways",
             default: "gen_random_uuid()",
           },

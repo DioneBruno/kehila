@@ -18,6 +18,7 @@ export class MigrationCreateCartaoCredito1781983983294 implements MigrationInter
           {
             name: "uuid",
             type: "uuid",
+            isPrimary: true,
             primaryKeyConstraintName: "PK_financeiro_cartao_credito",
             default: "gen_random_uuid()",
           },

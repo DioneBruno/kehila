@@ -82,6 +82,7 @@ const MENU_ITEMS = [
   { label: "EMPRESA", type: "section" },
   { label: "Minha Empresa", icon: "business", route: "empresa" },
   { label: "Usuários", icon: "group", route: "usuarios" },
+  { label: "Notificações", icon: "email", route: "notificacao" },
 ];
 
 export default defineComponent({

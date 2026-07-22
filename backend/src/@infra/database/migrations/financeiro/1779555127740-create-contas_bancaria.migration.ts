@@ -18,6 +18,7 @@ export class MigrationCreateContasBancariasMigration1779555127740 implements Mig
           {
             name: "uuid",
             type: "uuid",
+            isPrimary: true,
             primaryKeyConstraintName: "PK_financeiro_contas_bancarias",
             default: "gen_random_uuid()",
           },

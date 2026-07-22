@@ -82,6 +82,11 @@ const routes: RouteRecordRaw[] = [
         name: "usuarios.detalhe",
         component: () => import("pages/usuario/usuarioEditar.vue"),
       },
+      {
+        path: "notificacao",
+        name: "notificacao",
+        component: () => import("pages/notificacao/home.vue"),
+      },
     ],
   },
   {

@@ -6,10 +6,18 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { EnviarSmsRepository } from "src/@modules/notificacao/sms/enviarSmsRepository";
 import { EnviarEmailUsecase } from "src/@modules/notificacao/email/enviarEmail.usecase";
 import { EnviarEmailRepository } from "src/@modules/notificacao/email/enviarEmailRepository";
+import { NotificacaoGateway } from "src/@modules/notificacao/notificacaoGateway";
 
 @Module({
   controllers: [NotificacaoController],
   providers: [
+    {
+      provide: NotificacaoGateway,
+      useFactory: (connectionHub: ConnectionHub) => {
+        return new NotificacaoGateway(connectionHub);
+      },
+      inject: [ConnectionHub],
+    },
     {
       provide: EnviarSmsUsecase,
       useFactory: (connectionHub: ConnectionHub) => {

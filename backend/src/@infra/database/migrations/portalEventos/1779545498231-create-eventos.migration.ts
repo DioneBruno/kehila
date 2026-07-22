@@ -18,6 +18,7 @@ export class CreateEventos1779545498231 implements MigrationInterface {
           {
             name: "uuid",
             type: "uuid",
+            isPrimary: true,
             primaryKeyConstraintName: "PK_eventos",
             default: "gen_random_uuid()",
           },

@@ -18,6 +18,7 @@ export class MigrationCreateCobrancasMigration1779555127741 implements Migration
           {
             name: "uuid",
             type: "uuid",
+            isPrimary: true,
             primaryKeyConstraintName: "PK_financeiro_cobrancas",
             default: "gen_random_uuid()",
           },
