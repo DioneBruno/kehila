@@ -1,6 +1,6 @@
 export type MensagemProps = {
   companyUuid: string;
-  gateway: string;
+  gateway?: string;
   destinatario: string;
   titulo: string;
   mensagem: string;
@@ -13,8 +13,8 @@ export class MensagemEntity {
   companyUuid(): string {
     return this.props.companyUuid;
   }
-  gateway(): string {
-    return this.props.gateway;
+  gateway(): string | null {
+    return this.props.gateway ?? null;
   }
   destinatario(): string {
     return this.props.destinatario;

@@ -5,8 +5,10 @@ import { VerificarPagamentoUsecase } from "../verificarPagamento.usecase";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { VerificarPagamentoGateway } from "../verificarPagamentoGateway";
 import { ApiDate } from "src/@modules/shared/apiDate";
+import { EnviarEmailUsecase } from "src/@modules/notificacao/email/enviarEmail.usecase";
 
 const companyUuid = "c265edea-8690-47ed-8593-944551771cd2";
+const userUuid = "906ede0f-ab5f-4dcb-8054-332ddc3aed64";
 let repo: VerificarPagamentoRepostiory;
 let gateway: VerificarPagamentoGateway;
 let clock: sinon.SinonFakeTimers;
@@ -18,12 +20,20 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
     const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new VerificarPagamentoRepostiory(connectionHub);
     gateway = new VerificarPagamentoGateway(connectionHub);
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, email) VALUES ('${userUuid}', 'Teste', 'emaildo@usuario.com.br')`);
+  });
+  beforeEach(async () => {
+    await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
   });
   afterAll(async () => {
     clock.restore();
     await dataSource.query(`DELETE FROM financeiro_pagamentos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_cobrancas WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM financeiro_contas_bancarias WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
     await dataSource.destroy();
   });
 
@@ -38,11 +48,12 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
       dataCreditado: "2026-06-19",
       valorPago: 101.5,
     });
+    const enviarEmailUsecase = stub(EnviarEmailUsecase.prototype, "execute").resolves();
 
     await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, banco_numero)
       VALUES ('${contaBancariaUuid}', '${companyUuid}', '461')`);
     await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid)
-      VALUES ('${cobrancaUuid}', '${companyUuid}', '${companyUuid}')`);
+      VALUES ('${cobrancaUuid}', '${companyUuid}', '${userUuid}')`);
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref)
       VALUES ('${pagamentoUuid}', '${companyUuid}', '${companyUuid}', '${cobrancaUuid}', 'boleto', 100, '')`);
 
@@ -60,5 +71,44 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
     expect(pagamentoModel.valor_pago).toBe("101.50");
 
     verificaPagamentoStub.restore();
+    enviarEmailUsecase.restore();
+  });
+
+  test("Deve enviar email para o usuario da cobranca", async () => {
+    const pagamentoUuid = "407cb594-4574-4824-acc3-75a68ece3155";
+    const cobrancaUuid = "407cb594-4574-4824-acc3-75a68ece3155";
+    const contaBancariaUuid = "3fba0036-f55d-4cd1-a853-6d5f2bedf792";
+
+    const verificaPagamentoStub = stub(gateway, "verificarPagamento").resolves({
+      status: "pago",
+      dataPagamento: "2026-06-18",
+      dataCreditado: "2026-06-19",
+      valorPago: 101.5,
+    });
+    const enviarEmailUsecase = stub(EnviarEmailUsecase.prototype, "execute").resolves();
+
+    await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, banco_numero)
+      VALUES ('${contaBancariaUuid}', '${companyUuid}', '461')`);
+    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid)
+      VALUES ('${cobrancaUuid}', '${companyUuid}', '${userUuid}')`);
+    await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref)
+      VALUES ('${pagamentoUuid}', '${companyUuid}', '${companyUuid}', '${cobrancaUuid}', 'boleto', 100, '')`);
+
+    const usecase = new VerificarPagamentoUsecase(repo, gateway);
+    const input = {
+      companyUuid,
+      pagamentoUuid,
+    };
+    await usecase.execute(input);
+
+    // console.log(enviarEmailUsecase.args);
+    expect(enviarEmailUsecase.callCount).toBe(1);
+    expect(enviarEmailUsecase.args[0][0].companyUuid).toBe(companyUuid);
+    expect(enviarEmailUsecase.args[0][0].destinatario).toBe("emaildo@usuario.com.br");
+    expect(enviarEmailUsecase.args[0][0].titulo).toBe("Pagamento Recebido");
+    expect(enviarEmailUsecase.args[0][0].mensagem).not.toBeNull();
+
+    verificaPagamentoStub.restore();
+    enviarEmailUsecase.restore();
   });
 });

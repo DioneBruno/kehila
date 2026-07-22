@@ -3,7 +3,7 @@ import { MensagemEntity } from "./mensagem.entity";
 
 export type EnviarEmailInput = {
   companyUuid: string;
-  gateway: string;
+  gateway?: string;
   destinatario: string;
   titulo: string;
   mensagem: string;

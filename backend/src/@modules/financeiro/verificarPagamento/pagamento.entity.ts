@@ -5,6 +5,7 @@ export type PagamentoProps = {
   bancoRef: string;
   pagoEm?: string | null;
   valorPago?: number;
+  usuario: { uuid: string; name: string; email: string };
 };
 
 export class PagamentoEntity {
@@ -15,6 +16,9 @@ export class PagamentoEntity {
   }
   uuid(): string {
     return this.props.uuid;
+  }
+  usuario(): { uuid: string; name: string; email: string } {
+    return this.props.usuario;
   }
   status(): string {
     return this.props.status;

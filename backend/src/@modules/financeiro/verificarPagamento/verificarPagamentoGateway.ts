@@ -25,11 +25,11 @@ export class VerificarPagamentoGateway {
       access_token: token,
     };
     const response = await this.connectionHub.http?.get(url, { headers });
-    console.log(response?.data?.status);
-    console.log(response?.data?.customerPaymentDate);
-    console.log(response?.data?.creditDate);
-    console.log(response?.data?.value);
-    if (response?.data?.status !== "RECEIVED") return null;
+    // console.log(response?.data?.status);
+    // console.log(response?.data?.customerPaymentDate);
+    // console.log(response?.data?.creditDate);
+    // console.log(response?.data?.value);
+    if (response?.data?.status !== "RECEIVED") return null; // Caso for diferente de recebida
     return {
       status: "pago",
       dataPagamento: response.data.customerPaymentDate,

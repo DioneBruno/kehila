@@ -20,5 +20,6 @@ export class VerificarPagamentoUsecase {
 
     pagamento.receber(resultado.dataPagamento, resultado.valorPago);
     await this.verificarPagamentoRepository.atualizarPagamento(pagamento);
+    await this.verificarPagamentoRepository.enviarEmail(pagamento);
   }
 }
