@@ -4,6 +4,7 @@ export type PagamentoProps = {
   status: string;
   bancoRef: string;
   pagoEm?: string | null;
+  vencimento: string;
   valorPago?: number;
   usuario: { uuid: string; name: string; email: string };
 };
@@ -26,8 +27,11 @@ export class PagamentoEntity {
   bancoRef(): string {
     return this.props.bancoRef;
   }
-  pagoEm(): string | null | undefined {
-    return this.props.pagoEm;
+  vencimento(): string {
+    return this.props.vencimento;
+  }
+  pagoEm(): string {
+    return this.props.pagoEm ?? "";
   }
   valorPago(): number | undefined {
     return this.props.valorPago;

@@ -16,6 +16,7 @@ export class VerificarPagamentoRepostiory {
           pagamentos.status,
           pagamentos.banco_ref,
           pagamentos.pago_em,
+          pagamentos.venicmento,
           pagamentos.valor_pago,
           cobrancas.user_uuid
         FROM financeiro_pagamentos pagamentos
@@ -36,6 +37,7 @@ export class VerificarPagamentoRepostiory {
       companyUuid: pagamentoModel.company_uuid,
       status: pagamentoModel.status,
       bancoRef: pagamentoModel.banco_ref,
+      vencimento: pagamentoModel.venicmento,
       pagoEm: pagamentoModel.pago_em,
       valorPago: parseFloat(pagamentoModel.valor_pago),
     });
@@ -52,7 +54,7 @@ export class VerificarPagamentoRepostiory {
     if (!pagamento.usuario()?.email) return;
     const repo = new EnviarEmailRepository(this.connectionHub);
     const usecase = new EnviarEmailUsecase(repo);
-    const template = `Pagamento recebido no valor de ${pagamento.valorPago()}`;
+    const template = `Em ${ApiDate.format(pagamento.pagoEm(), "DD/MM/YYYY")} Recebemos o valor de R$ ${pagamento.valorPago()}, referente ao vencimento de ${ApiDate.format(pagamento.vencimento(), "DD/MM/YYYY")}`;
 
     await usecase.execute({
       companyUuid: pagamento.companyUuid(),
