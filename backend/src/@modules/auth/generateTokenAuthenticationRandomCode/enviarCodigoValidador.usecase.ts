@@ -32,7 +32,7 @@ export class EnviarCodigoValidadorUsecase {
 
     await this.repo.salvarCodigoNoCache(input.companyUuid, input.username, code, user.uuid);
     await this.repo.enviarEmail(input.companyUuid, user.email, code);
-    await this.repo.enviarSms(user.phone, code);
+    // await this.repo.enviarSms(user.phone, code);
 
     return { code, email: maskEmail(user.email), phone: maskPhone(user.phone) };
   }

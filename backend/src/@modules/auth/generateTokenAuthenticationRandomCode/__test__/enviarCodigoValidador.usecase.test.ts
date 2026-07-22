@@ -7,6 +7,13 @@ import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
 import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 
+jest.mock("@vonage/server-sdk", () => ({
+  Vonage: jest.fn().mockImplementation(() => ({
+    messages: { send: jest.fn().mockResolvedValue({}) },
+  })),
+}));
+jest.mock("@vonage/messages", () => ({ Channels: { SMS: "sms" } }));
+
 const companyUuid = "d22ca823-c559-4d91-9a59-7c7a499d6977";
 const userUuid = "7a426c07-7709-4adc-b3f7-4782c9a12b89";
 const username = "A12345678909B";
@@ -24,6 +31,9 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
     const cache = new ConnectionCacheRedis(cacheClient);
     const connectionHub = new ConnectionHub({ database: dataSource, cache });
     repo = new GenerateTokenAuthenticationRandomCodeRepository(connectionHub);
+
+    await dataSource.query(`INSERT INTO notificacao_gateways (uuid, company_uuid, type, name, usuario, senha, meta, status)
+      VALUES ('${companyUuid}', '${companyUuid}', 'sms', 'gateway', 'usuario', 'senha', '{}', 'active')`);
   });
 
   beforeEach(async () => {
@@ -33,6 +43,7 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
 
   afterAll(async () => {
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = '${userUuid}'`);
+    await dataSource.query(`DELETE FROM notificacao_gateways WHERE uuid = '${companyUuid}'`);
     await dataSource.destroy();
   });
 
@@ -72,21 +83,20 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
     const result = await usecase.execute({ companyUuid, username });
 
     expect(enviarEmailStub.calledOnce).toBe(true);
-    expect(enviarEmailStub.firstCall.args[0]).toBe(userEmail);
-    expect(enviarEmailStub.firstCall.args[1]).toBe(result.code);
+    expect(enviarEmailStub.firstCall.args[0]).toBe(companyUuid);
+    expect(enviarEmailStub.firstCall.args[1]).toBe(userEmail);
+    expect(enviarEmailStub.firstCall.args[2]).toBe(result.code);
   });
 
-  test("Deve enviar o código via SMS com destinatário e código corretos", async () => {
+  test("Não deve enviar o código via SMS (envio desabilitado)", async () => {
     await inserirUsuario();
     sinon.stub(repo, "enviarEmail").resolves();
     const enviarSmsStub = sinon.stub(repo, "enviarSms").resolves();
 
     const usecase = new EnviarCodigoValidadorUsecase(repo);
-    const result = await usecase.execute({ companyUuid, username });
+    await usecase.execute({ companyUuid, username });
 
-    expect(enviarSmsStub.calledOnce).toBe(true);
-    expect(enviarSmsStub.firstCall.args[0]).toBe(userPhone);
-    expect(enviarSmsStub.firstCall.args[1]).toBe(result.code);
+    expect(enviarSmsStub.called).toBe(false);
   });
 
   test("Deve lançar erro quando usuário não é encontrado", async () => {
