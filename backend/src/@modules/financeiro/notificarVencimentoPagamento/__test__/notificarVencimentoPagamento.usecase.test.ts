@@ -170,4 +170,36 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
 
     enviarEmailUsecase.restore();
   });
+
+  test("Deve enviar para um array de uuids de pagamentos", async () => {
+    const userUuid = "b4f3aa00-bccc-4a33-a779-7e4bc1096e95";
+
+    const enviarEmailUsecase = stub(EnviarEmailUsecase.prototype, "execute").resolves();
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, email) VALUES ('${userUuid}', '${nomeUser}', 'emaildo@usuario.com.br')`);
+
+    const cobrancaUuidBase = "b35e2d4-0118-4e04-a49f-aa55a30bdeea";
+    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid, pagador_nome, pagador_email)
+      VALUES ('1${cobrancaUuidBase}', '${companyUuid}', '${userUuid}', 'Nome do Pagador', 'emaildoPagador@gmail.com'),
+      ('2${cobrancaUuidBase}', '${companyUuid}', '${userUuid}', 'Nome do Pagador', 'emaildoPagador@gmail.com'),
+      ('3${cobrancaUuidBase}', '${companyUuid}', '${userUuid}', 'Nome do Pagador', 'emaildoPagador@gmail.com'),
+      ('4${cobrancaUuidBase}', '${companyUuid}', '${userUuid}', 'Nome do Pagador', 'emaildoPagador@gmail.com')`);
+
+    const pagamentoUuidBase = "5e50b1e-f619-4375-bb81-10511778b55b";
+    await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref, vencimento, link_boleto)
+      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
+      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
+      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
+      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto')`);
+
+    const usecase = new NotificarVencimentoPagamento(repo);
+    const input = { pagamentosUuid: [`1${pagamentoUuidBase}`, `2${pagamentoUuidBase}`] };
+    await usecase.execute(input);
+
+    expect(enviarEmailUsecase.callCount).toBe(2);
+    const pagamentoNotificacoes = await dataSource.query(`SELECT * FROM financeiro_pagamento_notificacoes WHERE company_uuid = '${companyUuid}'`);
+    expect(pagamentoNotificacoes.length).toBe(2);
+
+    enviarEmailUsecase.restore();
+  });
 });

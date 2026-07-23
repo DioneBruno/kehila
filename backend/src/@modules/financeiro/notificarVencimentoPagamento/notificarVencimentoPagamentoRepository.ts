@@ -9,7 +9,8 @@ export class NotificarVencimentoPagamentoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async buscarPagamentos(companyUuid: string, vencimento: string): Promise<PagamentoEntity[]> {
-    const pagamentosModel = await this.connectionHub.database?.query(`
+    const pagamentosModel = await this.connectionHub.database?.query(
+      `
       SELECT 
         pagamentos.uuid,
         pagamentos.valor,
@@ -35,19 +36,72 @@ export class NotificarVencimentoPagamentoRepository {
         pagamentos.link_boleto,
         cobrancas.pagador_nome,
         cobrancas.pagador_email
-      `, [companyUuid, vencimento]);
+      `,
+      [companyUuid, vencimento],
+    );
     const pagamentos = [] as PagamentoEntity[];
     for (const pagamentoModel of pagamentosModel) {
-      pagamentos.push(new PagamentoEntity({
-        companyUuid,
-        uuid: pagamentoModel.uuid,
-        pagadorEmail: pagamentoModel.pagador_email,
-        pagadorNome: pagamentoModel.pagador_nome,
-        valor: pagamentoModel.valor,
-        vencimento: pagamentoModel.vencimento,
-        linkBoleto: pagamentoModel.link_boleto,
-        quantidadeNotificacoes: pagamentoModel.quantidadeNotificacoes,
-      }));
+      pagamentos.push(
+        new PagamentoEntity({
+          companyUuid,
+          uuid: pagamentoModel.uuid,
+          pagadorEmail: pagamentoModel.pagador_email,
+          pagadorNome: pagamentoModel.pagador_nome,
+          valor: pagamentoModel.valor,
+          vencimento: pagamentoModel.vencimento,
+          linkBoleto: pagamentoModel.link_boleto,
+          quantidadeNotificacoes: pagamentoModel.quantidadeNotificacoes,
+        }),
+      );
+    }
+    return pagamentos;
+  }
+
+  async buscarPagamentosPorUuids(pagamentosUuid: string[]): Promise<PagamentoEntity[]> {
+    const pagamentosModel = await this.connectionHub.database?.query(
+      `
+      SELECT
+        pagamentos.uuid,
+        pagamentos.company_uuid,
+        pagamentos.valor,
+        pagamentos.vencimento,
+        pagamentos.link_boleto,
+        cobrancas.pagador_nome,
+        cobrancas.pagador_email,
+        count(notificacoes.uuid) as "quantidadeNotificacoes"
+      FROM financeiro_pagamentos pagamentos
+      JOIN financeiro_cobrancas cobrancas
+        ON cobrancas.uuid = pagamentos.cobanca_uuid
+      LEFT JOIN financeiro_pagamento_notificacoes notificacoes
+        ON notificacoes.pagamento_uuid = pagamentos.uuid
+      WHERE pagamentos.deleted_at IS NULL
+        AND cobrancas.deleted_at IS NULL
+        AND pagamentos.uuid = ANY($1)
+      GROUP BY
+        pagamentos.uuid,
+        pagamentos.company_uuid,
+        pagamentos.valor,
+        pagamentos.vencimento,
+        pagamentos.link_boleto,
+        cobrancas.pagador_nome,
+        cobrancas.pagador_email
+      `,
+      [pagamentosUuid],
+    );
+    const pagamentos = [] as PagamentoEntity[];
+    for (const pagamentoModel of pagamentosModel) {
+      pagamentos.push(
+        new PagamentoEntity({
+          companyUuid: pagamentoModel.company_uuid,
+          uuid: pagamentoModel.uuid,
+          pagadorEmail: pagamentoModel.pagador_email,
+          pagadorNome: pagamentoModel.pagador_nome,
+          valor: pagamentoModel.valor,
+          vencimento: pagamentoModel.vencimento,
+          linkBoleto: pagamentoModel.link_boleto,
+          quantidadeNotificacoes: pagamentoModel.quantidadeNotificacoes,
+        }),
+      );
     }
     return pagamentos;
   }
@@ -92,7 +146,10 @@ export class NotificarVencimentoPagamentoRepository {
   }
 
   async salvarNotificacao(pagamento: PagamentoEntity) {
-    await this.connectionHub.database?.query(`INSERT INTO financeiro_pagamento_notificacoes (uuid, company_uuid, pagamento_uuid, tipo, data_envio)
-      VALUES ($1, $2, $3, $4, $5)`, [randomUUID(), pagamento.companyUuid(), pagamento.uuid(), "email", ApiDate.now()]);
+    await this.connectionHub.database?.query(
+      `INSERT INTO financeiro_pagamento_notificacoes (uuid, company_uuid, pagamento_uuid, tipo, data_envio)
+      VALUES ($1, $2, $3, $4, $5)`,
+      [randomUUID(), pagamento.companyUuid(), pagamento.uuid(), "email", ApiDate.now()],
+    );
   }
 }
