@@ -4,7 +4,7 @@ import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
 import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamento.usecase";
 import { InformarPagamentoManualUsecase } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManual.usecase";
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
-import { NotificarVencimentoPagamento } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamento.usecase";
+import { NotificarVencimentoPagamentoUsecase } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamento.usecase";
 import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
 
 @Controller("pagamentos")
@@ -15,7 +15,7 @@ export class PagamentosController {
     readonly verificarPagamentoUsecase: VerificarPagamentoUsecase,
     readonly gerarBoletoPagamentoUsecase: GerarBoletoPagamentoUsecase,
     readonly informarPagamentoManualUsecase: InformarPagamentoManualUsecase,
-    readonly notificarVencimentoPagamento: NotificarVencimentoPagamento,
+    readonly notificarVencimentoPagamentoUsecase: NotificarVencimentoPagamentoUsecase,
   ) {}
 
   @Get()
@@ -78,7 +78,7 @@ export class PagamentosController {
       companyUuid: req.companyUuid,
       pagamentosUuid: body.pagamentosUuid,
     };
-    await this.notificarVencimentoPagamento.execute(input);
+    await this.notificarVencimentoPagamentoUsecase.execute(input);
     return res.status(200).json({ success: true });
   }
 }

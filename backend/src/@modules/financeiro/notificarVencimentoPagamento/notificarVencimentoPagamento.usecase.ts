@@ -8,7 +8,7 @@ export type NotificarVencimentoPagamentoInput = {
   pagamentosUuid?: string[];
 };
 
-export class NotificarVencimentoPagamento {
+export class NotificarVencimentoPagamentoUsecase {
   constructor(readonly repo: NotificarVencimentoPagamentoRepository) {}
 
   async execute(input: NotificarVencimentoPagamentoInput) {
