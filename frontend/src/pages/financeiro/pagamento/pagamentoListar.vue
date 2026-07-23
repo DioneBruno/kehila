@@ -8,6 +8,14 @@
       </div>
       <div class="col-auto">
         <q-btn
+          flat
+          no-caps
+          color="primary"
+          icon="send"
+          label="Notificar Vencimentos"
+          @click="dialogNotificarVencimento.aberto = true"
+        />
+        <q-btn
           unelevated
           no-caps
           color="primary"
@@ -164,6 +172,25 @@
             </div>
           </q-form>
         </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="dialogNotificarVencimento.aberto" persistent>
+      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+        <q-card-section class="row items-center">
+          <div class="">
+            <div class="text-h6">Informar Uuids dos Pagamentos</div>
+            <div class="q-ml-sm text-grey-8">Uuids sem quebrar de linha, sem aspas e separados por vírgula</div>
+          </div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <q-input outlined v-model="dialogNotificarVencimento.pagamentosUuid" type="textarea" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat no-caps label="Cancelar" color="grey-9" v-close-popup />
+          <q-btn flat no-caps label="Enviar" color="primary" @click="notificarVencimento(dialogNotificarVencimento.pagamentosUuid.split(','))" />
+        </q-card-actions>
       </q-card>
     </q-dialog>
 
@@ -359,6 +386,7 @@ import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { Notify } from "quasar";
 import { PagamentoService, STATUS_CORES, STATUS_LABELS } from "./pagamento.service";
 import { ApiDate } from "src/shared/apiDate.service";
+import { MessageConfirmationService } from "src/shared/message.service";
 
 const OPCOES_STATUS = Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const OPCOES_POR_PAGINA = [10, 20, 50];
@@ -367,6 +395,7 @@ export default defineComponent({
   name: "FinanceiroPagamentosListar",
   setup() {
     const $service = new PagamentoService();
+    const $messageService = new MessageConfirmationService();
 
     const data = reactive({
       carregando: false,
@@ -399,6 +428,10 @@ export default defineComponent({
         pagoEm: "",
         pagoDescricao: "",
       },
+      dialogNotificarVencimento: {
+        aberto: false,
+        pagamentosUuid: "",
+      }
     });
 
     const totalPaginas = computed(() =>
@@ -543,7 +576,11 @@ export default defineComponent({
     }
 
     async function notificarVencimento(pagamentosUuid: string[]) {
+      const confirmation = await $messageService.execute("Enviar notificação de vencimento");
+      if (!confirmation) return;
       await $service.notificarVencimento(pagamentosUuid);
+      data.dialogNotificarVencimento.aberto = false;
+      data.dialogNotificarVencimento.pagamentosUuid = "";
     }
 
     onMounted(() => void carregar());
