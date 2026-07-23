@@ -84,4 +84,16 @@ export class PagamentoService {
       this.$q.loading.hide();
     }
   }
+
+  async notificarVencimento(pagamentosUuid: string[]) {
+    try {
+      this.$q.loading.show();
+      await this.$http.notificarVencimento(pagamentosUuid);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
 }

@@ -314,6 +314,17 @@
                 >
                   <q-tooltip>Informar pagamento manual</q-tooltip>
                 </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  size="sm"
+                  icon="send"
+                  color="grey-7"
+                  @click="notificarVencimento([pagamento.uuid])"
+                >
+                  <q-tooltip>Enviar notificação de vencimento</q-tooltip>
+                </q-btn>
               </div>
             </td>
           </tr>
@@ -531,11 +542,16 @@ export default defineComponent({
       }
     }
 
+    async function notificarVencimento(pagamentosUuid: string[]) {
+      await $service.notificarVencimento(pagamentosUuid);
+    }
+
     onMounted(() => void carregar());
 
     return {
       ...toRefs(data),
       totalPaginas,
+      notificarVencimento,
       abrirDialogBoleto,
       confirmarGerarBoleto,
       irParaPagina,

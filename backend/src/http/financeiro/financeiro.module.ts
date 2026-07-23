@@ -38,6 +38,8 @@ import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoleto
 import { GerarBoletoPagamentoRepository } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamentoRepository";
 import { InformarPagamentoManualUsecase } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManual.usecase";
 import { InformarPagamentoManualRepository } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManualRepository";
+import { NotificarVencimentoPagamento } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamento.usecase";
+import { NotificarVencimentoPagamentoRepository } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamentoRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -61,6 +63,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(ListarCobrancaUsecase, (hub) => new ListarCobrancaUsecase(new ListarCobrancaRepository(hub))),
     makeProvider(ListaPagamentoUsecase, (hub) => new ListaPagamentoUsecase(new ListaPagamentoRepository(hub))),
     makeProvider(GerarBoletoPagamentoUsecase, (hub) => new GerarBoletoPagamentoUsecase(new GerarBoletoPagamentoRepository(hub))),
+    makeProvider(NotificarVencimentoPagamento, (hub) => new NotificarVencimentoPagamento(new NotificarVencimentoPagamentoRepository(hub))),
     makeProvider(
       VerificarPagamentoUsecase,
       (hub) => new VerificarPagamentoUsecase(new VerificarPagamentoRepostiory(hub), new VerificarPagamentoGateway(hub)),

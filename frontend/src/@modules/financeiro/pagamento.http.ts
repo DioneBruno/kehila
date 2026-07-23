@@ -33,4 +33,9 @@ export class PagamentoHttp {
   async verificarPagamentoPeriodo(dataInicial: string, dataFinal: string) {
     return this.http.post("pagamentos/verificarPagamentoPeriodo", { dataInicial, dataFinal });
   }
+
+
+  async notificarVencimento(pagamentosUuid: string[]) {
+    return this.http.post("pagamentos/notificarVencimento", { pagamentosUuid });
+  }
 }

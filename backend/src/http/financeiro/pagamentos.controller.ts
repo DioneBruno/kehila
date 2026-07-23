@@ -4,6 +4,7 @@ import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
 import { GerarBoletoPagamentoUsecase } from "src/@modules/financeiro/gerarBoletoPagamento/gerarBoletoPagamento.usecase";
 import { InformarPagamentoManualUsecase } from "src/@modules/financeiro/informarPagamentoManual/informarPagamentoManual.usecase";
 import { ListaPagamentoUsecase } from "src/@modules/financeiro/listaPagamento/listaPagamento.usecase";
+import { NotificarVencimentoPagamento } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamento.usecase";
 import { VerificarPagamentoUsecase } from "src/@modules/financeiro/verificarPagamento/verificarPagamento.usecase";
 
 @Controller("pagamentos")
@@ -14,6 +15,7 @@ export class PagamentosController {
     readonly verificarPagamentoUsecase: VerificarPagamentoUsecase,
     readonly gerarBoletoPagamentoUsecase: GerarBoletoPagamentoUsecase,
     readonly informarPagamentoManualUsecase: InformarPagamentoManualUsecase,
+    readonly notificarVencimentoPagamento: NotificarVencimentoPagamento,
   ) {}
 
   @Get()
@@ -67,6 +69,16 @@ export class PagamentosController {
   async verificarPagamentoPeriodo(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const { dataInicial, dataFinal } = body;
     await this.financeiroQuery.verificarPagamentoPeriodo(req.companyUuid, dataInicial, dataFinal);
+    return res.status(200).json({ success: true });
+  }
+
+  @Post("notificarVencimento")
+  async notificarVencimento(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    const input = {
+      companyUuid: req.companyUuid,
+      pagamentosUuid: body.pagamentosUuid,
+    };
+    await this.notificarVencimentoPagamento.execute(input);
     return res.status(200).json({ success: true });
   }
 }
