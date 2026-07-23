@@ -38,7 +38,7 @@ export class PagamentoService {
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async executarTarefaTodoDiaAs2h() {
-    // lógica aqui
+    await this.notificarVencimentoPagamentoUsecase.execute({ diasParaVencimento: 5 });
   }
 
 }
