@@ -89,8 +89,8 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
 
     await dataSource.query(`INSERT INTO financeiro_contas_bancarias (uuid, company_uuid, banco_numero)
       VALUES ('${contaBancariaUuid}', '${companyUuid}', '461')`);
-    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid)
-      VALUES ('${cobrancaUuid}', '${companyUuid}', '${userUuid}')`);
+    await dataSource.query(`INSERT INTO financeiro_cobrancas (uuid, company_uuid, user_uuid, pagador_nome, pagador_email)
+      VALUES ('${cobrancaUuid}', '${companyUuid}', '${userUuid}', 'Testador', 'teste@teste.com.br')`);
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref)
       VALUES ('${pagamentoUuid}', '${companyUuid}', '${companyUuid}', '${cobrancaUuid}', 'boleto', 100, '')`);
 
@@ -104,7 +104,7 @@ describe("Deve testar VerificarPagamentoUsecase", () => {
     // console.log(enviarEmailUsecase.args);
     expect(enviarEmailUsecase.callCount).toBe(1);
     expect(enviarEmailUsecase.args[0][0].companyUuid).toBe(companyUuid);
-    expect(enviarEmailUsecase.args[0][0].destinatario).toBe("emaildo@usuario.com.br");
+    expect(enviarEmailUsecase.args[0][0].destinatario).toBe("teste@teste.com.br");
     expect(enviarEmailUsecase.args[0][0].titulo).toBe("Pagamento Recebido");
     expect(enviarEmailUsecase.args[0][0].mensagem).not.toBeNull();
 

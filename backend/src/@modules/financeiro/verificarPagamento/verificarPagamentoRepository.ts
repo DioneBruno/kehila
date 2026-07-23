@@ -18,7 +18,9 @@ export class VerificarPagamentoRepostiory {
           pagamentos.pago_em,
           pagamentos.vencimento,
           pagamentos.valor_pago,
-          cobrancas.user_uuid
+          cobrancas.user_uuid,
+          cobrancas.pagador_nome,
+          cobrancas.pagador_email
         FROM financeiro_pagamentos pagamentos
         INNER JOIN financeiro_cobrancas cobrancas
           ON pagamentos.cobanca_uuid = cobrancas.uuid
@@ -29,11 +31,9 @@ export class VerificarPagamentoRepostiory {
     );
     if (!pagamentoModel) throw new ApiError("Pagamento não encontrado", 400);
 
-    const [usuario] = await this.connectionHub.database?.query(`SELECT uuid, name, email FROM auth_users WHERE uuid = $1`, [pagamentoModel.user_uuid]);
-
     return new PagamentoEntity({
       uuid: pagamentoModel.uuid,
-      usuario,
+      usuario: { uuid: pagamentoModel.user_uuid, name: pagamentoModel.pagador_nome, email: pagamentoModel.pagador_email },
       companyUuid: pagamentoModel.company_uuid,
       status: pagamentoModel.status,
       bancoRef: pagamentoModel.banco_ref,
