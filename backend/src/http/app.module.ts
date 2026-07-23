@@ -14,10 +14,12 @@ import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 import { RedisClientType, createClient } from "redis";
 import { BiModule } from "./bi/bi.module";
 import { UsuarioModule } from "./usuario/usuario.module";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Global()
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: process.env.DB_DEFAULT_DRIVER as any,
       host: process.env.DB_DEFAULT_HOST,

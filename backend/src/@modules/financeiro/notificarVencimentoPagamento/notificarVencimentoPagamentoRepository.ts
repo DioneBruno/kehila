@@ -8,11 +8,12 @@ import { ApiDate } from "src/@modules/shared/apiDate";
 export class NotificarVencimentoPagamentoRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
-  async buscarPagamentos(companyUuid: string, vencimento: string): Promise<PagamentoEntity[]> {
+  async buscarPagamentos(vencimento: string): Promise<PagamentoEntity[]> {
     const pagamentosModel = await this.connectionHub.database?.query(
       `
       SELECT 
         pagamentos.uuid,
+        pagamentos.company_uuid,
         pagamentos.valor,
         pagamentos.vencimento,
         pagamentos.link_boleto,
@@ -26,8 +27,7 @@ export class NotificarVencimentoPagamentoRepository {
         ON notificacoes.pagamento_uuid = pagamentos.uuid
       WHERE pagamentos.deleted_at IS NULL
         AND cobrancas.deleted_at IS NULL
-        AND pagamentos.company_uuid = $1
-        AND pagamentos.vencimento = $2
+        AND pagamentos.vencimento = $1
         AND pagamentos.status IN ('pendente', 'PENDING')
       GROUP BY 
         pagamentos.uuid,
@@ -37,13 +37,13 @@ export class NotificarVencimentoPagamentoRepository {
         cobrancas.pagador_nome,
         cobrancas.pagador_email
       `,
-      [companyUuid, vencimento],
+      [vencimento],
     );
     const pagamentos = [] as PagamentoEntity[];
     for (const pagamentoModel of pagamentosModel) {
       pagamentos.push(
         new PagamentoEntity({
-          companyUuid,
+          companyUuid: pagamentoModel.company_uuid,
           uuid: pagamentoModel.uuid,
           pagadorEmail: pagamentoModel.pagador_email,
           pagadorNome: pagamentoModel.pagador_nome,

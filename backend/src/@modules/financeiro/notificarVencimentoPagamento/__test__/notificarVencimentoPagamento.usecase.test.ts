@@ -14,7 +14,7 @@ let clock: sinon.SinonFakeTimers;
 
 describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
   beforeAll(async () => {
-    clock = useFakeTimers({ now: new Date("2026-06-20 01:22:30"), toFake: ["Date"] });
+    clock = useFakeTimers({ now: new Date("2024-06-20 01:22:30"), toFake: ["Date"] });
     await dataSource.initialize();
     const connections = new ConnectionHub({ database: dataSource });
     repo = new NotificarVencimentoPagamentoRepository(connections);
@@ -49,10 +49,10 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
 
     const pagamentoUuidBase = "5e50b1e-f619-4375-bb81-10511778b55b";
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref, vencimento, link_boleto)
-      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto')`);
+      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto')`);
 
     const usecase = new NotificarVencimentoPagamentoUsecase(repo);
-    const input = { companyUuid, diasParaVencimento:  5 };
+    const input = { diasParaVencimento: 5 };
     await usecase.execute(input);
 
     // console.log(enviarEmailUsecase.args);
@@ -81,13 +81,13 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
 
     const pagamentoUuidBase = "5e50b1e-f619-4375-bb81-10511778b55b";
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref, vencimento, link_boleto)
-      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto')`);
+      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto')`);
 
     const usecase = new NotificarVencimentoPagamentoUsecase(repo);
-    const input = { companyUuid, diasParaVencimento: 5 };
+    const input = { diasParaVencimento: 5 };
     await usecase.execute(input);
 
     // console.log(enviarEmailUsecase.args);
@@ -96,7 +96,7 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
     expect(pagamentoNotificacoes[0].company_uuid).toBe(companyUuid);
     expect(pagamentoNotificacoes[0].pagamento_uuid).toBe(`1${pagamentoUuidBase}`);
     expect(pagamentoNotificacoes[0].tipo).toBe("email");
-    expect(ApiDate.format(pagamentoNotificacoes[0].data_envio)).toBe("2026-06-20 01:22:30");
+    expect(ApiDate.format(pagamentoNotificacoes[0].data_envio)).toBe("2024-06-20 01:22:30");
 
     enviarEmailUsecase.restore();
   });
@@ -117,16 +117,16 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
 
     const pagamentoUuidBase = "5e50b1e-f619-4375-bb81-10511778b55b";
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref, vencimento, link_boleto)
-      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto')`);
+      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto')`);
 
     await dataSource.query(`INSERT INTO financeiro_pagamento_notificacoes (uuid, company_uuid, pagamento_uuid, tipo, data_envio)
           VALUES ($1, $2, $3, $4, $5)`, [randomUUID(), companyUuid, `1${pagamentoUuidBase}`, "email", ApiDate.now()]);
 
     const usecase = new NotificarVencimentoPagamentoUsecase(repo);
-    const input = { companyUuid, diasParaVencimento: 5 };
+    const input = { diasParaVencimento: 5 };
     await usecase.execute(input);
 
     expect(enviarEmailUsecase.callCount).toBe(3);
@@ -152,16 +152,16 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
 
     const pagamentoUuidBase = "5e50b1e-f619-4375-bb81-10511778b55b";
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref, vencimento, link_boleto)
-      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto')`);
+      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto')`);
 
     await dataSource.query(`INSERT INTO financeiro_pagamento_notificacoes (uuid, company_uuid, pagamento_uuid, tipo, data_envio)
           VALUES ($1, $2, $3, $4, $5)`, [randomUUID(), companyUuid, `1${pagamentoUuidBase}`, "email", ApiDate.now()]);
 
     const usecase = new NotificarVencimentoPagamentoUsecase(repo);
-    const input = { companyUuid, diasParaVencimento: 5, forcarEnvio: true };
+    const input = { diasParaVencimento: 5, forcarEnvio: true };
     await usecase.execute(input);
 
     expect(enviarEmailUsecase.callCount).toBe(4);
@@ -187,10 +187,10 @@ describe("Deve testar NotificarVencimentoPagamentoUsecase", () => {
 
     const pagamentoUuidBase = "5e50b1e-f619-4375-bb81-10511778b55b";
     await dataSource.query(`INSERT INTO financeiro_pagamentos (uuid, company_uuid, user_uuid, cobanca_uuid, forma_pagamento, valor, banco_ref, vencimento, link_boleto)
-      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto'),
-      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2026-06-25', 'Link_do_boleto')`);
+      VALUES ('1${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '1${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('2${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '2${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('3${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '3${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto'),
+      ('4${pagamentoUuidBase}', '${companyUuid}', '${companyUuid}', '4${cobrancaUuidBase}', 'boleto', 100, '', '2024-06-25', 'Link_do_boleto')`);
 
     const usecase = new NotificarVencimentoPagamentoUsecase(repo);
     const input = { pagamentosUuid: [`1${pagamentoUuidBase}`, `2${pagamentoUuidBase}`] };
