@@ -176,6 +176,7 @@
                         if (!v) form.dataLimitePagamento = '';
                       }
                     "
+                    :hint="`Quantidade de parcelas: ${quantidadeParcelas()}`"
                   >
                     <template v-slot:append>
                       <q-icon name="event" class="cursor-pointer">
@@ -536,6 +537,12 @@ export default defineComponent({
       return `${urlOrigin}${url.href}`;
     }
 
+    function quantidadeParcelas() {
+      if (!data.form.dataLimitePagamento) return 0;
+      const dataAtual = ApiDate.now();
+      return ApiDate.diff(dataAtual, data.form.dataLimitePagamento, "month");
+    }
+
     onMounted(() => void carregar());
 
     return {
@@ -553,6 +560,7 @@ export default defineComponent({
       toDisplayDate,
       quillToolbar,
       onDescricaoUpdate,
+      quantidadeParcelas
     };
   },
 });
