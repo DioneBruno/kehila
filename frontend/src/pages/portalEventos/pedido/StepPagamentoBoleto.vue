@@ -286,7 +286,7 @@ export default defineComponent({
     function quantidadeParcelas() {
       if (!data.pedido.dataLimitePagamento) return 1;
       const dataAtual = ApiDate.now();
-      const diferencaMeses = ApiDate.diff(dataAtual, data.pedido.dataLimitePagamento, "month");
+      const diferencaMeses = ApiDate.diff(dataAtual, data.pedido.dataLimitePagamento, "month") + 1;
       for (let i = 1; i <= diferencaMeses; i++) {
         data.opcoesParcelas.push(i);
       }
