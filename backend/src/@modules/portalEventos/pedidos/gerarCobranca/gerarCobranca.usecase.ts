@@ -28,7 +28,11 @@ export class GerarCobrancaUsecase {
 
     if (pedido.dataLimitePagamento()) {
       const dataLimite = pedido.dataLimitePagamento() as string;
-      const mesesDiferenca = ApiDate.diff(ApiDate.now(), dataLimite, "month");
+      const hoje = ApiDate.now();
+      const limite = ApiDate.diff(hoje, dataLimite);
+      if (limite < 0) throw new ApiError(`Data limite de pagamento ${ApiDate.format(pedido.dataLimitePagamento() as string, "DD/MM/YYYY")}`, 400);
+
+      const mesesDiferenca = ApiDate.diff(hoje, dataLimite, "month") + 1;
       const numParcelas = input.numParcelas ?? 1;
       if (mesesDiferenca < numParcelas) throw new ApiError(`Quantidade máxima de parcelas deve ser ${mesesDiferenca}`, 400);
     }
