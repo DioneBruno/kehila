@@ -8,6 +8,7 @@ export type EventoDetalhe = {
   bannerUrl: string | null;
   dataInicio: string;
   dataFim: string | null;
+  dataLimitePagamento: string | null;
   capacidadeTotal: number | null;
   localNome: string | null;
   localEndereco: string | null;
@@ -65,7 +66,8 @@ export class DetalharEventoRepository {
         e.suporte_email AS "suporteEmail",
         e.suporte_telefone AS "suporteTelefone",
         e.status,
-        e.created_at AS "createdAt"
+        e.created_at AS "createdAt",
+        e.data_limite_pagamento AS "dataLimitePagamento"
       FROM eventos e
       WHERE e.deleted_at IS NULL
         AND e.company_uuid = $1

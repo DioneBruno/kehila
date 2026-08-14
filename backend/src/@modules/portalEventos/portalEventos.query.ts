@@ -22,7 +22,8 @@ export class PortalEventosQuery {
       eventos.local_nome "localNome",
       eventos.online,
       eventos.suporte_telefone "suporteTelefone",
-      eventos.suporte_email "suporteEmail"
+      eventos.suporte_email "suporteEmail",
+      eventos.data_limite_pagamento "dataLimitePagamento"
     FROM eventos
     WHERE deleted_at IS NULL
       AND uuid = $1`,
@@ -85,6 +86,7 @@ export class PortalEventosQuery {
 
     return {
       ...eventoModel,
+      dataLimitePagamento: ApiDate.format(eventoModel.dataLimitePagamento, "YYYY-MM-DD"),
       dataFim: ApiDate.format(eventoModel.dataFim, "YYYY-MM-DD HH:mm"),
       dataInicio: ApiDate.format(eventoModel.dataInicio, "YYYY-MM-DD HH:mm"),
     };

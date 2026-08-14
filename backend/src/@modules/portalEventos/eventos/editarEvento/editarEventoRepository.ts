@@ -6,6 +6,7 @@ export type EditarEventoData = {
   bannerUrl?: string;
   dataInicio?: string;
   dataFim?: string;
+  dataLimitePagamento?: string;
   capacidadeTotal?: number;
   localNome?: string;
   localEndereco?: string;
@@ -40,6 +41,7 @@ export class EditarEventoRepository {
       bannerUrl: "banner_url",
       dataInicio: "data_inicio",
       dataFim: "data_fim",
+      dataLimitePagamento: "data_limite_pagamento",
       capacidadeTotal: "capacidade_total",
       localNome: "local_nome",
       localEndereco: "local_endereco",

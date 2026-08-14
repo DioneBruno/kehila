@@ -9,6 +9,7 @@ export type EditarEventoInput = {
   bannerUrl?: string;
   dataInicio?: string;
   dataFim?: string;
+  dataLimitePagamento?: string;
   capacidadeTotal?: number;
   localNome?: string;
   localEndereco?: string;
@@ -45,6 +46,7 @@ export class EditarEventoUsecase {
       bannerUrl: input.bannerUrl,
       dataInicio: input.dataInicio,
       dataFim: input.dataFim,
+      dataLimitePagamento: input.dataLimitePagamento,
       capacidadeTotal: input.capacidadeTotal,
       localNome: input.localNome,
       localEndereco: input.localEndereco,

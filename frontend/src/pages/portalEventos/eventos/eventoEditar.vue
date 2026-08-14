@@ -163,6 +163,34 @@
                   </q-input>
                 </div>
 
+                <!-- Data limite de pagamento -->
+                <div class="col-12 col-sm-6">
+                  <q-input
+                    :model-value="toDisplayDate(form.dataLimitePagamento)"
+                    label="Data Limite de Pagamento"
+                    filled
+                    readonly
+                    clearable
+                    @update:model-value="
+                      (v) => {
+                        if (!v) form.dataLimitePagamento = '';
+                      }
+                    "
+                  >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy cover>
+                          <q-date v-model="form.dataLimitePagamento" mask="YYYY-MM-DD" color="primary">
+                            <div class="row items-center justify-end">
+                              <q-btn v-close-popup label="OK" color="primary" flat />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
+                </div>
+
                 <div class="col-12 col-sm-6">
                   <q-input
                     v-model.number="form.capacidadeTotal"
@@ -380,6 +408,7 @@ export default defineComponent({
         descricao: "",
         dataInicio: "",
         dataFim: "",
+        dataLimitePagamento: "",
         capacidadeTotal: null as number | null,
         online: false,
         localNome: "",
@@ -399,6 +428,9 @@ export default defineComponent({
       data.form.descricao = evento.descricao ?? "";
       data.form.dataInicio = evento.dataInicio ? evento.dataInicio.slice(0, 16) : "";
       data.form.dataFim = evento.dataFim ? evento.dataFim.slice(0, 16) : "";
+      data.form.dataLimitePagamento = evento.dataLimitePagamento
+        ? evento.dataLimitePagamento.slice(0, 10)
+        : "";
       data.form.capacidadeTotal = evento.capacidadeTotal ?? null;
       data.form.online = evento.online;
       data.form.localNome = evento.localNome ?? "";
@@ -428,6 +460,7 @@ export default defineComponent({
         descricao: data.form.descricao || undefined,
         dataInicio: data.form.dataInicio,
         dataFim: data.form.dataFim || undefined,
+        dataLimitePagamento: data.form.dataLimitePagamento || undefined,
         capacidadeTotal: data.form.capacidadeTotal || undefined,
         online: data.form.online,
         localNome: data.form.online ? undefined : data.form.localNome || undefined,

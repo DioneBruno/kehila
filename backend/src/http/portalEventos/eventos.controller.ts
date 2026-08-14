@@ -74,6 +74,7 @@ export class EventosController {
       bannerUrl: body.bannerUrl,
       dataInicio: body.dataInicio,
       dataFim: body.dataFim,
+      dataLimitePagamento: body.dataLimitePagamento,
       capacidadeTotal: body.capacidadeTotal,
       localNome: body.localNome,
       localEndereco: body.localEndereco,
