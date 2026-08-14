@@ -17,7 +17,7 @@
         stack-label
         v-model.number="pagador.numParcelas"
         label="Número de parcelas"
-        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+        :options="opcoesParcelas"
         lazy-rules
         :rules="[(val) => (val && val > 0) || 'Campo obrigatório']"
       >
@@ -238,10 +238,11 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { PedidoService } from "./pedido.service";
 import { usePedidoStore } from "src/stores/pedido";
 import TokenDecode from "src/@modules/auth/tokenDecode";
+import { ApiDate } from "src/shared/apiDate.service";
 
 export default defineComponent({
   name: "StepPagamentoBoleto",
@@ -254,6 +255,7 @@ export default defineComponent({
 
     const data = reactive({
       pedido: computed(() => $pedidoStore.$state.pedido),
+      opcoesParcelas: ref([] as number[]),
       pagador: ref({
         pedidoUuid: null,
         numParcelas: 1,
@@ -272,14 +274,28 @@ export default defineComponent({
       }),
     });
 
+    onMounted(() => {
+      quantidadeParcelas();
+    });
+
     async function gerarCobranca() {
       data.pagador.pedidoUuid = data.pedido.uuid;
       await $service.gerarCobranca(data.pagador);
     }
 
+    function quantidadeParcelas() {
+      if (!data.pedido.dataLimitePagamento) return 1;
+      const dataAtual = ApiDate.now();
+      const diferencaMeses = ApiDate.diff(dataAtual, data.pedido.dataLimitePagamento, "month");
+      for (let i = 1; i <= diferencaMeses; i++) {
+        data.opcoesParcelas.push(i);
+      }
+    }
+
     return {
       ...toRefs(data),
       gerarCobranca,
+      quantidadeParcelas
     };
   },
 });

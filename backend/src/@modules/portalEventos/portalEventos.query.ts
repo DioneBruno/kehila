@@ -130,10 +130,13 @@ export class PortalEventosQuery {
         pedidos.uuid,
         pedidos.status,
         pedidos.valor_liquido "valorLiquido",
-        pedidos.pago_em "pagoEm"
+        pedidos.pago_em "pagoEm",
+        eventos.data_limite_pagamento "dataLimitePagamento"
       FROM evento_pedidos pedidos
-      WHERE deleted_at IS NULL
-        AND uuid = $1
+        INNER JOIN eventos
+          ON pedidos.evento_uuid = eventos.uuid
+      WHERE pedidos.deleted_at IS NULL
+        AND pedidos.uuid = $1
       `,
       [pedidoUuid],
     );
@@ -141,6 +144,7 @@ export class PortalEventosQuery {
 
     pedidoModel.createdAt = ApiDate.format(pedidoModel.createdAt, "YYYY-MM-DD HH:mm");
     pedidoModel.pagoEm = ApiDate.format(pedidoModel.pagoEm, "YYYY-MM-DD HH:mm");
+    pedidoModel.dataLimitePagamento = ApiDate.format(pedidoModel.dataLimitePagamento, "YYYY-MM-DD");
 
     const ingressosModel = await this.connectionHub.database!.query(
       `

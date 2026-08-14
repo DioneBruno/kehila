@@ -540,7 +540,7 @@ export default defineComponent({
     function quantidadeParcelas() {
       if (!data.form.dataLimitePagamento) return 0;
       const dataAtual = ApiDate.now();
-      return ApiDate.diff(dataAtual, data.form.dataLimitePagamento, "month");
+      return ApiDate.diff(dataAtual, data.form.dataLimitePagamento, "month") + 1;
     }
 
     onMounted(() => void carregar());

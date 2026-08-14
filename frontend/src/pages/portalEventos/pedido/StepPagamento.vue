@@ -15,7 +15,7 @@
             <q-card-section class="text-center q-py-md">
               <q-icon name="receipt_long" size="32px" color="blue-9" />
               <div class="text-subtitle2 q-mt-xs text-grey-9">Boleto</div>
-              <div class="text-caption text-grey-6">Até 12x sem juros</div>
+              <div class="text-caption text-grey-6">Até {{ quantidadeParcelas() }}x sem juros</div>
               <q-icon
                 v-if="formaPagamento === 'boleto'"
                 name="check_circle"
@@ -100,9 +100,11 @@
 
 <script lang="ts">
 import type { PropType } from "vue";
-import { defineComponent } from "vue";
+import { computed, defineComponent, reactive, toRefs } from "vue";
 import StepPagamentoBoleto from "./StepPagamentoBoleto.vue";
 import StepPagamentoCartao from "./StepPagamentoCartao.vue";
+import { usePedidoStore } from "src/stores/pedido.js";
+import { ApiDate } from "src/shared/apiDate.service.js";
 
 interface Cartao {
   numero: string;
@@ -130,7 +132,22 @@ export default defineComponent({
   },
   emits: ["update:formaPagamento", "update:cartao", "prev", "confirmar"],
   setup() {
-    return {};
+    const $pedidoStore = usePedidoStore();
+
+    const data = reactive({
+      pedido: computed(() => $pedidoStore.$state.pedido),
+    });
+
+    function quantidadeParcelas() {
+      if (!data.pedido.dataLimitePagamento) return 1;
+      const dataAtual = ApiDate.now();
+      return ApiDate.diff(dataAtual, data.pedido.dataLimitePagamento, "month") + 1;
+    }
+
+    return {
+      ...toRefs(data),
+      quantidadeParcelas
+    };
   },
 });
 </script>
