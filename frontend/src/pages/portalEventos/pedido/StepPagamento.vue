@@ -15,7 +15,7 @@
             <q-card-section class="text-center q-py-md">
               <q-icon name="receipt_long" size="32px" color="blue-9" />
               <div class="text-subtitle2 q-mt-xs text-grey-9">Boleto</div>
-              <div class="text-caption text-grey-6">Até 13x sem juros</div>
+              <div class="text-caption text-grey-6">Até 12x sem juros</div>
               <q-icon
                 v-if="formaPagamento === 'boleto'"
                 name="check_circle"
