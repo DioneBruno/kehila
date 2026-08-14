@@ -17,7 +17,7 @@
         stack-label
         v-model.number="pagador.numParcelas"
         label="Número de parcelas"
-        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]"
+        :options="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
         lazy-rules
         :rules="[(val) => (val && val > 0) || 'Campo obrigatório']"
       >
