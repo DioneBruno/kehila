@@ -8,6 +8,7 @@ export type PedidoProps = {
   valorBruno: number;
   valorDesconto: number;
   valorTotal: number;
+  dataLimitePagamento?: string | null;
 };
 
 export class PedidoEntity {
@@ -33,5 +34,8 @@ export class PedidoEntity {
   }
   valorTotal(): number {
     return this.props.valorTotal;
+  }
+  dataLimitePagamento(): string | null {
+    return this.props.dataLimitePagamento ?? null;
   }
 }

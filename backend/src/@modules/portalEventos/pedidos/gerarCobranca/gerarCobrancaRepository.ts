@@ -4,6 +4,7 @@ import { GerarCobrancaUsecase } from "src/@modules/financeiro/gerarCobranca/gera
 import { GerarCobrancaRepository as FinanceiroGerarCobrancaRepository } from "src/@modules/financeiro/gerarCobranca/gerarCobrancaRepository";
 import { PagadorEntity } from "./pagador.entity";
 import { IngressoEntity } from "./ingresso.entity";
+import { ApiDate } from "src/@modules/shared/apiDate";
 
 export class GerarCobrancaRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -11,15 +12,17 @@ export class GerarCobrancaRepository {
   async buscarPedido(companyUuid: string, pedidoUuid: string): Promise<PedidoEntity | null> {
     const [pedidoModel] = await this.connectionHub.database!.query(
       `SELECT
-       uuid,
-       company_uuid,
-       user_uuid,
-       valor_bruto,
-       valor_desconto,
-       valor_liquido
-      FROM evento_pedidos
-      WHERE company_uuid = $1
-        AND uuid = $2`,
+       pedidos.uuid,
+       pedidos.company_uuid,
+       pedidos.user_uuid,
+       pedidos.valor_bruto,
+       pedidos.valor_desconto,
+       pedidos.valor_liquido,
+       eventos.data_limite_pagamento
+      FROM evento_pedidos pedidos
+        LEFT JOIN eventos ON pedidos.evento_uuid = eventos.uuid
+      WHERE pedidos.company_uuid = $1
+        AND pedidos.uuid = $2`,
       [companyUuid, pedidoUuid],
     );
     if (!pedidoModel) return null;
@@ -40,6 +43,7 @@ export class GerarCobrancaRepository {
       valorBruno: pedidoModel.valor_bruto,
       valorDesconto: pedidoModel.valor_desconto,
       valorTotal: pedidoModel.valor_liquido,
+      dataLimitePagamento: pedidoModel.data_limite_pagamento ? ApiDate.format(pedidoModel.data_limite_pagamento, "YYYY-MM-DD") : null,
     });
     return pedido;
   }

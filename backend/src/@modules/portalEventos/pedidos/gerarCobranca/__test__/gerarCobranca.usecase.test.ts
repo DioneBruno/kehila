@@ -1,5 +1,5 @@
 import dataSource from "src/@infra/database/datasource";
-import { stub } from "sinon";
+import { stub, useFakeTimers } from "sinon";
 import { GerarCobrancaUsecase } from "../gerarCobranca.usecase";
 import { GerarCobrancaUsecase as FinanceiroGerarCobrancaUsecase } from "src/@modules/financeiro/gerarCobranca/gerarCobranca.usecase";
 import { GerarCobrancaRepository } from "../gerarCobrancaRepository";
@@ -8,9 +8,11 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 const companyUuid = "7a0bc611-61f3-400f-8da4-f22b8a2f9e1d";
 const userUuid = "c229e263-83bb-44c5-a6ca-6e16f0de6853";
 let repo: GerarCobrancaRepository;
+let clock: any;
 
 describe("Deve testar GerarCobrancaUsecase", () => {
   beforeAll(async () => {
+    clock = useFakeTimers({ now: new Date("2026-08-13 01:00:00"), toFake: ["Date"] });
     await dataSource.initialize();
     const connectionHub = new ConnectionHub({ database: dataSource });
     repo = new GerarCobrancaRepository(connectionHub);
@@ -21,6 +23,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     await dataSource.query(`DELETE FROM evento_pedidos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM evento_ingressos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM evento_lote_tipos_ingresso WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM eventos WHERE company_uuid = '${companyUuid}'`);
   });
 
   afterAll(async () => {
@@ -29,7 +32,9 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     await dataSource.query(`DELETE FROM evento_pedidos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM evento_ingressos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.query(`DELETE FROM evento_lote_tipos_ingresso WHERE company_uuid = '${companyUuid}'`);
+    await dataSource.query(`DELETE FROM eventos WHERE company_uuid = '${companyUuid}'`);
     await dataSource.destroy();
+    clock.restore();
   });
 
   test("Deve chamar FinanceiroGerarCobrancaUsecase com dados do usuário", async () => {
@@ -182,6 +187,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
       companyUuid,
       userUuid,
       pedidoUuid,
+      numParcelas: 10,
       tipoPagador: "ingresso" as const,
     };
     await usecase.execute(input);
@@ -194,6 +200,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     expect(gerarCobrancaStub.args[0][0].pagadorDocumento).toBe("11111111111");
     expect(gerarCobrancaStub.args[0][0].pagadorEmail).toBe("email Pessoa1");
     expect(gerarCobrancaStub.args[0][0].pagadorTelefone).toBe("telefone Pessoa1");
+    expect(gerarCobrancaStub.args[0][0].numParcelas).toBe(10);
 
     expect(gerarCobrancaStub.args[1][0].valor).toBe(100);
     expect(gerarCobrancaStub.args[1][0].origem).toBe("eventoIngresso");
@@ -202,6 +209,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     expect(gerarCobrancaStub.args[1][0].pagadorDocumento).toBe("22222222222");
     expect(gerarCobrancaStub.args[1][0].pagadorEmail).toBe("email Pessoa2");
     expect(gerarCobrancaStub.args[1][0].pagadorTelefone).toBe("telefone Pessoa2");
+    expect(gerarCobrancaStub.args[1][0].numParcelas).toBe(10);
 
     expect(gerarCobrancaStub.args[2][0].valor).toBe(100);
     expect(gerarCobrancaStub.args[2][0].origem).toBe("eventoIngresso");
@@ -210,6 +218,7 @@ describe("Deve testar GerarCobrancaUsecase", () => {
     expect(gerarCobrancaStub.args[2][0].pagadorDocumento).toBe("33333333333");
     expect(gerarCobrancaStub.args[2][0].pagadorEmail).toBe("email Pessoa3");
     expect(gerarCobrancaStub.args[2][0].pagadorTelefone).toBe("telefone Pessoa3");
+    expect(gerarCobrancaStub.args[2][0].numParcelas).toBe(10);
 
     gerarCobrancaStub.restore();
   });
@@ -281,6 +290,45 @@ describe("Deve testar GerarCobrancaUsecase", () => {
 
     gerarCobrancaStub.restore();
   });
+
+  test("Deve bloquear caso quantidade de parcelar ultrapassa [eventos.data_limite_pagamento]", async () => {
+    const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";
+
+    const gerarCobrancaStub = stub(FinanceiroGerarCobrancaUsecase.prototype, "execute").resolves();
+
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, cpf, email, phone )
+      VALUES ('${userUuid}', 'nomeUsuario', 'cpfUsuario', 'emailUsuario', 'telefoneUsuario')`);
+
+    const eventoUuid = "7f71ae62-83ae-4997-ab10-9a5b14fb2e00";
+    await dataSource.query(`INSERT INTO eventos (uuid, company_uuid, user_uuid, titulo, slug, data_inicio, data_limite_pagamento)
+      VALUES ('${eventoUuid}', '${companyUuid}', '${companyUuid}', 'evento', 'evento', '2027-01-13', '2027-01-13')`);
+
+    const tipoIngressoUuid = "82b3750-56cc-46ae-8961-74e2614e03d2";
+    await dataSource.query(`INSERT INTO evento_lote_tipos_ingresso (uuid, company_uuid, evento_uuid, lote_uuid, nome, preco)
+      VALUES ('1${tipoIngressoUuid}', '${companyUuid}', '${companyUuid}', '${companyUuid}', 'Lote 1', 100)`);
+
+    await dataSource.query(`INSERT INTO evento_pedidos (uuid, company_uuid, user_uuid, evento_uuid, idempotency_key, valor_bruto, valor_liquido)
+      VALUES ('${pedidoUuid}', '${companyUuid}', '${userUuid}', '${eventoUuid}', '123e4567', 300, 300)`);
+
+    const ingressoUuidBase = "7a55d33-8c90-4836-a4f8-4b9a69f0a2d5";
+    await dataSource.query(`INSERT INTO evento_ingressos (uuid, company_uuid, evento_uuid, tipo_ingresso_uuid, pedido_uuid, codigo, pessoa_nome, pessoa_email, pessoa_telefone, pessoa_documento, pessoa_uf, pessoa_cidade)
+      VALUES ('1${ingressoUuidBase}', '${companyUuid}', '${companyUuid}', '1${tipoIngressoUuid}', '${pedidoUuid}', '11111111', 'pessoa1', 'email Pessoa1', 'telefone Pessoa1', '11111111111', '11', 'cidade Pessoa1'),
+      ('2${ingressoUuidBase}', '${companyUuid}', '${companyUuid}', '1${tipoIngressoUuid}', '${pedidoUuid}', '22222222', 'pessoa2', 'email Pessoa2', 'telefone Pessoa2', '22222222222', '22', 'cidade Pessoa2'),
+      ('3${ingressoUuidBase}', '${companyUuid}', '${companyUuid}', '1${tipoIngressoUuid}', '${pedidoUuid}', '33333333', 'pessoa3', 'email Pessoa3', 'telefone Pessoa3', '33333333333', '33', 'cidade Pessoa3')`);
+
+    const usecase = new GerarCobrancaUsecase(repo);
+    const input = {
+      companyUuid,
+      userUuid,
+      pedidoUuid,
+      numParcelas: 6,
+      tipoPagador: "ingresso" as const,
+    };
+    await expect(() => usecase.execute(input)).rejects.toThrow("Quantidade máxima de parcelas deve ser 4");
+
+    gerarCobrancaStub.restore();
+  });
+
 
   test("Deve verificar o valor do tipo de ingresso para cada participante", async () => {
     const pedidoUuid = "86c3ee08-ed3c-4c57-97d2-a8e0aa61581c";

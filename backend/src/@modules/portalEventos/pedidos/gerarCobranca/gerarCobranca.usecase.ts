@@ -1,6 +1,7 @@
 import { ApiError } from "src/@modules/shared/apiError";
 import { GerarCobrancaRepository } from "./gerarCobrancaRepository";
 import { PagadorEntity } from "./pagador.entity";
+import { ApiDate } from "src/@modules/shared/apiDate";
 
 export type GerarCobrancaInput = {
   companyUuid: string;
@@ -24,6 +25,13 @@ export class GerarCobrancaUsecase {
 
     const pedido = await this.repo.buscarPedido(input.companyUuid, input.pedidoUuid);
     if (!pedido) throw new ApiError("Pedido não encontrado", 404);
+
+    if (pedido.dataLimitePagamento()) {
+      const dataLimite = pedido.dataLimitePagamento() as string;
+      const mesesDiferenca = ApiDate.diff(ApiDate.now(), dataLimite, "month");
+      const numParcelas = input.numParcelas ?? 1;
+      if (mesesDiferenca < numParcelas) throw new ApiError(`Quantidade máxima de parcelas deve ser ${mesesDiferenca}`, 400);
+    }
 
     if (input.tipoPagador === "ingresso") {
       const ingressos = await this.repo.buscarIngressos(input.companyUuid, input.pedidoUuid);
