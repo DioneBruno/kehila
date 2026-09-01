@@ -14,10 +14,13 @@ export class VerificarPagamentoPeriodoUsecase {
   ) {}
 
   async execute(input: VerificarPagamentoPeriodoInput): Promise<void> {
-    const contas = await this.gateway.buscarContasBancariasAtivas(input.companyUuid);
+    const contas = await this.repo.buscarContasBancariasAtivas(input.companyUuid);
 
     for (const conta of contas) {
-      await this.gateway.listarPagamentosRecebidos(conta, input.dataInicial, input.dataFinal);
+      const pagamentos = await this.gateway.listarPagamentosRecebidos(conta, input.dataInicial, input.dataFinal);
+      for (const pagamento of pagamentos) {
+        await this.repo.verificarPagamento(input.companyUuid, pagamento.id);
+      }
     }
   }
 }

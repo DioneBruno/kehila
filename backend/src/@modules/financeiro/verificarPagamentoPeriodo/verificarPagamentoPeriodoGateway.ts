@@ -9,7 +9,7 @@ export type ContaBancariaAtiva = {
   ambiente: string;
 };
 
-export type PagamentoRecebidoAsaas = {
+export type listarPagamentosRecebidosOutput = {
   id: string;
   value: number;
   paymentDate: string;
@@ -18,32 +18,35 @@ export type PagamentoRecebidoAsaas = {
 export class VerificarPagamentoPeriodoGateway {
   constructor(readonly connectionHub: ConnectionHub) {}
 
-  async buscarContasBancariasAtivas(companyUuid: string): Promise<ContaBancariaAtiva[]> {
-    const contas = await this.connectionHub.database!.query<{ company_uuid: string; chave_api: string; ambiente: string }[]>(
-      `SELECT company_uuid, chave_api, ambiente
-      FROM financeiro_contas_bancarias
-      WHERE deleted_at IS NULL
-        AND company_uuid = $1
-        AND status = 'ativo'`,
-      [companyUuid],
-    );
-    return contas.map((conta) => ({
-      companyUuid: conta.company_uuid,
-      chaveApi: conta.chave_api,
-      ambiente: conta.ambiente,
-    }));
-  }
-
-  async listarPagamentosRecebidos(conta: ContaBancariaAtiva, dataInicial: string, dataFinal: string): Promise<PagamentoRecebidoAsaas[]> {
+  async listarPagamentosRecebidos(conta: ContaBancariaAtiva, dataInicial: string, dataFinal: string): Promise<listarPagamentosRecebidosOutput[]> {
     const baseUrl = conta.ambiente === "PROD" ? ASAAS_PROD_URL : ASAAS_SANDBOX_URL;
-    const url = `${baseUrl}/v3/payments?limit=100&offset=0&paymentDate[ge]=${dataInicial}&paymentDate[le]=${dataFinal}&status=RECEIVED`;
     const headers = {
       accept: "application/json",
       "User-Agent": "Kehila",
       "content-type": "application/json",
       access_token: conta.chaveApi,
     };
-    const response = await this.connectionHub.http?.get<{ data: PagamentoRecebidoAsaas[] }>(url, { headers });
-    return response?.data?.data ?? [];
+
+    const limit = 100;
+    let offset = 0;
+    let hasMore = true;
+    const pagamentos: listarPagamentosRecebidosOutput[] = [];
+
+    while (hasMore) {
+      const url = `${baseUrl}/v3/payments?limit=${limit}&offset=${offset}&paymentDate[ge]=${dataInicial}&paymentDate[le]=${dataFinal}&status=RECEIVED`;
+      const response = await this.connectionHub.http?.get<{ data: listarPagamentosRecebidosOutput[]; hasMore: boolean }>(url, { headers });
+
+      pagamentos.push(
+        ...(response?.data?.data?.map((it) => ({
+          id: it.id,
+          value: it.value,
+          paymentDate: it.paymentDate,
+        })) ?? []),
+      );
+      hasMore = response?.data?.hasMore ?? false;
+      offset += limit;
+    }
+
+    return pagamentos;
   }
 }
