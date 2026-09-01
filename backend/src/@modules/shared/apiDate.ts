@@ -90,6 +90,11 @@ export class ApiDate {
     return newDate.format(format);
   }
 
+  static subtractDay(date: string, dayAmount: number = 1, format: string = "YYYY-MM-DD") {
+    const newDate = moment(date, format).subtract(dayAmount, "days");
+    return newDate.format(format);
+  }
+
   static diff(dateBegin: string, dateEnd: string, unidadeMedita: UnitOfTime = "days") {
     const data1 = moment(dateBegin);
     const data2 = moment(dateEnd);

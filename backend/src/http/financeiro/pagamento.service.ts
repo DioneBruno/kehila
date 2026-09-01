@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { FinanceiroQuery } from "src/@modules/financeiro/financeiro.query";
 import { NotificarVencimentoPagamentoUsecase } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamento.usecase";
 
 @Injectable()
 export class PagamentoService {
-  constructor(readonly notificarVencimentoPagamentoUsecase: NotificarVencimentoPagamentoUsecase) {}
+  constructor(
+    readonly financeiroQuery: FinanceiroQuery,
+    readonly notificarVencimentoPagamentoUsecase: NotificarVencimentoPagamentoUsecase
+  ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async executarTarefaCada10Segundos() {
@@ -34,11 +38,11 @@ export class PagamentoService {
   @Cron(CronExpression.EVERY_2_HOURS)
   async executarTarefaCada2Horas() {
     // lógica aqui
+    await this.financeiroQuery.verificarPagamentosCompanies();
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async executarTarefaTodoDiaAs2h() {
     await this.notificarVencimentoPagamentoUsecase.execute({ diasParaVencimento: 5 });
   }
-
 }
