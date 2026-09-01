@@ -39,7 +39,7 @@ export class VerificarPagamentoGateway {
   }
 
   private async buscarToken(pagamento: PagamentoEntity): Promise<{ token: string; baseUrl: string }> {
-    const [contaBancariaModel] = await this.connectionHub.database?.query(
+    const [contaBancariaModel] = await this.connectionHub?.database?.query(
       `SELECT chave_api, ambiente FROM financeiro_contas_bancarias WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'ativo'`,
       [pagamento.companyUuid()],
     );
