@@ -6,7 +6,7 @@ import { EnviarEmailUsecase } from "src/@modules/notificacao/email/enviarEmail.u
 import { EnviarSmsRepository } from "src/@modules/notificacao/sms/enviarSmsRepository";
 import { EnviarSmsUsecase } from "src/@modules/notificacao/sms/enviarSms.usecase";
 
-const CACHE_TTL_SECONDS = 300;
+const CACHE_TTL_SECONDS = 60 * 24; // 1 dia
 
 export class GenerateTokenAuthenticationRandomCodeRepository {
   constructor(readonly connectionHub: ConnectionHub) {}

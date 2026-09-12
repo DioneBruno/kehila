@@ -2,7 +2,15 @@
   <q-page padding>
     <!-- Header -->
     <div class="row items-center q-mb-lg">
-      <q-btn flat round dense icon="arrow_back" color="grey-7" :to="{ name: 'usuarios' }" class="q-mr-sm" />
+      <q-btn
+        flat
+        round
+        dense
+        icon="arrow_back"
+        color="grey-7"
+        :to="{ name: 'usuarios' }"
+        class="q-mr-sm"
+      />
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">
           {{ usuario?.name || "Carregando..." }}
@@ -27,10 +35,25 @@
             <div class="row items-center justify-between q-mb-md">
               <p class="text-subtitle1 text-weight-bold q-ma-none">Dados do Usuário</p>
               <div>
-                <q-btn v-if="!editando" flat dense icon="edit" label="Editar" color="primary" @click="editando = true" />
+                <q-btn
+                  v-if="!editando"
+                  flat
+                  dense
+                  icon="edit"
+                  label="Editar"
+                  color="primary"
+                  @click="editando = true"
+                />
                 <div v-else class="row q-gutter-sm">
                   <q-btn flat dense label="Cancelar" color="grey-7" @click="cancelarEdicao" />
-                  <q-btn unelevated dense label="Salvar" color="primary" icon="save" @click="salvar" />
+                  <q-btn
+                    unelevated
+                    dense
+                    label="Salvar"
+                    color="primary"
+                    icon="save"
+                    @click="salvar"
+                  />
                 </div>
               </div>
             </div>
@@ -39,7 +62,9 @@
               <div class="row q-col-gutter-md">
                 <!-- Identificação -->
                 <div class="col-12">
-                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">Identificação</p>
+                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">
+                    Identificação
+                  </p>
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input
@@ -72,7 +97,13 @@
                   />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="form.email" label="E-mail" filled type="email" :readonly="!editando" />
+                  <q-input
+                    v-model="form.email"
+                    label="E-mail"
+                    filled
+                    type="email"
+                    :readonly="!editando"
+                  />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="form.position" label="Cargo" filled :readonly="!editando" />
@@ -108,7 +139,11 @@
                   />
                 </div>
                 <div class="col-12">
-                  <q-toggle v-model="form.isAccepted" label="Acesso liberado" :disable="!editando" />
+                  <q-toggle
+                    v-model="form.isAccepted"
+                    label="Acesso liberado"
+                    :disable="!editando"
+                  />
                 </div>
               </div>
             </q-form>
@@ -118,40 +153,59 @@
 
       <!-- Painel lateral -->
       <div class="col-12 col-md-4">
-        <q-card flat bordered>
-          <q-card-section>
-            <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-sm">Informações</p>
+        <div class="col-12 q-mb-sm">
+          <q-card flat bordered>
+            <q-card-section>
+              <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-sm">Informações</p>
+              <q-list dense>
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="calendar_today" color="grey-6" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label caption>Criado em</q-item-label>
+                    <q-item-label>{{ formatarData(usuario.createdAt) }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="update" color="grey-6" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label caption>Atualizado em</q-item-label>
+                    <q-item-label>{{ formatarData(usuario.updatedAt) }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="mark_email_read" color="grey-6" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label caption>E-mail verificado</q-item-label>
+                    <q-item-label>{{ usuario.isVerify ? "Sim" : "Não" }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12">
+          <q-card flat bordered>
+            <q-card-section>
+              <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-sm">Tokens de Acesso</p>
+            </q-card-section>
             <q-list dense>
-              <q-item>
+              <q-item v-for="(token, index) in usuario.randomCode" :key="index">
                 <q-item-section avatar>
-                  <q-icon name="calendar_today" color="grey-6" />
+                  <q-icon name="key" color="grey-6" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label caption>Criado em</q-item-label>
-                  <q-item-label>{{ formatarData(usuario.createdAt) }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="update" color="grey-6" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label caption>Atualizado em</q-item-label>
-                  <q-item-label>{{ formatarData(usuario.updatedAt) }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="mark_email_read" color="grey-6" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label caption>E-mail verificado</q-item-label>
-                  <q-item-label>{{ usuario.isVerify ? "Sim" : "Não" }}</q-item-label>
+                  <q-item-label>{{ token }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
-          </q-card-section>
-        </q-card>
+          </q-card>
+        </div>
       </div>
     </div>
   </q-page>

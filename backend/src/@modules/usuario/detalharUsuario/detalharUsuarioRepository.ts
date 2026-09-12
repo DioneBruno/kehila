@@ -12,6 +12,7 @@ export type UsuarioDetalhe = {
   isVerify: boolean;
   createdAt: string;
   updatedAt: string;
+  randomCode: string[];
 };
 
 export class DetalharUsuarioRepository {
@@ -42,6 +43,29 @@ export class DetalharUsuarioRepository {
       [companyUuid, usuarioUuid],
     );
 
-    return row ?? null;
+    if (!row) return null;
+
+    const randomCode = [];
+    const tokensAcessoCpf = `auth_random_code:${companyUuid}:${row.cpf}`;
+    const tokensCpf = await this.connectionHub.cache!.findKey(tokensAcessoCpf);
+    if (tokensCpf) randomCode.push(tokensCpf.code);
+    const tokensAcessoEmail = `auth_random_code:${companyUuid}:${row.email}`;
+    const tokensEmail = await this.connectionHub.cache!.findKey(tokensAcessoEmail);
+    if (tokensEmail) randomCode.push(tokensEmail.code);
+
+    return {
+      uuid: row.uuid,
+      name: row.name,
+      cpf: row.cpf,
+      email: row.email,
+      phone: row.phone,
+      position: row.position,
+      roles: row.roles,
+      isAccepted: row.isAccepted,
+      isVerify: row.isVerify,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      randomCode,
+    };
   }
 }
