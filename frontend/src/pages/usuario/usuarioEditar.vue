@@ -106,7 +106,19 @@
                   />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="form.position" label="Cargo" filled :readonly="!editando" />
+                  <q-select
+                    filled
+                    emit-value
+                    map-options
+                    v-model="form.position"
+                    label="Cargo"
+                    :readonly="!editando"
+                    :options="[
+                      { value: 'admin', label: 'Administrador' },
+                      { value: 'membro', label: 'Membro' },
+                      { value: 'lider', label: 'Lider' },
+                    ]"
+                  />
                 </div>
 
                 <!-- Acesso -->
@@ -131,8 +143,11 @@
                     multiple
                     use-input
                     use-chips
-                    new-value-mode="add-unique"
                     hide-dropdown-icon
+                    emit-value
+                    map-options
+                    :options="[]"
+                    new-value-mode="add-unique"
                     :readonly="!editando"
                     :disable="!editando"
                     @new-value="adicionarRole"
