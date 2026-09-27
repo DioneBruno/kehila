@@ -6,6 +6,15 @@ export type UsuarioDetalhe = {
   cpf: string | null;
   email: string | null;
   phone: string | null;
+  cep: string | null;
+  endereco: string | null;
+  enderecoNumero: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string | null;
+  estadoCivil: string | null;
+  dataNascimento: string | null;
+  meta: { batizado?: boolean; outraIgreja?: boolean };
   position: string | null;
   roles: string[];
   isAccepted: boolean;
@@ -27,6 +36,15 @@ export class DetalharUsuarioRepository {
         u.cpf,
         u.email,
         u.phone,
+        u.cep,
+        u.endereco,
+        u.endereco_numero AS "enderecoNumero",
+        u.bairro,
+        u.cidade,
+        u.uf,
+        u.estado_civil AS "estadoCivil",
+        TO_CHAR(u.data_nascimento, 'YYYY-MM-DD') AS "dataNascimento",
+        u.meta,
         uc.position,
         uc.roles,
         uc.is_accepted AS "isAccepted",
@@ -59,6 +77,15 @@ export class DetalharUsuarioRepository {
       cpf: row.cpf,
       email: row.email,
       phone: row.phone,
+      cep: row.cep,
+      endereco: row.endereco,
+      enderecoNumero: row.enderecoNumero,
+      bairro: row.bairro,
+      cidade: row.cidade,
+      uf: row.uf,
+      estadoCivil: row.estadoCivil,
+      dataNascimento: row.dataNascimento,
+      meta: row.meta ?? {},
       position: row.position,
       roles: row.roles,
       isAccepted: row.isAccepted,

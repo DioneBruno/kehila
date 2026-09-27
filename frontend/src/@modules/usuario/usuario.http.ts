@@ -12,6 +12,15 @@ export type CriarUsuarioInput = {
 
 export type EditarUsuarioInput = Partial<CriarUsuarioInput> & {
   isAccepted?: boolean;
+  cep?: string;
+  endereco?: string;
+  enderecoNumero?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  estadoCivil?: string;
+  dataNascimento?: string;
+  meta?: { batizado?: boolean; outraIgreja?: boolean };
 };
 
 export class UsuarioHttp {

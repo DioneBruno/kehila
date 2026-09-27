@@ -121,6 +121,88 @@
                   />
                 </div>
 
+                <div class="col-12 col-md-6">
+                  <q-input
+                    v-model="form.dataNascimento"
+                    label="Data de nascimento"
+                    filled
+                    type="date"
+                    stack-label
+                    :readonly="!editando"
+                  />
+                </div>
+                <div class="col-12 col-md-6">
+                  <q-select
+                    filled
+                    emit-value
+                    map-options
+                    clearable
+                    v-model="form.estadoCivil"
+                    label="Estado civil"
+                    :readonly="!editando"
+                    :options="estadosCivis"
+                  />
+                </div>
+                <div class="col-12 col-md-6">
+                  <q-checkbox
+                    left-label
+                    v-model="form.meta.batizado"
+                    label="Batizado"
+                    :disable="!editando"
+                  />
+                </div>
+                <div class="col-12 col-md-6">
+                  <q-checkbox
+                    left-label
+                    v-model="form.meta.outraIgreja"
+                    label="Veio de outra igreja?"
+                    :disable="!editando"
+                  />
+                </div>
+
+                <!-- Endereço -->
+                <div class="col-12 q-mt-sm">
+                  <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">Endereço</p>
+                </div>
+                <div class="col-12 col-md-3">
+                  <q-input
+                    v-model="form.cep"
+                    label="CEP"
+                    filled
+                    mask="#####-###"
+                    unmasked-value
+                    :loading="buscandoCep"
+                    :readonly="!editando"
+                  />
+                </div>
+                <div class="col-12 col-md-7">
+                  <q-input v-model="form.endereco" label="Endereço" filled :readonly="!editando" />
+                </div>
+                <div class="col-12 col-md-2">
+                  <q-input
+                    v-model="form.enderecoNumero"
+                    label="Número"
+                    filled
+                    :readonly="!editando"
+                  />
+                </div>
+                <div class="col-12 col-md-5">
+                  <q-input v-model="form.bairro" label="Bairro" filled :readonly="!editando" />
+                </div>
+                <div class="col-12 col-md-5">
+                  <q-input v-model="form.cidade" label="Cidade" filled :readonly="!editando" />
+                </div>
+                <div class="col-12 col-md-2">
+                  <q-input
+                    v-model="form.uf"
+                    label="UF"
+                    filled
+                    mask="AA"
+                    :readonly="!editando"
+                    @update:model-value="(v) => (form.uf = String(v ?? '').toUpperCase())"
+                  />
+                </div>
+
                 <!-- Acesso -->
                 <div class="col-12 q-mt-sm">
                   <p class="text-caption text-grey-6 q-ma-none q-mb-sm text-uppercase">Acesso</p>
@@ -227,7 +309,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { defineComponent, onMounted, reactive, toRefs, watch } from "vue";
 import { useRoute } from "vue-router";
 import { UsuarioService } from "./usuario.service";
 
@@ -240,11 +322,24 @@ export default defineComponent({
     const data = reactive({
       usuario: null as any,
       editando: false,
+      buscandoCep: false,
       form: {
         name: "",
         cpf: "",
         email: "",
         phone: "",
+        dataNascimento: "",
+        estadoCivil: null as string | null,
+        cep: "",
+        endereco: "",
+        enderecoNumero: "",
+        bairro: "",
+        cidade: "",
+        uf: "",
+        meta: {
+          batizado: false,
+          outraIgreja: false,
+        },
         password: "",
         position: "",
         roles: [] as string[],
@@ -257,6 +352,18 @@ export default defineComponent({
       data.form.cpf = usuario.cpf ?? "";
       data.form.email = usuario.email ?? "";
       data.form.phone = usuario.phone ?? "";
+      data.form.dataNascimento = usuario.dataNascimento ?? "";
+      data.form.estadoCivil = usuario.estadoCivil ?? null;
+      data.form.cep = usuario.cep ?? "";
+      data.form.endereco = usuario.endereco ?? "";
+      data.form.enderecoNumero = usuario.enderecoNumero ?? "";
+      data.form.bairro = usuario.bairro ?? "";
+      data.form.cidade = usuario.cidade ?? "";
+      data.form.uf = usuario.uf ?? "";
+      data.form.meta = {
+        batizado: !!usuario.meta?.batizado,
+        outraIgreja: !!usuario.meta?.outraIgreja,
+      };
       data.form.password = "";
       data.form.position = usuario.position ?? "";
       data.form.roles = usuario.roles ?? [];
@@ -272,6 +379,40 @@ export default defineComponent({
       }
     }
 
+    const estadosCivis = [
+      { value: "solteiro", label: "Solteiro(a)" },
+      { value: "casado", label: "Casado(a)" },
+      { value: "uniao", label: "União estável" },
+      { value: "separado", label: "Separado(a)" },
+      { value: "divorciado", label: "Divorciado(a)" },
+      { value: "viuvo", label: "Viúvo(a)" },
+      { value: "outros", label: "Outros" },
+    ];
+
+    async function buscarEndereco(cep: string) {
+      data.buscandoCep = true;
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const endereco = await response.json();
+        if (endereco.erro) return;
+        data.form.endereco = endereco.logradouro ?? data.form.endereco;
+        data.form.bairro = endereco.bairro ?? data.form.bairro;
+        data.form.cidade = endereco.localidade ?? data.form.cidade;
+        data.form.uf = endereco.uf ?? data.form.uf;
+      } catch {
+        // mantém os valores digitados
+      } finally {
+        data.buscandoCep = false;
+      }
+    }
+
+    watch(
+      () => data.form.cep,
+      (cep, anterior) => {
+        if (data.editando && cep?.length === 8 && cep !== anterior) void buscarEndereco(cep);
+      },
+    );
+
     function adicionarRole(val: string, done: (val?: string) => void) {
       if (val) done(val);
     }
@@ -283,6 +424,15 @@ export default defineComponent({
         cpf: data.form.cpf || undefined,
         email: data.form.email || undefined,
         phone: data.form.phone || undefined,
+        dataNascimento: data.form.dataNascimento || undefined,
+        estadoCivil: data.form.estadoCivil || undefined,
+        cep: data.form.cep || undefined,
+        endereco: data.form.endereco || undefined,
+        enderecoNumero: data.form.enderecoNumero || undefined,
+        bairro: data.form.bairro || undefined,
+        cidade: data.form.cidade || undefined,
+        uf: data.form.uf || undefined,
+        meta: { ...data.form.meta },
         password: data.form.password || undefined,
         position: data.form.position || undefined,
         roles: data.form.roles,
@@ -319,6 +469,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      estadosCivis,
       adicionarRole,
       salvar,
       cancelarEdicao,

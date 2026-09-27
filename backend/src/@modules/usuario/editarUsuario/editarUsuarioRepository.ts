@@ -1,11 +1,25 @@
 import * as bcryptjs from "bcryptjs";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
+export type UsuarioMeta = {
+  batizado?: boolean;
+  outraIgreja?: boolean;
+};
+
 export type EditarUsuarioData = {
   name?: string;
   cpf?: string;
   email?: string;
   phone?: string;
+  cep?: string;
+  endereco?: string;
+  enderecoNumero?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  estadoCivil?: string;
+  dataNascimento?: string;
+  meta?: UsuarioMeta;
   password?: string;
   position?: string;
   roles?: string[];
@@ -46,6 +60,14 @@ export class EditarUsuarioRepository {
       cpf: "cpf",
       email: "email",
       phone: "phone",
+      cep: "cep",
+      endereco: "endereco",
+      enderecoNumero: "endereco_numero",
+      bairro: "bairro",
+      cidade: "cidade",
+      uf: "uf",
+      estadoCivil: "estado_civil",
+      dataNascimento: "data_nascimento",
     };
 
     for (const [chave, coluna] of Object.entries(mapeamento)) {
@@ -63,6 +85,12 @@ export class EditarUsuarioRepository {
       idx++;
       campos.push(`password_date_update = $${idx}`);
       valores.push(new Date());
+      idx++;
+    }
+
+    if (data.meta !== undefined) {
+      campos.push(`meta = COALESCE(meta, '{}'::jsonb) || $${idx}::jsonb`);
+      valores.push(JSON.stringify(data.meta));
       idx++;
     }
 
