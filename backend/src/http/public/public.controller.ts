@@ -7,8 +7,9 @@ export class PublicController {
   constructor(readonly layoutQuery: LayoutQuery) {}
 
   @Get("/ping")
-  async buscarLayout(@Req() req: Request, @Res() res: Response) {
-    const layout = await this.layoutQuery.buscarLayoutDominio("teste");
+  async ping(@Req() req: Request, @Res() res: Response) {
+    const companyUuid = req["companyUuid"];
+    const layout = await this.layoutQuery.buscarLayoutCompanyUuid(companyUuid);
     return res.status(201).json({
       layout,
     });
