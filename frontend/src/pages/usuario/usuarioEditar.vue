@@ -115,8 +115,7 @@
                     :readonly="!editando"
                     :options="[
                       { value: 'admin', label: 'Administrador' },
-                      { value: 'membro', label: 'Membro' },
-                      { value: 'lider', label: 'Lider' },
+                      { value: 'usuario', label: 'Usuário' },
                     ]"
                   />
                 </div>
