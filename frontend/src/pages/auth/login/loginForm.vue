@@ -115,19 +115,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, reactive, ref, toRefs } from "vue";
 import { LoginService } from "./login.service";
+import { useLayoutStore } from "src/stores/layout";
 
 export default defineComponent({
   name: "authLoginLoginForm",
   setup() {
     const $service = new LoginService();
+    const $layoutStore = useLayoutStore();
 
     const data = reactive({
       inputPassword: ref(),
       // loginTemplate: computed(() => $setting.$state.template.login),
       showPwd: ref(true),
       authenticated: ref(false),
+      layout: computed(() => $layoutStore.layout),
       input: ref({
         username: "",
         password: "",

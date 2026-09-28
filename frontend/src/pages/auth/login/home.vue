@@ -19,8 +19,9 @@
           <div class="row col-11 col-sm-7 col-md-5">
             <!-- Logo Section -->
             <div class="column col-11 col-md-7 q-mx-auto">
-              <p class="text-h4 col-12 q-ma-none q-py-md text-center">
-                Kehila
+              <p class="text-h4 col-12 q-ma-none q-py-md text-center text-grey-9">
+                <div>{{ layout?.telaLogin?.titulo }}</div>
+                <div style="font-size: 10px;"> {{ layout?.telaLogin?.subTitulo }}</div>
                 <!-- <q-img
                   v-if="!loginTemplate.logo.title"
                   :src="eomnesLogo"
@@ -48,8 +49,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from "vue";
+import { computed, defineComponent, reactive, toRefs } from "vue";
 import LoginForm from "./loginForm.vue";
+import { useLayoutStore } from "src/stores/layout.js";
 
 export default defineComponent({
   name: "authLoginHome",
@@ -57,7 +59,11 @@ export default defineComponent({
     LoginForm,
   },
   setup() {
-    const data = reactive({});
+    const $layoutStore = useLayoutStore();
+
+    const data = reactive({
+      layout: computed(() => $layoutStore.layout),
+    });
 
     return {
       ...toRefs(data),
