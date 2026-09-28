@@ -3,9 +3,8 @@ import type { RouteRecordRaw } from "vue-router";
 const routes: RouteRecordRaw[] = [
   {
     path: "/login",
-    name: "login",
     component: () => import("layouts/BlankLayout.vue"),
-    children: [{ path: "", component: () => import("pages/auth/login/home.vue") }],
+    children: [{ path: "", name: "login", component: () => import("pages/auth/login/home.vue") }],
   },
   {
     path: "/",
@@ -91,9 +90,8 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/publico/eventos/:eventoUuid",
-    name: "eventos.publico",
     component: () => import("layouts/BlankLayout.vue"),
-    children: [{ path: "", component: () => import("pages/portalEventos/pedido/home.vue") }],
+    children: [{ path: "", name: "eventos.publico", component: () => import("pages/portalEventos/pedido/home.vue") }],
   },
 
   {
