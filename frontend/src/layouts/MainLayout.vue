@@ -10,7 +10,10 @@
           aria-label="Menu"
           @click="drawerAberto = !drawerAberto"
         />
-        <q-toolbar-title class="text-weight-bold">Kehila</q-toolbar-title>
+        <q-toolbar-title class="text-weight-bold">
+          <div>{{ layout?.header?.titulo }}</div>
+          <div style="font-size: 10px; margin-top: -5px;">{{ layout?.header?.subTitulo }}</div>
+        </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -67,10 +70,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import { MainLayoutService } from "./MainLayout.service";
+import { useLayoutStore } from "src/stores/layout";
 
 const MENU_ITEMS = [
   { label: "Início", icon: "home", route: "home" },
@@ -92,10 +96,12 @@ export default defineComponent({
     const $router = useRouter();
     const $authCookies = new AuthCookiesQuasar();
     const $service = new MainLayoutService();
+    const $layoutStore = useLayoutStore();
 
     const data = reactive({
       drawerAberto: false,
       menuItems: MENU_ITEMS,
+      layout: computed(() => $layoutStore.layout),
     });
 
     onMounted(async () => {

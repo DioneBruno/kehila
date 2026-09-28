@@ -15,6 +15,7 @@ export class LayoutQuery {
       },
       header: {
         titulo: layout?.header?.titulo ?? "Kehila",
+        subTitulo: layout?.header?.subTitulo ?? "",
       },
     };
   }

@@ -21,7 +21,7 @@
             <div class="column col-11 col-md-7 q-mx-auto">
               <p class="text-h4 col-12 q-ma-none q-py-md text-center text-grey-9">
                 <div>{{ layout?.telaLogin?.titulo }}</div>
-                <div style="font-size: 10px;"> {{ layout?.telaLogin?.subTitulo }}</div>
+                <div style="font-size: 10px; margin-top: -15px;"> {{ layout?.telaLogin?.subTitulo }}</div>
                 <!-- <q-img
                   v-if="!loginTemplate.logo.title"
                   :src="eomnesLogo"
