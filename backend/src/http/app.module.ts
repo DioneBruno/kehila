@@ -15,6 +15,7 @@ import { RedisClientType, createClient } from "redis";
 import { BiModule } from "./bi/bi.module";
 import { UsuarioModule } from "./usuario/usuario.module";
 import { ScheduleModule } from "@nestjs/schedule";
+import { PublicModule } from "./public/public.module";
 
 @Global()
 @Module({
@@ -37,6 +38,7 @@ import { ScheduleModule } from "@nestjs/schedule";
     EmpresaModule,
     BiModule,
     UsuarioModule,
+    PublicModule,
   ],
   controllers: [AppController],
   providers: [

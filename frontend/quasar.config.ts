@@ -19,6 +19,7 @@ export default defineConfig((/* ctx */) => {
       "financeiro.boot",
       "empresa.boot",
       "usuario.boot",
+      "shared.boot",
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css

@@ -65,7 +65,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     inject: [ConnectionHub],
   };
 }
-//
+
 @Module({
   controllers: [EventosController, LotesController, PedidosController, PublicoController],
   providers: [

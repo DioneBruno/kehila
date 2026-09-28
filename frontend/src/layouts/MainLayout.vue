@@ -67,9 +67,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from "vue";
+import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
+import { MainLayoutService } from "./MainLayout.service";
 
 const MENU_ITEMS = [
   { label: "Início", icon: "home", route: "home" },
@@ -90,16 +91,26 @@ export default defineComponent({
   setup() {
     const $router = useRouter();
     const $authCookies = new AuthCookiesQuasar();
+    const $service = new MainLayoutService();
 
     const data = reactive({
       drawerAberto: false,
       menuItems: MENU_ITEMS,
     });
 
+    onMounted(async () => {
+      await ping();
+    });
+
     function sair() {
       $authCookies.deleteToken();
       $authCookies.deleteRefreshToken();
       void $router.push({ name: "login" });
+    }
+
+    async function ping() {
+      const response  = await $service.ping();
+      console.log(response);
     }
 
     return {
