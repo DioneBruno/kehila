@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from "vue";
+import { computed, defineComponent, reactive, toRefs, watchEffect } from "vue";
 import LoginForm from "./loginForm.vue";
 import { useLayoutStore } from "src/stores/layout.js";
 
@@ -63,6 +63,11 @@ export default defineComponent({
 
     const data = reactive({
       layout: computed(() => $layoutStore.layout),
+    });
+
+    watchEffect(() => {
+      const titulo = $layoutStore.layout?.telaLogin?.titulo;
+      if (titulo) document.title = titulo;
     });
 
     return {

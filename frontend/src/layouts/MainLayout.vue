@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, toRefs, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import { MainLayoutService } from "./MainLayout.service";
@@ -106,6 +106,11 @@ export default defineComponent({
 
     onMounted(async () => {
       await ping();
+    });
+
+    watchEffect(() => {
+      const titulo = $layoutStore.layout?.telaLogin?.titulo;
+      if (titulo) document.title = titulo;
     });
 
     function sair() {
