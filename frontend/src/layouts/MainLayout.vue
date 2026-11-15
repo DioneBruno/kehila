@@ -19,11 +19,15 @@
 
     <q-drawer v-model="drawerAberto" show-if-above bordered class="bg-grey-1">
       <q-list padding>
-        <q-item-label header class="text-grey-6 text-weight-bold text-caption q-mt-sm">
+        <q-item-label
+          v-if="isAdmin"
+          header
+          class="text-grey-6 text-weight-bold text-caption q-mt-sm"
+        >
           MENU
         </q-item-label>
 
-        <template v-for="item in menuItems">
+        <template v-for="item in isAdmin ? menuItems : []">
           <q-item-label
             v-if="item.type === 'section'"
             :key="'sec-' + item.label"
@@ -50,7 +54,7 @@
           </q-item>
         </template>
 
-        <q-separator class="q-my-md" />
+        <q-separator v-if="isAdmin" class="q-my-md" />
 
         <q-item clickable v-ripple class="rounded-borders text-negative" @click="sair">
           <q-item-section avatar>
@@ -75,6 +79,7 @@ import { useRouter } from "vue-router";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import { MainLayoutService } from "./MainLayout.service";
 import { useLayoutStore } from "src/stores/layout";
+import TokenDecode from "src/@modules/auth/tokenDecode";
 
 const MENU_ITEMS = [
   { label: "Início", icon: "home", route: "home" },
@@ -104,6 +109,7 @@ export default defineComponent({
       drawerAberto: false,
       menuItems: MENU_ITEMS,
       layout: computed(() => $layoutStore.layout),
+      isAdmin: TokenDecode.execute()?.user?.position === "admin",
     });
 
     onMounted(async () => {

@@ -8,6 +8,8 @@ type TokenDecodeOutput = {
     cpf: string;
     email: string;
     name: string;
+    position?: string | null;
+    roles?: string[];
   };
   company?: {
     uuid: string;
@@ -21,6 +23,7 @@ export default class TokenDecode {
     const token = cookie.getToken() ? cookie.getToken() : null;
     const tokenDecoded = token ? jwtDecode(token) : (null as any);
     // console.log(tokenDecoded);
+    if (!tokenDecoded) return null;
     return {
       user: tokenDecoded.user,
       company: tokenDecoded.company,
