@@ -22,7 +22,7 @@
           />
         </div>
       </div>
-      <div v-if="aprisco" class="col-auto">
+      <div v-if="aprisco && isAdmin" class="col-auto">
         <q-btn unelevated color="negative" label="Excluir" icon="delete" @click="excluir" />
       </div>
     </div>
@@ -125,6 +125,7 @@
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { useRoute } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
+import TokenDecode from "src/@modules/auth/tokenDecode";
 import ApriscoForm, { apriscoFormParaInput, novoApriscoForm } from "./apriscoForm.vue";
 import ApriscoIntegrantes from "./apriscoIntegrantes.vue";
 import { ApriscoService, linkMapa, statusAprisco } from "./aprisco.service";
@@ -144,6 +145,9 @@ export default defineComponent({
     });
     const form = reactive(novoApriscoForm());
     const formRef = ref();
+
+    // Apenas administradores podem excluir (o backend também bloqueia)
+    const isAdmin = TokenDecode.execute()?.user?.position === "admin";
 
     const mapa = computed(() => (data.aprisco ? linkMapa(data.aprisco) : null));
 
@@ -190,6 +194,7 @@ export default defineComponent({
       form,
       formRef,
       mapa,
+      isAdmin,
       salvar,
       cancelarEdicao,
       excluir,

@@ -14,6 +14,7 @@ import { DisvincularIntegranteRepository } from "../disvincularIntegrante/disvin
 
 const companyUuid = "3f7a1c92-8d4e-4b60-9a2f-5e1b7c3d9f04";
 const outraCompanyUuid = "6b2e9d14-0a7c-4f38-b5e1-8c4a2f6d0e79";
+const userUuid = "9c4d2e71-5b8a-4f13-a6e0-2d7f1b9c3e58";
 let connections: ConnectionHub;
 
 describe("Deve testar ApriscoQuery", () => {
@@ -23,6 +24,7 @@ describe("Deve testar ApriscoQuery", () => {
   });
   afterAll(async () => {
     await dataSource.query(`DELETE FROM aprisco_integrantes WHERE company_uuid = $1`, [companyUuid]);
+    await dataSource.query(`DELETE FROM auth_users WHERE uuid = $1`, [userUuid]);
     await dataSource.query(`DELETE FROM auth_pessoas WHERE company_uuid = $1`, [companyUuid]);
     await dataSource.query(`DELETE FROM apriscos WHERE company_uuid IN ($1, $2)`, [companyUuid, outraCompanyUuid]);
     await dataSource.destroy();
@@ -81,5 +83,28 @@ describe("Deve testar ApriscoQuery", () => {
     ]);
     expect(integrantes[0].pessoaUuid).toBe(bruno);
     expect(await new ApriscoQuery(connections).listarIntegrantes(outraCompanyUuid, apriscoUuid)).toEqual([]);
+  });
+
+  test("Deve listar apenas os Apriscos em que o usuário logado é LIDER", async () => {
+    await dataSource.query(`INSERT INTO auth_users (uuid, name, email) VALUES ($1, 'Lider', 'lider.aprisco@teste.com')`, [userUuid]);
+    const incluir = new IncluirApriscoUsecase(new IncluirApriscoRepository(connections));
+    const { uuid: liderado } = await incluir.execute({ companyUuid, nome: "Liderado" });
+    const { uuid: comoMembro } = await incluir.execute({ companyUuid, nome: "Como membro" });
+    const { uuid: deletado } = await incluir.execute({ companyUuid, nome: "Deletado" });
+    const pessoa = (
+      await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({ companyUuid, nome: "Lider", email: "lider.aprisco@teste.com" })
+    ).uuid;
+    const outraPessoa = (await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({ companyUuid, nome: "Outro" })).uuid;
+    const vincular = new VincularIntegranteUsecase(new VincularIntegranteRepository(connections));
+    await vincular.execute({ companyUuid, apriscoUuid: liderado, pessoaUuid: pessoa, papel: "LIDER" });
+    await vincular.execute({ companyUuid, apriscoUuid: comoMembro, pessoaUuid: pessoa, papel: "MEMBRO" });
+    await vincular.execute({ companyUuid, apriscoUuid: comoMembro, pessoaUuid: outraPessoa, papel: "LIDER" });
+    await vincular.execute({ companyUuid, apriscoUuid: deletado, pessoaUuid: pessoa, papel: "LIDER" });
+    await new DeletarApriscoUsecase(new DeletarApriscoRepository(connections)).execute({ companyUuid, apriscoUuid: deletado });
+
+    const query = new ApriscoQuery(connections);
+    const apriscos = await query.listarApriscosLiderados(companyUuid, userUuid);
+    expect(apriscos.map((a) => a.uuid)).toEqual([liderado]);
+    expect(await query.listarApriscosLiderados(outraCompanyUuid, userUuid)).toEqual([]);
   });
 });

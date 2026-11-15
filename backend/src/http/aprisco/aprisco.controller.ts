@@ -36,6 +36,13 @@ export class ApriscoController {
     return res.status(200).json({ success: true, data: apriscos });
   }
 
+  /** Apriscos em que o usuário logado é LIDER */
+  @Get("liderados")
+  async listarLiderados(@Req() req: Request | any, @Res() res: Response) {
+    const apriscos = await this.apriscoQuery.listarApriscosLiderados(req.companyUuid, req.userUuid);
+    return res.status(200).json({ success: true, data: apriscos });
+  }
+
   @Get(":uuid")
   async detalhar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
     const aprisco = await this.apriscoQuery.buscarAprisco(req.companyUuid, uuid);
@@ -64,6 +71,7 @@ export class ApriscoController {
 
   @Delete(":uuid")
   async deletar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    if (req.userPosition !== "admin") throw new ApiError("Apenas administradores podem excluir apriscos", 403);
     await this.deletarApriscoUsecase.execute({ companyUuid: req.companyUuid, apriscoUuid: uuid });
     return res.status(200).json({ success: true });
   }

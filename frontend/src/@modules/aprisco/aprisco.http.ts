@@ -48,6 +48,11 @@ export class ApriscoHttp {
     return this.http.get("apriscos");
   }
 
+  /** Apriscos em que o usuário logado é LIDER */
+  async listarLiderados(): Promise<{ data: Aprisco[] }> {
+    return this.http.get("apriscos/liderados");
+  }
+
   async buscarPorUuid(uuid: string): Promise<{ data: Aprisco }> {
     return this.http.get(`apriscos/${uuid}`);
   }

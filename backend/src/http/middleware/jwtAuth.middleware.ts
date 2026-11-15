@@ -15,6 +15,7 @@ export class JwtAuthMiddleware implements NestMiddleware {
 
     req["userUuid"] = payload.user?.uuid;
     req["userName"] = payload.user?.name;
+    req["userPosition"] = payload.user?.position;
     req["companyUuid"] = payload.company?.uuid;
 
     next();

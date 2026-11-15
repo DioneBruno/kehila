@@ -76,6 +76,15 @@ export class ApriscoService {
     }
   }
 
+  async listarLiderados() {
+    try {
+      const response = await this.$http.listarLiderados();
+      return response.data;
+    } catch {
+      return [];
+    }
+  }
+
   async buscarPorUuid(uuid: string) {
     try {
       this.$q.loading.show();
