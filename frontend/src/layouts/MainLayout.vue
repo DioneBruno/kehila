@@ -84,8 +84,9 @@ const MENU_ITEMS = [
   { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
   { label: "Cobranças", icon: "receipt_long", route: "financeiro.cobrancas" },
   { label: "Pagamentos", icon: "payments", route: "financeiro.pagamentos" },
-  { label: "EMPRESA", type: "section" },
+  { label: "ADMINISTRAÇÃO", type: "section" },
   { label: "Minha Empresa", icon: "business", route: "empresa" },
+  { label: "Membros", icon: "diversity_3", route: "membros" },
   { label: "Usuários", icon: "group", route: "usuarios" },
   { label: "Notificações", icon: "email", route: "notificacao" },
 ];

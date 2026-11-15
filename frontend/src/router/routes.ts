@@ -82,6 +82,21 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/usuario/usuarioEditar.vue"),
       },
       {
+        path: "membros",
+        name: "membros",
+        component: () => import("pages/membresia/membroListar.vue"),
+      },
+      {
+        path: "membros/criar",
+        name: "membros.criar",
+        component: () => import("pages/membresia/membroIncluir.vue"),
+      },
+      {
+        path: "membros/:uuid",
+        name: "membros.detalhe",
+        component: () => import("pages/membresia/membroEditar.vue"),
+      },
+      {
         path: "notificacao",
         name: "notificacao",
         component: () => import("pages/notificacao/home.vue"),

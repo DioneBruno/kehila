@@ -14,6 +14,7 @@ import { ConnectionCacheRedis } from "src/@infra/cache/cacheConnection.redis";
 import { RedisClientType, createClient } from "redis";
 import { BiModule } from "./bi/bi.module";
 import { UsuarioModule } from "./usuario/usuario.module";
+import { MembresiaModule } from "./membresia/membresia.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PublicModule } from "./public/public.module";
 
@@ -38,6 +39,7 @@ import { PublicModule } from "./public/public.module";
     EmpresaModule,
     BiModule,
     UsuarioModule,
+    MembresiaModule,
     PublicModule,
   ],
   controllers: [AppController],
