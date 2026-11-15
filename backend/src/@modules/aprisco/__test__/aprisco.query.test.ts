@@ -11,6 +11,8 @@ import { VincularIntegranteUsecase } from "../vincularIntegrante/vincularIntegra
 import { VincularIntegranteRepository } from "../vincularIntegrante/vincularIntegranteRepository";
 import { DisvincularIntegranteUsecase } from "../disvincularIntegrante/disvincularIntegrante.usecase";
 import { DisvincularIntegranteRepository } from "../disvincularIntegrante/disvincularIntegranteRepository";
+import { RegistrarPresencaUsecase } from "../registrarPresenca/registrarPresenca.usecase";
+import { RegistrarPresencaRepository } from "../registrarPresenca/registrarPresencaRepository";
 
 const companyUuid = "3f7a1c92-8d4e-4b60-9a2f-5e1b7c3d9f04";
 const outraCompanyUuid = "6b2e9d14-0a7c-4f38-b5e1-8c4a2f6d0e79";
@@ -23,6 +25,7 @@ describe("Deve testar ApriscoQuery", () => {
     connections = new ConnectionHub({ database: dataSource });
   });
   afterAll(async () => {
+    await dataSource.query(`DELETE FROM aprisco_presencas WHERE company_uuid = $1`, [companyUuid]);
     await dataSource.query(`DELETE FROM aprisco_integrantes WHERE company_uuid = $1`, [companyUuid]);
     await dataSource.query(`DELETE FROM auth_users WHERE uuid = $1`, [userUuid]);
     await dataSource.query(`DELETE FROM auth_pessoas WHERE company_uuid = $1`, [companyUuid]);
@@ -106,5 +109,29 @@ describe("Deve testar ApriscoQuery", () => {
     const apriscos = await query.listarApriscosLiderados(companyUuid, userUuid);
     expect(apriscos.map((a) => a.uuid)).toEqual([liderado]);
     expect(await query.listarApriscosLiderados(outraCompanyUuid, userUuid)).toEqual([]);
+  });
+
+  test("Deve listar as presenças dos integrantes apenas da reunião informada", async () => {
+    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({ companyUuid, nome: "Presenças" });
+    const incluirMembro = new IncluirMembroUsecase(new IncluirMembroRepository(connections));
+    const ana = (await incluirMembro.execute({ companyUuid, nome: "Ana Presença" })).uuid;
+    const bruno = (await incluirMembro.execute({ companyUuid, nome: "Bruno Presença" })).uuid;
+    const vincular = new VincularIntegranteUsecase(new VincularIntegranteRepository(connections));
+    await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: ana });
+    await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: bruno });
+
+    const registrar = new RegistrarPresencaUsecase(new RegistrarPresencaRepository(connections));
+    await registrar.execute({ companyUuid, apriscoUuid, tipo: "INTEGRANTE", pessoaUuid: ana, dataReuniao: "2026-11-12", presenca: true });
+    await registrar.execute({ companyUuid, apriscoUuid, tipo: "INTEGRANTE", pessoaUuid: bruno, dataReuniao: "2026-11-12", presenca: false });
+    await registrar.execute({ companyUuid, apriscoUuid, tipo: "INTEGRANTE", pessoaUuid: bruno, dataReuniao: "2026-11-05", presenca: true });
+    await registrar.execute({ companyUuid, apriscoUuid, tipo: "VISITANTE", dataReuniao: "2026-11-12", quantidade: 3 });
+
+    const query = new ApriscoQuery(connections);
+    const presencas = await query.listarPresencasIntegrantes(companyUuid, apriscoUuid, "2026-11-12");
+    expect(presencas.sort((a, b) => (a.pessoaUuid === ana ? -1 : b.pessoaUuid === ana ? 1 : 0))).toEqual([
+      { pessoaUuid: ana, presenca: true },
+      { pessoaUuid: bruno, presenca: false },
+    ]);
+    expect(await query.listarPresencasIntegrantes(outraCompanyUuid, apriscoUuid, "2026-11-12")).toEqual([]);
   });
 });

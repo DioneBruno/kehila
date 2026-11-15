@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ApriscoQuery } from "src/@modules/aprisco/aprisco.query";
@@ -7,6 +7,8 @@ import { AlterarApriscoUsecase } from "src/@modules/aprisco/alterarAprisco/alter
 import { DeletarApriscoUsecase } from "src/@modules/aprisco/deletarAprisco/deletarAprisco.usecase";
 import { VincularIntegranteUsecase } from "src/@modules/aprisco/vincularIntegrante/vincularIntegrante.usecase";
 import { DisvincularIntegranteUsecase } from "src/@modules/aprisco/disvincularIntegrante/disvincularIntegrante.usecase";
+import { RegistrarPresencaUsecase } from "src/@modules/aprisco/registrarPresenca/registrarPresenca.usecase";
+import { validarDataReuniao } from "src/@modules/aprisco/registrarPresenca/presenca.entity";
 
 function camposAprisco(body: any) {
   return {
@@ -28,6 +30,7 @@ export class ApriscoController {
     readonly deletarApriscoUsecase: DeletarApriscoUsecase,
     readonly vincularIntegranteUsecase: VincularIntegranteUsecase,
     readonly disvincularIntegranteUsecase: DisvincularIntegranteUsecase,
+    readonly registrarPresencaUsecase: RegistrarPresencaUsecase,
   ) {}
 
   @Get()
@@ -102,5 +105,26 @@ export class ApriscoController {
   ) {
     await this.disvincularIntegranteUsecase.execute({ companyUuid: req.companyUuid, apriscoUuid: uuid, integranteUuid });
     return res.status(200).json({ success: true });
+  }
+
+  /** Presenças dos integrantes em uma reunião: ?data=AAAA-MM-DD */
+  @Get(":uuid/presencas")
+  async listarPresencas(@Req() req: Request | any, @Param("uuid") uuid: string, @Query("data") data: string, @Res() res: Response) {
+    const presencas = await this.apriscoQuery.listarPresencasIntegrantes(req.companyUuid, uuid, validarDataReuniao(data));
+    return res.status(200).json({ success: true, data: presencas });
+  }
+
+  @Post(":uuid/presencas")
+  async registrarPresenca(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    const resultado = await this.registrarPresencaUsecase.execute({
+      companyUuid: req.companyUuid,
+      apriscoUuid: uuid,
+      tipo: body.tipo,
+      pessoaUuid: body.pessoaUuid,
+      dataReuniao: body.dataReuniao,
+      presenca: body.presenca,
+      quantidade: body.quantidade,
+    });
+    return res.status(201).json({ success: true, data: resultado });
   }
 }

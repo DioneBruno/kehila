@@ -25,6 +25,11 @@ export type IntegranteListItem = {
   createdAt: Date;
 };
 
+export type PresencaIntegranteItem = {
+  pessoaUuid: string;
+  presenca: boolean;
+};
+
 // Ordem de exibição dos papéis: liderança primeiro
 const ORDEM_PAPEL = `CASE i.papel WHEN 'LIDER' THEN 1 WHEN 'AUXILIAR' THEN 2 WHEN 'ANFITRIAO' THEN 3 ELSE 4 END`;
 
@@ -122,6 +127,22 @@ export class ApriscoQuery {
       ORDER BY ${ORDEM_PAPEL}, p.nome ASC NULLS LAST
       `,
       [companyUuid, apriscoUuid],
+    );
+  }
+
+  /** Presenças de integrantes registradas para uma reunião (AAAA-MM-DD) */
+  async listarPresencasIntegrantes(companyUuid: string, apriscoUuid: string, dataReuniao: string): Promise<PresencaIntegranteItem[]> {
+    return this.connections.database.query(
+      `
+      SELECT pessoa_uuid AS "pessoaUuid", presenca
+      FROM aprisco_presencas
+      WHERE deleted_at IS NULL
+        AND company_uuid = $1
+        AND aprisco_uuid = $2
+        AND data_reuniao = $3
+        AND tipo = 'INTEGRANTE'
+      `,
+      [companyUuid, apriscoUuid, dataReuniao],
     );
   }
 }

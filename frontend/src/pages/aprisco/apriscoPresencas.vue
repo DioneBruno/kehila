@@ -1,0 +1,190 @@
+<template>
+  <q-dialog :model-value="modelValue" @update:model-value="fechar" @show="carregar">
+    <q-card style="width: 520px; max-width: 95vw">
+      <q-card-section class="row items-center q-pb-none">
+        <p class="text-h6 q-ma-none">Registrar presenças</p>
+        <q-space />
+        <q-btn flat round dense icon="close" @click="fechar(false)" />
+      </q-card-section>
+
+      <q-card-section>
+        <q-input
+          v-model="dataReuniao"
+          type="date"
+          label="Data da reunião *"
+          filled
+          dense
+          @update:model-value="carregarPresencas"
+        />
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section v-if="carregando" class="text-center q-pa-lg">
+        <q-spinner color="primary" size="32px" />
+      </q-card-section>
+
+      <q-card-section v-else-if="!integrantes.length" class="text-center text-grey-6 q-pa-lg">
+        <q-icon name="group_off" size="40px" />
+        <p class="q-mt-sm q-mb-none">Este aprisco ainda não possui integrantes.</p>
+      </q-card-section>
+
+      <template v-else>
+        <q-card-section class="row items-center q-py-sm">
+          <span class="text-caption text-grey-7">
+            {{ totalPresentes }} de {{ integrantes.length }} presentes
+          </span>
+          <q-space />
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="primary"
+            :label="todosPresentes ? 'Desmarcar todos' : 'Marcar todos'"
+            @click="marcarTodos(!todosPresentes)"
+          />
+        </q-card-section>
+
+        <q-list separator style="max-height: 50vh" class="scroll">
+          <q-item v-for="integrante in integrantes" :key="integrante.pessoaUuid" tag="label" v-ripple>
+            <q-item-section side>
+              <q-checkbox v-model="presencas[integrante.pessoaUuid]" color="positive" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ integrante.nome || "Sem nome" }}</q-item-label>
+              <q-item-label caption>
+                <q-icon :name="papelIntegrante(integrante.papel).icon" size="14px" />
+                {{ papelIntegrante(integrante.papel).label }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-badge
+                :color="presencas[integrante.pessoaUuid] ? 'positive' : 'grey-5'"
+                :label="presencas[integrante.pessoaUuid] ? 'Presente' : 'Ausente'"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </template>
+
+      <q-separator />
+
+      <q-card-actions align="right">
+        <q-btn flat label="Cancelar" color="grey-7" @click="fechar(false)" />
+        <q-btn
+          unelevated
+          label="Salvar"
+          icon="save"
+          color="primary"
+          :disable="!integrantes.length || !dataReuniao"
+          @click="salvar"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+</template>
+
+<script lang="ts">
+import { computed, defineComponent, reactive, ref } from "vue";
+import { useQuasar } from "quasar";
+import type { Integrante } from "src/@modules/aprisco/aprisco.http";
+import { ApriscoService, papelIntegrante } from "./aprisco.service";
+
+/** Data de hoje no fuso local, em AAAA-MM-DD */
+function hoje() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+export default defineComponent({
+  name: "ApriscoPresencas",
+  props: {
+    modelValue: { type: Boolean, default: false },
+    apriscoUuid: { type: String, required: true },
+  },
+  emits: ["update:modelValue", "salvo"],
+  setup(props, { emit }) {
+    const $q = useQuasar();
+    const $service = new ApriscoService();
+
+    const dataReuniao = ref(hoje());
+    const integrantes = ref<Integrante[]>([]);
+    const presencas = reactive<Record<string, boolean>>({});
+    const carregando = ref(false);
+
+    const totalPresentes = computed(
+      () => integrantes.value.filter((i) => presencas[i.pessoaUuid]).length,
+    );
+    const todosPresentes = computed(
+      () => integrantes.value.length > 0 && totalPresentes.value === integrantes.value.length,
+    );
+
+    function marcarTodos(valor: boolean) {
+      integrantes.value.forEach((i) => (presencas[i.pessoaUuid] = valor));
+    }
+
+    /** Preenche a lista com o que já foi registrado na data (sem registro = ausente) */
+    async function carregarPresencas() {
+      marcarTodos(false);
+      if (!dataReuniao.value) return;
+      const registradas = await $service.listarPresencas(props.apriscoUuid, dataReuniao.value);
+      registradas?.forEach((p) => {
+        if (p.pessoaUuid in presencas) presencas[p.pessoaUuid] = p.presenca;
+      });
+    }
+
+    async function carregar() {
+      carregando.value = true;
+      try {
+        dataReuniao.value = hoje();
+        integrantes.value = (await $service.listarIntegrantes(props.apriscoUuid)) ?? [];
+        Object.keys(presencas).forEach((k) => delete presencas[k]);
+        integrantes.value.forEach((i) => (presencas[i.pessoaUuid] = false));
+        await carregarPresencas();
+      } finally {
+        carregando.value = false;
+      }
+    }
+
+    async function salvar() {
+      if (!dataReuniao.value) {
+        $q.notify({ type: "warning", message: "Informe a data da reunião" });
+        return;
+      }
+      const ok = await $service.registrarPresencas(
+        props.apriscoUuid,
+        integrantes.value.map((i) => ({
+          tipo: "INTEGRANTE" as const,
+          pessoaUuid: i.pessoaUuid,
+          dataReuniao: dataReuniao.value,
+          presenca: !!presencas[i.pessoaUuid],
+        })),
+      );
+      if (ok) {
+        emit("salvo");
+        fechar(false);
+      }
+    }
+
+    function fechar(valor: boolean) {
+      emit("update:modelValue", valor);
+    }
+
+    return {
+      dataReuniao,
+      integrantes,
+      presencas,
+      carregando,
+      totalPresentes,
+      todosPresentes,
+      marcarTodos,
+      carregar,
+      carregarPresencas,
+      salvar,
+      fechar,
+      papelIntegrante,
+    };
+  },
+});
+</script>

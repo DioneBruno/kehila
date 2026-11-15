@@ -21,6 +21,9 @@ import { VincularIntegranteRepository } from "src/@modules/aprisco/vincularInteg
 import { DisvincularIntegranteUsecase } from "src/@modules/aprisco/disvincularIntegrante/disvincularIntegrante.usecase";
 import { DisvincularIntegranteRepository } from "src/@modules/aprisco/disvincularIntegrante/disvincularIntegranteRepository";
 
+import { RegistrarPresencaUsecase } from "src/@modules/aprisco/registrarPresenca/registrarPresenca.usecase";
+import { RegistrarPresencaRepository } from "src/@modules/aprisco/registrarPresenca/registrarPresencaRepository";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -38,6 +41,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(DeletarApriscoUsecase, (hub) => new DeletarApriscoUsecase(new DeletarApriscoRepository(hub))),
     makeProvider(VincularIntegranteUsecase, (hub) => new VincularIntegranteUsecase(new VincularIntegranteRepository(hub))),
     makeProvider(DisvincularIntegranteUsecase, (hub) => new DisvincularIntegranteUsecase(new DisvincularIntegranteRepository(hub))),
+    makeProvider(RegistrarPresencaUsecase, (hub) => new RegistrarPresencaUsecase(new RegistrarPresencaRepository(hub))),
   ],
 })
 export class ApriscoModule implements NestModule {

@@ -63,7 +63,7 @@
                 </div>
               </div>
 
-              <aprisco-form :form="form" :readonly="!editando" />
+              <aprisco-form :form="form" :readonly="!editando" :aprisco-uuid="aprisco.uuid" />
             </q-card-section>
           </q-card>
         </q-form>

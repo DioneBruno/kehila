@@ -3,8 +3,20 @@
 <template>
   <div class="row q-col-gutter-md">
     <!-- Identificação -->
-    <div class="col-12">
+    <div class="col-12 row items-center">
       <p class="text-caption text-grey-6 q-ma-none text-uppercase">Identificação</p>
+      <q-space />
+      <q-btn
+        v-if="apriscoUuid"
+        outline
+        dense
+        no-caps
+        color="primary"
+        icon="how_to_reg"
+        label="Registrar presenças"
+        class="q-px-sm"
+        @click="presencasAberto = true"
+      />
     </div>
     <div class="col-12 col-md-8">
       <q-input
@@ -92,6 +104,12 @@
         target="_blank"
       />
     </div>
+
+    <aprisco-presencas
+      v-if="apriscoUuid"
+      v-model="presencasAberto"
+      :aprisco-uuid="apriscoUuid"
+    />
   </div>
 </template>
 
@@ -100,6 +118,7 @@ import { computed, defineComponent, ref, type PropType } from "vue";
 import { useQuasar } from "quasar";
 import type { Aprisco, ApriscoInput, ApriscoStatus } from "src/@modules/aprisco/aprisco.http";
 import { linkMapa } from "./aprisco.service";
+import ApriscoPresencas from "./apriscoPresencas.vue";
 
 export type ApriscoFormModel = {
   nome: string;
@@ -146,13 +165,17 @@ export function apriscoFormParaInput(form: ApriscoFormModel): ApriscoInput {
 
 export default defineComponent({
   name: "ApriscoForm",
+  components: { ApriscoPresencas },
   props: {
     form: { type: Object as PropType<ApriscoFormModel>, required: true },
     readonly: { type: Boolean, default: false },
+    /** Aprisco já salvo: habilita o registro de presenças */
+    apriscoUuid: { type: String, default: null },
   },
   setup(props) {
     const $q = useQuasar();
     const localizando = ref(false);
+    const presencasAberto = ref(false);
 
     function validarFaixa(v: string, limite: number, nome: string) {
       const n = paraNumero(v);
@@ -201,6 +224,7 @@ export default defineComponent({
 
     return {
       localizando,
+      presencasAberto,
       mapa,
       validarLatitude,
       validarLongitude,

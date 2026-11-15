@@ -5,6 +5,7 @@ import type {
   ApriscoStatus,
   IntegranteInput,
   PapelIntegrante,
+  PresencaInput,
 } from "src/@modules/aprisco/aprisco.http";
 import { inject } from "vue";
 import { useRouter } from "vue-router";
@@ -197,5 +198,30 @@ export class ApriscoService {
         })
         .onCancel(() => resolve(false));
     });
+  }
+
+  async listarPresencas(uuid: string, dataReuniao: string) {
+    try {
+      const response = await this.$http.listarPresencas(uuid, dataReuniao);
+      return response.data;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Registra várias presenças da mesma reunião; reenviar atualiza o registro existente. */
+  async registrarPresencas(uuid: string, presencas: PresencaInput[]) {
+    try {
+      this.$q.loading.show();
+      for (const presenca of presencas) {
+        await this.$http.registrarPresenca(uuid, presenca);
+      }
+      this.$q.notify({ type: "positive", message: "Presenças registradas" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 }
