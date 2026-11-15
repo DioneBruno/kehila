@@ -1,5 +1,10 @@
 import { useQuasar } from "quasar";
-import type { MembresiaHttp, MembroInput } from "src/@modules/membresia/membresia.http";
+import type {
+  MembresiaHttp,
+  MembroInput,
+  TipoVinculo,
+  VinculoInput,
+} from "src/@modules/membresia/membresia.http";
 import { inject } from "vue";
 import { useRouter } from "vue-router";
 
@@ -12,6 +17,47 @@ export const ESTADOS_CIVIS = [
   { value: "viuvo", label: "Viúvo(a)" },
   { value: "outros", label: "Outros" },
 ];
+
+export const TIPOS_VINCULO: { value: TipoVinculo; label: string }[] = [
+  { value: "PAI", label: "Pai" },
+  { value: "MAE", label: "Mãe" },
+  { value: "FILHO", label: "Filho" },
+  { value: "FILHA", label: "Filha" },
+  { value: "CONJUGE", label: "Cônjuge" },
+  { value: "IRMAO", label: "Irmão" },
+  { value: "IRMA", label: "Irmã" },
+  { value: "AVO", label: "Avô / Avó" },
+  { value: "NETO", label: "Neto" },
+  { value: "NETA", label: "Neta" },
+  { value: "TIO", label: "Tio" },
+  { value: "TIA", label: "Tia" },
+  { value: "SOBRINHO", label: "Sobrinho" },
+  { value: "SOBRINHA", label: "Sobrinha" },
+  { value: "OUTRO", label: "Outro" },
+];
+
+/** Inversos aceitos por tipo (o primeiro é o padrão). Mantém em sincronia com o backend. */
+export const INVERSOS_VINCULO: Record<TipoVinculo, TipoVinculo[]> = {
+  PAI: ["FILHO", "FILHA"],
+  MAE: ["FILHO", "FILHA"],
+  FILHO: ["PAI", "MAE"],
+  FILHA: ["PAI", "MAE"],
+  CONJUGE: ["CONJUGE"],
+  IRMAO: ["IRMAO", "IRMA"],
+  IRMA: ["IRMAO", "IRMA"],
+  AVO: ["NETO", "NETA"],
+  NETO: ["AVO"],
+  NETA: ["AVO"],
+  TIO: ["SOBRINHO", "SOBRINHA"],
+  TIA: ["SOBRINHO", "SOBRINHA"],
+  SOBRINHO: ["TIO", "TIA"],
+  SOBRINHA: ["TIO", "TIA"],
+  OUTRO: ["OUTRO"],
+};
+
+export function labelTipoVinculo(tipo: TipoVinculo) {
+  return TIPOS_VINCULO.find((t) => t.value === tipo)?.label ?? tipo;
+}
 
 export class MembresiaService {
   private $http = inject("membresiaHttp") as MembresiaHttp;
@@ -81,6 +127,54 @@ export class MembresiaService {
             this.$q.loading.show();
             await this.$http.deletar(uuid);
             void this.$router.push({ name: "membros" });
+            resolve(true);
+          } catch {
+            resolve(false);
+          } finally {
+            this.$q.loading.hide();
+          }
+        })
+        .onCancel(() => resolve(false));
+    });
+  }
+
+  async listarVinculos(uuid: string) {
+    try {
+      const response = await this.$http.listarVinculos(uuid);
+      return response.data;
+    } catch {
+      return null;
+    }
+  }
+
+  async vincular(uuid: string, vinculos: VinculoInput[]) {
+    try {
+      this.$q.loading.show();
+      await this.$http.vincular(uuid, vinculos);
+      this.$q.notify({ type: "positive", message: "Vínculo adicionado" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async removerVinculo(uuid: string, vinculoUuid: string) {
+    return new Promise<boolean>((resolve) => {
+      this.$q
+        .dialog({
+          title: "Remover vínculo",
+          message: "Deseja remover este vínculo? O vínculo inverso também será removido.",
+          cancel: { label: "Não", flat: true, color: "grey" },
+          ok: { label: "Sim", unelevated: true, color: "negative" },
+          persistent: true,
+        })
+        .onOk(async () => {
+          try {
+            this.$q.loading.show();
+            await this.$http.removerVinculo(uuid, vinculoUuid);
+            this.$q.notify({ type: "positive", message: "Vínculo removido" });
             resolve(true);
           } catch {
             resolve(false);

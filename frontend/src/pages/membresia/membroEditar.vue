@@ -107,25 +107,28 @@
             </q-list>
           </q-card-section>
         </q-card>
+
+        <membro-vinculos :membro-uuid="membro.uuid" :membro-nome="membro.nome" class="q-mt-md" />
       </div>
     </div>
   </q-page>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue";
 import { useRoute } from "vue-router";
 import type { Membro } from "src/@modules/membresia/membresia.http";
 import MembroForm, { membroFormParaInput, novoMembroForm } from "./membroForm.vue";
 import { MembresiaService } from "./membresia.service";
+import MembroVinculos from "./membroVinculos.vue";
 
 export default defineComponent({
   name: "MembroEditar",
-  components: { MembroForm },
+  components: { MembroForm, MembroVinculos },
   setup() {
     const $route = useRoute();
     const $service = new MembresiaService();
-    const uuid = $route.params.uuid as string;
+    const uuid = computed(() => $route.params.uuid as string);
 
     const data = reactive({
       membro: null as Membro | null,
@@ -147,14 +150,14 @@ export default defineComponent({
     });
 
     async function carregar() {
-      const membro = await $service.buscarPorUuid(uuid);
+      const membro = await $service.buscarPorUuid(uuid.value);
       data.membro = membro;
       data.naoEncontrado = !membro;
       Object.assign(form, novoMembroForm(membro));
     }
 
     async function salvar() {
-      const ok = await $service.alterar(uuid, membroFormParaInput(form));
+      const ok = await $service.alterar(uuid.value, membroFormParaInput(form));
       if (ok) {
         data.editando = false;
         await carregar();
@@ -168,7 +171,7 @@ export default defineComponent({
     }
 
     async function excluir() {
-      await $service.deletar(uuid);
+      await $service.deletar(uuid.value);
     }
 
     function formatarDataHora(iso: string) {
@@ -182,6 +185,12 @@ export default defineComponent({
       });
     }
 
+    // Recarrega ao navegar para outro membro (ex.: clicando num vínculo)
+    watch(uuid, (novo) => {
+      if (!novo) return;
+      data.editando = false;
+      void carregar();
+    });
     onMounted(() => void carregar());
 
     return {

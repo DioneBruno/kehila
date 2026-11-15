@@ -5,6 +5,8 @@ import { MembresiaQuery } from "src/@modules/membresia/membresia.query";
 import { IncluirMembroUsecase } from "src/@modules/membresia/incluirMembro/incluirMembro.usecase";
 import { AlterarMembroUsecase } from "src/@modules/membresia/alterarMembro/alterarMembro.usecase";
 import { DeletarMembroUsecase } from "src/@modules/membresia/deletarMembro/deletarMembro.usecase";
+import { VinculoEntreMembrosUsecase } from "src/@modules/membresia/vinculoEntreMembros/vinculoEntreMembros.usecase";
+import { RemoverVinculoUsecase } from "src/@modules/membresia/removerVinculo/removerVinculo.usecase";
 
 function camposMembro(body: any) {
   return {
@@ -36,6 +38,8 @@ export class MembresiaController {
     readonly incluirMembroUsecase: IncluirMembroUsecase,
     readonly alterarMembroUsecase: AlterarMembroUsecase,
     readonly deletarMembroUsecase: DeletarMembroUsecase,
+    readonly vinculoEntreMembrosUsecase: VinculoEntreMembrosUsecase,
+    readonly removerVinculoUsecase: RemoverVinculoUsecase,
   ) {}
 
   @Get()
@@ -73,6 +77,38 @@ export class MembresiaController {
   @Delete(":uuid")
   async deletar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
     await this.deletarMembroUsecase.execute({ companyUuid: req.companyUuid, membroUuid: uuid });
+    return res.status(200).json({ success: true });
+  }
+
+  @Get(":uuid/vinculos")
+  async listarVinculos(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    const vinculos = await this.membresiaQuery.listarVinculos(req.companyUuid, uuid);
+    return res.status(200).json({ success: true, data: vinculos });
+  }
+
+  @Post(":uuid/vinculos")
+  async vincular(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    const vinculos = Array.isArray(body.vinculos) ? body.vinculos : [body];
+    const resultado = await this.vinculoEntreMembrosUsecase.execute({
+      companyUuid: req.companyUuid,
+      membroUuid: uuid,
+      vinculos: vinculos.map((v: any) => ({
+        membroVinculadoUuid: v.membroVinculadoUuid,
+        tipo: v.tipo,
+        tipoInverso: v.tipoInverso,
+      })),
+    });
+    return res.status(201).json({ success: true, data: resultado });
+  }
+
+  @Delete(":uuid/vinculos/:vinculoUuid")
+  async removerVinculo(
+    @Req() req: Request | any,
+    @Param("uuid") uuid: string,
+    @Param("vinculoUuid") vinculoUuid: string,
+    @Res() res: Response,
+  ) {
+    await this.removerVinculoUsecase.execute({ companyUuid: req.companyUuid, membroUuid: uuid, vinculoUuid });
     return res.status(200).json({ success: true });
   }
 }

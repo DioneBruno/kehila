@@ -48,6 +48,14 @@ const COLUNAS_MEMBRO = `
         updated_at AS "updatedAt"
 `;
 
+export type VinculoListItem = {
+  uuid: string;
+  tipo: string;
+  membroVinculadoUuid: string;
+  membroVinculadoNome: string | null;
+  createdAt: Date;
+};
+
 export class MembresiaQuery {
   constructor(readonly connections: ConnectionHub) {}
 
@@ -76,5 +84,25 @@ export class MembresiaQuery {
       [companyUuid, membroUuid],
     );
     return membro ?? null;
+  }
+
+  /** Lista os vínculos do membro. Cada item lê-se: "membroVinculado é <tipo> do membro". */
+  async listarVinculos(companyUuid: string, membroUuid: string): Promise<VinculoListItem[]> {
+    return this.connections.database.query(
+      `
+      SELECT
+        v.uuid,
+        v.tipo,
+        v.pessoa_vinculada_uuid AS "membroVinculadoUuid",
+        p.nome AS "membroVinculadoNome",
+        v.created_at AS "createdAt"
+      FROM auth_pessoas_vinculos v
+      JOIN auth_pessoas p ON p.uuid = v.pessoa_vinculada_uuid AND p.deleted_at IS NULL
+      WHERE v.company_uuid = $1
+        AND v.pessoa_uuid = $2
+      ORDER BY v.tipo ASC, p.nome ASC NULLS LAST
+      `,
+      [companyUuid, membroUuid],
+    );
   }
 }

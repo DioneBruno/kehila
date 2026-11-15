@@ -45,6 +45,38 @@ export type MembroInput = {
   meta?: Record<string, any>;
 };
 
+export type TipoVinculo =
+  | "PAI"
+  | "MAE"
+  | "FILHO"
+  | "FILHA"
+  | "CONJUGE"
+  | "IRMAO"
+  | "IRMA"
+  | "AVO"
+  | "NETO"
+  | "NETA"
+  | "TIO"
+  | "TIA"
+  | "SOBRINHO"
+  | "SOBRINHA"
+  | "OUTRO";
+
+/** Lê-se: "membroVinculado é <tipo> do membro". */
+export type Vinculo = {
+  uuid: string;
+  tipo: TipoVinculo;
+  membroVinculadoUuid: string;
+  membroVinculadoNome: string | null;
+  createdAt: string;
+};
+
+export type VinculoInput = {
+  membroVinculadoUuid: string;
+  tipo: TipoVinculo;
+  tipoInverso?: TipoVinculo | null;
+};
+
 export class MembresiaHttp {
   constructor(readonly http: HttpClient) {}
 
@@ -66,5 +98,17 @@ export class MembresiaHttp {
 
   async deletar(uuid: string) {
     return this.http.delete(`membros/${uuid}`);
+  }
+
+  async listarVinculos(uuid: string): Promise<{ data: Vinculo[] }> {
+    return this.http.get(`membros/${uuid}/vinculos`);
+  }
+
+  async vincular(uuid: string, vinculos: VinculoInput[]): Promise<{ data: { uuids: string[] } }> {
+    return this.http.post(`membros/${uuid}/vinculos`, { vinculos });
+  }
+
+  async removerVinculo(uuid: string, vinculoUuid: string) {
+    return this.http.delete(`membros/${uuid}/vinculos/${vinculoUuid}`);
   }
 }
