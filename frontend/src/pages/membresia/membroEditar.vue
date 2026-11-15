@@ -108,6 +108,16 @@
           </q-card-section>
         </q-card>
 
+        <membro-usuario
+          :membro-uuid="membro.uuid"
+          :membro-nome="membro.nome"
+          :cpf="membro.cpf"
+          :email="membro.email"
+          :usuario-uuid="membro.usuarioUuid ?? null"
+          class="q-mt-md"
+          @criado="carregar"
+        />
+
         <membro-vinculos :membro-uuid="membro.uuid" :membro-nome="membro.nome" class="q-mt-md" />
       </div>
     </div>
@@ -121,10 +131,11 @@ import type { Membro } from "src/@modules/membresia/membresia.http";
 import MembroForm, { membroFormParaInput, novoMembroForm } from "./membroForm.vue";
 import { MembresiaService } from "./membresia.service";
 import MembroVinculos from "./membroVinculos.vue";
+import MembroUsuario from "./membroUsuario.vue";
 
 export default defineComponent({
   name: "MembroEditar",
-  components: { MembroForm, MembroVinculos },
+  components: { MembroForm, MembroVinculos, MembroUsuario },
   setup() {
     const $route = useRoute();
     const $service = new MembresiaService();
@@ -202,6 +213,7 @@ export default defineComponent({
       cancelarEdicao,
       excluir,
       formatarDataHora,
+      carregar,
     };
   },
 });

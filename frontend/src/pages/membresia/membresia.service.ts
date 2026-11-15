@@ -1,5 +1,6 @@
 import { useQuasar } from "quasar";
 import type {
+  CriarUsuarioMembroInput,
   MembresiaHttp,
   MembroInput,
   TipoVinculo,
@@ -136,6 +137,19 @@ export class MembresiaService {
         })
         .onCancel(() => resolve(false));
     });
+  }
+
+  async criarUsuario(uuid: string, input: CriarUsuarioMembroInput) {
+    try {
+      this.$q.loading.show();
+      const response = await this.$http.criarUsuario(uuid, input);
+      this.$q.notify({ type: "positive", message: "Usuário de acesso criado" });
+      return response.data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
   }
 
   async listarVinculos(uuid: string) {

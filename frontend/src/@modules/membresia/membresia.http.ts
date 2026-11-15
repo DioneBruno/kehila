@@ -22,6 +22,15 @@ export type Membro = {
   meta: Record<string, any>;
   createdAt: string;
   updatedAt: string;
+  /** Presente no detalhe: usuário de acesso vinculado à empresa (mesmo CPF/e-mail). */
+  usuarioUuid?: string | null;
+};
+
+export type CriarUsuarioMembroInput = {
+  /** Opcional: sem senha, o membro define a sua em "Recuperar conta" na tela de login. */
+  password?: string | undefined;
+  position?: string | undefined;
+  roles?: string[] | undefined;
 };
 
 export type MembroInput = {
@@ -110,5 +119,9 @@ export class MembresiaHttp {
 
   async removerVinculo(uuid: string, vinculoUuid: string) {
     return this.http.delete(`membros/${uuid}/vinculos/${vinculoUuid}`);
+  }
+
+  async criarUsuario(uuid: string, input: CriarUsuarioMembroInput): Promise<{ data: { uuid: string } }> {
+    return this.http.post(`membros/${uuid}/usuario`, input);
   }
 }

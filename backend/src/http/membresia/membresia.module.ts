@@ -21,6 +21,9 @@ import { VinculoEntreMembrosRepository } from "src/@modules/membresia/vinculoEnt
 import { RemoverVinculoUsecase } from "src/@modules/membresia/removerVinculo/removerVinculo.usecase";
 import { RemoverVinculoRepository } from "src/@modules/membresia/removerVinculo/removerVinculoRepository";
 
+import { CriarUsuarioUsecase } from "src/@modules/membresia/criarUsuario/criarUsuario.usecase";
+import { CriarUsuarioRepository } from "src/@modules/membresia/criarUsuario/criarUsuarioRepository";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -38,6 +41,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(DeletarMembroUsecase, (hub) => new DeletarMembroUsecase(new DeletarMembroRepository(hub))),
     makeProvider(VinculoEntreMembrosUsecase, (hub) => new VinculoEntreMembrosUsecase(new VinculoEntreMembrosRepository(hub))),
     makeProvider(RemoverVinculoUsecase, (hub) => new RemoverVinculoUsecase(new RemoverVinculoRepository(hub))),
+    makeProvider(CriarUsuarioUsecase, (hub) => new CriarUsuarioUsecase(new CriarUsuarioRepository(hub))),
   ],
 })
 export class MembresiaModule implements NestModule {

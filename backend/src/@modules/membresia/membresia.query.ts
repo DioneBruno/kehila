@@ -24,6 +24,11 @@ export type MembroListItem = {
   updatedAt: Date;
 };
 
+export type MembroDetalhe = MembroListItem & {
+  /** Usuário de acesso (auth_users) vinculado à empresa com o mesmo CPF/e-mail do membro. */
+  usuarioUuid: string | null;
+};
+
 const COLUNAS_MEMBRO = `
         uuid,
         nome,
@@ -72,10 +77,23 @@ export class MembresiaQuery {
     );
   }
 
-  async buscarMembro(companyUuid: string, membroUuid: string): Promise<MembroListItem | null> {
-    const [membro]: MembroListItem[] = await this.connections.database.query(
+  async buscarMembro(companyUuid: string, membroUuid: string): Promise<MembroDetalhe | null> {
+    const [membro]: MembroDetalhe[] = await this.connections.database.query(
       `
-      SELECT ${COLUNAS_MEMBRO}
+      SELECT ${COLUNAS_MEMBRO},
+        (
+          SELECT u.uuid
+          FROM auth_users u
+            INNER JOIN auth_users_companies uc ON uc.user_uuid = u.uuid
+          WHERE u.deleted_at IS NULL
+            AND uc.deleted_at IS NULL
+            AND uc.company_uuid = auth_pessoas.company_uuid
+            AND (
+              (NULLIF(TRIM(auth_pessoas.cpf), '') IS NOT NULL AND u.cpf = TRIM(auth_pessoas.cpf))
+              OR (NULLIF(TRIM(auth_pessoas.email), '') IS NOT NULL AND u.email = TRIM(auth_pessoas.email))
+            )
+          LIMIT 1
+        ) AS "usuarioUuid"
       FROM auth_pessoas
       WHERE deleted_at IS NULL
         AND company_uuid = $1

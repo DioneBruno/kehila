@@ -5,6 +5,7 @@ import { IncluirMembroUsecase } from "../../incluirMembro/incluirMembro.usecase"
 import { IncluirMembroRepository } from "../../incluirMembro/incluirMembroRepository";
 import { CriarUsuarioUsecase } from "../criarUsuario.usecase";
 import { CriarUsuarioRepository } from "../criarUsuarioRepository";
+import { MembresiaQuery } from "../../membresia.query";
 
 const companyUuid = "4b8e2d61-9a3c-4f57-8e1b-7c0d5a2f9e14";
 const outraCompanyUuid = "d1f7a3c9-2e6b-4a85-b0c4-8e3f1d7a6b52";
@@ -43,7 +44,12 @@ describe("Deve testar CriarUsuarioUsecase (membresia)", () => {
       enderecoUf: "SP",
     });
 
+    const query = new MembresiaQuery(connections);
+    expect((await query.buscarMembro(companyUuid, membroUuid))?.usuarioUuid).toBeNull();
+
     const { uuid } = await usecase().execute({ companyUuid, membroUuid, password: "senha123", roles: ["MEMBRO"] });
+
+    expect((await query.buscarMembro(companyUuid, membroUuid))?.usuarioUuid).toBe(uuid);
 
     const [user] = await dataSource.query(`SELECT * FROM auth_users WHERE uuid = $1`, [uuid]);
     expect(user).toMatchObject({ name: "Membro Usuário", email: emails[0], phone: "11999999999", cidade: "São Paulo", uf: "SP" });

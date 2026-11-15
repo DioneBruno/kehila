@@ -7,6 +7,7 @@ import { AlterarMembroUsecase } from "src/@modules/membresia/alterarMembro/alter
 import { DeletarMembroUsecase } from "src/@modules/membresia/deletarMembro/deletarMembro.usecase";
 import { VinculoEntreMembrosUsecase } from "src/@modules/membresia/vinculoEntreMembros/vinculoEntreMembros.usecase";
 import { RemoverVinculoUsecase } from "src/@modules/membresia/removerVinculo/removerVinculo.usecase";
+import { CriarUsuarioUsecase } from "src/@modules/membresia/criarUsuario/criarUsuario.usecase";
 
 function camposMembro(body: any) {
   return {
@@ -40,6 +41,7 @@ export class MembresiaController {
     readonly deletarMembroUsecase: DeletarMembroUsecase,
     readonly vinculoEntreMembrosUsecase: VinculoEntreMembrosUsecase,
     readonly removerVinculoUsecase: RemoverVinculoUsecase,
+    readonly criarUsuarioUsecase: CriarUsuarioUsecase,
   ) {}
 
   @Get()
@@ -110,5 +112,17 @@ export class MembresiaController {
   ) {
     await this.removerVinculoUsecase.execute({ companyUuid: req.companyUuid, membroUuid: uuid, vinculoUuid });
     return res.status(200).json({ success: true });
+  }
+
+  @Post(":uuid/usuario")
+  async criarUsuario(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    const resultado = await this.criarUsuarioUsecase.execute({
+      companyUuid: req.companyUuid,
+      membroUuid: uuid,
+      password: body.password || undefined,
+      position: body.position || undefined,
+      roles: Array.isArray(body.roles) ? body.roles : undefined,
+    });
+    return res.status(201).json({ success: true, data: resultado });
   }
 }
