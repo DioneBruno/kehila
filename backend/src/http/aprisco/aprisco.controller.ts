@@ -5,6 +5,8 @@ import { ApriscoQuery } from "src/@modules/aprisco/aprisco.query";
 import { IncluirApriscoUsecase } from "src/@modules/aprisco/incluirAprisco/incluirAprisco.usecase";
 import { AlterarApriscoUsecase } from "src/@modules/aprisco/alterarAprisco/alterarAprisco.usecase";
 import { DeletarApriscoUsecase } from "src/@modules/aprisco/deletarAprisco/deletarAprisco.usecase";
+import { VincularIntegranteUsecase } from "src/@modules/aprisco/vincularIntegrante/vincularIntegrante.usecase";
+import { DisvincularIntegranteUsecase } from "src/@modules/aprisco/disvincularIntegrante/disvincularIntegrante.usecase";
 
 function camposAprisco(body: any) {
   return {
@@ -24,6 +26,8 @@ export class ApriscoController {
     readonly incluirApriscoUsecase: IncluirApriscoUsecase,
     readonly alterarApriscoUsecase: AlterarApriscoUsecase,
     readonly deletarApriscoUsecase: DeletarApriscoUsecase,
+    readonly vincularIntegranteUsecase: VincularIntegranteUsecase,
+    readonly disvincularIntegranteUsecase: DisvincularIntegranteUsecase,
   ) {}
 
   @Get()
@@ -61,6 +65,34 @@ export class ApriscoController {
   @Delete(":uuid")
   async deletar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
     await this.deletarApriscoUsecase.execute({ companyUuid: req.companyUuid, apriscoUuid: uuid });
+    return res.status(200).json({ success: true });
+  }
+
+  @Get(":uuid/integrantes")
+  async listarIntegrantes(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    const integrantes = await this.apriscoQuery.listarIntegrantes(req.companyUuid, uuid);
+    return res.status(200).json({ success: true, data: integrantes });
+  }
+
+  @Post(":uuid/integrantes")
+  async vincularIntegrante(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    const resultado = await this.vincularIntegranteUsecase.execute({
+      companyUuid: req.companyUuid,
+      apriscoUuid: uuid,
+      pessoaUuid: body.pessoaUuid,
+      papel: body.papel,
+    });
+    return res.status(201).json({ success: true, data: resultado });
+  }
+
+  @Delete(":uuid/integrantes/:integranteUuid")
+  async disvincularIntegrante(
+    @Req() req: Request | any,
+    @Param("uuid") uuid: string,
+    @Param("integranteUuid") integranteUuid: string,
+    @Res() res: Response,
+  ) {
+    await this.disvincularIntegranteUsecase.execute({ companyUuid: req.companyUuid, apriscoUuid: uuid, integranteUuid });
     return res.status(200).json({ success: true });
   }
 }

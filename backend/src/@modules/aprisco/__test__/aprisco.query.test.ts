@@ -5,6 +5,12 @@ import { IncluirApriscoRepository } from "../incluirAprisco/incluirApriscoReposi
 import { DeletarApriscoUsecase } from "../deletarAprisco/deletarAprisco.usecase";
 import { DeletarApriscoRepository } from "../deletarAprisco/deletarApriscoRepository";
 import { ApriscoQuery } from "../aprisco.query";
+import { IncluirMembroUsecase } from "src/@modules/membresia/incluirMembro/incluirMembro.usecase";
+import { IncluirMembroRepository } from "src/@modules/membresia/incluirMembro/incluirMembroRepository";
+import { VincularIntegranteUsecase } from "../vincularIntegrante/vincularIntegrante.usecase";
+import { VincularIntegranteRepository } from "../vincularIntegrante/vincularIntegranteRepository";
+import { DisvincularIntegranteUsecase } from "../disvincularIntegrante/disvincularIntegrante.usecase";
+import { DisvincularIntegranteRepository } from "../disvincularIntegrante/disvincularIntegranteRepository";
 
 const companyUuid = "3f7a1c92-8d4e-4b60-9a2f-5e1b7c3d9f04";
 const outraCompanyUuid = "6b2e9d14-0a7c-4f38-b5e1-8c4a2f6d0e79";
@@ -16,6 +22,8 @@ describe("Deve testar ApriscoQuery", () => {
     connections = new ConnectionHub({ database: dataSource });
   });
   afterAll(async () => {
+    await dataSource.query(`DELETE FROM aprisco_integrantes WHERE company_uuid = $1`, [companyUuid]);
+    await dataSource.query(`DELETE FROM auth_pessoas WHERE company_uuid = $1`, [companyUuid]);
     await dataSource.query(`DELETE FROM apriscos WHERE company_uuid IN ($1, $2)`, [companyUuid, outraCompanyUuid]);
     await dataSource.destroy();
   });
@@ -50,5 +58,28 @@ describe("Deve testar ApriscoQuery", () => {
     expect(aprisco?.horario).toBe("Quinta-feira 20h");
 
     expect(await query.buscarAprisco(outraCompanyUuid, uuid)).toBeNull();
+  });
+
+  test("Deve listar integrantes do Aprisco, liderança primeiro, sem os desvinculados", async () => {
+    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({ companyUuid, nome: "Integrantes" });
+    const incluirPessoa = async (nome: string) =>
+      (await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({ companyUuid, nome })).uuid;
+    const vincular = new VincularIntegranteUsecase(new VincularIntegranteRepository(connections));
+
+    const ana = await incluirPessoa("Ana");
+    const bruno = await incluirPessoa("Bruno");
+    const carla = await incluirPessoa("Carla");
+    await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: ana });
+    await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: bruno, papel: "LIDER" });
+    const { uuid: removido } = await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: carla });
+    await new DisvincularIntegranteUsecase(new DisvincularIntegranteRepository(connections)).execute({ companyUuid, apriscoUuid, integranteUuid: removido });
+
+    const integrantes = await new ApriscoQuery(connections).listarIntegrantes(companyUuid, apriscoUuid);
+    expect(integrantes.map((i) => [i.nome, i.papel])).toEqual([
+      ["Bruno", "LIDER"],
+      ["Ana", "MEMBRO"],
+    ]);
+    expect(integrantes[0].pessoaUuid).toBe(bruno);
+    expect(await new ApriscoQuery(connections).listarIntegrantes(outraCompanyUuid, apriscoUuid)).toEqual([]);
   });
 });

@@ -1,5 +1,6 @@
 import { ConnectionHub } from "../shared/connections/connectionHub";
 import { ApriscoStatus } from "./incluirAprisco/aprisco.entity";
+import { PapelIntegrante } from "./vincularIntegrante/integrante.entity";
 
 export type ApriscoListItem = {
   uuid: string;
@@ -13,6 +14,19 @@ export type ApriscoListItem = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type IntegranteListItem = {
+  uuid: string;
+  pessoaUuid: string;
+  nome: string | null;
+  email: string | null;
+  telefone: string | null;
+  papel: PapelIntegrante;
+  createdAt: Date;
+};
+
+// Ordem de exibição dos papéis: liderança primeiro
+const ORDEM_PAPEL = `CASE i.papel WHEN 'LIDER' THEN 1 WHEN 'AUXILIAR' THEN 2 WHEN 'ANFITRIAO' THEN 3 ELSE 4 END`;
 
 // latitude/longitude são decimal no banco; o cast para float8 faz o driver devolver number em vez de string
 const COLUNAS_APRISCO = `
@@ -56,5 +70,27 @@ export class ApriscoQuery {
       [companyUuid, apriscoUuid],
     );
     return aprisco ?? null;
+  }
+
+  async listarIntegrantes(companyUuid: string, apriscoUuid: string): Promise<IntegranteListItem[]> {
+    return this.connections.database.query(
+      `
+      SELECT
+        i.uuid,
+        i.pessoa_uuid AS "pessoaUuid",
+        p.nome,
+        p.email,
+        p.telefone,
+        i.papel,
+        i.created_at AS "createdAt"
+      FROM aprisco_integrantes i
+      JOIN auth_pessoas p ON p.uuid = i.pessoa_uuid AND p.deleted_at IS NULL
+      WHERE i.deleted_at IS NULL
+        AND i.company_uuid = $1
+        AND i.aprisco_uuid = $2
+      ORDER BY ${ORDEM_PAPEL}, p.nome ASC NULLS LAST
+      `,
+      [companyUuid, apriscoUuid],
+    );
   }
 }

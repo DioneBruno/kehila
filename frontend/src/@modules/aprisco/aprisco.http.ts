@@ -24,6 +24,23 @@ export type ApriscoInput = {
   status?: ApriscoStatus;
 };
 
+export type PapelIntegrante = "LIDER" | "AUXILIAR" | "ANFITRIAO" | "MEMBRO";
+
+export type Integrante = {
+  uuid: string;
+  pessoaUuid: string;
+  nome: string | null;
+  email: string | null;
+  telefone: string | null;
+  papel: PapelIntegrante;
+  createdAt: string;
+};
+
+export type IntegranteInput = {
+  pessoaUuid: string;
+  papel?: PapelIntegrante;
+};
+
 export class ApriscoHttp {
   constructor(readonly http: HttpClient) {}
 
@@ -45,5 +62,20 @@ export class ApriscoHttp {
 
   async deletar(uuid: string) {
     return this.http.delete(`apriscos/${uuid}`);
+  }
+
+  async listarIntegrantes(uuid: string): Promise<{ data: Integrante[] }> {
+    return this.http.get(`apriscos/${uuid}/integrantes`);
+  }
+
+  async vincularIntegrante(
+    uuid: string,
+    input: IntegranteInput,
+  ): Promise<{ data: { uuid: string } }> {
+    return this.http.post(`apriscos/${uuid}/integrantes`, input);
+  }
+
+  async disvincularIntegrante(uuid: string, integranteUuid: string) {
+    return this.http.delete(`apriscos/${uuid}/integrantes/${integranteUuid}`);
   }
 }

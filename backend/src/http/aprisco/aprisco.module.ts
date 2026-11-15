@@ -15,6 +15,12 @@ import { AlterarApriscoRepository } from "src/@modules/aprisco/alterarAprisco/al
 import { DeletarApriscoUsecase } from "src/@modules/aprisco/deletarAprisco/deletarAprisco.usecase";
 import { DeletarApriscoRepository } from "src/@modules/aprisco/deletarAprisco/deletarApriscoRepository";
 
+import { VincularIntegranteUsecase } from "src/@modules/aprisco/vincularIntegrante/vincularIntegrante.usecase";
+import { VincularIntegranteRepository } from "src/@modules/aprisco/vincularIntegrante/vincularIntegranteRepository";
+
+import { DisvincularIntegranteUsecase } from "src/@modules/aprisco/disvincularIntegrante/disvincularIntegrante.usecase";
+import { DisvincularIntegranteRepository } from "src/@modules/aprisco/disvincularIntegrante/disvincularIntegranteRepository";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -30,6 +36,8 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(IncluirApriscoUsecase, (hub) => new IncluirApriscoUsecase(new IncluirApriscoRepository(hub))),
     makeProvider(AlterarApriscoUsecase, (hub) => new AlterarApriscoUsecase(new AlterarApriscoRepository(hub))),
     makeProvider(DeletarApriscoUsecase, (hub) => new DeletarApriscoUsecase(new DeletarApriscoRepository(hub))),
+    makeProvider(VincularIntegranteUsecase, (hub) => new VincularIntegranteUsecase(new VincularIntegranteRepository(hub))),
+    makeProvider(DisvincularIntegranteUsecase, (hub) => new DisvincularIntegranteUsecase(new DisvincularIntegranteRepository(hub))),
   ],
 })
 export class ApriscoModule implements NestModule {

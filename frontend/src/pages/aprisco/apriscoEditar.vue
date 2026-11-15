@@ -67,6 +67,8 @@
             </q-card-section>
           </q-card>
         </q-form>
+
+        <aprisco-integrantes :aprisco-uuid="aprisco.uuid" class="q-mt-md" />
       </div>
 
       <!-- Painel lateral -->
@@ -124,11 +126,12 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue
 import { useRoute } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
 import ApriscoForm, { apriscoFormParaInput, novoApriscoForm } from "./apriscoForm.vue";
+import ApriscoIntegrantes from "./apriscoIntegrantes.vue";
 import { ApriscoService, linkMapa, statusAprisco } from "./aprisco.service";
 
 export default defineComponent({
   name: "ApriscoEditar",
-  components: { ApriscoForm },
+  components: { ApriscoForm, ApriscoIntegrantes },
   setup() {
     const $route = useRoute();
     const $service = new ApriscoService();

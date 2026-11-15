@@ -1,5 +1,11 @@
 import { useQuasar } from "quasar";
-import type { ApriscoHttp, ApriscoInput, ApriscoStatus } from "src/@modules/aprisco/aprisco.http";
+import type {
+  ApriscoHttp,
+  ApriscoInput,
+  ApriscoStatus,
+  IntegranteInput,
+  PapelIntegrante,
+} from "src/@modules/aprisco/aprisco.http";
 import { inject } from "vue";
 import { useRouter } from "vue-router";
 
@@ -14,6 +20,29 @@ export function statusAprisco(status: ApriscoStatus) {
       value: status,
       label: status,
       color: "grey-6",
+    }
+  );
+}
+
+export const PAPEIS_INTEGRANTE: {
+  value: PapelIntegrante;
+  label: string;
+  color: string;
+  icon: string;
+}[] = [
+  { value: "LIDER", label: "Líder", color: "primary", icon: "star" },
+  { value: "AUXILIAR", label: "Auxiliar", color: "secondary", icon: "support_agent" },
+  { value: "ANFITRIAO", label: "Anfitrião", color: "teal", icon: "home" },
+  { value: "MEMBRO", label: "Membro", color: "grey-7", icon: "person" },
+];
+
+export function papelIntegrante(papel: PapelIntegrante) {
+  return (
+    PAPEIS_INTEGRANTE.find((p) => p.value === papel) ?? {
+      value: papel,
+      label: papel,
+      color: "grey-7",
+      icon: "person",
     }
   );
 }
@@ -102,6 +131,54 @@ export class ApriscoService {
             await this.$http.deletar(uuid);
             this.$q.notify({ type: "positive", message: "Aprisco excluído" });
             void this.$router.push({ name: "apriscos" });
+            resolve(true);
+          } catch {
+            resolve(false);
+          } finally {
+            this.$q.loading.hide();
+          }
+        })
+        .onCancel(() => resolve(false));
+    });
+  }
+
+  async listarIntegrantes(uuid: string) {
+    try {
+      const response = await this.$http.listarIntegrantes(uuid);
+      return response.data;
+    } catch {
+      return null;
+    }
+  }
+
+  async vincularIntegrante(uuid: string, input: IntegranteInput) {
+    try {
+      this.$q.loading.show();
+      await this.$http.vincularIntegrante(uuid, input);
+      this.$q.notify({ type: "positive", message: "Integrante adicionado" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async disvincularIntegrante(uuid: string, integranteUuid: string, nome?: string | null) {
+    return new Promise<boolean>((resolve) => {
+      this.$q
+        .dialog({
+          title: "Remover integrante",
+          message: `Deseja remover ${nome || "este integrante"} do aprisco?`,
+          cancel: { label: "Não", flat: true, color: "grey" },
+          ok: { label: "Sim", unelevated: true, color: "negative" },
+          persistent: true,
+        })
+        .onOk(async () => {
+          try {
+            this.$q.loading.show();
+            await this.$http.disvincularIntegrante(uuid, integranteUuid);
+            this.$q.notify({ type: "positive", message: "Integrante removido" });
             resolve(true);
           } catch {
             resolve(false);
