@@ -11,6 +11,8 @@ export class GenerateTokenAuthenticationUserRepository {
         users.cpf,
         users.name,
         users.email,
+        "userCompanies".position,
+        "userCompanies".roles,
         companies.uuid AS company_uuid,
         companies.name AS company_name,
         companies.cpf_cnpj AS company_cpf_cnpj
@@ -36,6 +38,8 @@ export class GenerateTokenAuthenticationUserRepository {
       email: usuarioModel.email,
       name: usuarioModel.name,
       uuid: usuarioModel.uuid,
+      position: usuarioModel.position,
+      roles: usuarioModel.roles,
     });
 
     return usuario;

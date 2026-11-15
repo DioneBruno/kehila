@@ -40,8 +40,8 @@ describe("Deve testar TokenGenerateUsecase", () => {
       VALUES ('${userUuid}', 'userCpf', 'nome', '${username}', '${passwordCrypto}', '2024-06-06');
     `);
 
-    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
-      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position, roles)
+      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin', '["role1", "role2"]');
     `);
     await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
       VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
@@ -61,6 +61,8 @@ describe("Deve testar TokenGenerateUsecase", () => {
     expect(payload.user.cpf).toBe("userCpf");
     expect(payload.user.name).toBe("nome");
     expect(payload.user.email).toBe(username);
+    expect(payload.user.position).toBe("admin");
+    expect(payload.user.roles).toEqual(["role1", "role2"]);
 
     expect(payload.company.uuid).toBe(companyUuid);
     expect(payload.company.name).toBe("companyName");

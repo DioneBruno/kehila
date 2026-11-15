@@ -12,6 +12,8 @@ export type UserProps = {
   cpf: string;
   name: string;
   email: string;
+  position?: string | null;
+  roles?: string[] | null;
 };
 
 export class UserEntity {
@@ -32,6 +34,12 @@ export class UserEntity {
   email(): string {
     return this.props.email;
   }
+  position(): string | null {
+    return this.props.position ?? null;
+  }
+  roles(): string[] {
+    return this.props.roles ?? [];
+  }
 
   tokenGenegate(): any {
     const token = ApiJwt.tokenSigning({
@@ -40,6 +48,8 @@ export class UserEntity {
         cpf: this.cpf(),
         name: this.name(),
         email: this.email(),
+        position: this.position(),
+        roles: this.roles(),
       },
       company: {
         uuid: this.company().uuid,
