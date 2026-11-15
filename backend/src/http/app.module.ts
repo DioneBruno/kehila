@@ -15,6 +15,7 @@ import { RedisClientType, createClient } from "redis";
 import { BiModule } from "./bi/bi.module";
 import { UsuarioModule } from "./usuario/usuario.module";
 import { MembresiaModule } from "./membresia/membresia.module";
+import { ApriscoModule } from "./aprisco/aprisco.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PublicModule } from "./public/public.module";
 
@@ -40,6 +41,7 @@ import { PublicModule } from "./public/public.module";
     BiModule,
     UsuarioModule,
     MembresiaModule,
+    ApriscoModule,
     PublicModule,
   ],
   controllers: [AppController],

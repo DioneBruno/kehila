@@ -97,6 +97,21 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/membresia/membroEditar.vue"),
       },
       {
+        path: "apriscos",
+        name: "apriscos",
+        component: () => import("pages/aprisco/apriscoListar.vue"),
+      },
+      {
+        path: "apriscos/criar",
+        name: "apriscos.criar",
+        component: () => import("pages/aprisco/apriscoIncluir.vue"),
+      },
+      {
+        path: "apriscos/:uuid",
+        name: "apriscos.detalhe",
+        component: () => import("pages/aprisco/apriscoEditar.vue"),
+      },
+      {
         path: "notificacao",
         name: "notificacao",
         component: () => import("pages/notificacao/home.vue"),

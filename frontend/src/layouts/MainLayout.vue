@@ -87,6 +87,7 @@ const MENU_ITEMS = [
   { label: "ADMINISTRAÇÃO", type: "section" },
   { label: "Minha Empresa", icon: "business", route: "empresa" },
   { label: "Membros", icon: "diversity_3", route: "membros" },
+  { label: "Apriscos", icon: "holiday_village", route: "apriscos" },
   { label: "Usuários", icon: "group", route: "usuarios" },
   { label: "Notificações", icon: "email", route: "notificacao" },
 ];

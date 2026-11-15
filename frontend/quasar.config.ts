@@ -20,6 +20,7 @@ export default defineConfig((/* ctx */) => {
       "empresa.boot",
       "usuario.boot",
       "membresia.boot",
+      "aprisco.boot",
       "shared.boot",
     ],
 
