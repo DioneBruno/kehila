@@ -26,6 +26,40 @@
           dense
           @update:model-value="carregarPresencas"
         />
+        <div class="row q-col-gutter-sm q-mt-xs">
+          <div class="col-6">
+            <q-input
+              v-model.number="quantidadeCriancas"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              label="Crianças"
+              filled
+              dense
+              :disable="carregando"
+              :rules="[validarQuantidade]"
+              hide-bottom-space
+            >
+              <template #prepend><q-icon name="child_care" /></template>
+            </q-input>
+          </div>
+          <div class="col-6">
+            <q-input
+              v-model.number="quantidadeVisitantes"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              label="Visitantes"
+              filled
+              dense
+              :disable="carregando"
+              :rules="[validarQuantidade]"
+              hide-bottom-space
+            >
+              <template #prepend><q-icon name="person_add" /></template>
+            </q-input>
+          </div>
+        </div>
       </q-card-section>
 
       <q-separator />
@@ -96,7 +130,7 @@
           label="Salvar"
           icon="save"
           color="primary"
-          :disable="!integrantes.length || !dataReuniao"
+          :disable="!dataReuniao || carregando"
           @click="salvar"
         />
       </q-card-actions>
@@ -107,7 +141,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
-import type { Integrante } from "src/@modules/aprisco/aprisco.http";
+import type { Integrante, PresencaInput } from "src/@modules/aprisco/aprisco.http";
 import { ApriscoService, papelIntegrante } from "./aprisco.service";
 
 /** Data de hoje no fuso local, em AAAA-MM-DD */
@@ -115,6 +149,15 @@ function hoje() {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+type Quantidade = number | string | null;
+
+/** Campo vazio = não informado (não é enviado) */
+function paraQuantidade(v: Quantidade): number | null {
+  if (v === null || v === "") return null;
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 0 ? n : NaN;
 }
 
 export default defineComponent({
@@ -132,6 +175,11 @@ export default defineComponent({
     const integrantes = ref<Integrante[]>([]);
     const presencas = reactive<Record<string, boolean>>({});
     const carregando = ref(false);
+    const quantidadeCriancas = ref<Quantidade>(null);
+    const quantidadeVisitantes = ref<Quantidade>(null);
+
+    const validarQuantidade = (v: Quantidade) =>
+      !Number.isNaN(paraQuantidade(v)) || "Informe um número inteiro a partir de 0";
 
     // Celular e tablet (< 1024px): modal em tela cheia
     const telaCheia = computed(() => $q.screen.lt.md);
@@ -150,10 +198,17 @@ export default defineComponent({
     /** Preenche a lista com o que já foi registrado na data (sem registro = ausente) */
     async function carregarPresencas() {
       marcarTodos(false);
+      quantidadeCriancas.value = null;
+      quantidadeVisitantes.value = null;
       if (!dataReuniao.value) return;
       const registradas = await $service.listarPresencas(props.apriscoUuid, dataReuniao.value);
       registradas?.forEach((p) => {
-        if (p.pessoaUuid in presencas) presencas[p.pessoaUuid] = p.presenca;
+        if (p.tipo === "INTEGRANTE") {
+          if (p.pessoaUuid && p.pessoaUuid in presencas) presencas[p.pessoaUuid] = p.presenca;
+        } else if (!p.pessoaUuid) {
+          if (p.tipo === "CRIANCA") quantidadeCriancas.value = p.quantidade;
+          if (p.tipo === "VISITANTE") quantidadeVisitantes.value = p.quantidade;
+        }
       });
     }
 
@@ -175,15 +230,35 @@ export default defineComponent({
         $q.notify({ type: "warning", message: "Informe a data da reunião" });
         return;
       }
-      const ok = await $service.registrarPresencas(
-        props.apriscoUuid,
-        integrantes.value.map((i) => ({
-          tipo: "INTEGRANTE" as const,
-          pessoaUuid: i.pessoaUuid,
+      const criancas = paraQuantidade(quantidadeCriancas.value);
+      const visitantes = paraQuantidade(quantidadeVisitantes.value);
+      if (Number.isNaN(criancas) || Number.isNaN(visitantes)) {
+        $q.notify({ type: "warning", message: "Quantidade inválida" });
+        return;
+      }
+
+      const registros: PresencaInput[] = integrantes.value.map((i) => ({
+        tipo: "INTEGRANTE",
+        pessoaUuid: i.pessoaUuid,
+        dataReuniao: dataReuniao.value,
+        presenca: !!presencas[i.pessoaUuid],
+      }));
+      if (criancas !== null) {
+        registros.push({ tipo: "CRIANCA", dataReuniao: dataReuniao.value, quantidade: criancas });
+      }
+      if (visitantes !== null) {
+        registros.push({
+          tipo: "VISITANTE",
           dataReuniao: dataReuniao.value,
-          presenca: !!presencas[i.pessoaUuid],
-        })),
-      );
+          quantidade: visitantes,
+        });
+      }
+      if (!registros.length) {
+        $q.notify({ type: "warning", message: "Nada para registrar" });
+        return;
+      }
+
+      const ok = await $service.registrarPresencas(props.apriscoUuid, registros);
       if (ok) {
         emit("salvo");
         fechar(false);
@@ -199,6 +274,9 @@ export default defineComponent({
       integrantes,
       presencas,
       carregando,
+      quantidadeCriancas,
+      quantidadeVisitantes,
+      validarQuantidade,
       telaCheia,
       totalPresentes,
       todosPresentes,

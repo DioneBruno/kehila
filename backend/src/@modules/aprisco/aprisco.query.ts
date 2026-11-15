@@ -1,6 +1,7 @@
 import { ConnectionHub } from "../shared/connections/connectionHub";
 import { ApriscoStatus } from "./incluirAprisco/aprisco.entity";
 import { PapelIntegrante } from "./vincularIntegrante/integrante.entity";
+import { TipoPresenca } from "./registrarPresenca/presenca.entity";
 
 export type ApriscoListItem = {
   uuid: string;
@@ -25,9 +26,11 @@ export type IntegranteListItem = {
   createdAt: Date;
 };
 
-export type PresencaIntegranteItem = {
-  pessoaUuid: string;
+export type PresencaListItem = {
+  tipo: TipoPresenca;
+  pessoaUuid: string | null;
   presenca: boolean;
+  quantidade: number | null;
 };
 
 // Ordem de exibição dos papéis: liderança primeiro
@@ -130,17 +133,17 @@ export class ApriscoQuery {
     );
   }
 
-  /** Presenças de integrantes registradas para uma reunião (AAAA-MM-DD) */
-  async listarPresencasIntegrantes(companyUuid: string, apriscoUuid: string, dataReuniao: string): Promise<PresencaIntegranteItem[]> {
+  /** Presenças registradas para uma reunião (AAAA-MM-DD): integrantes e contagens de crianças/visitantes */
+  async listarPresencas(companyUuid: string, apriscoUuid: string, dataReuniao: string): Promise<PresencaListItem[]> {
     return this.connections.database.query(
       `
-      SELECT pessoa_uuid AS "pessoaUuid", presenca
+      SELECT tipo, pessoa_uuid AS "pessoaUuid", presenca, quantidade
       FROM aprisco_presencas
       WHERE deleted_at IS NULL
         AND company_uuid = $1
         AND aprisco_uuid = $2
         AND data_reuniao = $3
-        AND tipo = 'INTEGRANTE'
+      ORDER BY tipo
       `,
       [companyUuid, apriscoUuid, dataReuniao],
     );

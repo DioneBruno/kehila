@@ -107,10 +107,10 @@ export class ApriscoController {
     return res.status(200).json({ success: true });
   }
 
-  /** Presenças dos integrantes em uma reunião: ?data=AAAA-MM-DD */
+  /** Presenças registradas em uma reunião: ?data=AAAA-MM-DD */
   @Get(":uuid/presencas")
   async listarPresencas(@Req() req: Request | any, @Param("uuid") uuid: string, @Query("data") data: string, @Res() res: Response) {
-    const presencas = await this.apriscoQuery.listarPresencasIntegrantes(req.companyUuid, uuid, validarDataReuniao(data));
+    const presencas = await this.apriscoQuery.listarPresencas(req.companyUuid, uuid, validarDataReuniao(data));
     return res.status(200).json({ success: true, data: presencas });
   }
 

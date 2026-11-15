@@ -111,7 +111,7 @@ describe("Deve testar ApriscoQuery", () => {
     expect(await query.listarApriscosLiderados(outraCompanyUuid, userUuid)).toEqual([]);
   });
 
-  test("Deve listar as presenças dos integrantes apenas da reunião informada", async () => {
+  test("Deve listar as presenças apenas da reunião informada", async () => {
     const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({ companyUuid, nome: "Presenças" });
     const incluirMembro = new IncluirMembroUsecase(new IncluirMembroRepository(connections));
     const ana = (await incluirMembro.execute({ companyUuid, nome: "Ana Presença" })).uuid;
@@ -127,11 +127,15 @@ describe("Deve testar ApriscoQuery", () => {
     await registrar.execute({ companyUuid, apriscoUuid, tipo: "VISITANTE", dataReuniao: "2026-11-12", quantidade: 3 });
 
     const query = new ApriscoQuery(connections);
-    const presencas = await query.listarPresencasIntegrantes(companyUuid, apriscoUuid, "2026-11-12");
-    expect(presencas.sort((a, b) => (a.pessoaUuid === ana ? -1 : b.pessoaUuid === ana ? 1 : 0))).toEqual([
-      { pessoaUuid: ana, presenca: true },
-      { pessoaUuid: bruno, presenca: false },
-    ]);
-    expect(await query.listarPresencasIntegrantes(outraCompanyUuid, apriscoUuid, "2026-11-12")).toEqual([]);
+    const presencas = await query.listarPresencas(companyUuid, apriscoUuid, "2026-11-12");
+    expect(presencas).toHaveLength(3);
+    expect(presencas).toEqual(
+      expect.arrayContaining([
+        { tipo: "INTEGRANTE", pessoaUuid: ana, presenca: true, quantidade: null },
+        { tipo: "INTEGRANTE", pessoaUuid: bruno, presenca: false, quantidade: null },
+        { tipo: "VISITANTE", pessoaUuid: null, presenca: true, quantidade: 3 },
+      ]),
+    );
+    expect(await query.listarPresencas(outraCompanyUuid, apriscoUuid, "2026-11-12")).toEqual([]);
   });
 });

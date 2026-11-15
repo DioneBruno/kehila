@@ -41,13 +41,17 @@ export type IntegranteInput = {
   papel?: PapelIntegrante;
 };
 
-export type PresencaIntegrante = {
-  pessoaUuid: string;
+export type TipoPresenca = "INTEGRANTE" | "CRIANCA" | "VISITANTE";
+
+export type Presenca = {
+  tipo: TipoPresenca;
+  pessoaUuid: string | null;
   presenca: boolean;
+  quantidade: number | null;
 };
 
 export type PresencaInput = {
-  tipo: "INTEGRANTE" | "CRIANCA" | "VISITANTE";
+  tipo: TipoPresenca;
   pessoaUuid?: string | null;
   /** AAAA-MM-DD */
   dataReuniao: string;
@@ -98,7 +102,7 @@ export class ApriscoHttp {
     return this.http.delete(`apriscos/${uuid}/integrantes/${integranteUuid}`);
   }
 
-  async listarPresencas(uuid: string, dataReuniao: string): Promise<{ data: PresencaIntegrante[] }> {
+  async listarPresencas(uuid: string, dataReuniao: string): Promise<{ data: Presenca[] }> {
     return this.http.get(`apriscos/${uuid}/presencas?data=${encodeURIComponent(dataReuniao)}`);
   }
 
