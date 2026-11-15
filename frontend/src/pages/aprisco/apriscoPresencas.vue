@@ -1,6 +1,16 @@
 <template>
-  <q-dialog :model-value="modelValue" @update:model-value="fechar" @show="carregar">
-    <q-card style="width: 520px; max-width: 95vw">
+  <q-dialog
+    :model-value="modelValue"
+    :maximized="telaCheia"
+    :transition-show="telaCheia ? 'slide-up' : 'scale'"
+    :transition-hide="telaCheia ? 'slide-down' : 'scale'"
+    @update:model-value="fechar"
+    @show="carregar"
+  >
+    <q-card
+      :class="{ column: telaCheia }"
+      :style="telaCheia ? '' : 'width: 520px; max-width: 95vw'"
+    >
       <q-card-section class="row items-center q-pb-none">
         <p class="text-h6 q-ma-none">Registrar presenças</p>
         <q-space />
@@ -11,7 +21,7 @@
         <q-input
           v-model="dataReuniao"
           type="date"
-          label="Data da reunião *"
+          label="Data *"
           filled
           dense
           @update:model-value="carregarPresencas"
@@ -45,8 +55,18 @@
           />
         </q-card-section>
 
-        <q-list separator style="max-height: 50vh" class="scroll">
-          <q-item v-for="integrante in integrantes" :key="integrante.pessoaUuid" tag="label" v-ripple>
+        <q-list
+          separator
+          class="scroll"
+          :class="{ col: telaCheia }"
+          :style="telaCheia ? '' : 'max-height: 50vh'"
+        >
+          <q-item
+            v-for="integrante in integrantes"
+            :key="integrante.pessoaUuid"
+            tag="label"
+            v-ripple
+          >
             <q-item-section side>
               <q-checkbox v-model="presencas[integrante.pessoaUuid]" color="positive" />
             </q-item-section>
@@ -113,6 +133,9 @@ export default defineComponent({
     const presencas = reactive<Record<string, boolean>>({});
     const carregando = ref(false);
 
+    // Celular e tablet (< 1024px): modal em tela cheia
+    const telaCheia = computed(() => $q.screen.lt.md);
+
     const totalPresentes = computed(
       () => integrantes.value.filter((i) => presencas[i.pessoaUuid]).length,
     );
@@ -176,6 +199,7 @@ export default defineComponent({
       integrantes,
       presencas,
       carregando,
+      telaCheia,
       totalPresentes,
       todosPresentes,
       marcarTodos,
