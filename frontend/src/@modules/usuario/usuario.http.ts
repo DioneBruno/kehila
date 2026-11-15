@@ -23,6 +23,8 @@ export type EditarUsuarioInput = Partial<CriarUsuarioInput> & {
   meta?: { batizado?: boolean; outraIgreja?: boolean };
 };
 
+export type Cargo = { value: string; label: string };
+
 export class UsuarioHttp {
   constructor(readonly http: HttpClient) {}
 
@@ -33,6 +35,10 @@ export class UsuarioHttp {
     if (params?.porPagina) query.set("porPagina", String(params.porPagina));
     const qs = query.toString();
     return this.http.get(`usuarios${qs ? `?${qs}` : ""}`);
+  }
+
+  async listarCargos(): Promise<{ data: Cargo[] }> {
+    return this.http.get("usuarios/cargos");
   }
 
   async buscarPorUuid(uuid: string) {

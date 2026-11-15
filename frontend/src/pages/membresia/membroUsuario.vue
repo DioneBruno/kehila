@@ -90,12 +90,15 @@
               <b>"Recuperar conta"</b> na tela de login e definir a própria senha.
             </q-banner>
 
-            <q-input
+            <q-select
               v-model="form.position"
               outlined
               dense
+              emit-value
+              map-options
+              clearable
               label="Cargo (opcional)"
-              hint="Ex: Membro, Líder, Secretaria"
+              :options="cargos"
             />
             <q-select
               v-model="form.roles"
@@ -122,7 +125,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import type { Cargo } from "src/@modules/usuario/usuario.http";
+import { UsuarioService } from "../usuario/usuario.service";
 import { MembresiaService } from "./membresia.service";
 
 function novoForm() {
@@ -130,7 +135,7 @@ function novoForm() {
     definirSenha: false,
     password: "",
     confirmacao: "",
-    position: "",
+    position: null as string | null,
     roles: [] as string[],
   };
 }
@@ -147,10 +152,12 @@ export default defineComponent({
   emits: ["criado"],
   setup(props, { emit }) {
     const $service = new MembresiaService();
+    const $usuarioService = new UsuarioService();
 
     const data = reactive({
       dialog: false,
       mostrarSenha: false,
+      cargos: [] as Cargo[],
     });
     const form = reactive(novoForm());
     const formRef = ref();
@@ -172,13 +179,17 @@ export default defineComponent({
     async function salvar() {
       const resultado = await $service.criarUsuario(props.membroUuid, {
         password: form.definirSenha ? form.password : undefined,
-        position: form.position.trim() || undefined,
+        position: form.position || undefined,
         roles: form.roles,
       });
       if (!resultado) return;
       data.dialog = false;
       emit("criado", resultado.uuid);
     }
+
+    onMounted(async () => {
+      data.cargos = await $usuarioService.listarCargos();
+    });
 
     return {
       ...toRefs(data),

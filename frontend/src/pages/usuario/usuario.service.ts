@@ -20,6 +20,15 @@ export class UsuarioService {
     }
   }
 
+  async listarCargos() {
+    try {
+      const response = await this.$http.listarCargos();
+      return response.data;
+    } catch {
+      return [];
+    }
+  }
+
   async buscarPorUuid(uuid: string) {
     try {
       this.$q.loading.show();

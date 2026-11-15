@@ -14,6 +14,8 @@ export type EditarPerfilUsuarioInput = {
   uf: string;
 };
 
+export type Cargo = { value: string; label: string };
+
 export class UsuarioQuery {
   constructor(readonly connectionHub: ConnectionHub) {}
 
@@ -79,5 +81,11 @@ export class UsuarioQuery {
     );
 
     return { ...usuarioModel, cartoes };
+  }
+  listarCargos(): Cargo[] {
+    return [
+      { value: "admin", label: "Administrador" },
+      { value: "usuario", label: "Usuário" },
+    ];
   }
 }

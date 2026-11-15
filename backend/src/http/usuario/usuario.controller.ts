@@ -5,6 +5,7 @@ import { ListarUsuariosUsecase } from "src/@modules/usuario/listarUsuarios/lista
 import { DetalharUsuarioUsecase } from "src/@modules/usuario/detalharUsuario/detalharUsuario.usecase";
 import { EditarUsuarioUsecase } from "src/@modules/usuario/editarUsuario/editarUsuario.usecase";
 import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
+import { UsuarioQuery } from "src/@modules/usuario/usuario.query";
 
 @Controller("usuarios")
 export class UsuarioController {
@@ -14,6 +15,7 @@ export class UsuarioController {
     readonly detalharUsuarioUsecase: DetalharUsuarioUsecase,
     readonly editarUsuarioUsecase: EditarUsuarioUsecase,
     readonly deletarUsuarioUsecase: DeletarUsuarioUsecase,
+    readonly usuarioQuery: UsuarioQuery,
   ) {}
 
   @Post()
@@ -44,6 +46,11 @@ export class UsuarioController {
       data: resultado.dados,
       meta: { total: resultado.total },
     });
+  }
+
+  @Get("cargos")
+  cargos(@Res() res: Response) {
+    return res.status(200).json({ success: true, data: this.usuarioQuery.listarCargos() });
   }
 
   @Get(":uuid")

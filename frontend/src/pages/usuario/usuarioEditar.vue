@@ -113,10 +113,7 @@
                     v-model="form.position"
                     label="Cargo"
                     :readonly="!editando"
-                    :options="[
-                      { value: 'admin', label: 'Administrador' },
-                      { value: 'usuario', label: 'Usuário' },
-                    ]"
+                    :options="cargos"
                   />
                 </div>
 
@@ -310,6 +307,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs, watch } from "vue";
 import { useRoute } from "vue-router";
+import type { Cargo } from "src/@modules/usuario/usuario.http";
 import { UsuarioService } from "./usuario.service";
 
 export default defineComponent({
@@ -320,6 +318,7 @@ export default defineComponent({
 
     const data = reactive({
       usuario: null as any,
+      cargos: [] as Cargo[],
       editando: false,
       buscandoCep: false,
       form: {
@@ -464,7 +463,14 @@ export default defineComponent({
       });
     }
 
-    onMounted(() => void carregar());
+    async function carregarCargos() {
+      data.cargos = await $service.listarCargos();
+    }
+
+    onMounted(() => {
+      void carregar();
+      void carregarCargos();
+    });
 
     return {
       ...toRefs(data),

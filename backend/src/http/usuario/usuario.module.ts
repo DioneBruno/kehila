@@ -19,6 +19,8 @@ import { EditarUsuarioRepository } from "src/@modules/usuario/editarUsuario/edit
 import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
 import { DeletarUsuarioRepository } from "src/@modules/usuario/deletarUsuario/deletarUsuarioRepository";
 
+import { UsuarioQuery } from "src/@modules/usuario/usuario.query";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -35,6 +37,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(DetalharUsuarioUsecase, (hub) => new DetalharUsuarioUsecase(new DetalharUsuarioRepository(hub))),
     makeProvider(EditarUsuarioUsecase, (hub) => new EditarUsuarioUsecase(new EditarUsuarioRepository(hub))),
     makeProvider(DeletarUsuarioUsecase, (hub) => new DeletarUsuarioUsecase(new DeletarUsuarioRepository(hub))),
+    makeProvider(UsuarioQuery, (hub) => new UsuarioQuery(hub)),
   ],
 })
 export class UsuarioModule implements NestModule {
