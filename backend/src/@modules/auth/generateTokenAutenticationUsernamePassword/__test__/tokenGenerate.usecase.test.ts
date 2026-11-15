@@ -58,7 +58,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
     const payload = ApiJwt.tokenDecoding(response.token);
 
     expect(payload.user.uuid).toBe(userUuid);
-    expect(payload.user.cpfCnpj).toBe("userCpf");
+    expect(payload.user.cpf).toBe("userCpf");
     expect(payload.user.name).toBe("nome");
     expect(payload.user.email).toBe(username);
 
@@ -90,7 +90,7 @@ describe("Deve testar TokenGenerateUsecase", () => {
     const payload = ApiJwt.tokenDecoding(response.token);
 
     expect(payload.user.uuid).toBe(userUuid);
-    expect(payload.user.cpfCnpj).toBe("userCpf");
+    expect(payload.user.cpf).toBe("userCpf");
     expect(payload.user.name).toBe(username);
     expect(payload.user.email).toBe("userEmail");
 

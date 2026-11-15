@@ -104,12 +104,7 @@ export class MembresiaController {
   }
 
   @Delete(":uuid/vinculos/:vinculoUuid")
-  async removerVinculo(
-    @Req() req: Request | any,
-    @Param("uuid") uuid: string,
-    @Param("vinculoUuid") vinculoUuid: string,
-    @Res() res: Response,
-  ) {
+  async removerVinculo(@Req() req: Request | any, @Param("uuid") uuid: string, @Param("vinculoUuid") vinculoUuid: string, @Res() res: Response) {
     await this.removerVinculoUsecase.execute({ companyUuid: req.companyUuid, membroUuid: uuid, vinculoUuid });
     return res.status(200).json({ success: true });
   }
