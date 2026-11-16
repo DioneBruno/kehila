@@ -2,15 +2,7 @@
   <q-page padding>
     <!-- Header -->
     <div class="row items-center q-mb-lg">
-      <q-btn
-        flat
-        round
-        dense
-        icon="arrow_back"
-        color="grey-7"
-        class="q-mr-sm"
-        @click="voltar"
-      />
+      <q-btn flat round dense icon="arrow_back" color="grey-7" class="q-mr-sm" @click="voltar" />
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">
           {{ aprisco?.nome || "Carregando..." }}
@@ -33,91 +25,113 @@
       <q-btn flat color="primary" label="Voltar para a lista" :to="{ name: 'apriscos' }" />
     </div>
 
-    <div v-if="aprisco" class="row q-col-gutter-md">
-      <!-- Formulário -->
-      <div class="col-12 col-md-8">
-        <q-form ref="formRef" greedy @submit.prevent="salvar">
-          <q-card flat bordered>
-            <q-card-section>
-              <div class="row items-center justify-between q-mb-md">
-                <p class="text-subtitle1 text-weight-bold q-ma-none">Dados do Aprisco</p>
-                <q-btn
-                  v-if="!editando"
-                  flat
-                  dense
-                  icon="edit"
-                  label="Editar"
-                  color="primary"
-                  @click="editando = true"
-                />
-                <div v-else class="row q-gutter-sm">
-                  <q-btn flat dense label="Cancelar" color="grey-7" @click="cancelarEdicao" />
-                  <q-btn
-                    unelevated
-                    dense
-                    type="submit"
-                    label="Salvar"
-                    color="primary"
-                    icon="save"
-                  />
-                </div>
-              </div>
+    <template v-if="aprisco">
+      <q-tabs
+        v-model="aba"
+        dense
+        align="left"
+        active-color="primary"
+        indicator-color="primary"
+        class="text-grey-7"
+        narrow-indicator
+      >
+        <q-tab name="dados" icon="info" label="Dados do Aprisco" no-caps />
+        <q-tab name="integrantes" icon="groups" label="Integrantes" no-caps />
+      </q-tabs>
+      <q-separator class="q-mb-md" />
 
-              <aprisco-form :form="form" :readonly="!editando" />
-            </q-card-section>
-          </q-card>
-        </q-form>
+      <q-tab-panels v-model="aba" animated keep-alive class="bg-transparent">
+        <q-tab-panel name="dados" class="q-pa-none">
+          <div class="row q-col-gutter-md">
+            <!-- Formulário -->
+            <div class="col-12 col-md-8">
+              <q-form ref="formRef" greedy @submit.prevent="salvar">
+                <q-card flat bordered>
+                  <q-card-section>
+                    <div class="row items-center justify-between q-mb-md">
+                      <p class="text-subtitle1 text-weight-bold q-ma-none">Dados do Aprisco</p>
+                      <q-btn
+                        v-if="!editando"
+                        flat
+                        dense
+                        icon="edit"
+                        label="Editar"
+                        color="primary"
+                        @click="editando = true"
+                      />
+                      <div v-else class="row q-gutter-sm">
+                        <q-btn flat dense label="Cancelar" color="grey-7" @click="cancelarEdicao" />
+                        <q-btn
+                          unelevated
+                          dense
+                          type="submit"
+                          label="Salvar"
+                          color="primary"
+                          icon="save"
+                        />
+                      </div>
+                    </div>
 
-        <aprisco-integrantes :aprisco-uuid="aprisco.uuid" class="q-mt-md" />
-      </div>
+                    <aprisco-form :form="form" :readonly="!editando" />
+                  </q-card-section>
+                </q-card>
+              </q-form>
+            </div>
 
-      <!-- Painel lateral -->
-      <div class="col-12 col-md-4">
-        <q-card flat bordered>
-          <q-card-section>
-            <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-sm">Informações</p>
-            <q-list dense>
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="tag" color="grey-6" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label caption>Código</q-item-label>
-                  <q-item-label>{{ aprisco.index }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="calendar_today" color="grey-6" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label caption>Cadastrado em</q-item-label>
-                  <q-item-label>{{ formatarDataHora(aprisco.createdAt) }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="update" color="grey-6" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label caption>Atualizado em</q-item-label>
-                  <q-item-label>{{ formatarDataHora(aprisco.updatedAt) }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item v-if="mapa" clickable tag="a" :href="mapa" target="_blank">
-                <q-item-section avatar>
-                  <q-icon name="map" color="primary" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label caption>Localização</q-item-label>
-                  <q-item-label class="text-primary">Abrir no Google Maps</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+            <!-- Painel lateral -->
+            <div class="col-12 col-md-4">
+              <q-card flat bordered>
+                <q-card-section>
+                  <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-sm">Informações</p>
+                  <q-list dense>
+                    <q-item>
+                      <q-item-section avatar>
+                        <q-icon name="tag" color="grey-6" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label caption>Código</q-item-label>
+                        <q-item-label>{{ aprisco.index }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section avatar>
+                        <q-icon name="calendar_today" color="grey-6" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label caption>Cadastrado em</q-item-label>
+                        <q-item-label>{{ formatarDataHora(aprisco.createdAt) }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section avatar>
+                        <q-icon name="update" color="grey-6" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label caption>Atualizado em</q-item-label>
+                        <q-item-label>{{ formatarDataHora(aprisco.updatedAt) }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item v-if="mapa" clickable tag="a" :href="mapa" target="_blank">
+                      <q-item-section avatar>
+                        <q-icon name="map" color="primary" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label caption>Localização</q-item-label>
+                        <q-item-label class="text-primary">Abrir no Google Maps</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+        </q-tab-panel>
+
+        <q-tab-panel name="integrantes" class="q-pa-none">
+          <aprisco-integrantes :aprisco-uuid="aprisco.uuid" />
+        </q-tab-panel>
+      </q-tab-panels>
+    </template>
   </q-page>
 </template>
 
@@ -143,6 +157,7 @@ export default defineComponent({
       aprisco: null as Aprisco | null,
       naoEncontrado: false,
       editando: false,
+      aba: "dados",
     });
     const form = reactive(novoApriscoForm());
     const formRef = ref();
