@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="row q-col-gutter-md">
-      <div class="col-12 col-sm-4 col-md-2 cursor-pointer">
+      <!-- <div class="col-12 col-sm-4 col-md-2 cursor-pointer">
         <q-card>
           <q-card-section>
             <div class="text-h6">Home</div>
@@ -11,15 +11,15 @@
           </q-card-section>
           <q-card-section> </q-card-section>
         </q-card>
-      </div>
+      </div> -->
 
       <!-- Apriscos em que o usuário logado é líder -->
-      <div v-for="aprisco in apriscosLiderados" :key="aprisco.uuid" class="col-12 col-sm-4 col-md-2">
-        <q-card
-          v-ripple
-          class="cursor-pointer q-hoverable"
-          @click="abrirAprisco(aprisco.uuid)"
-        >
+      <div
+        v-for="aprisco in apriscosLiderados"
+        :key="aprisco.uuid"
+        class="col-12 col-sm-4 col-md-2"
+      >
+        <q-card v-ripple class="cursor-pointer q-hoverable" @click="abrirAprisco(aprisco.uuid)">
           <q-card-section>
             <div class="text-overline text-primary">
               <q-icon name="star" class="q-mr-xs" />Meu aprisco
@@ -55,7 +55,8 @@ export default defineComponent({
       data.apriscosLiderados = await apriscoService.listarLiderados();
     });
 
-    const abrirAprisco = (uuid: string) => router.push({ name: "apriscos.detalhe", params: { uuid } });
+    const abrirAprisco = (uuid: string) =>
+      router.push({ name: "apriscos.lider", params: { uuid } });
 
     return {
       ...toRefs(data),

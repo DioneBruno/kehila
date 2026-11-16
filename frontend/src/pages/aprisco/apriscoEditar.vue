@@ -8,8 +8,8 @@
         dense
         icon="arrow_back"
         color="grey-7"
-        :to="{ name: 'apriscos' }"
         class="q-mr-sm"
+        @click="voltar"
       />
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">
@@ -63,7 +63,7 @@
                 </div>
               </div>
 
-              <aprisco-form :form="form" :readonly="!editando" :aprisco-uuid="aprisco.uuid" />
+              <aprisco-form :form="form" :readonly="!editando" />
             </q-card-section>
           </q-card>
         </q-form>
@@ -123,7 +123,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
 import TokenDecode from "src/@modules/auth/tokenDecode";
 import ApriscoForm, { apriscoFormParaInput, novoApriscoForm } from "./apriscoForm.vue";
@@ -135,6 +135,7 @@ export default defineComponent({
   components: { ApriscoForm, ApriscoIntegrantes },
   setup() {
     const $route = useRoute();
+    const $router = useRouter();
     const $service = new ApriscoService();
     const uuid = computed(() => $route.params.uuid as string);
 
@@ -187,6 +188,8 @@ export default defineComponent({
       });
     }
 
+    const voltar = () => $router.go(-1);
+
     onMounted(() => void carregar());
 
     return {
@@ -195,6 +198,7 @@ export default defineComponent({
       formRef,
       mapa,
       isAdmin,
+      voltar,
       salvar,
       cancelarEdicao,
       excluir,
