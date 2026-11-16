@@ -109,6 +109,7 @@ import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
 import { ApriscoService, linkMapa, statusAprisco } from "./aprisco.service";
+import { useQuasar } from "quasar";
 
 const COLUNAS = [
   { name: "nome", label: "Nome", field: "nome", align: "left" as const, sortable: true },
@@ -133,6 +134,7 @@ const OPCOES_STATUS = [
 export default defineComponent({
   name: "ApriscoListar",
   setup() {
+    const $q = useQuasar();
     const $service = new ApriscoService();
     const $router = useRouter();
 

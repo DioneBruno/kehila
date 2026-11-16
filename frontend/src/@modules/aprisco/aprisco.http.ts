@@ -50,13 +50,14 @@ export type Presenca = {
   quantidade: number | null;
 };
 
-export type PresencaInput = {
-  tipo: TipoPresenca;
-  pessoaUuid?: string | null;
+export type RegistrarPresencasInput = {
   /** AAAA-MM-DD */
   dataReuniao: string;
-  presenca?: boolean;
-  quantidade?: number | null;
+  integrantes: { pessoaUuid: string; presenca: boolean }[];
+  /** null = não informado */
+  criancas?: number | null;
+  /** null = não informado */
+  visitantes?: number | null;
 };
 
 export class ApriscoHttp {
@@ -106,7 +107,10 @@ export class ApriscoHttp {
     return this.http.get(`apriscos/${uuid}/presencas?data=${encodeURIComponent(dataReuniao)}`);
   }
 
-  async registrarPresenca(uuid: string, input: PresencaInput): Promise<{ data: { uuid: string } }> {
+  async registrarPresencas(
+    uuid: string,
+    input: RegistrarPresencasInput,
+  ): Promise<{ data: { uuid: string; tipo: TipoPresenca; pessoaUuid: string | null }[] }> {
     return this.http.post(`apriscos/${uuid}/presencas`, input);
   }
 }

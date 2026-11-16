@@ -66,7 +66,10 @@ describe("Deve testar ApriscoQuery", () => {
   });
 
   test("Deve listar integrantes do Aprisco, liderança primeiro, sem os desvinculados", async () => {
-    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({ companyUuid, nome: "Integrantes" });
+    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({
+      companyUuid,
+      nome: "Integrantes",
+    });
     const incluirPessoa = async (nome: string) =>
       (await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({ companyUuid, nome })).uuid;
     const vincular = new VincularIntegranteUsecase(new VincularIntegranteRepository(connections));
@@ -77,7 +80,11 @@ describe("Deve testar ApriscoQuery", () => {
     await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: ana });
     await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: bruno, papel: "LIDER" });
     const { uuid: removido } = await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: carla });
-    await new DisvincularIntegranteUsecase(new DisvincularIntegranteRepository(connections)).execute({ companyUuid, apriscoUuid, integranteUuid: removido });
+    await new DisvincularIntegranteUsecase(new DisvincularIntegranteRepository(connections)).execute({
+      companyUuid,
+      apriscoUuid,
+      integranteUuid: removido,
+    });
 
     const integrantes = await new ApriscoQuery(connections).listarIntegrantes(companyUuid, apriscoUuid);
     expect(integrantes.map((i) => [i.nome, i.papel])).toEqual([
@@ -95,7 +102,11 @@ describe("Deve testar ApriscoQuery", () => {
     const { uuid: comoMembro } = await incluir.execute({ companyUuid, nome: "Como membro" });
     const { uuid: deletado } = await incluir.execute({ companyUuid, nome: "Deletado" });
     const pessoa = (
-      await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({ companyUuid, nome: "Lider", email: "lider.aprisco@teste.com" })
+      await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({
+        companyUuid,
+        nome: "Lider",
+        email: "lider.aprisco@teste.com",
+      })
     ).uuid;
     const outraPessoa = (await new IncluirMembroUsecase(new IncluirMembroRepository(connections)).execute({ companyUuid, nome: "Outro" })).uuid;
     const vincular = new VincularIntegranteUsecase(new VincularIntegranteRepository(connections));
@@ -112,7 +123,10 @@ describe("Deve testar ApriscoQuery", () => {
   });
 
   test("Deve listar as presenças apenas da reunião informada", async () => {
-    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({ companyUuid, nome: "Presenças" });
+    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({
+      companyUuid,
+      nome: "Presenças",
+    });
     const incluirMembro = new IncluirMembroUsecase(new IncluirMembroRepository(connections));
     const ana = (await incluirMembro.execute({ companyUuid, nome: "Ana Presença" })).uuid;
     const bruno = (await incluirMembro.execute({ companyUuid, nome: "Bruno Presença" })).uuid;
@@ -121,10 +135,17 @@ describe("Deve testar ApriscoQuery", () => {
     await vincular.execute({ companyUuid, apriscoUuid, pessoaUuid: bruno });
 
     const registrar = new RegistrarPresencaUsecase(new RegistrarPresencaRepository(connections));
-    await registrar.execute({ companyUuid, apriscoUuid, tipo: "INTEGRANTE", pessoaUuid: ana, dataReuniao: "2026-11-12", presenca: true });
-    await registrar.execute({ companyUuid, apriscoUuid, tipo: "INTEGRANTE", pessoaUuid: bruno, dataReuniao: "2026-11-12", presenca: false });
-    await registrar.execute({ companyUuid, apriscoUuid, tipo: "INTEGRANTE", pessoaUuid: bruno, dataReuniao: "2026-11-05", presenca: true });
-    await registrar.execute({ companyUuid, apriscoUuid, tipo: "VISITANTE", dataReuniao: "2026-11-12", quantidade: 3 });
+    await registrar.execute({
+      companyUuid,
+      apriscoUuid,
+      dataReuniao: "2026-11-12",
+      integrantes: [
+        { pessoaUuid: ana, presenca: true },
+        { pessoaUuid: bruno, presenca: false },
+      ],
+      visitantes: 3,
+    });
+    await registrar.execute({ companyUuid, apriscoUuid, dataReuniao: "2026-11-05", integrantes: [{ pessoaUuid: bruno, presenca: true }] });
 
     const query = new ApriscoQuery(connections);
     const presencas = await query.listarPresencas(companyUuid, apriscoUuid, "2026-11-12");

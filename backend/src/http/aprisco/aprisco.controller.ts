@@ -119,11 +119,10 @@ export class ApriscoController {
     const resultado = await this.registrarPresencaUsecase.execute({
       companyUuid: req.companyUuid,
       apriscoUuid: uuid,
-      tipo: body.tipo,
-      pessoaUuid: body.pessoaUuid,
       dataReuniao: body.dataReuniao,
-      presenca: body.presenca,
-      quantidade: body.quantidade,
+      integrantes: body.integrantes,
+      criancas: body.criancas,
+      visitantes: body.visitantes,
     });
     return res.status(201).json({ success: true, data: resultado });
   }

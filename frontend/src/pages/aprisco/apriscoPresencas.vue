@@ -16,7 +16,7 @@
         <q-space />
         <q-btn flat round dense icon="close" @click="fechar(false)" />
       </q-card-section>
-
+      <q-separator />
       <q-card-section>
         <q-input
           v-model="dataReuniao"
@@ -141,7 +141,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
-import type { Integrante, PresencaInput } from "src/@modules/aprisco/aprisco.http";
+import type { Integrante } from "src/@modules/aprisco/aprisco.http";
 import { ApriscoService, papelIntegrante } from "./aprisco.service";
 
 /** Data de hoje no fuso local, em AAAA-MM-DD */
@@ -237,28 +237,21 @@ export default defineComponent({
         return;
       }
 
-      const registros: PresencaInput[] = integrantes.value.map((i) => ({
-        tipo: "INTEGRANTE",
+      const registros = integrantes.value.map((i) => ({
         pessoaUuid: i.pessoaUuid,
-        dataReuniao: dataReuniao.value,
         presenca: !!presencas[i.pessoaUuid],
       }));
-      if (criancas !== null) {
-        registros.push({ tipo: "CRIANCA", dataReuniao: dataReuniao.value, quantidade: criancas });
-      }
-      if (visitantes !== null) {
-        registros.push({
-          tipo: "VISITANTE",
-          dataReuniao: dataReuniao.value,
-          quantidade: visitantes,
-        });
-      }
-      if (!registros.length) {
+      if (!registros.length && criancas === null && visitantes === null) {
         $q.notify({ type: "warning", message: "Nada para registrar" });
         return;
       }
 
-      const ok = await $service.registrarPresencas(props.apriscoUuid, registros);
+      const ok = await $service.registrarPresencas(props.apriscoUuid, {
+        dataReuniao: dataReuniao.value,
+        integrantes: registros,
+        criancas,
+        visitantes,
+      });
       if (ok) {
         emit("salvo");
         fechar(false);
