@@ -64,14 +64,35 @@
 
     <!-- Dialog de novo integrante -->
     <q-dialog v-model="dialog">
-      <q-card style="width: 460px; max-width: 90vw">
+      <q-card :style="{ width: modo === 'novo' ? '900px' : '460px', maxWidth: '90vw' }">
         <q-form greedy @submit.prevent="salvar">
           <q-card-section>
             <p class="text-h6 q-ma-none">Adicionar integrante</p>
           </q-card-section>
 
+          <q-card-section class="q-pt-none">
+            <q-btn-toggle
+              v-model="modo"
+              spread
+              no-caps
+              unelevated
+              toggle-color="primary"
+              color="grey-2"
+              text-color="grey-8"
+              :options="[
+                { label: 'Pessoa existente', value: 'existente', icon: 'person_search' },
+                { label: 'Novo membro', value: 'novo', icon: 'person_add' },
+              ]"
+            />
+          </q-card-section>
+
+          <q-card-section v-if="modo === 'novo'" class="scroll" style="max-height: 60vh">
+            <membro-form :form="formMembro" />
+          </q-card-section>
+
           <q-card-section class="q-gutter-md">
             <q-select
+              v-if="modo === 'existente'"
               v-model="form.pessoaUuid"
               :options="opcoesPessoas"
               option-value="value"
@@ -122,12 +143,14 @@ import { computed, defineComponent, onMounted, reactive, toRefs, watch } from "v
 import type { Integrante, PapelIntegrante } from "src/@modules/aprisco/aprisco.http";
 import type { Membro } from "src/@modules/membresia/membresia.http";
 import { MembresiaService } from "../membresia/membresia.service";
+import MembroForm, { membroFormParaInput, novoMembroForm } from "../membresia/membroForm.vue";
 import { ApriscoService, PAPEIS_INTEGRANTE, papelIntegrante } from "./aprisco.service";
 
 type Opcao = { value: string; label: string };
 
 export default defineComponent({
   name: "ApriscoIntegrantes",
+  components: { MembroForm },
   props: {
     apriscoUuid: { type: String, required: true },
   },
@@ -141,12 +164,15 @@ export default defineComponent({
       dialog: false,
       pessoas: [] as Membro[],
       opcoesPessoas: [] as Opcao[],
+      modo: "existente" as "existente" | "novo",
     });
 
     const form = reactive({
       pessoaUuid: null as string | null,
       papel: "MEMBRO" as PapelIntegrante,
     });
+    // Mesmo form da tela "Novo Membro"
+    const formMembro = reactive(novoMembroForm());
 
     // Pessoas disponíveis: exclui quem já é integrante
     const pessoasDisponiveis = computed<Opcao[]>(() => {
@@ -164,6 +190,8 @@ export default defineComponent({
 
     async function abrirDialog() {
       Object.assign(form, { pessoaUuid: null, papel: "MEMBRO" });
+      Object.assign(formMembro, novoMembroForm());
+      data.modo = "existente";
       if (!data.pessoas.length) data.pessoas = (await $membresia.listar()) ?? [];
       data.opcoesPessoas = pessoasDisponiveis.value;
       data.dialog = true;
@@ -179,9 +207,18 @@ export default defineComponent({
     }
 
     async function salvar() {
-      if (!form.pessoaUuid) return;
+      let pessoaUuid = form.pessoaUuid;
+      if (data.modo === "novo") {
+        const criado = await $membresia.incluir(membroFormParaInput(formMembro), {
+          redirecionar: false,
+        });
+        if (!criado) return;
+        pessoaUuid = criado.uuid;
+        data.pessoas = []; // força recarregar a lista de pessoas na próxima abertura
+      }
+      if (!pessoaUuid) return;
       const ok = await $service.vincularIntegrante(props.apriscoUuid, {
-        pessoaUuid: form.pessoaUuid,
+        pessoaUuid,
         papel: form.papel,
       });
       if (ok) {
@@ -207,6 +244,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       form,
+      formMembro,
       PAPEIS_INTEGRANTE,
       papelIntegrante,
       abrirDialog,

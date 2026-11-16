@@ -86,12 +86,14 @@ export class MembresiaService {
     }
   }
 
-  async incluir(input: MembroInput) {
+  async incluir(input: MembroInput, opcoes: { redirecionar?: boolean } = {}) {
     try {
       this.$q.loading.show();
       const response = await this.$http.incluir(input);
       this.$q.notify({ type: "positive", message: "Membro cadastrado" });
-      void this.$router.push({ name: "membros.detalhe", params: { uuid: response.data.uuid } });
+      if (opcoes.redirecionar ?? true) {
+        void this.$router.push({ name: "membros.detalhe", params: { uuid: response.data.uuid } });
+      }
       return response.data;
     } catch {
       return null;
