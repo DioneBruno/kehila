@@ -1,9 +1,9 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row q-col-gutter-sm" style="height: calc(100vh - 78px)">
-      <div class="col row full-height">
-        <div class="col-12">
-          <q-card class="">
+  <q-page padding>
+    <div class="row q-col-gutter-md bi-layout">
+      <div class="col-12 col-md-4 col-lg-3 column no-wrap bi-lista">
+        <div>
+          <q-card flat bordered>
             <q-card-section class="row q-pa-xs">
               <div class="col">
                 <q-input
@@ -21,7 +21,7 @@
                   </template>
                 </q-input>
               </div>
-              <div class="col-1 text-right">
+              <div class="col-auto q-pl-xs">
                 <q-btn-dropdown v-if="admin" flat dense color="grey-9" dropdown-icon="more_vert">
                   <q-list>
                     <q-item clickable v-close-popup v-ripple @click="newBi()">
@@ -38,8 +38,8 @@
             </q-card-section>
           </q-card>
         </div>
-        <q-scroll-area class="col-12" style="height: calc(80vh)">
-          <q-card class="my-card">
+        <q-scroll-area class="col q-mt-sm bi-lista__scroll">
+          <q-card flat bordered class="my-card">
             <q-list bordered separator>
               <q-item clickable v-ripple v-for="item in biList" :key="item.uuid">
                 <q-item-section avatar>
@@ -104,17 +104,20 @@
           </q-card>
         </q-scroll-area>
       </div>
-      <div class="col-12 col-md-9 full-height text-center">
-        <span class="text-h6 text-grey-7" v-if="!metabaseUrl"
-          >Selecione um Dashboard ou Relatório</span
-        >
-        <iframe :src="metabaseUrl" frameborder="0" width="100%" height="100%" />
+      <div class="col-12 col-md-8 col-lg-9 bi-viewer">
+        <q-card flat bordered class="fit column">
+          <div v-if="!metabaseUrl" class="col flex flex-center column text-grey-6 q-pa-lg text-center">
+            <q-icon name="insights" size="48px" class="q-mb-sm" />
+            <span class="text-subtitle1">Selecione um Dashboard ou Relatório</span>
+          </div>
+          <iframe v-else :src="metabaseUrl" frameborder="0" class="col" width="100%" />
+        </q-card>
       </div>
     </div>
 
     <!-- Configurações do Relatório -->
     <q-dialog v-model="openModal" persistent>
-      <q-card style="width: 500px">
+      <q-card style="width: 500px; max-width: 100%">
         <q-card-section class="row items-center">
           <span class="q-ml-sm text-h6">Novo BI</span>
           <q-space />
@@ -299,6 +302,10 @@ export default defineComponent({
         $q.loading.show();
         const response = await $service.montar(item.uuid);
         data.metabaseUrl = `${metabaseBaseUrl}/embed/${item.referencia.tipo}/${response}#bordered=true&titled=true`;
+        // No celular/tablet o painel fica abaixo da lista: rola até ele.
+        if (window.innerWidth < 1024) {
+          setTimeout(() => document.querySelector(".bi-viewer")?.scrollIntoView({ behavior: "smooth" }), 50);
+        }
       } catch (error) {
       } finally {
         $q.loading.hide();
@@ -325,4 +332,39 @@ export default defineComponent({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Desktop: lista e painel lado a lado ocupando a altura da tela */
+.bi-layout {
+  min-height: calc(100vh - 56px - 2 * var(--app-gutter));
+}
+
+.bi-lista,
+.bi-viewer {
+  height: calc(100vh - 56px - 2 * var(--app-gutter));
+}
+
+.bi-lista__scroll {
+  min-height: 0;
+}
+
+.bi-viewer iframe {
+  border: 0;
+  border-radius: var(--app-radius);
+}
+
+/* Celular/tablet: empilhados */
+@media (max-width: 1023.98px) {
+  .bi-lista {
+    height: auto;
+  }
+
+  .bi-lista__scroll {
+    flex: none;
+    height: 40vh;
+  }
+
+  .bi-viewer {
+    height: 75vh;
+  }
+}
+</style>

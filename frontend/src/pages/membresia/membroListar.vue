@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-md">
+    <div class="row items-center page-header q-mb-md">
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Membros</p>
         <p class="text-caption text-grey-6 q-ma-none">Gerencie os membros da igreja</p>
@@ -19,7 +19,7 @@
 
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
-      <q-card-section class="row q-col-gutter-md items-center">
+      <q-card-section class="filter-bar">
         <div class="col-12 col-sm-6 col-md-4">
           <q-input
             v-model="filtros.busca"
@@ -51,6 +51,8 @@
     <q-table
       flat
       bordered
+      :grid="modoCartoes"
+      card-container-class="q-pt-xs table-cards"
       :rows="membrosFiltrados"
       :columns="colunas"
       row-key="uuid"
@@ -91,11 +93,45 @@
           </q-btn>
         </q-td>
       </template>
+      <!-- Celular: cartões no lugar das linhas -->
+      <template v-slot:item="props">
+        <div class="col-12 col-sm-6 q-pa-xs">
+          <q-card flat bordered v-ripple class="table-card cursor-pointer" @click="abrir(props.row.uuid)">
+            <q-card-section class="row no-wrap items-start q-gutter-x-sm">
+              <div class="col" style="min-width: 0">
+                <div class="table-card__title">{{ props.row.nome || 'Sem nome' }}</div>
+                <div v-if="props.row.telefone" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="phone" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.cols.find((c: any) => c.name === 'telefone')?.value }}</span>
+                </div>
+                <div v-if="props.row.email" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="mail" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.row.email }}</span>
+                </div>
+                <div v-if="props.row.enderecoCidade" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="place" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.cols.find((c: any) => c.name === 'cidade')?.value }}</span>
+                </div>
+                <div class="row q-gutter-xs q-mt-sm">
+                  <q-badge
+                    :color="props.row.ativo ? 'positive' : 'grey-6'"
+                    :label="props.row.ativo ? 'Ativo' : 'Inativo'"
+                  />
+                  <q-badge v-if="props.row.membro" color="primary" label="Membro" />
+                  <q-badge v-if="props.row.batizado" color="blue-6" label="Batizado" />
+                  <q-badge v-if="props.row.transferido" color="orange-8" label="Transferido" />
+                </div>
+              </div>
+              <div class="col-auto row no-wrap items-center">
+                <q-icon name="chevron_right" size="sm" color="grey-5" />
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
     </q-table>
   </q-page>
 </template>
 
 <script lang="ts">
+import { useQuasar } from "quasar";
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import type { Membro } from "src/@modules/membresia/membresia.http";
@@ -140,6 +176,9 @@ const OPCOES_SITUACAO = [
 export default defineComponent({
   name: "MembroListar",
   setup() {
+    const $q = useQuasar();
+    // Celular e tablet: lista em cartões; desktop: tabela.
+    const modoCartoes = computed(() => $q.screen.lt.md);
     const $service = new MembresiaService();
     const $router = useRouter();
 
@@ -187,6 +226,7 @@ export default defineComponent({
     onMounted(() => void carregar());
 
     return {
+      modoCartoes,
       ...toRefs(data),
       membrosFiltrados,
       abrir,

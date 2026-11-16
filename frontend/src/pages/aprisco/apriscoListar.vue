@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-md">
+    <div class="row items-center page-header q-mb-md">
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Apriscos</p>
         <p class="text-caption text-grey-6 q-ma-none">Gerencie os apriscos da igreja</p>
@@ -19,7 +19,7 @@
 
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
-      <q-card-section class="row q-col-gutter-md items-center">
+      <q-card-section class="filter-bar">
         <div class="col-12 col-sm-6 col-md-4">
           <q-input
             v-model="filtros.busca"
@@ -51,6 +51,8 @@
     <q-table
       flat
       bordered
+      :grid="modoCartoes"
+      card-container-class="q-pt-xs table-cards"
       :rows="apriscosFiltrados"
       :columns="colunas"
       row-key="uuid"
@@ -100,6 +102,44 @@
           </q-btn>
         </q-td>
       </template>
+      <!-- Celular: cartões no lugar das linhas -->
+      <template v-slot:item="props">
+        <div class="col-12 col-sm-6 q-pa-xs">
+          <q-card flat bordered v-ripple class="table-card cursor-pointer" @click="abrir(props.row.uuid)">
+            <q-card-section class="row no-wrap items-start q-gutter-x-sm">
+              <div class="col" style="min-width: 0">
+                <div class="table-card__title">{{ props.row.nome }}</div>
+                <div v-if="props.cols.find((c: any) => c.name === 'encontro')?.value" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="schedule" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.cols.find((c: any) => c.name === 'encontro')?.value }}</span>
+                </div>
+                <div v-if="props.cols.find((c: any) => c.name === 'endereco')?.value" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="place" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.cols.find((c: any) => c.name === 'endereco')?.value }}</span>
+                </div>
+                <div class="row q-gutter-xs q-mt-sm">
+                  <q-badge
+                    :color="statusAprisco(props.row.status).color"
+                    :label="statusAprisco(props.row.status).label"
+                  />
+                </div>
+              </div>
+              <div class="col-auto row no-wrap items-center">
+                <q-btn
+                  v-if="linkMapa(props.row)"
+                  flat
+                  dense
+                  round
+                  icon="map"
+                  color="primary"
+                  :href="linkMapa(props.row)!"
+                  target="_blank"
+                  @click.stop
+                />
+                <q-icon name="chevron_right" size="sm" color="grey-5" />
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
     </q-table>
   </q-page>
 </template>
@@ -140,6 +180,8 @@ export default defineComponent({
   name: "ApriscoListar",
   setup() {
     const $q = useQuasar();
+    // Celular e tablet: lista em cartões; desktop: tabela.
+    const modoCartoes = computed(() => $q.screen.lt.md);
     const $service = new ApriscoService();
     const $router = useRouter();
 
@@ -183,6 +225,7 @@ export default defineComponent({
     onMounted(() => void carregar());
 
     return {
+      modoCartoes,
       ...toRefs(data),
       apriscosFiltrados,
       abrir,

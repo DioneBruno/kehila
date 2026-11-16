@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-lg">
+    <div class="row items-center page-header q-mb-lg">
       <q-btn
         flat
         round

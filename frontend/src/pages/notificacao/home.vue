@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-md">
+    <div class="row items-center page-header q-mb-md">
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Canais de notificação</p>
         <p class="text-caption text-grey-6 q-ma-none">

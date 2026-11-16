@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-md">
+    <div class="row items-center page-header q-mb-md">
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Usuários</p>
         <p class="text-caption text-grey-6 q-ma-none">Gerencie os usuários da empresa</p>
@@ -13,7 +13,7 @@
 
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
-      <q-card-section class="row q-gutter-md items-center">
+      <q-card-section class="filter-bar">
         <q-input
           v-model="filtros.busca"
           dense
@@ -34,6 +34,8 @@
     <q-table
       flat
       bordered
+      :grid="modoCartoes"
+      card-container-class="q-pt-xs table-cards"
       :rows="usuarios"
       :columns="colunas"
       row-key="uuid"
@@ -80,12 +82,45 @@
           </q-btn>
         </q-td>
       </template>
+      <!-- Celular: cartões no lugar das linhas -->
+      <template v-slot:item="props">
+        <div class="col-12 col-sm-6 q-pa-xs">
+          <q-card flat bordered v-ripple class="table-card cursor-pointer" @click="abrirDetalhe(props.row.uuid)">
+            <q-card-section class="row no-wrap items-start q-gutter-x-sm">
+              <div class="col" style="min-width: 0">
+                <div class="table-card__title">{{ props.row.name }}</div>
+                <div v-if="props.row.email" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="mail" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.row.email }}</span>
+                </div>
+                <div v-if="props.row.cpf" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="badge" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.row.cpf }}</span>
+                </div>
+                <div v-if="props.row.position" class="text-caption text-muted row no-wrap items-center q-mt-xs">
+                  <q-icon name="work" size="14px" class="q-mr-xs" /><span class="ellipsis">{{ props.row.position }}</span>
+                </div>
+                <div class="row q-gutter-xs q-mt-sm">
+                  <q-badge
+                    :color="props.row.isAccepted ? 'positive' : 'grey-6'"
+                    :label="props.row.isAccepted ? 'Ativo' : 'Pendente'"
+                  />
+                  <q-badge v-for="role in props.row.roles" :key="role" color="blue-grey-6" :label="role" />
+                </div>
+              </div>
+              <div class="col-auto row no-wrap items-center">
+                <q-icon name="chevron_right" size="sm" color="grey-5" />
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
     </q-table>
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { UsuarioService } from "./usuario.service";
 
 const COLUNAS = [
@@ -101,6 +136,12 @@ const COLUNAS = [
 export default defineComponent({
   name: "UsuarioListar",
   setup() {
+    const $q = useQuasar();
+    const $router = useRouter();
+    // Celular e tablet: lista em cartões; desktop: tabela.
+    const modoCartoes = computed(() => $q.screen.lt.md);
+    const abrirDetalhe = (uuid: string) =>
+      void $router.push({ name: "usuarios.detalhe", params: { uuid } });
     const $service = new UsuarioService();
 
     const data = reactive({
@@ -145,6 +186,8 @@ export default defineComponent({
     onMounted(() => void carregar());
 
     return {
+      modoCartoes,
+      abrirDetalhe,
       ...toRefs(data),
       onRequest,
       buscar,

@@ -1,1 +1,247 @@
 // app global css
+// -----------------------------------------------------------------------------
+// Base responsiva da aplicação. Breakpoints seguem o Quasar:
+//   xs < 600px (celular) · sm 600–1023px (tablet) · md+ >= 1024px (desktop)
+// -----------------------------------------------------------------------------
+
+:root {
+  --app-bg: #f4f6f9;
+  --app-surface: #ffffff;
+  --app-border: #e3e7ee;
+  --app-text-muted: #6b7686;
+  --app-radius: 12px;
+  --app-page-max: 1400px;
+  --app-gutter: 24px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (max-width: 1023.98px) {
+  :root {
+    --app-gutter: 16px;
+  }
+}
+
+@media (max-width: 599.98px) {
+  :root {
+    --app-gutter: 12px;
+  }
+}
+
+html,
+body {
+  background: var(--app-bg);
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+// -----------------------------------------------------------------------------
+// Páginas: largura máxima e espaçamento consistente em todas as telas
+// -----------------------------------------------------------------------------
+.q-page[padding],
+.q-page.q-pa-md,
+.q-page.q-layout-padding {
+  padding: var(--app-gutter) !important;
+}
+
+.main-layout .q-page {
+  max-width: var(--app-page-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// -----------------------------------------------------------------------------
+// Cartões: cantos e borda suaves
+// -----------------------------------------------------------------------------
+.main-layout {
+  .q-card {
+    border-radius: var(--app-radius);
+  }
+
+  .q-card--bordered,
+  .q-table__card.q-table--bordered,
+  .q-markup-table.q-table--bordered {
+    border-color: var(--app-border);
+  }
+
+  .q-table__card,
+  .q-markup-table {
+    border-radius: var(--app-radius);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Cabeçalho de página
+// Padrão usado nas telas: <div class="row items-center q-mb-*"> com
+// título em .col e ações em .col-auto. No celular as ações descem para
+// baixo do título e ocupam a largura toda.
+// -----------------------------------------------------------------------------
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  > .col {
+    min-width: 0;
+    flex: 1 1 260px;
+  }
+
+  > .col-auto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .text-h5 {
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  @media (max-width: 599.98px) {
+    .text-h5 {
+      font-size: 1.25rem;
+    }
+
+    > .col-auto {
+      flex: 1 1 100%;
+
+      > .q-btn {
+        flex: 1 1 auto;
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Barra de filtros: grid fluido, sem estourar a largura no celular
+// -----------------------------------------------------------------------------
+.filter-bar {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  align-items: center;
+  margin: 0 !important;
+
+  > * {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  > .filter-bar__wide {
+    grid-column: span 2;
+  }
+
+  @media (max-width: 599.98px) {
+    grid-template-columns: 1fr;
+
+    > .filter-bar__wide {
+      grid-column: auto;
+    }
+
+    .q-btn-toggle {
+      width: 100%;
+      overflow-x: auto;
+
+      .q-btn {
+        flex: 1 1 auto;
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Tabelas: rolagem horizontal suave quando não couberem
+// -----------------------------------------------------------------------------
+.q-markup-table,
+.q-table__middle {
+  -webkit-overflow-scrolling: touch;
+}
+
+.q-table th {
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+// Itens em modo grid (tabelas no celular)
+.table-card {
+  border-radius: var(--app-radius);
+  transition: box-shadow 0.15s ease;
+
+  &:active {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .table-card__title {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+}
+
+.q-table__grid-content {
+  gap: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Diálogos: nunca maiores que a tela no celular
+// -----------------------------------------------------------------------------
+.q-dialog__inner > .q-card {
+  max-width: 100%;
+}
+
+@media (max-width: 599.98px) {
+  .q-dialog__inner--minimized {
+    padding: 12px !important;
+  }
+
+  .q-dialog__inner > .q-card {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Celular: alvos de toque confortáveis e evitar zoom automático do iOS
+// -----------------------------------------------------------------------------
+@media (max-width: 599.98px) {
+  .q-field__native,
+  .q-field__input,
+  .q-select__filter {
+    font-size: 16px;
+  }
+
+  .q-tabs--horizontal .q-tab {
+    padding: 0 10px;
+  }
+
+  // Botões de ações de formulário (Salvar/Cancelar) empilhados
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch !important;
+    gap: 8px;
+    margin-left: 0 !important;
+    margin-top: 16px !important;
+
+    > .q-btn {
+      width: 100%;
+      margin: 0 !important;
+    }
+  }
+}
+
+.text-muted {
+  color: var(--app-text-muted);
+}
+
+// Container dos cartões (q-table em modo grid): compensa o padding dos itens
+.table-cards {
+  margin-left: -4px;
+  margin-right: -4px;
+}

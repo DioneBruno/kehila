@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-lg">
+    <div class="row items-center page-header q-mb-lg">
       <q-btn flat round dense icon="arrow_back" color="grey-7" :to="{ name: 'usuarios' }" class="q-mr-sm" />
       <div>
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Novo Usuário</p>
@@ -91,7 +91,7 @@
 
         <!-- Ações -->
         <div class="col-12">
-          <div class="row justify-end q-gutter-sm">
+          <div class="row justify-end q-gutter-sm form-actions">
             <q-btn flat label="Cancelar" color="grey-7" :to="{ name: 'usuarios' }" />
             <q-btn unelevated type="submit" label="Criar Usuário" color="primary" icon="save" />
           </div>

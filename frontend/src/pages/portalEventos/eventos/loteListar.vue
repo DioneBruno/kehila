@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-lg">
+    <div class="row items-center page-header q-mb-lg">
       <q-btn
         flat
         round
@@ -97,8 +97,8 @@
         <!-- Tipos de ingresso -->
         <q-card-section>
           <div class="row items-center q-mb-sm">
-            <div class="col-4" />
-            <div class="col-4 flex flex-center">
+            <div class="col-sm-4 gt-xs" />
+            <div class="col-6 col-sm-4 flex flex-center">
               <q-btn
                 flat
                 dense
@@ -109,7 +109,7 @@
                 @click="toggleTipos(lote.uuid)"
               />
             </div>
-            <div class="col-4 flex justify-end">
+            <div class="col-6 col-sm-4 flex justify-end">
               <q-btn
                 flat
                 dense
@@ -199,7 +199,7 @@
 
     <!-- Dialog: Criar/Editar Lote -->
     <q-dialog v-model="dialogLote.aberto" persistent>
-      <q-card style="min-width: 400px; max-width: 560px; width: 100%">
+      <q-card style="max-width: 560px; width: 100%">
         <q-card-section class="row items-center">
           <span class="text-h6">{{ dialogLote.editando ? "Editar Lote" : "Novo Lote" }}</span>
           <q-space />
@@ -312,7 +312,7 @@
               </div>
             </div>
 
-            <div class="row justify-end q-gutter-sm q-mt-md">
+            <div class="row justify-end q-gutter-sm form-actions q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Salvar" color="primary" />
             </div>
@@ -323,7 +323,7 @@
 
     <!-- Dialog: Criar/Editar Tipo de Ingresso -->
     <q-dialog v-model="dialogTipo.aberto" persistent>
-      <q-card style="min-width: 400px; max-width: 520px; width: 100%">
+      <q-card style="max-width: 520px; width: 100%">
         <q-card-section class="row items-center">
           <span class="text-h6">{{
             dialogTipo.editando ? "Editar Tipo de Ingresso" : "Novo Tipo de Ingresso"
@@ -402,7 +402,7 @@
               </div>
             </div>
 
-            <div class="row justify-end q-gutter-sm q-mt-md">
+            <div class="row justify-end q-gutter-sm form-actions q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Salvar" color="primary" />
             </div>

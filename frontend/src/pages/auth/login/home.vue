@@ -1,49 +1,27 @@
 <template>
-  <q-page class="row full-height">
+  <q-page class="login-page">
     <!-- Imagem de fundo -->
-    <div class="absolute-full" style="z-index: -1">
-      <q-img
-        src="https://ministeriofiel.com.br/wp-content/uploads/2023/04/orac%CC%A7a%CC%83o-1.png"
-        fit="cover"
-        style="width: 100%; height: 100%"
-      />
-    </div>
+    <q-img
+      src="https://ministeriofiel.com.br/wp-content/uploads/2023/04/orac%CC%A7a%CC%83o-1.png"
+      fit="cover"
+      class="login-page__bg"
+      no-spinner
+    />
+    <div class="login-page__overlay" />
 
-    <!-- Painel de login -->
-    <div class="fit row justify-end full-height align-items-center">
-      <div class="col-12 col-sm-6 col-md-5 col-lg-4 q-pa-md custom-border">
-        <div
-          class="flex justify-center items-center column fit bg-grey-1 full--width rounded-panel q-pa-md shadow-7 card-hover"
-          style="opacity: 0.93; max-width: 400px; width: 100%; padding: 16px; margin: auto"
-        >
-          <div class="row col-11 col-sm-7 col-md-5">
-            <!-- Logo Section -->
-            <div class="column col-11 col-md-7 q-mx-auto">
-              <p class="text-h4 col-12 q-ma-none q-py-md text-center text-grey-9">
-                <div>{{ layout?.telaLogin?.titulo }}</div>
-                <div style="font-size: 10px; margin-top: -15px;"> {{ layout?.telaLogin?.subTitulo }}</div>
-                <!-- <q-img
-                  v-if="!loginTemplate.logo.title"
-                  :src="eomnesLogo"
-                  :class="loginTemplate.logo.class"
-                  :style="loginTemplate.logo.style"
-                  fit="contain"
-                /> -->
-              </p>
-              <!-- <q-img
-                v-else-if="loginTemplate.logo.type === 'image'"
-                :src="loginTemplate.logo.srcImg ? loginTemplate.logo.srcImg : eomnesLogo"
-                :class="loginTemplate.logo.class"
-                :style="loginTemplate.logo.style"
-                fit="contain"
-              /> -->
-            </div>
-            <div class="col-12">
-              <LoginForm />
-            </div>
+    <!-- Painel de login: centralizado no celular, à direita no desktop -->
+    <div class="login-page__panel">
+      <q-card class="login-card">
+        <q-card-section class="text-center q-pb-none">
+          <div class="text-h5 text-weight-bold text-grey-9">{{ layout?.telaLogin?.titulo }}</div>
+          <div v-if="layout?.telaLogin?.subTitulo" class="text-caption text-grey-7">
+            {{ layout?.telaLogin?.subTitulo }}
           </div>
-        </div>
-      </div>
+        </q-card-section>
+        <q-card-section>
+          <LoginForm />
+        </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
@@ -78,27 +56,69 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.full-height {
-  height: 100vh;
-}
-
-.row {
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  /* height: 100vh; */
-}
-
-.q-page {
-  padding-right: 2vw;
-}
-
-.rounded-panel {
-  border-radius: 12px;
+  padding: 24px max(24px, 5vw);
   overflow: hidden;
 }
 
-.shadow-4 {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+.login-page__bg,
+.login-page__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.login-page__bg {
+  width: 100%;
+  height: 100%;
+}
+
+.login-page__overlay {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.login-page__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-card {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+}
+
+/* Tablet: centralizado */
+@media (max-width: 1023.98px) {
+  .login-page {
+    justify-content: center;
+  }
+
+  .login-page__overlay {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Celular: cartão ocupa a largura, ancorado embaixo para alcance do polegar */
+@media (max-width: 599.98px) {
+  .login-page {
+    padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    align-items: flex-end;
+  }
+
+  .login-card {
+    padding: 4px;
+  }
 }
 </style>

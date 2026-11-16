@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-lg">
+    <div class="row items-center page-header q-mb-lg">
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">
           {{ empresa?.name || "Carregando..." }}
@@ -273,7 +273,7 @@
 
     <!-- Dialog: Criar/Editar Domínio -->
     <q-dialog v-model="dialogDominio.aberto" persistent>
-      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+      <q-card style="max-width: 480px; width: 100%">
         <q-card-section class="row items-center">
           <span class="text-h6">{{ dialogDominio.editando ? "Editar Domínio" : "Novo Domínio" }}</span>
           <q-space />
@@ -300,7 +300,7 @@
               </div>
             </div>
 
-            <div class="row justify-end q-gutter-sm q-mt-md">
+            <div class="row justify-end q-gutter-sm form-actions q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Salvar" color="primary" />
             </div>

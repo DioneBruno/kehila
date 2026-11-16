@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-md">
+    <div class="row items-center page-header q-mb-md">
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">Pagamentos</p>
         <p class="text-caption text-grey-6 q-ma-none">Acompanhe os pagamentos gerados</p>
@@ -28,7 +28,7 @@
 
     <!-- Dialog: Verificar Pagamentos Período -->
     <q-dialog v-model="dialogPeriodo.aberto" persistent>
-      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+      <q-card style="max-width: 480px; width: 100%">
         <q-card-section class="row items-center">
           <span class="text-h6">Verificar Pagamentos Período</span>
           <q-space />
@@ -87,7 +87,7 @@
                 </q-input>
               </div>
             </div>
-            <div class="row justify-end q-gutter-sm q-mt-md">
+            <div class="row justify-end q-gutter-sm form-actions q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Verificar" color="primary" />
             </div>
@@ -98,7 +98,7 @@
 
     <!-- Dialog: Gerar Novo Boleto -->
     <q-dialog v-model="dialogBoleto.aberto" persistent>
-      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+      <q-card style="max-width: 480px; width: 100%">
         <q-card-section class="row items-center">
           <span class="text-h6">Gerar Novo Boleto</span>
           <q-space />
@@ -113,7 +113,7 @@
               v-model="dialogBoleto.vencimento"
               label="Nova data de vencimento"
             />
-            <div class="row justify-end q-gutter-sm q-mt-md">
+            <div class="row justify-end q-gutter-sm form-actions q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Gerar" color="primary" />
             </div>
@@ -124,7 +124,7 @@
 
     <!-- Dialog: Informar Pagamento Manual -->
     <q-dialog v-model="dialogPagamentoManual.aberto" persistent>
-      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+      <q-card style="max-width: 480px; width: 100%">
         <q-card-section class="row items-center">
           <span class="text-h6">Informar Pagamento Manual</span>
           <q-space />
@@ -166,7 +166,7 @@
                 />
               </div>
             </div>
-            <div class="row justify-end q-gutter-sm q-mt-md">
+            <div class="row justify-end q-gutter-sm form-actions q-mt-md">
               <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
               <q-btn unelevated type="submit" label="Confirmar" color="primary" />
             </div>
@@ -176,7 +176,7 @@
     </q-dialog>
 
     <q-dialog v-model="dialogNotificarVencimento.aberto" persistent>
-      <q-card style="min-width: 360px; max-width: 480px; width: 100%">
+      <q-card style="max-width: 480px; width: 100%">
         <q-card-section class="row items-center">
           <div class="">
             <div class="text-h6">Informar Uuids dos Pagamentos</div>
@@ -196,7 +196,7 @@
 
     <!-- Filtros -->
     <q-card flat bordered class="q-mb-md">
-      <q-card-section class="row q-gutter-md items-center">
+      <q-card-section class="filter-bar">
         <q-input
           v-model="filtros.busca"
           dense

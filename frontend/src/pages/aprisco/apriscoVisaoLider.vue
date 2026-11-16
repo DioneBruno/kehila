@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center q-mb-lg">
+    <div class="row items-center page-header q-mb-lg">
       <q-btn flat round dense icon="arrow_back" color="grey-7" :to="{ name: 'home' }" class="q-mr-sm" />
       <div class="col">
         <p class="text-h5 text-weight-bold q-ma-none text-primary">

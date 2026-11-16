@@ -1,10 +1,5 @@
 <template>
   <div class="row">
-    <div class="col-12 q-my-md">
-      <q-separator color="secondary" />
-    </div>
-
-    <div class="col-12 q-my-md"></div>
     <!-- Username Input -->
     <div class="col-12 q-my-sm rounded-panel">
       <q-input
@@ -13,7 +8,8 @@
         unmasked-value
         autofocus
         v-model="input.username"
-        autocomplete="off"
+        autocomplete="username"
+        inputmode="email"
         bg-color="grey-3"
         data-cy="username"
         type="text"
@@ -30,7 +26,7 @@
         filled
         stack-label
         ref="inputPassword"
-        autocomplete="off"
+        autocomplete="current-password"
         bg-color="grey-3"
         v-model="input.password"
         :type="showPwd ? 'password' : 'text'"
@@ -58,19 +54,21 @@
     </div>
 
     <!-- Login and Digital Certificate Buttons -->
-    <div class="col-12 row justify-between items-center q-mb-xl">
-      <div class="col-9">
+    <div class="col-12 row no-wrap items-center q-gutter-x-sm q-mb-md">
+      <div class="col">
         <q-btn
           unelevated
           data-cy="btn-login"
           label="Entrar"
           @click="login()"
           color="primary"
-          class="full-width"
+          size="lg"
+          no-caps
+          class="full-width login-btn"
         />
       </div>
-      <div class="col-2 text-right">
-        <q-btn flat color="grey-6" icon="developer_board" size="md">
+      <div class="col-auto">
+        <q-btn flat round color="grey-6" icon="developer_board" size="md">
           <q-tooltip>Acessar com Certificado Digital</q-tooltip>
         </q-btn>
       </div>
@@ -161,4 +159,9 @@ export default defineComponent({
 });
 </script>
 
-<style></style>
+<style scoped>
+.login-btn {
+  border-radius: 10px;
+  min-height: 48px;
+}
+</style>

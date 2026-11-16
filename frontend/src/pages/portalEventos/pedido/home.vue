@@ -12,16 +12,18 @@
       <div class="row q-col-gutter-md">
         <!-- Stepper de compra -->
         <div class="col-12 col-md-8">
-          <div class="q-pa-sm">
+          <div class="pedido-tabs q-pa-sm">
             <q-btn
               :flat="pedido.tab !== 'ingressos'"
+              no-caps
               color="grey-8"
-              label="Incrição"
+              label="Inscrição"
               icon="confirmation_number"
               @click="pedido.tab = 'ingressos'"
             />
             <q-btn
               :flat="pedido.tab !== 'pedidos'"
+              no-caps
               color="grey-8"
               label="Meus Pedidos"
               icon="list"
@@ -389,6 +391,33 @@ export default defineComponent({
 
   .page-with-bar .suporte-flutuante-wrapper {
     bottom: 88px;
+  }
+}
+
+.pedido-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Celular: abas ocupam a largura e suporte mostra apenas os ícones */
+@media (max-width: 599.98px) {
+  .pedido-tabs .q-btn {
+    flex: 1 1 0;
+  }
+
+  .suporte-flutuante-wrapper {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .suporte-flutuante-label {
+    display: none;
+  }
+
+  .suporte-whatsapp-btn {
+    width: 50px;
+    height: 50px;
   }
 }
 
