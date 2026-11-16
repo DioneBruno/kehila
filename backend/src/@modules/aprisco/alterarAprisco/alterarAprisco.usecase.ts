@@ -1,5 +1,10 @@
 import { ApiError } from "src/@modules/shared/apiError";
-import { validarCoordenadasAprisco, validarStatusAprisco } from "../incluirAprisco/aprisco.entity";
+import {
+  normalizarHorarioAprisco,
+  validarCoordenadasAprisco,
+  validarDiaSemanaAprisco,
+  validarStatusAprisco,
+} from "../incluirAprisco/aprisco.entity";
 import { AlterarApriscoData, AlterarApriscoRepository } from "./alterarApriscoRepository";
 
 export type AlterarApriscoInput = AlterarApriscoData & {
@@ -19,6 +24,9 @@ export class AlterarApriscoUsecase {
     if (!apriscoUuid) throw new ApiError("Aprisco não identificado");
     if (data.nome !== undefined && !data.nome?.trim()) throw new ApiError("O nome do aprisco é obrigatório");
     if (data.status !== undefined) validarStatusAprisco(data.status);
+    const diaSemana = data.diaSemana === undefined ? undefined : data.diaSemana || null;
+    if (diaSemana !== undefined) validarDiaSemanaAprisco(diaSemana);
+    const horario = data.horario === undefined ? undefined : normalizarHorarioAprisco(data.horario);
 
     // Coordenadas são alteradas sempre em par (null nas duas para remover)
     if (data.latitude !== undefined || data.longitude !== undefined) {
@@ -31,7 +39,8 @@ export class AlterarApriscoUsecase {
     await this.repo.alterar(companyUuid, apriscoUuid, {
       ...data,
       nome: data.nome?.trim(),
-      horario: textoOpcional(data.horario),
+      diaSemana,
+      horario,
       endereco: textoOpcional(data.endereco),
     });
   }

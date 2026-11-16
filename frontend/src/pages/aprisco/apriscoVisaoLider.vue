@@ -7,7 +7,9 @@
         <p class="text-h5 text-weight-bold q-ma-none text-primary">
           {{ aprisco?.nome || (naoEncontrado ? "Aprisco" : "Carregando...") }}
         </p>
-        <div v-if="aprisco?.horario" class="text-caption text-grey-7">{{ aprisco.horario }}</div>
+        <div v-if="aprisco && descricaoEncontro(aprisco)" class="text-caption text-grey-7">
+          {{ descricaoEncontro(aprisco) }}
+        </div>
       </div>
     </div>
 
@@ -48,7 +50,7 @@ import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
 import ApriscoPresencas from "./apriscoPresencas.vue";
-import { ApriscoService } from "./aprisco.service";
+import { ApriscoService, descricaoEncontro } from "./aprisco.service";
 
 export default defineComponent({
   name: "ApriscoVisaoLider",
@@ -77,6 +79,7 @@ export default defineComponent({
     onMounted(() => void carregar());
 
     return {
+      descricaoEncontro,
       ...toRefs(data),
       abrirEdicao,
     };

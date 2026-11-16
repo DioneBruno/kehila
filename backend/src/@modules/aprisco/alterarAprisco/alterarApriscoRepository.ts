@@ -1,8 +1,9 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
-import { ApriscoStatus } from "../incluirAprisco/aprisco.entity";
+import { ApriscoStatus, DiaSemana } from "../incluirAprisco/aprisco.entity";
 
 export type AlterarApriscoData = {
   nome?: string;
+  diaSemana?: DiaSemana | null;
   horario?: string | null;
   endereco?: string | null;
   latitude?: number | null;
@@ -12,6 +13,7 @@ export type AlterarApriscoData = {
 
 const COLUNAS: Record<keyof AlterarApriscoData, string> = {
   nome: "nome",
+  diaSemana: "dia_semana",
   horario: "horario",
   endereco: "endereco",
   latitude: "latitude",

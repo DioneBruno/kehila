@@ -108,12 +108,17 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
-import { ApriscoService, linkMapa, statusAprisco } from "./aprisco.service";
+import { ApriscoService, descricaoEncontro, linkMapa, statusAprisco } from "./aprisco.service";
 import { useQuasar } from "quasar";
 
 const COLUNAS = [
   { name: "nome", label: "Nome", field: "nome", align: "left" as const, sortable: true },
-  { name: "horario", label: "Horário", field: "horario", align: "left" as const },
+  {
+    name: "encontro",
+    label: "Encontro",
+    field: (a: Aprisco) => descricaoEncontro(a) ?? "",
+    align: "left" as const,
+  },
   {
     name: "endereco",
     label: "Endereço",
@@ -158,7 +163,7 @@ export default defineComponent({
 
         return (
           a.nome.toLowerCase().includes(termo) ||
-          (a.horario ?? "").toLowerCase().includes(termo) ||
+          (descricaoEncontro(a) ?? "").toLowerCase().includes(termo) ||
           (a.endereco ?? "").toLowerCase().includes(termo)
         );
       });

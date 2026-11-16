@@ -22,7 +22,8 @@ describe("Deve testar IncluirApriscoUsecase", () => {
     const { uuid } = await usecase.execute({
       companyUuid,
       nome: "  Aprisco Centro  ",
-      horario: "Quinta-feira 20h",
+      diaSemana: "Quinta",
+      horario: "20:00",
       endereco: "Rua das Flores, 123",
       latitude: -23.5505199,
       longitude: -46.6333094,
@@ -36,11 +37,31 @@ describe("Deve testar IncluirApriscoUsecase", () => {
     expect(Number(aprisco.latitude)).toBeCloseTo(-23.5505199, 6);
     expect(Number(aprisco.longitude)).toBeCloseTo(-46.6333094, 6);
     expect(aprisco.index).toBeGreaterThan(0);
+    expect(aprisco.dia_semana).toBe("Quinta");
+    expect(aprisco.horario).toBe("20:00");
   });
 
   test("Não deve incluir Aprisco sem nome", async () => {
     const usecase = new IncluirApriscoUsecase(repo);
     await expect(usecase.execute({ companyUuid, nome: " " })).rejects.toThrow("O nome do aprisco é obrigatório");
+  });
+
+  test("Deve normalizar horário com uma casa na hora", async () => {
+    const usecase = new IncluirApriscoUsecase(repo);
+    const { uuid } = await usecase.execute({ companyUuid, nome: "Aprisco", diaSemana: "Domingo", horario: "8:30" });
+    const [aprisco] = await dataSource.query(`SELECT * FROM apriscos WHERE uuid = $1`, [uuid]);
+    expect(aprisco.horario).toBe("08:30");
+  });
+
+  test("Não deve incluir Aprisco com dia da semana inválido", async () => {
+    const usecase = new IncluirApriscoUsecase(repo);
+    await expect(usecase.execute({ companyUuid, nome: "Aprisco", diaSemana: "Quinta-feira" as any })).rejects.toThrow("Dia da semana inválido");
+  });
+
+  test("Não deve incluir Aprisco com horário inválido", async () => {
+    const usecase = new IncluirApriscoUsecase(repo);
+    await expect(usecase.execute({ companyUuid, nome: "Aprisco", horario: "20h" })).rejects.toThrow("Horário inválido");
+    await expect(usecase.execute({ companyUuid, nome: "Aprisco", horario: "24:00" })).rejects.toThrow("Horário inválido");
   });
 
   test("Não deve incluir Aprisco com latitude inválida", async () => {

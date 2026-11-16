@@ -26,15 +26,40 @@
         class="q-mt-sm"
       />
     </div>
-    <div class="col-12">
-      <q-input
-        v-model="form.horario"
-        label="Horário"
+    <div class="col-12 col-sm-6">
+      <q-select
+        v-model="form.diaSemana"
+        :options="diasSemana"
+        label="Dia do encontro"
         filled
-        placeholder="Ex.: Quinta-feira às 20h"
-        hint="Dia e horário dos encontros"
+        clearable
         :readonly="readonly"
       />
+    </div>
+    <div class="col-12 col-sm-6">
+      <q-input
+        v-model="form.horario"
+        label="Horário do encontro"
+        filled
+        mask="time"
+        fill-mask="_"
+        placeholder="20:00"
+        :readonly="readonly"
+        :rules="[validarHorario]"
+        lazy-rules
+      >
+        <template #append>
+          <q-icon name="schedule" class="cursor-pointer">
+            <q-popup-proxy v-if="!readonly" cover transition-show="scale" transition-hide="scale">
+              <q-time v-model="form.horario" format24h>
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="OK" color="primary" flat />
+                </div>
+              </q-time>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+      </q-input>
     </div>
 
     <!-- Localização -->
@@ -44,7 +69,7 @@
     <div class="col-12">
       <q-input v-model="form.endereco" label="Endereço" filled :readonly="readonly" />
     </div>
-    <div class="col-12 col-sm-6 col-md-4">
+    <!-- <div class="col-12 col-sm-6 col-md-4">
       <q-input
         v-model="form.latitude"
         label="Latitude"
@@ -67,7 +92,7 @@
         :rules="[validarLongitude, validarPar]"
         lazy-rules
       />
-    </div>
+    </div> -->
     <div class="col-12 col-md-4 row items-start q-gutter-sm q-pt-md">
       <q-btn
         v-if="!readonly"
@@ -98,11 +123,19 @@
 <script lang="ts">
 import { computed, defineComponent, ref, type PropType } from "vue";
 import { useQuasar } from "quasar";
-import type { Aprisco, ApriscoInput, ApriscoStatus } from "src/@modules/aprisco/aprisco.http";
+import {
+  DIAS_SEMANA,
+  type Aprisco,
+  type ApriscoInput,
+  type ApriscoStatus,
+  type DiaSemana,
+} from "src/@modules/aprisco/aprisco.http";
 import { linkMapa } from "./aprisco.service";
 
 export type ApriscoFormModel = {
   nome: string;
+  diaSemana: DiaSemana | null;
+  /** HH:MM */
   horario: string;
   endereco: string;
   latitude: string;
@@ -113,6 +146,7 @@ export type ApriscoFormModel = {
 export function novoApriscoForm(aprisco?: Aprisco | null): ApriscoFormModel {
   return {
     nome: aprisco?.nome ?? "",
+    diaSemana: aprisco?.diaSemana ?? null,
     horario: aprisco?.horario ?? "",
     endereco: aprisco?.endereco ?? "",
     latitude: aprisco?.latitude != null ? String(aprisco.latitude) : "",
@@ -131,12 +165,21 @@ function paraNumero(v: string | null | undefined): number | null {
   return Number.isFinite(n) ? n : NaN;
 }
 
+/** Remove o preenchimento da máscara ("2_:__" → "2"); vazio vira null */
+function horarioParaInput(v: string | null | undefined): string | null {
+  const texto = String(v ?? "")
+    .replace(/_/g, "")
+    .trim();
+  return texto && texto !== ":" ? texto : null;
+}
+
 /** Converte o form em payload da API: campos de texto vazios viram null (limpa o valor no banco). */
 export function apriscoFormParaInput(form: ApriscoFormModel): ApriscoInput {
   const vazioParaNull = (v: string | null) => (v && v.trim() ? v.trim() : null);
   return {
     nome: form.nome.trim(),
-    horario: vazioParaNull(form.horario),
+    diaSemana: form.diaSemana || null,
+    horario: horarioParaInput(form.horario),
     endereco: vazioParaNull(form.endereco),
     latitude: paraNumero(form.latitude),
     longitude: paraNumero(form.longitude),
@@ -163,6 +206,10 @@ export default defineComponent({
     }
     const validarLatitude = (v: string) => validarFaixa(v, 90, "Latitude");
     const validarLongitude = (v: string) => validarFaixa(v, 180, "Longitude");
+    const validarHorario = (v: string) => {
+      const horario = horarioParaInput(v);
+      return !horario || /^([01]\d|2[0-3]):[0-5]\d$/.test(horario) || "Horário inválido (HH:MM)";
+    };
     const validarPar = () =>
       (paraNumero(props.form.latitude) === null) === (paraNumero(props.form.longitude) === null) ||
       "Informe latitude e longitude juntas";
@@ -200,11 +247,13 @@ export default defineComponent({
     }
 
     return {
+      diasSemana: DIAS_SEMANA,
       localizando,
       mapa,
       validarLatitude,
       validarLongitude,
       validarPar,
+      validarHorario,
       usarMinhaLocalizacao,
     };
   },

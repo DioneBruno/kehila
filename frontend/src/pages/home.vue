@@ -25,7 +25,9 @@
               <q-icon name="star" class="q-mr-xs" />Meu aprisco
             </div>
             <div class="text-h6 ellipsis">{{ aprisco.nome }}</div>
-            <div v-if="aprisco.horario" class="text-caption text-grey-7">{{ aprisco.horario }}</div>
+            <div v-if="descricaoEncontro(aprisco)" class="text-caption text-grey-7">
+              {{ descricaoEncontro(aprisco) }}
+            </div>
           </q-card-section>
           <q-card-actions align="right">
             <q-btn flat dense no-caps color="primary" label="Acessar" icon-right="chevron_right" />
@@ -40,7 +42,7 @@
 import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import type { Aprisco } from "src/@modules/aprisco/aprisco.http";
-import { ApriscoService } from "./aprisco/aprisco.service";
+import { ApriscoService, descricaoEncontro } from "./aprisco/aprisco.service";
 
 export default defineComponent({
   name: "pageHome",
@@ -59,6 +61,7 @@ export default defineComponent({
       router.push({ name: "apriscos.lider", params: { uuid } });
 
     return {
+      descricaoEncontro,
       ...toRefs(data),
       abrirAprisco,
     };

@@ -23,7 +23,8 @@ describe("Deve testar AlterarApriscoUsecase", () => {
     new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({
       companyUuid,
       nome: "Aprisco Centro",
-      horario: "Quinta-feira 20h",
+      diaSemana: "Quinta",
+      horario: "20:00",
       endereco: "Rua das Flores, 123",
       latitude: -23.5505199,
       longitude: -46.6333094,
@@ -37,7 +38,8 @@ describe("Deve testar AlterarApriscoUsecase", () => {
       companyUuid,
       apriscoUuid: uuid,
       nome: "  Aprisco Norte  ",
-      horario: "Sexta-feira 19h30",
+      diaSemana: "Sexta",
+      horario: "19:30",
       latitude: -22.9068467,
       longitude: -43.1728965,
       status: "inativo",
@@ -45,7 +47,8 @@ describe("Deve testar AlterarApriscoUsecase", () => {
 
     const [row] = await dataSource.query(`SELECT * FROM apriscos WHERE uuid = $1`, [uuid]);
     expect(row.nome).toBe("Aprisco Norte");
-    expect(row.horario).toBe("Sexta-feira 19h30");
+    expect(row.dia_semana).toBe("Sexta");
+    expect(row.horario).toBe("19:30");
     expect(row.endereco).toBe("Rua das Flores, 123");
     expect(Number(row.latitude)).toBeCloseTo(-22.9068467, 6);
     expect(Number(row.longitude)).toBeCloseTo(-43.1728965, 6);
@@ -63,6 +66,27 @@ describe("Deve testar AlterarApriscoUsecase", () => {
     expect(row.latitude).toBeNull();
     expect(row.longitude).toBeNull();
     expect(row.nome).toBe("Aprisco Centro");
+  });
+
+  test("Deve remover dia da semana e horário", async () => {
+    const { uuid } = await incluir();
+
+    const usecase = new AlterarApriscoUsecase(new AlterarApriscoRepository(connections));
+    await usecase.execute({ companyUuid, apriscoUuid: uuid, diaSemana: null, horario: " " });
+
+    const [row] = await dataSource.query(`SELECT * FROM apriscos WHERE uuid = $1`, [uuid]);
+    expect(row.dia_semana).toBeNull();
+    expect(row.horario).toBeNull();
+  });
+
+  test("Deve lançar erro com dia da semana inválido", async () => {
+    const usecase = new AlterarApriscoUsecase(new AlterarApriscoRepository(connections));
+    await expect(usecase.execute({ companyUuid, apriscoUuid: uuidInexistente, diaSemana: "xpto" as any })).rejects.toThrow("Dia da semana inválido");
+  });
+
+  test("Deve lançar erro com horário inválido", async () => {
+    const usecase = new AlterarApriscoUsecase(new AlterarApriscoRepository(connections));
+    await expect(usecase.execute({ companyUuid, apriscoUuid: uuidInexistente, horario: "25:00" })).rejects.toThrow("Horário inválido");
   });
 
   test("Deve lançar erro ao alterar Aprisco inexistente", async () => {

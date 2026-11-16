@@ -13,6 +13,7 @@ import { validarDataReuniao } from "src/@modules/aprisco/registrarPresenca/prese
 function camposAprisco(body: any) {
   return {
     nome: body.nome,
+    diaSemana: body.diaSemana,
     horario: body.horario,
     endereco: body.endereco,
     latitude: body.latitude,

@@ -1,5 +1,5 @@
 import { ConnectionHub } from "../shared/connections/connectionHub";
-import { ApriscoStatus } from "./incluirAprisco/aprisco.entity";
+import { ApriscoStatus, DiaSemana } from "./incluirAprisco/aprisco.entity";
 import { PapelIntegrante } from "./vincularIntegrante/integrante.entity";
 import { TipoPresenca } from "./registrarPresenca/presenca.entity";
 
@@ -7,6 +7,8 @@ export type ApriscoListItem = {
   uuid: string;
   index: number;
   nome: string;
+  diaSemana: DiaSemana | null;
+  /** HH:MM */
   horario: string | null;
   endereco: string | null;
   latitude: number | null;
@@ -41,6 +43,7 @@ const COLUNAS_APRISCO = `
         uuid,
         index,
         nome,
+        dia_semana AS "diaSemana",
         horario,
         endereco,
         latitude::float8 AS latitude,

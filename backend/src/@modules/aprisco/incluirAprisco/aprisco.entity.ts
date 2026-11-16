@@ -3,10 +3,15 @@ import { ApiError } from "src/@modules/shared/apiError";
 
 export type ApriscoStatus = "ativo" | "inativo";
 
+export const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"] as const;
+export type DiaSemana = (typeof DIAS_SEMANA)[number];
+
 export type ApriscoProps = {
   uuid: string;
   companyUuid: string;
   nome: string;
+  diaSemana?: DiaSemana | null;
+  /** HH:MM (24h) */
   horario?: string | null;
   endereco?: string | null;
   latitude?: number | null;
@@ -20,6 +25,23 @@ const STATUS_VALIDOS: ApriscoStatus[] = ["ativo", "inativo"];
 
 export function validarStatusAprisco(status: ApriscoStatus): void {
   if (!STATUS_VALIDOS.includes(status)) throw new ApiError("Status do aprisco inválido");
+}
+
+export function validarDiaSemanaAprisco(diaSemana: string | null): void {
+  if (diaSemana !== null && !DIAS_SEMANA.includes(diaSemana as DiaSemana)) {
+    throw new ApiError(`Dia da semana inválido. Use: ${DIAS_SEMANA.join(", ")}`);
+  }
+}
+
+const HORARIO_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Normaliza o horário para HH:MM (aceita "8:30"). Vazio vira null. */
+export function normalizarHorarioAprisco(horario: string | null | undefined): string | null {
+  const texto = horario?.trim();
+  if (!texto) return null;
+  const normalizado = /^\d:\d{2}$/.test(texto) ? `0${texto}` : texto;
+  if (!HORARIO_REGEX.test(normalizado)) throw new ApiError("Horário inválido. Use o formato HH:MM");
+  return normalizado;
 }
 
 export function validarCoordenadasAprisco(latitude: number | null, longitude: number | null): void {
@@ -48,11 +70,16 @@ export class ApriscoEntity {
     const longitude = input.longitude ?? null;
     validarCoordenadasAprisco(latitude, longitude);
 
+    const diaSemana = input.diaSemana || null;
+    validarDiaSemanaAprisco(diaSemana);
+    const horario = normalizarHorarioAprisco(input.horario);
+
     return new ApriscoEntity({
       uuid: randomUUID(),
       companyUuid: input.companyUuid,
       nome: input.nome.trim(),
-      horario: input.horario?.trim() || null,
+      diaSemana,
+      horario,
       endereco: input.endereco?.trim() || null,
       latitude,
       longitude,

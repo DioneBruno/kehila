@@ -1,10 +1,12 @@
-import { ApriscoEntity, ApriscoStatus } from "./aprisco.entity";
+import { ApriscoEntity, ApriscoStatus, DiaSemana } from "./aprisco.entity";
 import { IncluirApriscoRepository } from "./incluirApriscoRepository";
 
 export type IncluirApriscoInput = {
   companyUuid: string;
   nome: string;
-  horario?: string;
+  diaSemana?: DiaSemana | null;
+  /** HH:MM (24h) */
+  horario?: string | null;
   endereco?: string;
   latitude?: number;
   longitude?: number;

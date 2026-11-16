@@ -2,10 +2,15 @@ import type HttpClient from "../http/httpClient.interface";
 
 export type ApriscoStatus = "ativo" | "inativo";
 
+export const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"] as const;
+export type DiaSemana = (typeof DIAS_SEMANA)[number];
+
 export type Aprisco = {
   uuid: string;
   index: number;
   nome: string;
+  diaSemana: DiaSemana | null;
+  /** HH:MM */
   horario: string | null;
   endereco: string | null;
   latitude: number | null;
@@ -17,6 +22,8 @@ export type Aprisco = {
 
 export type ApriscoInput = {
   nome: string;
+  diaSemana?: DiaSemana | null;
+  /** HH:MM */
   horario?: string | null;
   endereco?: string | null;
   latitude?: number | null;

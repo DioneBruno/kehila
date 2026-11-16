@@ -54,13 +54,15 @@ describe("Deve testar ApriscoQuery", () => {
     const { uuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({
       companyUuid,
       nome: "Centro",
-      horario: "Quinta-feira 20h",
+      diaSemana: "Quinta",
+      horario: "20:00",
     });
     const query = new ApriscoQuery(connections);
 
     const aprisco = await query.buscarAprisco(companyUuid, uuid);
     expect(aprisco?.nome).toBe("Centro");
-    expect(aprisco?.horario).toBe("Quinta-feira 20h");
+    expect(aprisco?.diaSemana).toBe("Quinta");
+    expect(aprisco?.horario).toBe("20:00");
 
     expect(await query.buscarAprisco(outraCompanyUuid, uuid)).toBeNull();
   });

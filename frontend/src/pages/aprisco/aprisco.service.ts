@@ -3,6 +3,7 @@ import type {
   ApriscoHttp,
   ApriscoInput,
   ApriscoStatus,
+  DiaSemana,
   IntegranteInput,
   PapelIntegrante,
   RegistrarPresencasInput,
@@ -46,6 +47,15 @@ export function papelIntegrante(papel: PapelIntegrante) {
       icon: "person",
     }
   );
+}
+
+/** Texto do encontro para exibição, ex.: "Quinta às 20:00". Null se nada informado. */
+export function descricaoEncontro(aprisco: {
+  diaSemana: DiaSemana | null;
+  horario: string | null;
+}): string | null {
+  if (aprisco.diaSemana && aprisco.horario) return `${aprisco.diaSemana} às ${aprisco.horario}`;
+  return aprisco.diaSemana || aprisco.horario || null;
 }
 
 /** Link do Google Maps: usa as coordenadas se houver, senão o endereço. */
