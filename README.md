@@ -32,6 +32,10 @@ Kehila nasceu com o objetivo de centralizar e facilitar a gestão de comunidades
 
 > _A definir conforme o projeto avança._
 
+## Documentação de desenvolvimento
+
+Arquitetura, módulos (backend e frontend) e riscos conhecidos: [`docs/`](docs/README.md).
+
 ## Como executar
 
 ```bash
