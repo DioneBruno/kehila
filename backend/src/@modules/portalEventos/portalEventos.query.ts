@@ -123,7 +123,8 @@ export class PortalEventosQuery {
     }));
   }
 
-  async buscarPedido(pedidoUuid: string) {
+  /** Retorna o pedido somente se for da empresa e do usuário (ou se o usuário for administrador). */
+  async buscarPedido(pedidoUuid: string, acesso: { companyUuid: string; userUuid: string; admin: boolean }) {
     const [pedidoModel] = await this.connectionHub.database!.query(
       `SELECT 
         pedidos.created_at as "createdAt",
@@ -137,8 +138,10 @@ export class PortalEventosQuery {
           ON pedidos.evento_uuid = eventos.uuid
       WHERE pedidos.deleted_at IS NULL
         AND pedidos.uuid = $1
+        AND pedidos.company_uuid = $2
+        AND ($3::boolean OR pedidos.user_uuid = $4)
       `,
-      [pedidoUuid],
+      [pedidoUuid, acesso.companyUuid, acesso.admin, acesso.userUuid],
     );
     if (!pedidoModel) return null;
 

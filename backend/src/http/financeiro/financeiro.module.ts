@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { AdminMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 
 import { ContasBancariasController } from "./contasBancarias.controller";
@@ -74,6 +75,8 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class FinanceiroModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(ContasBancariasController, CobrancasController, PagamentosController, CartaoCreditoController);
+    // Cartão de crédito é usado pelo próprio usuário (portal de eventos); demais rotas são administrativas.
+    consumer.apply(JwtAuthMiddleware).forRoutes(CartaoCreditoController);
+    consumer.apply(JwtAuthMiddleware, AdminMiddleware).forRoutes(ContasBancariasController, CobrancasController, PagamentosController);
   }
 }

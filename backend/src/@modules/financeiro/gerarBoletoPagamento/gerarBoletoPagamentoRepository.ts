@@ -10,7 +10,7 @@ export class GerarBoletoPagamentoRepository {
     return new GerarBoletoPagamentoGatewayAsaas(this.connectionHub);
   }
 
-  async buscarPagamento(pagamentoUuid: string) {
+  async buscarPagamento(companyUuid: string, pagamentoUuid: string) {
     const [pagamentoModel] = await this.connectionHub.database?.query(
       `SELECT
         pagamentos.uuid,
@@ -29,8 +29,9 @@ export class GerarBoletoPagamentoRepository {
         INNER JOIN financeiro_cobrancas cobrancas
           ON (pagamentos.cobanca_uuid = cobrancas.uuid)
       WHERE pagamentos.deleted_at IS NULL
-        AND pagamentos.uuid = $1`,
-      [pagamentoUuid],
+        AND pagamentos.uuid = $1
+        AND pagamentos.company_uuid = $2`,
+      [pagamentoUuid, companyUuid],
     );
     if (!pagamentoModel) return null;
 

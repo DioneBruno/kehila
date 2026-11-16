@@ -6,7 +6,8 @@ import { EnviarEmailUsecase } from "src/@modules/notificacao/email/enviarEmail.u
 import { EnviarSmsRepository } from "src/@modules/notificacao/sms/enviarSmsRepository";
 import { EnviarSmsUsecase } from "src/@modules/notificacao/sms/enviarSms.usecase";
 
-const CACHE_TTL_SECONDS = 60 * 24; // 1 dia
+const CACHE_TTL_SECONDS = 60 * 15; // 15 minutos
+export const MAX_TENTATIVAS_CODIGO = 5;
 
 export class GenerateTokenAuthenticationRandomCodeRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
@@ -17,8 +18,10 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
        FROM auth_users users
        INNER JOIN auth_users_companies "userCompanies"
          ON users.uuid = "userCompanies".user_uuid
-       WHERE (users.cpf = $1 OR users.email = $1 OR users.phone = $1)`,
-      [username],
+       WHERE users.deleted_at IS NULL
+         AND "userCompanies".company_uuid = $2
+         AND (users.cpf = $1 OR users.email = $1 OR users.phone = $1)`,
+      [username, companyUuid],
     );
     if (!user) return null;
     return { uuid: user.uuid, email: user.email, phone: user.phone };
@@ -26,13 +29,28 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
 
   async salvarCodigoNoCache(companyUuid: string, username: string, code: string, userUuid: string): Promise<void> {
     const key = `auth_random_code:${companyUuid}:${username}`;
-    await this.connectionHub.cache!.saveObject(key, { code, userUuid }, CACHE_TTL_SECONDS);
+    await this.connectionHub.cache!.saveObject(key, { code, userUuid, tentativas: 0 }, CACHE_TTL_SECONDS);
   }
 
-  async buscarCodigoNoCache(companyUuid: string, username: string): Promise<{ code: string; userUuid: string } | null> {
+  async buscarCodigoNoCache(companyUuid: string, username: string): Promise<{ code: string; userUuid: string; tentativas?: number } | null> {
     const key = `auth_random_code:${companyUuid}:${username}`;
     const result = await this.connectionHub.cache!.findKey(key);
-    return result as { code: string; userUuid: string } | null;
+    return result as { code: string; userUuid: string; tentativas?: number } | null;
+  }
+
+  async registrarTentativaInvalida(companyUuid: string, username: string, cached: { code: string; userUuid: string; tentativas?: number }) {
+    const key = `auth_random_code:${companyUuid}:${username}`;
+    const tentativas = (cached.tentativas ?? 0) + 1;
+    if (tentativas >= MAX_TENTATIVAS_CODIGO) {
+      await this.connectionHub.cache!.deleteKey(key);
+      return;
+    }
+    await this.connectionHub.cache!.saveObject(key, { ...cached, tentativas }, CACHE_TTL_SECONDS);
+  }
+
+  async removerCodigoDoCache(companyUuid: string, username: string): Promise<void> {
+    const key = `auth_random_code:${companyUuid}:${username}`;
+    await this.connectionHub.cache!.deleteKey(key);
   }
 
   async gerarTokenAuthentication(companyUuid: string, userUuid: string) {

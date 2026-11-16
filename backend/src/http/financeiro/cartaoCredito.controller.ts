@@ -30,7 +30,7 @@ export class CartaoCreditoController {
 
   @Delete(":cartaoUuid")
   async remover(@Req() req: Request | any, @Res() res: Response, @Param("cartaoUuid") cartaoUuid: string) {
-    await this.financeiroQuery.removerCartaoCredito(cartaoUuid);
+    await this.financeiroQuery.removerCartaoCredito(req.userUuid, cartaoUuid);
     return res.status(201).json({ success: true });
   }
 }

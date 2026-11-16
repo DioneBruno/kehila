@@ -47,6 +47,22 @@ export class EditarFormIngressoRepository {
     return ingresso;
   }
 
+  async usuarioPodeEditarIngresso(ingressoUuid: string, acesso: { companyUuid: string; userUuid: string; admin: boolean }): Promise<boolean> {
+    const [row] = await this.connectionHub.database!.query(
+      `SELECT ingressos.uuid
+      FROM evento_ingressos ingressos
+        INNER JOIN evento_pedidos pedidos
+          ON pedidos.uuid = ingressos.pedido_uuid
+      WHERE ingressos.deleted_at IS NULL
+        AND pedidos.deleted_at IS NULL
+        AND ingressos.uuid = $1
+        AND pedidos.company_uuid = $2
+        AND ($3::boolean OR pedidos.user_uuid = $4)`,
+      [ingressoUuid, acesso.companyUuid ?? null, acesso.admin, acesso.userUuid ?? null],
+    );
+    return !!row;
+  }
+
   async existeOutroIngressoComDocumento(pedidoUuid: string, pessoaDocumento: string, ingressoUuid: string): Promise<boolean> {
     const [ingressoModel] = await this.connectionHub.database!.query(
       `SELECT uuid FROM evento_ingressos

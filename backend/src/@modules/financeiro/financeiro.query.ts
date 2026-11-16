@@ -27,8 +27,12 @@ export class FinanceiroQuery {
     }
   }
 
-  async removerCartaoCredito(cartaoUuid: string) {
-    await this.connectionHub.database?.query(`UPDATE financeiro_cartao_credito SET deleted_at = now() WHERE uuid = $1`, [cartaoUuid]);
+  async removerCartaoCredito(userUuid: string, cartaoUuid: string) {
+    // Só o dono do cartão pode removê-lo.
+    await this.connectionHub.database?.query(
+      `UPDATE financeiro_cartao_credito SET deleted_at = now() WHERE uuid = $1 AND user_uuid = $2 AND deleted_at IS NULL`,
+      [cartaoUuid, userUuid],
+    );
   }
 
   async verificarPagamentosCompanies() {

@@ -26,13 +26,25 @@ export class EventoEntity {
   montaPedido(userUuid: string, input: { tipoIngressoUuid: string; quantidade: number }[]): PedidoEntity {
     const ingressos: IngressosEntity[] = [];
     let valorBruto = 0;
+    if (!Array.isArray(input) || input.length === 0) throw new ApiError("Informe os ingressos do pedido", 400);
     for (const item of input) {
+      const quantidade = Number(item?.quantidade);
+      if (!Number.isInteger(quantidade) || quantidade < 1) {
+        throw new ApiError("Quantidade de ingressos inválida", 400);
+      }
+      item.quantidade = quantidade;
+    }
+    for (const item of input) {
+      // O tipo de ingresso precisa pertencer a este evento: sem isso o ingresso seria criado com valor zero.
       const tipo = this.props.tiposIngresso.find((t) => t.uuid() === item.tipoIngressoUuid);
-      if (tipo && !tipo.temVagaDisponivel(item.quantidade)) {
+      if (!tipo) throw new ApiError("Tipo de ingresso não encontrado para este evento", 400);
+      // Soma todas as linhas do mesmo tipo para não burlar o limite de vagas repetindo o tipo no pedido.
+      const quantidadeTotalDoTipo = input.filter((i) => i.tipoIngressoUuid === item.tipoIngressoUuid).reduce((total, i) => total + i.quantidade, 0);
+      if (!tipo.temVagaDisponivel(quantidadeTotalDoTipo)) {
         throw new ApiError(`Não tem vaga disponível para o tipo de ingresso: ${tipo.nome()}`, 400);
       }
-      if (tipo) valorBruto += tipo.preco() * item.quantidade;
-      const gerarQtd = tipo?.gerarQuantidadeIngressos() ?? 1;
+      valorBruto += tipo.preco() * item.quantidade;
+      const gerarQtd = tipo.gerarQuantidadeIngressos() ?? 1;
       for (let i = 0; i < item.quantidade; i++) {
         if (gerarQtd > 1) {
           for (let j = 0; j < gerarQtd; j++) {

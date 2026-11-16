@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { AdminMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 import { NotificacaoController } from "./notificacao.controller";
 import { EnviarSmsUsecase } from "src/@modules/notificacao/sms/enviarSms.usecase";
@@ -38,6 +39,6 @@ import { NotificacaoGateway } from "src/@modules/notificacao/notificacaoGateway"
 })
 export class NotificacaoModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes("notificacoes/*");
+    consumer.apply(JwtAuthMiddleware, AdminMiddleware).forRoutes(NotificacaoController);
   }
 }

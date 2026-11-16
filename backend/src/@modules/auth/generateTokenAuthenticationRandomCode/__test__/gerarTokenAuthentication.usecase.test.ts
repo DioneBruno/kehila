@@ -64,6 +64,9 @@ describe("Deve testar GerarTokenAuthenticationUsecase", () => {
     expect(payload.user.uuid).toBe(userUuid);
     expect(payload.user.cpf).toBe(username);
     expect(payload.company.uuid).toBe(companyUuid);
+
+    // Código é de uso único
+    await expect(usecase.execute({ companyUuid, username, code })).rejects.toThrow("Código inválido ou expirado");
   });
 
   test("Deve lançar erro quando código não existe no cache", async () => {
@@ -76,5 +79,15 @@ describe("Deve testar GerarTokenAuthenticationUsecase", () => {
 
     const usecase = new GerarTokenAuthenticationUsecase(repo);
     await expect(usecase.execute({ companyUuid, username, code: "000000" })).rejects.toThrow("Código inválido");
+  });
+
+  test("Deve descartar o código após várias tentativas inválidas", async () => {
+    await repo.salvarCodigoNoCache(companyUuid, username, "654321", userUuid);
+    const usecase = new GerarTokenAuthenticationUsecase(repo);
+    for (let i = 0; i < 5; i++) {
+      await expect(usecase.execute({ companyUuid, username, code: "000000" })).rejects.toThrow("Código inválido");
+    }
+    expect(await repo.buscarCodigoNoCache(companyUuid, username)).toBeNull();
+    await expect(usecase.execute({ companyUuid, username, code: "654321" })).rejects.toThrow("Código inválido ou expirado");
   });
 });

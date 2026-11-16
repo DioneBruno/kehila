@@ -6,7 +6,7 @@
     </div>
 
     <div v-else class="q-gutter-md">
-      <div class="ql-editor" style="padding: 0" v-html="evento.descricao" />
+      <div class="ql-editor" style="padding: 0" v-html="sanitizeHtml(evento.descricao)" />
       <div v-for="lote in evento.lotes" :key="lote.uuid">
         <!-- <div class="text-grey-8">Opções para ingressos</div> -->
         <div class="row items-center q-mb-sm">
@@ -92,6 +92,7 @@
 
 <script lang="ts">
 import { usePedidoStore } from "src/stores/pedido";
+import { sanitizeHtml } from "src/shared/sanitizeHtml";
 import { computed, defineComponent, reactive, toRefs } from "vue";
 import "quill/dist/quill.snow.css";
 
@@ -141,6 +142,7 @@ export default defineComponent({
     }
 
     return {
+      sanitizeHtml,
       ...toRefs(data),
       formatarMoeda,
       aumentar,

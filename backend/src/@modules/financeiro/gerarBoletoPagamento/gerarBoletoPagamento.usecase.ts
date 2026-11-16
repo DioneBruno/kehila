@@ -7,6 +7,7 @@ import { GerarBoletoPagamentoRepository } from "./gerarBoletoPagamentoRepository
 import { ApiError } from "src/@modules/shared/apiError";
 
 export type GerarBoletoPagamentoInput = {
+  companyUuid: string;
   pagamentoUuid: string;
   vencimento?: string;
 };
@@ -15,7 +16,8 @@ export class GerarBoletoPagamentoUsecase {
   constructor(readonly repo: GerarBoletoPagamentoRepository) {}
 
   async execute(input: GerarBoletoPagamentoInput) {
-    const pagamento = await this.repo.buscarPagamento(input.pagamentoUuid);
+    if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
+    const pagamento = await this.repo.buscarPagamento(input.companyUuid, input.pagamentoUuid);
     if (!pagamento) throw new ApiError("Pagamento não encontrado", 450);
     if (input.vencimento) pagamento.setVencimento(input.vencimento);
     const dias = ApiDate.diff(ApiDate.now(), pagamento.vencimento(), "days");

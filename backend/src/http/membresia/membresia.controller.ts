@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { ApiError } from "src/@modules/shared/apiError";
+import { exigirAdmin } from "../middleware/perfil.middleware";
 import { MembresiaQuery } from "src/@modules/membresia/membresia.query";
 import { IncluirMembroUsecase } from "src/@modules/membresia/incluirMembro/incluirMembro.usecase";
 import { AlterarMembroUsecase } from "src/@modules/membresia/alterarMembro/alterarMembro.usecase";
@@ -78,6 +79,7 @@ export class MembresiaController {
 
   @Delete(":uuid")
   async deletar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    exigirAdmin(req);
     await this.deletarMembroUsecase.execute({ companyUuid: req.companyUuid, membroUuid: uuid });
     return res.status(200).json({ success: true });
   }
@@ -111,6 +113,7 @@ export class MembresiaController {
 
   @Post(":uuid/usuario")
   async criarUsuario(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    exigirAdmin(req);
     const resultado = await this.criarUsuarioUsecase.execute({
       companyUuid: req.companyUuid,
       membroUuid: uuid,

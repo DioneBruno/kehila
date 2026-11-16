@@ -14,7 +14,7 @@ export class GerarCobrancaRepository {
   }
 
   async buscarUsuario(userUuid: string): Promise<UsuarioEntity | null> {
-    const [usuarioModel] = await this.connectionHub.database!.query(`SELECT * FROM auth_users WHERE uuid = '${userUuid}'`);
+    const [usuarioModel] = await this.connectionHub.database!.query(`SELECT * FROM auth_users WHERE uuid = $1`, [userUuid]);
     if (!usuarioModel) return null;
     const cartoes = await this.connectionHub.database?.query(
       `SELECT uuid, token
@@ -98,13 +98,15 @@ export class GerarCobrancaRepository {
     await this.connectionHub.database!.query(
       `UPDATE financeiro_cartao_credito
       SET atual = false
-      WHERE user_uuid = '${cobranca.userUuid()}'`,
+      WHERE user_uuid = $1`,
+      [cobranca.userUuid()],
     );
     await this.connectionHub.database!.query(
       `UPDATE financeiro_cartao_credito
       SET atual = true
-      WHERE user_uuid = '${cobranca.userUuid()}'
-        AND uuid = '${cartaoUuid}'`,
+      WHERE user_uuid = $1
+        AND uuid = $2`,
+      [cobranca.userUuid(), cartaoUuid],
     );
   }
 }

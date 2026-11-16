@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { InternoMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 
 import { MembresiaController } from "./membresia.controller";
@@ -46,6 +47,6 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class MembresiaModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(MembresiaController);
+    consumer.apply(JwtAuthMiddleware, InternoMiddleware).forRoutes(MembresiaController);
   }
 }

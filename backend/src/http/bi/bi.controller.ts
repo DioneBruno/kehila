@@ -4,6 +4,7 @@ import { BiEditarUsecase } from "src/@modules/bi/biEditar.usecase";
 import { BiIncluirUsecase } from "src/@modules/bi/biIncluir.usecase";
 import { BiMontarUsecase } from "src/@modules/bi/biMontar.usecase";
 import { BiRepository } from "src/@modules/bi/biRepostiory";
+import { exigirAdmin } from "../middleware/perfil.middleware";
 
 @Controller("bi")
 export class BiController {
@@ -24,6 +25,7 @@ export class BiController {
 
   @Post("salvar")
   async biIncluir(@Req() request: Request | any, @Res() response: Response, @Body() body: any) {
+    exigirAdmin(request);
     const companyUuid = request.companyUuid;
     const input = {
       companyUuid,
@@ -46,8 +48,9 @@ export class BiController {
   }
 
   @Delete(":uuid")
-  async biDelete(@Req() request: Request, @Res() response: Response, @Param("uuid") uuid: string) {
-    await this.biRepository.biDelete(uuid);
+  async biDelete(@Req() request: Request | any, @Res() response: Response, @Param("uuid") uuid: string) {
+    exigirAdmin(request);
+    await this.biRepository.biDelete(request.companyUuid, uuid);
     response.status(HttpStatus.OK).send({ message: "BI removido com sucesso." });
   }
 

@@ -6,6 +6,7 @@ import { BiRepository } from "src/@modules/bi/biRepostiory";
 import { BiIncluirUsecase } from "src/@modules/bi/biIncluir.usecase";
 import { BiEditarUsecase } from "src/@modules/bi/biEditar.usecase";
 import { BiMontarUsecase } from "src/@modules/bi/biMontar.usecase";
+import { InternoMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 import { BiGatewayMetabase } from "src/@modules/bi/biGateway.metabase";
 
@@ -45,6 +46,6 @@ import { BiGatewayMetabase } from "src/@modules/bi/biGateway.metabase";
 })
 export class BiModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(BiController);
+    consumer.apply(JwtAuthMiddleware, InternoMiddleware).forRoutes(BiController);
   }
 }

@@ -57,7 +57,8 @@ export class NotificarVencimentoPagamentoRepository {
     return pagamentos;
   }
 
-  async buscarPagamentosPorUuids(pagamentosUuid: string[]): Promise<PagamentoEntity[]> {
+  async buscarPagamentosPorUuids(pagamentosUuid: string[], companyUuid?: string): Promise<PagamentoEntity[]> {
+    if (!Array.isArray(pagamentosUuid)) return [];
     const pagamentosModel = await this.connectionHub.database?.query(
       `
       SELECT
@@ -77,6 +78,7 @@ export class NotificarVencimentoPagamentoRepository {
       WHERE pagamentos.deleted_at IS NULL
         AND cobrancas.deleted_at IS NULL
         AND pagamentos.uuid = ANY($1)
+        AND ($2::text IS NULL OR pagamentos.company_uuid::text = $2::text)
       GROUP BY
         pagamentos.uuid,
         pagamentos.company_uuid,
@@ -86,7 +88,7 @@ export class NotificarVencimentoPagamentoRepository {
         cobrancas.pagador_nome,
         cobrancas.pagador_email
       `,
-      [pagamentosUuid],
+      [pagamentosUuid, companyUuid ?? null],
     );
     const pagamentos = [] as PagamentoEntity[];
     for (const pagamentoModel of pagamentosModel) {

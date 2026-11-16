@@ -25,6 +25,8 @@ export class GerarCobrancaUsecase {
 
     const pedido = await this.repo.buscarPedido(input.companyUuid, input.pedidoUuid);
     if (!pedido) throw new ApiError("Pedido não encontrado", 404);
+    // Só o dono do pedido pode gerar a cobrança (a cobrança por cartão usa os cartões do dono do pedido).
+    if (!input.userUuid || pedido.userUuid() !== input.userUuid) throw new ApiError("Pedido não encontrado", 404);
 
     if (pedido.dataLimitePagamento()) {
       const dataLimite = pedido.dataLimitePagamento() as string;

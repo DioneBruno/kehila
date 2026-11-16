@@ -12,11 +12,15 @@ export class JwtAuthMiddleware implements NestMiddleware {
 
     const token = authHeader.slice(7);
     const payload = ApiJwt.tokenDecoding(token);
+    if (!payload || !payload.user?.uuid || !payload.company?.uuid) {
+      throw new ApiError("Token de autenticação inválido ou expirado", 401);
+    }
 
-    req["userUuid"] = payload.user?.uuid;
-    req["userName"] = payload.user?.name;
-    req["userPosition"] = payload.user?.position;
-    req["companyUuid"] = payload.company?.uuid;
+    req["userUuid"] = payload.user.uuid;
+    req["userName"] = payload.user.name;
+    req["userPosition"] = payload.user.position ?? null;
+    req["userRoles"] = Array.isArray(payload.user.roles) ? payload.user.roles : [];
+    req["companyUuid"] = payload.company.uuid;
 
     next();
   }

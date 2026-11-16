@@ -45,6 +45,23 @@ export class EditarUsuarioRepository {
     return !!row;
   }
 
+  /** Usuários são globais: o mesmo login pode pertencer a várias igrejas. */
+  async vinculadoAOutrasEmpresas(companyUuid: string, usuarioUuid: string): Promise<boolean> {
+    const [row] = await this.connectionHub.database!.query(
+      `SELECT 1 FROM auth_users_companies
+      WHERE deleted_at IS NULL
+        AND user_uuid = $1
+        AND company_uuid <> $2
+      LIMIT 1`,
+      [usuarioUuid, companyUuid],
+    );
+    return !!row;
+  }
+
+  async dadosDeAcesso(usuarioUuid: string): Promise<{ email: string | null; cpf: string | null; phone: string | null }[]> {
+    return this.connectionHub.database!.query(`SELECT email, cpf, phone FROM auth_users WHERE uuid = $1`, [usuarioUuid]);
+  }
+
   async atualizar(companyUuid: string, usuarioUuid: string, data: EditarUsuarioData): Promise<void> {
     await this.atualizarUsuario(usuarioUuid, data);
     await this.atualizarVinculoEmpresa(companyUuid, usuarioUuid, data);

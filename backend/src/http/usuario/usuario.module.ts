@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { AdminMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 
 import { UsuarioController } from "./usuario.controller";
@@ -42,6 +43,6 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class UsuarioModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware).forRoutes(UsuarioController);
+    consumer.apply(JwtAuthMiddleware, AdminMiddleware).forRoutes(UsuarioController);
   }
 }

@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { EventosController } from "./eventos.controller";
 import { LotesController } from "./lotes.controller";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { AdminMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 
 import { CriarEventoUsecase } from "src/@modules/portalEventos/eventos/criarEvento/criarEvento.usecase";
@@ -94,6 +95,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 export class PortalEventosModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DominioMiddleware).forRoutes(PublicoController);
-    consumer.apply(JwtAuthMiddleware).forRoutes(EventosController, LotesController, PedidosController);
+    consumer.apply(JwtAuthMiddleware).forRoutes(PedidosController);
+    consumer.apply(JwtAuthMiddleware, AdminMiddleware).forRoutes(EventosController, LotesController);
   }
 }

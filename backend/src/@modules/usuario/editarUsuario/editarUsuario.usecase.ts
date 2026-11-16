@@ -48,6 +48,26 @@ export class EditarUsuarioUsecase {
     const existe = await this.repo.existe(input.companyUuid, input.usuarioUuid);
     if (!existe) throw new ApiError("Usuário não encontrado", 404);
 
+    // Dados de acesso (senha, e-mail, CPF, telefone) valem para todas as igrejas do usuário.
+    // Se ele também pertence a outra igreja, um admin desta não pode alterá-los (evita tomar a conta em outra igreja).
+    const alteraDadosDeAcesso = [input.password, input.email, input.cpf, input.phone].some(
+      (valor) => valor !== undefined && valor !== null && valor !== "",
+    );
+    if (alteraDadosDeAcesso && (await this.repo.vinculadoAOutrasEmpresas(input.companyUuid, input.usuarioUuid))) {
+      const [atual] = await this.repo.dadosDeAcesso(input.usuarioUuid);
+      const mudou =
+        !!input.password ||
+        (input.email !== undefined && (input.email?.trim() || null) !== (atual?.email ?? null)) ||
+        (input.cpf !== undefined && (input.cpf?.trim() || null) !== (atual?.cpf ?? null)) ||
+        (input.phone !== undefined && (input.phone || null) !== (atual?.phone ?? null));
+      if (mudou) {
+        throw new ApiError(
+          "Este usuário também pertence a outra igreja; senha, e-mail, CPF e telefone só podem ser alterados pelo próprio usuário.",
+          403,
+        );
+      }
+    }
+
     await this.repo.atualizar(input.companyUuid, input.usuarioUuid, {
       name: input.name?.trim(),
       cpf: input.cpf?.trim(),

@@ -5,6 +5,7 @@ import { CriarPedidoUsecase } from "src/@modules/portalEventos/pedidos/criarPedi
 import { EditarFormIngressoUsecase } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngresso.usecase";
 import { GerarCobrancaUsecase } from "src/@modules/portalEventos/pedidos/gerarCobranca/gerarCobranca.usecase";
 import { PortalEventosQuery } from "src/@modules/portalEventos/portalEventos.query";
+import { ehAdmin } from "../middleware/perfil.middleware";
 
 @Controller("pedidos")
 export class PedidosController {
@@ -60,7 +61,11 @@ export class PedidosController {
 
   @Post(":pedidoUuid")
   async buscar(@Req() req: Request | any, @Body() body: any, @Param("pedidoUuid") pedidoUuid: string, @Res() res: Response) {
-    const response = await this.portalEventosQuery.buscarPedido(pedidoUuid);
+    const response = await this.portalEventosQuery.buscarPedido(pedidoUuid, {
+      companyUuid: req.companyUuid,
+      userUuid: req.userUuid,
+      admin: ehAdmin(req),
+    });
     return res.status(200).json(response);
   }
 
@@ -73,6 +78,9 @@ export class PedidosController {
   @Post(":pedidoUuid/editar-form-ingresso")
   async editarFormIngresso(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
     const input = {
+      companyUuid: req.companyUuid,
+      userUuid: req.userUuid,
+      admin: ehAdmin(req),
       pedidoUuid: body.pedidoUuid,
       ingressoUuid: body.ingressoUuid,
       pessoaNome: body.pessoaNome,

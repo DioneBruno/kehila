@@ -5,8 +5,11 @@ import { ApiDate } from "src/@modules/shared/apiDate";
 export class InformarPagamentoManualRepository {
   constructor(readonly connectionHub: ConnectionHub) {}
 
-  async buscarPagamento(userUuid: string, pagamentoUuid: string) {
-    const [pagamentoModel] = await this.connectionHub.database?.query(`SELECT * FROM financeiro_pagamentos WHERE uuid = $1`, [pagamentoUuid]);
+  async buscarPagamento(companyUuid: string, pagamentoUuid: string) {
+    const [pagamentoModel] = await this.connectionHub.database?.query(
+      `SELECT * FROM financeiro_pagamentos WHERE uuid = $1 AND company_uuid = $2 AND deleted_at IS NULL`,
+      [pagamentoUuid, companyUuid],
+    );
     if (!pagamentoModel) return;
     const pagamento = new PagamentoEntity({
       uuid: pagamentoModel.uuid,

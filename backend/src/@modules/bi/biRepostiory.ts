@@ -75,8 +75,8 @@ export class BiRepository {
       titulo,
       descricao,
       parametros
-    FROM bi_sumario WHERE uuid = $1`,
-      [uuid],
+    FROM bi_sumario WHERE uuid = $1 AND company_uuid = $2 AND deleted_at IS NULL`,
+      [uuid, companyUuid],
     );
     if (!biModel) return null;
     const bi = new BiEntity({
@@ -101,12 +101,13 @@ export class BiRepository {
         titulo = $5,
         descricao = $6,
         parametros = $7,
-        roles = $8`,
+        roles = $8
+      WHERE bi_sumario.company_uuid = EXCLUDED.company_uuid`,
       [bi.uuid(), bi.companyUuid(), bi.gateway(), bi.referencia(), bi.titulo(), bi.descricao(), bi.parametros(), JSON.stringify(bi.roles())],
     );
   }
 
-  async biDelete(uuid: string) {
-    await this.dataSource.query(`UPDATE bi_sumario SET deleted_at = NOW() WHERE uuid = $1`, [uuid]);
+  async biDelete(companyUuid: string, uuid: string) {
+    await this.dataSource.query(`UPDATE bi_sumario SET deleted_at = NOW() WHERE uuid = $1 AND company_uuid = $2`, [uuid, companyUuid]);
   }
 }

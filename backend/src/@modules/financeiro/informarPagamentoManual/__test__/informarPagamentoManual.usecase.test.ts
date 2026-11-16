@@ -40,6 +40,7 @@ describe("Deve testar InformarPagamentoManualUsecase", () => {
 
     const usecase = new InformarPagamentoManualUsecase(repo);
     const input = {
+      companyUuid,
       userUuid,
       pagamentoUuid,
       valorPago: 145.78,
@@ -70,6 +71,7 @@ describe("Deve testar InformarPagamentoManualUsecase", () => {
 
     const usecase = new InformarPagamentoManualUsecase(repo);
     const input = {
+      companyUuid,
       userUuid,
       pagamentoUuid,
       valorPago: 145.0,
@@ -91,6 +93,7 @@ describe("Deve testar InformarPagamentoManualUsecase", () => {
 
     const usecase = new InformarPagamentoManualUsecase(repo);
     const input = {
+      companyUuid,
       userUuid,
       pagamentoUuid,
       valorPago: 145.0,

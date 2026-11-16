@@ -46,6 +46,7 @@ export class PagamentosController {
   @Post(":uuid/gerarBoleto")
   async gerarBoletoPagamento(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
     await this.gerarBoletoPagamentoUsecase.execute({
+      companyUuid: req.companyUuid,
       pagamentoUuid: uuid,
       vencimento: body.vencimento,
     });
@@ -55,6 +56,7 @@ export class PagamentosController {
   @Post(":uuid/informarPagamentoManual")
   async informarPagamentoManual(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
     const input = {
+      companyUuid: req.companyUuid,
       userUuid: req.userUuid,
       pagamentoUuid: uuid,
       valorPago: body.valorPago,

@@ -63,14 +63,13 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
     const usecase = new EnviarCodigoValidadorUsecase(repo);
     const result = await usecase.execute({ companyUuid, username });
 
-    expect(result.code).toBeDefined();
-    expect(result.code).toMatch(/^\d{6}$/);
+    expect((result as any).code).toBeUndefined();
     expect(result.email).toBe("e*****o@endereco.com");
     expect(result.phone).toBe("65985#####9");
 
     const cached = await repo.buscarCodigoNoCache(companyUuid, username);
     expect(cached).not.toBeNull();
-    expect(cached!.code).toBe(result.code);
+    expect(cached!.code).toMatch(/^\d{6}$/);
     expect(cached!.userUuid).toBe(userUuid);
   });
 
@@ -80,12 +79,13 @@ describe("Deve testar EnviarCodigoValidadorUsecase", () => {
     sinon.stub(repo, "enviarSms").resolves();
 
     const usecase = new EnviarCodigoValidadorUsecase(repo);
-    const result = await usecase.execute({ companyUuid, username });
+    await usecase.execute({ companyUuid, username });
+    const cached = await repo.buscarCodigoNoCache(companyUuid, username);
 
     expect(enviarEmailStub.calledOnce).toBe(true);
     expect(enviarEmailStub.firstCall.args[0]).toBe(companyUuid);
     expect(enviarEmailStub.firstCall.args[1]).toBe(userEmail);
-    expect(enviarEmailStub.firstCall.args[2]).toBe(result.code);
+    expect(enviarEmailStub.firstCall.args[2]).toBe(cached!.code);
   });
 
   test("Não deve enviar o código via SMS (envio desabilitado)", async () => {

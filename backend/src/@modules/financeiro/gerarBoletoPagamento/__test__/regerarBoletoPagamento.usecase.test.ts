@@ -69,6 +69,7 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
 
     const usecase = new GerarBoletoPagamentoUsecase(repo);
     const input = {
+      companyUuid,
       pagamentoUuid,
     };
     await usecase.execute(input);
@@ -131,6 +132,7 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
 
     const usecase = new GerarBoletoPagamentoUsecase(repo);
     const input = {
+      companyUuid,
       pagamentoUuid,
       vencimento: "2026-07-15",
     };
@@ -194,6 +196,7 @@ describe("Deve testar RegerarBoletoPagamentoUsecase", () => {
 
     const usecase = new GerarBoletoPagamentoUsecase(repo);
     const input = {
+      companyUuid,
       pagamentoUuid,
     };
     await expect(usecase.execute(input)).rejects.toThrow("Data de vencimento deve ser maior que hoje.");
