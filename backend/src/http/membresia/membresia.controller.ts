@@ -117,6 +117,7 @@ export class MembresiaController {
       password: body.password || undefined,
       position: body.position || undefined,
       roles: Array.isArray(body.roles) ? body.roles : undefined,
+      apriscoUuid: body.apriscoUuid || undefined,
     });
     return res.status(201).json({ success: true, data: resultado });
   }

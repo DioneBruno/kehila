@@ -30,6 +30,7 @@ export type CriarUsuarioDoMembroData = {
   password?: string;
   position?: string;
   roles: string[];
+  apriscoUuid?: string;
 };
 
 export class CriarUsuarioRepository {
@@ -59,6 +60,14 @@ export class CriarUsuarioRepository {
       [companyUuid, membroUuid],
     );
     return (row as MembroParaUsuario | undefined) ?? null;
+  }
+
+  async apriscoExiste(companyUuid: string, apriscoUuid: string): Promise<boolean> {
+    const [row] = await this.connections.database.query(`SELECT uuid FROM apriscos WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`, [
+      companyUuid,
+      apriscoUuid,
+    ]);
+    return !!row;
   }
 
   /** auth_users é global (um usuário pode pertencer a várias empresas): procura por CPF ou e-mail. */
@@ -133,6 +142,20 @@ export class CriarUsuarioRepository {
         `,
         [randomUUID(), userUuid, membro.companyUuid, true, data.position ?? null, JSON.stringify(data.roles)],
       );
+
+      if (data.apriscoUuid) {
+        await manager.query(
+          `
+          INSERT INTO aprisco_integrantes (uuid, company_uuid, aprisco_uuid, pessoa_uuid, papel)
+          SELECT $1, $2, $3, $4, 'MEMBRO'
+          WHERE NOT EXISTS (
+            SELECT 1 FROM aprisco_integrantes
+            WHERE deleted_at IS NULL AND company_uuid = $2 AND aprisco_uuid = $3 AND pessoa_uuid = $4
+          )
+          `,
+          [randomUUID(), membro.companyUuid, data.apriscoUuid, membro.uuid],
+        );
+      }
     });
 
     return { uuid: userUuid };

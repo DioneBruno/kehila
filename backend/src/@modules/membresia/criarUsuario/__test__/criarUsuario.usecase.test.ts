@@ -6,13 +6,17 @@ import { IncluirMembroRepository } from "../../incluirMembro/incluirMembroReposi
 import { CriarUsuarioUsecase } from "../criarUsuario.usecase";
 import { CriarUsuarioRepository } from "../criarUsuarioRepository";
 import { MembresiaQuery } from "../../membresia.query";
+import { IncluirApriscoUsecase } from "src/@modules/aprisco/incluirAprisco/incluirAprisco.usecase";
+import { IncluirApriscoRepository } from "src/@modules/aprisco/incluirAprisco/incluirApriscoRepository";
 
 const companyUuid = "4b8e2d61-9a3c-4f57-8e1b-7c0d5a2f9e14";
 const outraCompanyUuid = "d1f7a3c9-2e6b-4a85-b0c4-8e3f1d7a6b52";
-const emails = ["membro.usuario@kehila.test", "membro.reaproveitado@kehila.test"];
+const emails = ["membro.usuario@kehila.test", "membro.reaproveitado@kehila.test", "membro.aprisco@kehila.test"];
 let connections: ConnectionHub;
 
 async function limpar() {
+  await dataSource.query(`DELETE FROM aprisco_integrantes WHERE company_uuid IN ($1, $2)`, [companyUuid, outraCompanyUuid]);
+  await dataSource.query(`DELETE FROM apriscos WHERE company_uuid IN ($1, $2)`, [companyUuid, outraCompanyUuid]);
   await dataSource.query(`DELETE FROM auth_users_companies WHERE company_uuid IN ($1, $2)`, [companyUuid, outraCompanyUuid]);
   await dataSource.query(`DELETE FROM auth_users WHERE email = ANY($1)`, [emails]);
   await dataSource.query(`DELETE FROM auth_pessoas WHERE company_uuid IN ($1, $2)`, [companyUuid, outraCompanyUuid]);
@@ -59,6 +63,17 @@ describe("Deve testar CriarUsuarioUsecase (membresia)", () => {
     const vinculos = await dataSource.query(`SELECT * FROM auth_users_companies WHERE user_uuid = $1`, [uuid]);
     expect(vinculos).toHaveLength(1);
     expect(vinculos[0]).toMatchObject({ company_uuid: companyUuid, is_accepted: true, roles: ["MEMBRO"] });
+  });
+
+  test("Deve vincular o membro como integrante do aprisco informado", async () => {
+    const { uuid: apriscoUuid } = await new IncluirApriscoUsecase(new IncluirApriscoRepository(connections)).execute({ companyUuid, nome: "Aprisco Usuário" });
+    const { uuid: membroUuid } = await incluirMembro({ companyUuid, nome: "Membro Aprisco", email: emails[2] });
+
+    await usecase().execute({ companyUuid, membroUuid, apriscoUuid });
+
+    const integrantes = await dataSource.query(`SELECT * FROM aprisco_integrantes WHERE deleted_at IS NULL AND pessoa_uuid = $1`, [membroUuid]);
+    expect(integrantes).toHaveLength(1);
+    expect(integrantes[0]).toMatchObject({ company_uuid: companyUuid, aprisco_uuid: apriscoUuid, papel: "MEMBRO" });
   });
 
   test("Deve lançar erro se o membro já possui usuário na empresa", async () => {

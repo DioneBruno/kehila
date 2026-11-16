@@ -7,6 +7,8 @@ export type CriarUsuarioInput = {
   password?: string;
   position?: string;
   roles?: string[];
+  /** Se informado, o membro também é vinculado como integrante (MEMBRO) deste aprisco */
+  apriscoUuid?: string;
 };
 
 export type CriarUsuarioOutput = {
@@ -16,6 +18,7 @@ export type CriarUsuarioOutput = {
 /**
  * Cria um usuário (auth_users) a partir dos dados de um Membro (auth_pessoas)
  * e o vincula à empresa do membro (auth_users_companies).
+ * Se informado apriscoUuid, o membro também é vinculado como integrante do aprisco.
  * Se já existir um usuário com o mesmo CPF/e-mail em outra empresa, ele é reaproveitado e apenas vinculado.
  */
 export class CriarUsuarioUsecase {
@@ -36,12 +39,17 @@ export class CriarUsuarioUsecase {
     const existente = await this.repo.buscarUsuarioExistente(input.companyUuid, cpf, email);
     if (existente?.vinculadoNaEmpresa) throw new ApiError("Já existe um usuário desta empresa com este CPF ou e-mail");
 
+    if (input.apriscoUuid && !(await this.repo.apriscoExiste(input.companyUuid, input.apriscoUuid))) {
+      throw new ApiError("Aprisco não encontrado", 404);
+    }
+
     return this.repo.criar({
       membro: { ...membro, nome: membro.nome.trim(), cpf, email },
       usuarioExistenteUuid: existente?.uuid,
       password: input.password,
       position: input.position,
       roles: input.roles ?? [],
+      apriscoUuid: input.apriscoUuid,
     });
   }
 }
