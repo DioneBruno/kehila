@@ -30,6 +30,10 @@
                 </q-item-section>
               </q-item>
               <q-separator />
+              <q-item v-if="dispositivoConfiavel" v-close-popup clickable @click="esquecerDispositivo">
+                <q-item-section avatar><q-icon name="phonelink_erase" /></q-item-section>
+                <q-item-section>Esquecer este dispositivo</q-item-section>
+              </q-item>
               <q-item v-close-popup clickable class="text-negative" @click="sair">
                 <q-item-section avatar><q-icon name="logout" /></q-item-section>
                 <q-item-section>Sair</q-item-section>
@@ -96,6 +100,21 @@
 
           <q-separator class="q-my-md" />
 
+          <q-item
+            v-if="dispositivoConfiavel"
+            v-ripple
+            clickable
+            class="app-nav__item"
+            @click="esquecerDispositivo"
+          >
+            <q-item-section avatar>
+              <q-icon name="phonelink_erase" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Esquecer este dispositivo</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item v-ripple clickable class="app-nav__item text-negative" @click="sair">
             <q-item-section avatar>
               <q-icon name="logout" />
@@ -138,13 +157,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, toRefs, watchEffect } from "vue";
+import { computed, defineComponent, inject, onMounted, reactive, ref, toRefs, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
 import { MainLayoutService } from "./MainLayout.service";
 import { useLayoutStore } from "src/stores/layout";
 import TokenDecode from "src/@modules/auth/tokenDecode";
+import type { LoginHttp } from "src/@modules/auth/login.http";
 
 type MenuItem = {
   label: string;
@@ -250,10 +270,27 @@ export default defineComponent({
       if (titulo) document.title = titulo;
     });
 
+    const $loginHttp = inject<LoginHttp>("loginHttp");
+    const dispositivoConfiavel = ref(!!$authCookies.getDeviceToken());
+
+    // Sair mantém a confiança no dispositivo: a próxima visita entra direto.
     function sair() {
       $authCookies.deleteToken();
-      $authCookies.deleteRefreshToken();
       void $router.push({ name: "login" });
+    }
+
+    async function esquecerDispositivo() {
+      const deviceToken = $authCookies.getDeviceToken();
+      $authCookies.deleteDeviceToken();
+      dispositivoConfiavel.value = false;
+      if (deviceToken) {
+        try {
+          await $loginHttp?.trustedDeviceRevoke(deviceToken);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      sair();
     }
 
     async function ping() {
@@ -274,6 +311,8 @@ export default defineComponent({
       alternarDrawer,
       aoNavegar,
       sair,
+      dispositivoConfiavel,
+      esquecerDispositivo,
     };
   },
 });

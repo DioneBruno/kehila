@@ -88,69 +88,63 @@ export async function loginComDispositivoConfiavel(
 
 function redirectToLogin() {
   const cookie = new AuthCookiesQuasar();
+  // Só apaga a sessão: o token do dispositivo confiável é apagado apenas quando o servidor o recusa.
   cookie.deleteToken();
-  cookie.deleteRefreshToken();
   Loading.hide();
   if (window.location.href.includes("publico")) return; // TODO: Rever essa logica
   window.location.href = "#/login";
 }
 
-async function tryRefreshToken(originalRequest: AxiosRequestConfig): Promise<any> {
-  const cookie = new AuthCookiesQuasar();
-  const refreshToken = cookie.getRefreshToken();
+/** Rotas de login: um 401 nelas é credencial errada, não sessão expirada. */
+const ROTAS_SEM_RENOVACAO = ["token-generate", "random-code-authentication", "trusted-device"];
 
-  if (!refreshToken) {
+function deveTentarRenovar(request: AxiosRequestConfig & { _renovado?: boolean }): boolean {
+  if (request._renovado) return false;
+  const url = request.url ?? "";
+  return !ROTAS_SEM_RENOVACAO.some((rota) => url.includes(rota));
+}
+
+async function tryRefreshToken(originalRequest: AxiosRequestConfig & { _renovado?: boolean }): Promise<any> {
+  const cookie = new AuthCookiesQuasar();
+  const deviceToken = cookie.getDeviceToken();
+
+  if (!deviceToken) {
     redirectToLogin();
     return null;
   }
 
-  // Se já existe um refresh em andamento, enfileira e aguarda
+  const repetir = (token: string) => {
+    originalRequest._renovado = true;
+    originalRequest.headers = { ...originalRequest.headers, Authorization: `Bearer ${token}` };
+    return api(originalRequest);
+  };
+
+  // Se já existe uma renovação em andamento, enfileira e aguarda
   if (isRefreshing) {
     return new Promise((resolve, reject) => {
-      pendingRequests.push({
-        resolve: (token) => {
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${token}`,
-          };
-          resolve(api(originalRequest));
-        },
-        reject,
-      });
+      pendingRequests.push({ resolve: (token) => resolve(repetir(token)), reject });
     });
   }
 
   isRefreshing = true;
 
   try {
-    const response = await axios.post(
-      `${urlApi}/auth/refresh-token`,
-      { refreshToken },
-      {
-        headers: {
-          tenant: checkTenant(),
-          platform: checkPlatform(),
-          "Content-Type": "application/json",
-        },
-        validateStatus: () => true,
-      },
-    );
+    const { status, data } = await loginComDispositivoConfiavel(deviceToken);
 
-    if (response.status === 200 || response.status === 201) {
-      const { token, refreshToken: newRefreshToken } = response.data;
-      cookie.setToken(token);
-      if (newRefreshToken) cookie.setRefreshToken(newRefreshToken);
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-      resolvePendingRequests(token);
-      originalRequest.headers = { ...originalRequest.headers, Authorization: `Bearer ${token}` };
-      return api(originalRequest);
+    if (status === 200 && data?.token) {
+      cookie.setToken(data.token);
+      if (data.deviceToken) cookie.setDeviceToken(data.deviceToken);
+      api.defaults.headers.common.Authorization = `Bearer ${data.token}`;
+      resolvePendingRequests(data.token);
+      return repetir(data.token);
     }
 
-    rejectPendingRequests(new Error("Refresh token inválido"));
+    if (status === 401) cookie.deleteDeviceToken();
+    rejectPendingRequests(new Error("Dispositivo não reconhecido"));
     redirectToLogin();
     return null;
   } catch {
-    rejectPendingRequests(new Error("Erro ao renovar token"));
+    rejectPendingRequests(new Error("Erro ao renovar sessão"));
     redirectToLogin();
     return null;
   } finally {
@@ -190,8 +184,8 @@ api.interceptors.response.use(async (config: any) => {
       return;
     } else if (config.data.message === "Usuário bloqueado.") {
       redirectToLogin();
-    } else {
-      // Tenta renovar o token antes de redirecionar para login
+    } else if (deveTentarRenovar(config.config)) {
+      // Tenta renovar a sessão com o dispositivo confiável antes de mandar para o login
       const retryResponse = await tryRefreshToken(config.config);
       if (retryResponse) return retryResponse;
     }
