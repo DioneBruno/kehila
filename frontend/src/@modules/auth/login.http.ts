@@ -17,4 +17,9 @@ export class LoginHttp {
     const response = await this.http.post("random-code-authentication/validate", input);
     return response;
   }
+
+  async trustedDeviceRevoke(deviceToken: string) {
+    const response = await this.http.post("trusted-device/revoke", { deviceToken });
+    return response;
+  }
 }

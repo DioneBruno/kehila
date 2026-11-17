@@ -44,8 +44,16 @@
       </q-input>
     </div>
 
-    <!-- Forgot Password Link -->
-    <div class="col-12 q-my-md">
+    <!-- Trusted device + Forgot Password Link -->
+    <div class="col-12 q-my-md row items-center justify-between no-wrap">
+      <q-checkbox
+        v-model="input.trustDevice"
+        data-cy="trust-device"
+        label="Confiar neste dispositivo"
+        color="primary"
+        dense
+        class="text-grey-8"
+      />
       <div class="text-right text-grey-8">
         <p class="text-subtitle2 cursor-pointer q-ma-none" @click="$emit('recover')">
           Recuperar conta
@@ -133,6 +141,7 @@ export default defineComponent({
         username: "",
         password: "",
         companyUuid: "",
+        trustDevice: false,
       }),
     });
 

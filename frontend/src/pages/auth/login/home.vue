@@ -19,7 +19,10 @@
           </div>
         </q-card-section>
         <q-card-section>
-          <LoginForm />
+          <LoginForm v-if="mostrarFormulario" />
+          <div v-else class="row justify-center q-pa-lg">
+            <q-spinner color="primary" size="40px" />
+          </div>
         </q-card-section>
       </q-card>
     </div>
@@ -27,8 +30,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs, watchEffect } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watchEffect } from "vue";
 import LoginForm from "./loginForm.vue";
+import { LoginService } from "./login.service";
 import { useLayoutStore } from "src/stores/layout.js";
 
 export default defineComponent({
@@ -38,9 +42,16 @@ export default defineComponent({
   },
   setup() {
     const $layoutStore = useLayoutStore();
+    const $service = new LoginService();
 
     const data = reactive({
       layout: computed(() => $layoutStore.layout),
+      mostrarFormulario: ref(false),
+    });
+
+    onMounted(async () => {
+      const entrou = await $service.loginDispositivoConfiavel();
+      if (!entrou) data.mostrarFormulario = true;
     });
 
     watchEffect(() => {

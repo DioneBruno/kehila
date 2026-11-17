@@ -59,6 +59,33 @@ function rejectPendingRequests(error: any) {
   pendingRequests = [];
 }
 
+/**
+ * Troca o token do dispositivo confiável por um JWT. Usa o axios "cru" (sem os
+ * interceptors do `api`) para que um 401 aqui não dispare outra renovação nem notificação.
+ * Devolve o status HTTP (0 em erro de rede) e o corpo da resposta.
+ */
+export async function loginComDispositivoConfiavel(
+  deviceToken: string,
+): Promise<{ status: number; data: any }> {
+  try {
+    const response = await axios.post(
+      `${urlApi}/trusted-device/login`,
+      { deviceToken },
+      {
+        headers: {
+          tenant: checkTenant(),
+          platform: checkPlatform(),
+          "Content-Type": "application/json",
+        },
+        validateStatus: () => true,
+      },
+    );
+    return { status: response.status, data: response.data };
+  } catch {
+    return { status: 0, data: null };
+  }
+}
+
 function redirectToLogin() {
   const cookie = new AuthCookiesQuasar();
   cookie.deleteToken();

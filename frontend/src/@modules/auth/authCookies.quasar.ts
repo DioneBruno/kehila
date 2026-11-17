@@ -1,5 +1,6 @@
 const TOKEN_NAME = "_kehila_token_bearer";
 const REFRESH_TOKEN_NAME = "_kehila_refresh_token";
+const DEVICE_TOKEN_NAME = "_kehila_trusted_device";
 
 export class AuthCookiesQuasar {
   setToken(token: any) {
@@ -26,5 +27,16 @@ export class AuthCookiesQuasar {
   }
   deleteRefreshToken(): void {
     localStorage.removeItem(REFRESH_TOKEN_NAME);
+  }
+  setDeviceToken(token: string): void {
+    localStorage.setItem(DEVICE_TOKEN_NAME, token);
+  }
+  getDeviceToken(): string | null {
+    const token = localStorage.getItem(DEVICE_TOKEN_NAME);
+    if (!token || ["null", "undefined"].includes(token)) return null;
+    return token;
+  }
+  deleteDeviceToken(): void {
+    localStorage.removeItem(DEVICE_TOKEN_NAME);
   }
 }
