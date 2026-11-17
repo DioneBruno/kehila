@@ -17,12 +17,14 @@ class FakeRepo implements TrustedDeviceRepository {
     return row ? { ...row } : null;
   }
   async rotacionar(input: { uuid: string; novoHash: string; hashAnterior: string; agora: Date; expiresAt: Date }) {
-    const row = this.rows.find((r) => r.uuid === input.uuid)!;
+    const row = this.rows.find((r) => r.uuid === input.uuid && r.tokenHash === input.hashAnterior);
+    if (!row) return false;
     row.previousTokenHash = input.hashAnterior;
     row.tokenHash = input.novoHash;
     row.rotatedAt = input.agora;
     row.expiresAt = input.expiresAt;
     row.lastUsedAt = input.agora;
+    return true;
   }
   async revogarPorHash(companyUuid: string, hash: string, agora: Date) {
     for (const r of this.rows) {
@@ -82,6 +84,14 @@ describe("TrustedDeviceUsecase", () => {
     const t = await emitir();
     await usecase.login({ companyUuid: "c1", deviceToken: t });
     avancar(59 * 1000);
+    const r = await usecase.login({ companyUuid: "c1", deviceToken: t });
+    expect(r.token).toBe("jwt-u1");
+    expect(r.deviceToken).toBeUndefined();
+  });
+
+  test("rotação perdida para outra requisição não devolve deviceToken não gravado", async () => {
+    const t = await emitir();
+    repo.rotacionar = async () => false;
     const r = await usecase.login({ companyUuid: "c1", deviceToken: t });
     expect(r.token).toBe("jwt-u1");
     expect(r.deviceToken).toBeUndefined();

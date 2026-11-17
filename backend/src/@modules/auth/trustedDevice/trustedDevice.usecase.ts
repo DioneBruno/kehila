@@ -58,13 +58,15 @@ export class TrustedDeviceUsecase {
     if (!casouAtual) return { token };
 
     const novoToken = gerarDeviceToken();
-    await this.repo.rotacionar({
+    const rotacionou = await this.repo.rotacionar({
       uuid: device.uuid,
       novoHash: hashDeviceToken(novoToken),
       hashAnterior: hash,
       agora,
       expiresAt: this.expiraEm(),
     });
+    // Outra requisição rotacionou primeiro: o token dela é o válido, não devolvemos o nosso.
+    if (!rotacionou) return { token };
     return { token, deviceToken: novoToken };
   }
 

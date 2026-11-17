@@ -11,6 +11,8 @@ import { GerarTokenAuthenticationUsecase } from "src/@modules/auth/generateToken
 import { GenerateTokenAuthenticationRandomCodeRepository } from "src/@modules/auth/generateTokenAuthenticationRandomCode/generateTokenAuthenticationRandomCodeRepository";
 import { EnviarCodigoValidadorUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/enviarCodigoValidador.usecase";
 import { UsuarioQuery } from "src/@modules/usuario/usuario.query";
+import { TrustedDeviceUsecase } from "src/@modules/auth/trustedDevice/trustedDevice.usecase";
+import { TrustedDeviceRepositoryPg } from "src/@modules/auth/trustedDevice/trustedDevice.repository";
 
 @Module({
   imports: [],
@@ -59,12 +61,20 @@ import { UsuarioQuery } from "src/@modules/usuario/usuario.query";
       },
       inject: [GenerateTokenAuthenticationRandomCodeRepository],
     },
+    {
+      provide: TrustedDeviceUsecase,
+      useFactory: (connectionHub: ConnectionHub) => {
+        return new TrustedDeviceUsecase(new TrustedDeviceRepositoryPg(connectionHub));
+      },
+      inject: [ConnectionHub],
+    },
   ],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DominioMiddleware).forRoutes("token-generate");
     consumer.apply(DominioMiddleware).forRoutes("random-code-authentication");
+    consumer.apply(DominioMiddleware).forRoutes("trusted-device/login", "trusted-device/revoke");
     consumer.apply(JwtAuthMiddleware).forRoutes(UserController);
   }
 }

@@ -3,6 +3,8 @@ import type { Request, Response } from "express";
 import { TokenGenerateUseCase } from "src/@modules/auth/generateTokenAutenticationUsernamePassword/tokenGenerate.usecase";
 import { EnviarCodigoValidadorUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/enviarCodigoValidador.usecase";
 import { GerarTokenAuthenticationUsecase } from "src/@modules/auth/generateTokenAuthenticationRandomCode/gerarTokenAuthentication.usecase";
+import { TrustedDeviceUsecase } from "src/@modules/auth/trustedDevice/trustedDevice.usecase";
+import { ApiJwt } from "src/@modules/shared/apiJwt";
 //
 @Controller("")
 export class AuthController {
@@ -10,6 +12,7 @@ export class AuthController {
     readonly tokenGenerateUseCase: TokenGenerateUseCase,
     readonly enviarCodigoValidadorUsecase: EnviarCodigoValidadorUsecase,
     readonly gerarTokenAuthenticationUsecase: GerarTokenAuthenticationUsecase,
+    readonly trustedDeviceUsecase: TrustedDeviceUsecase,
   ) {}
 
   @Post("token-generate")
@@ -19,9 +22,18 @@ export class AuthController {
       username: body.username,
       password: body.password,
     };
-    const token = await this.tokenGenerateUseCase.execute(input);
+    const result: { token: string; deviceToken?: string } = await this.tokenGenerateUseCase.execute(input);
 
-    return res.status(200).json(token);
+    if (body.trustDevice === true) {
+      const payload = ApiJwt.tokenDecoding(result.token);
+      result.deviceToken = await this.trustedDeviceUsecase.emitir({
+        companyUuid: req.companyUuid,
+        userUuid: payload.user.uuid,
+        deviceName: req.headers["user-agent"] ?? null,
+      });
+    }
+
+    return res.status(200).json(result);
   }
 
   @Post("random-code-authentication/generate")
@@ -45,5 +57,25 @@ export class AuthController {
     const token = await this.gerarTokenAuthenticationUsecase.execute(input);
 
     return res.status(200).json(token);
+  }
+
+  @Post("trusted-device/login")
+  async trustedDeviceLogin(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    const result = await this.trustedDeviceUsecase.login({
+      companyUuid: req.companyUuid,
+      deviceToken: body?.deviceToken,
+    });
+
+    return res.status(200).json(result);
+  }
+
+  @Post("trusted-device/revoke")
+  async trustedDeviceRevoke(@Req() req: Request | any, @Body() body: any, @Res() res: Response) {
+    await this.trustedDeviceUsecase.revogar({
+      companyUuid: req.companyUuid,
+      deviceToken: body?.deviceToken,
+    });
+
+    return res.status(204).send();
   }
 }

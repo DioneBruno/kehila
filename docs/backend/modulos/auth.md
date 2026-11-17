@@ -12,7 +12,9 @@
 
 | Método | Rota | Middleware | Descrição |
 |---|---|---|---|
-| POST | `/token-generate` | `DominioMiddleware` | `{ username, password }` → `{ token }` |
+| POST | `/token-generate` | `DominioMiddleware` | `{ username, password, trustDevice? }` → `{ token, deviceToken? }` |
+| POST | `/trusted-device/login` | `DominioMiddleware` | `{ deviceToken }` → `{ token, deviceToken? }` (login sem senha) |
+| POST | `/trusted-device/revoke` | `DominioMiddleware` | `{ deviceToken }` → `204` (sempre) |
 | POST | `/random-code-authentication/generate` | `DominioMiddleware` | `{ username }` → envia código de 6 dígitos por e-mail; responde e-mail/telefone mascarados |
 | POST | `/random-code-authentication/validate` | `DominioMiddleware` | `{ username, code }` → `{ token }` |
 | POST | `/auth/me` | `JwtAuthMiddleware` | payload do token + dados atuais do usuário (`UsuarioQuery.buscarUsuarioPorUuid`) |
@@ -36,6 +38,21 @@ domínio) → `UserEntity.checkPassword` (bcrypt) → `GenerateTokenAuthenticati
 
 O código **nunca** é devolvido na resposta.
 
+### Dispositivo confiável
+Código em `trustedDevice/`. Com `trustDevice: true` no `/token-generate`, o controller chama
+`TrustedDeviceUsecase.emitir`: token aleatório (`randomBytes(32)`, base64url) devolvido como
+`deviceToken`; no banco (`auth_trusted_devices`) fica **só o SHA-256**.
+
+`/trusted-device/login` troca o `deviceToken` por um JWT. Regras (`TrustedDeviceUsecase.login`):
+- precisa ser da empresa do domínio, não revogado, não expirado, usuário e vínculo sem `deleted_at`;
+- a cada uso o token é **rotacionado** (novo `deviceToken` na resposta) e a validade renova
+  para `AUTH_TRUSTED_DEVICE_DAYS` dias (padrão 30);
+- o token anterior ainda vale por **60s** após a rotação (várias abas): responde só `{ token }`;
+- a rotação é condicional (`WHERE token_hash = <anterior>`): se outra requisição rotacionou
+  primeiro, também responde só `{ token }`.
+Qualquer falha → `401 "Dispositivo não reconhecido"`. Testes sem banco em
+`trustedDevice/__test__/`.
+
 ### Emissão do token
 `generateTokenAuthenticationUser/` é o único ponto que monta o payload:
 
@@ -57,7 +74,8 @@ cada restart) e loga aviso.
 ## Tabelas usadas
 
 `auth_users` (global), `auth_users_companies` (`position`, `roles` json, `is_accepted`),
-`auth_companies`, `auth_company_domains`.
+`auth_companies`, `auth_company_domains`, `auth_trusted_devices` (`token_hash`,
+`previous_token_hash`, `rotated_at`, `device_name`, `last_used_at`, `expires_at`, `revoked_at`).
 
 ## Observações para quem for mexer
 
