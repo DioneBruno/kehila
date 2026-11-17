@@ -19,13 +19,15 @@
   `LoginService.loginDispositivoConfiavel()` antes de mostrar o formulário: entra direto se o
   servidor aceitar; 401 apaga o `deviceToken`; erro de rede mantém.
 - **Sessão expirada** (`boot/axios.ts`): um 401 tenta `loginComDispositivoConfiavel` (axios sem
-  interceptors) e repete a requisição **uma vez** com o JWT novo. Não tenta nas rotas de login
+  interceptors) e repete a requisição **uma vez** com o JWT novo (se for recusada de novo, vai para `/login`). Não tenta nas rotas de login
   (`token-generate`, `random-code-authentication`, `trusted-device`). Sem `deviceToken`, vai
   para `/login` como antes.
 - **Portal de eventos** (`pages/portalEventos/pedido/LoginCadastro.vue`): login sem senha —
   envia código por e-mail (`randomCodeGenerate`) e valida (`randomCodeValidate`); ou cadastro
   rápido (`publico/eventos/novo-usuario`), que já devolve token.
 - **Sair** (`MainLayout`): apaga só o JWT e vai para `login`; o dispositivo continua confiável.
+  Marca `_kehila_saiu` no sessionStorage para a tela de login não entrar de volta na hora
+  (vale uma vez, só nesta aba; a próxima visita entra direto).
 - **Esquecer este dispositivo** (`MainLayout`, só aparece com `deviceToken`): revoga no servidor,
   apaga JWT e `deviceToken`, vai para `login`.
 

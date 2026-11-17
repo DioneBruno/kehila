@@ -188,6 +188,9 @@ api.interceptors.response.use(async (config: any) => {
       // Tenta renovar a sessão com o dispositivo confiável antes de mandar para o login
       const retryResponse = await tryRefreshToken(config.config);
       if (retryResponse) return retryResponse;
+    } else if (config.config?._renovado) {
+      // A sessão acabou de ser renovada e ainda assim foi recusada: manda para o login.
+      redirectToLogin();
     }
     Loading.hide();
   }

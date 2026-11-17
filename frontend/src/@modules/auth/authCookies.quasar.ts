@@ -1,6 +1,7 @@
 const TOKEN_NAME = "_kehila_token_bearer";
 const REFRESH_TOKEN_NAME = "_kehila_refresh_token";
 const DEVICE_TOKEN_NAME = "_kehila_trusted_device";
+const SAIDA_MANUAL_NAME = "_kehila_saiu";
 
 export class AuthCookiesQuasar {
   setToken(token: any) {
@@ -38,5 +39,22 @@ export class AuthCookiesQuasar {
   }
   deleteDeviceToken(): void {
     localStorage.removeItem(DEVICE_TOKEN_NAME);
+  }
+  /** "Sair" pula o login automático uma vez, só nesta aba; a próxima visita entra direto. */
+  marcarSaidaManual(): void {
+    try {
+      sessionStorage.setItem(SAIDA_MANUAL_NAME, "1");
+    } catch {
+      // sessionStorage indisponível: o login automático simplesmente acontece
+    }
+  }
+  consumirSaidaManual(): boolean {
+    try {
+      const saiu = sessionStorage.getItem(SAIDA_MANUAL_NAME) === "1";
+      sessionStorage.removeItem(SAIDA_MANUAL_NAME);
+      return saiu;
+    } catch {
+      return false;
+    }
   }
 }

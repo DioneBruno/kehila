@@ -276,6 +276,7 @@ export default defineComponent({
     // Sair mantém a confiança no dispositivo: a próxima visita entra direto.
     function sair() {
       $authCookies.deleteToken();
+      $authCookies.marcarSaidaManual();
       void $router.push({ name: "login" });
     }
 

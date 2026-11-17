@@ -34,6 +34,7 @@ export class LoginService {
    * Devolve `false` quando é preciso mostrar o formulário.
    */
   async loginDispositivoConfiavel(): Promise<boolean> {
+    if (this.$authCookies.consumirSaidaManual()) return false;
     const deviceToken = this.$authCookies.getDeviceToken();
     if (!deviceToken) return false;
 
