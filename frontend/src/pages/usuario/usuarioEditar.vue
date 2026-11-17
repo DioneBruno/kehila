@@ -295,6 +295,11 @@
                 <q-item-section>
                   <q-item-label>{{ token }}</q-item-label>
                 </q-item-section>
+                <q-item-section side>
+                  <q-btn flat round dense icon="content_copy" color="primary" @click="copiarToken(token)">
+                    <q-tooltip>Copiar token</q-tooltip>
+                  </q-btn>
+                </q-item-section>
               </q-item>
             </q-list>
           </q-card>
@@ -307,6 +312,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs, watch } from "vue";
 import { useRoute } from "vue-router";
+import { copyToClipboard, Notify } from "quasar";
 import type { Cargo } from "src/@modules/usuario/usuario.http";
 import { UsuarioService } from "./usuario.service";
 
@@ -463,6 +469,15 @@ export default defineComponent({
       });
     }
 
+    async function copiarToken(token: string) {
+      try {
+        await copyToClipboard(token);
+        Notify.create({ type: "positive", message: "Token copiado", position: "top" });
+      } catch {
+        Notify.create({ type: "negative", message: "Não foi possível copiar o token", position: "top" });
+      }
+    }
+
     async function carregarCargos() {
       data.cargos = await $service.listarCargos();
     }
@@ -480,6 +495,7 @@ export default defineComponent({
       cancelarEdicao,
       excluir,
       formatarData,
+      copiarToken,
     };
   },
 });
