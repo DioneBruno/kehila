@@ -1,3 +1,4 @@
+import { buscarSituacaoImovel, imovelTemContratoVigente } from "../situacaoImovel";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { ImovelSituacao } from "../../shared/imoveis.tipos";
@@ -47,20 +48,12 @@ const COLUNAS_PERMITIDAS = [
 export class AlterarImovelRepository {
   constructor(readonly connections: ConnectionHub) {}
 
-  async buscarSituacao(companyUuid: string, uuid: string): Promise<ImovelSituacao | null> {
-    const [row] = await this.connections.database.query(
-      `SELECT situacao FROM imovel_imoveis WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`,
-      [companyUuid, uuid],
-    );
-    return row?.situacao ?? null;
+  buscarSituacao(companyUuid: string, uuid: string) {
+    return buscarSituacaoImovel(this.connections, companyUuid, uuid);
   }
 
-  /**
-   * Seam da Task 6: hoje o contrato vigente é refletido por situacao = 'alugado' (só o contrato a define).
-   * Quando imovel_contratos existir, trocar por EXISTS (status = 'vigente').
-   */
-  async temContratoVigente(companyUuid: string, uuid: string): Promise<boolean> {
-    return (await this.buscarSituacao(companyUuid, uuid)) === "alugado";
+  temContratoVigente(companyUuid: string, uuid: string) {
+    return imovelTemContratoVigente(this.connections, companyUuid, uuid);
   }
 
   async alterar(companyUuid: string, uuid: string, data: AlterarImovelColunas): Promise<void> {

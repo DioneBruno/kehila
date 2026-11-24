@@ -224,7 +224,7 @@ describe("Imóveis do módulo imóveis", () => {
   test("Deletar pessoa dona de imóvel ativo deve dar 409; após excluir o imóvel, libera", async () => {
     const { uuid } = await incluir.execute(base());
     await expect(deletarPessoa.execute({ companyUuid, uuid: donoA })).rejects.toMatchObject({
-      message: "Não é possível excluir pessoa proprietária de imóvel ativo",
+      message: "Não é possível excluir: a pessoa é proprietária de imóvel ou parte de contrato vigente",
       statusCode: 409,
     });
     await deletar.execute({ companyUuid, uuid });

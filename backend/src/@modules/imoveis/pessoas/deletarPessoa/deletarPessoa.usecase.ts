@@ -18,10 +18,10 @@ export class DeletarPessoaUsecase {
     if (!existe) throw new ApiError("Pessoa não encontrada", 404);
 
     if (await this.repo.ehProprietarioDeImovelAtivo(input.companyUuid, uuid)) {
-      throw new ApiError("Não é possível excluir pessoa proprietária de imóvel ativo", 409);
+      throw new ApiError("Não é possível excluir: a pessoa é proprietária de imóvel ou parte de contrato vigente", 409);
     }
     if (await this.repo.temContratoVigente(input.companyUuid, uuid)) {
-      throw new ApiError("Não é possível excluir pessoa com contrato vigente", 409);
+      throw new ApiError("Não é possível excluir: a pessoa é proprietária de imóvel ou parte de contrato vigente", 409);
     }
     await this.repo.deletar(input.companyUuid, uuid);
   }
