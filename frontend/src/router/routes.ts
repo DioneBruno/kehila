@@ -97,6 +97,43 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/membresia/membroEditar.vue"),
       },
       {
+        path: "imoveis/proprietarios",
+        name: "imoveis.proprietarios",
+        component: () => import("pages/imoveis/pessoaListar.vue"),
+        meta: { papel: "proprietario" },
+      },
+      {
+        path: "imoveis/inquilinos",
+        name: "imoveis.inquilinos",
+        component: () => import("pages/imoveis/pessoaListar.vue"),
+        meta: { papel: "inquilino" },
+      },
+      {
+        path: "imoveis/pessoas/criar",
+        name: "imoveis.pessoas.criar",
+        component: () => import("pages/imoveis/pessoaIncluir.vue"),
+      },
+      {
+        path: "imoveis/pessoas/:uuid",
+        name: "imoveis.pessoas.detalhe",
+        component: () => import("pages/imoveis/pessoaEditar.vue"),
+      },
+      {
+        path: "imoveis/imoveis",
+        name: "imoveis.imoveis",
+        component: () => import("pages/imoveis/imovelListar.vue"),
+      },
+      {
+        path: "imoveis/imoveis/criar",
+        name: "imoveis.imoveis.criar",
+        component: () => import("pages/imoveis/imovelIncluir.vue"),
+      },
+      {
+        path: "imoveis/imoveis/:uuid",
+        name: "imoveis.imoveis.detalhe",
+        component: () => import("pages/imoveis/imovelEditar.vue"),
+      },
+      {
         path: "apriscos",
         name: "apriscos",
         component: () => import("pages/aprisco/apriscoListar.vue"),
