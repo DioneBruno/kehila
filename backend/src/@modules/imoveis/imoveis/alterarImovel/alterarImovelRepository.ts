@@ -1,4 +1,5 @@
-import { buscarSituacaoImovel, imovelTemContratoVigente } from "../situacaoImovel";
+import { imovelTemContratoVigente, travarImovel } from "../situacaoImovel";
+import { ImovelSituacao } from "../../shared/imoveis.tipos";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { MSG_PROPRIETARIO_NAO_ENCONTRADO } from "../imovel.entity";
@@ -44,33 +45,38 @@ const COLUNAS_PERMITIDAS = [
   "observacoes",
 ];
 
+/** Estado do imóvel lido com a linha travada; `temContratoVigente` consulta dentro da mesma transação. */
+export type EstadoImovel = {
+  situacao: ImovelSituacao;
+  temContratoVigente: () => Promise<boolean>;
+};
+
 export class AlterarImovelRepository {
   constructor(readonly connections: ConnectionHub) {}
 
-  buscarSituacao(companyUuid: string, uuid: string) {
-    return buscarSituacaoImovel(this.connections, companyUuid, uuid);
-  }
-
-  temContratoVigente(companyUuid: string, uuid: string) {
-    return imovelTemContratoVigente(this.connections, companyUuid, uuid);
-  }
-
-  async alterar(companyUuid: string, uuid: string, data: AlterarImovelColunas): Promise<void> {
-    const campos: string[] = [];
-    const valores: unknown[] = [];
-
-    for (const coluna of COLUNAS_PERMITIDAS) {
-      const valor = (data as any)[coluna];
-      if (valor === undefined) continue;
-      valores.push(valor);
-      campos.push(`${coluna} = $${valores.length}`);
-    }
-    if (campos.length === 0) return;
-
-    campos.push(`updated_at = now()`);
-    valores.push(companyUuid, uuid);
-
+  /**
+   * Numa transação: trava o imóvel (FOR UPDATE), deixa `montar` decidir as colunas sobre o estado travado
+   * (serializa com IncluirContrato, que trava a mesma linha) e grava. Liga eh_proprietario do novo dono.
+   */
+  async alterar(companyUuid: string, uuid: string, montar: (estado: EstadoImovel) => Promise<AlterarImovelColunas>): Promise<void> {
     await this.connections.database.transaction(async (manager) => {
+      const situacao = await travarImovel(manager, companyUuid, uuid);
+      if (!situacao) throw new ApiError("Imóvel não encontrado", 404);
+      const data = await montar({ situacao, temContratoVigente: () => imovelTemContratoVigente(manager, companyUuid, uuid) });
+
+      const campos: string[] = [];
+      const valores: unknown[] = [];
+      for (const coluna of COLUNAS_PERMITIDAS) {
+        const valor = (data as any)[coluna];
+        if (valor === undefined) continue;
+        valores.push(valor);
+        campos.push(`${coluna} = $${valores.length}`);
+      }
+      if (campos.length === 0) return;
+
+      campos.push(`updated_at = now()`);
+      valores.push(companyUuid, uuid);
+
       if (data.proprietario_uuid !== undefined) {
         // UPDATE ... RETURNING no TypeORM/pg devolve [linhas, quantidade]
         const [donos] = await manager.query(

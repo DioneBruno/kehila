@@ -10,14 +10,10 @@ export type DeletarImovelInput = {
 export class DeletarImovelUsecase {
   constructor(readonly repo: DeletarImovelRepository) {}
 
+  /** 404 se não existe; 409 se há contrato vigente (checado com o imóvel travado, ver repositório). */
   async execute(input: DeletarImovelInput): Promise<void> {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
     const uuid = garantirUuid(input.uuid, "Imóvel não encontrado");
-
-    const situacao = await this.repo.buscarSituacao(input.companyUuid, uuid);
-    if (!situacao) throw new ApiError("Imóvel não encontrado", 404);
-    if (await this.repo.temContratoVigente(input.companyUuid, uuid)) throw new ApiError("Não é possível excluir imóvel com contrato vigente", 409);
-
     await this.repo.deletar(input.companyUuid, uuid);
   }
 }

@@ -29,6 +29,13 @@ export class IncluirContratoRepository {
         if (imovel.situacao !== "livre") throw new ApiError(MSG_IMOVEL_NAO_LIVRE, 409);
         if (imovel.proprietario_uuid === p.inquilinoUuid) throw new ApiError(MSG_INQUILINO_PROPRIETARIO);
 
+        // Trava inquilino e fiador em ordem fixa (uuid) antes de mexer nas flags: dois contratos com os papéis
+        // trocados (A inquilino/B fiador x B inquilino/A fiador) travariam em ordem cruzada e dariam deadlock (40P01).
+        await manager.query(
+          `SELECT uuid FROM imovel_pessoas WHERE uuid = ANY($1::uuid[]) AND company_uuid = $2 AND deleted_at IS NULL ORDER BY uuid FOR UPDATE`,
+          [[p.inquilinoUuid, p.fiadorUuid].filter(Boolean), p.companyUuid],
+        );
+
         // UPDATE ... RETURNING no TypeORM/pg devolve [linhas, quantidade]
         const [inquilinos] = await manager.query(
           `UPDATE imovel_pessoas SET eh_inquilino = true, updated_at = now()

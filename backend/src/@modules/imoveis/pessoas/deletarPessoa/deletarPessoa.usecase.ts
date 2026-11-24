@@ -10,19 +10,10 @@ export type DeletarPessoaInput = {
 export class DeletarPessoaUsecase {
   constructor(readonly repo: DeletarPessoaRepository) {}
 
+  /** 404 se não existe; 409 se é proprietária de imóvel ativo ou parte de contrato vigente (checado com a pessoa travada). */
   async execute(input: DeletarPessoaInput): Promise<void> {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
     const uuid = garantirUuid(input.uuid, "Pessoa não encontrada");
-
-    const existe = await this.repo.existe(input.companyUuid, uuid);
-    if (!existe) throw new ApiError("Pessoa não encontrada", 404);
-
-    if (await this.repo.ehProprietarioDeImovelAtivo(input.companyUuid, uuid)) {
-      throw new ApiError("Não é possível excluir: a pessoa é proprietária de imóvel ou parte de contrato vigente", 409);
-    }
-    if (await this.repo.temContratoVigente(input.companyUuid, uuid)) {
-      throw new ApiError("Não é possível excluir: a pessoa é proprietária de imóvel ou parte de contrato vigente", 409);
-    }
     await this.repo.deletar(input.companyUuid, uuid);
   }
 }

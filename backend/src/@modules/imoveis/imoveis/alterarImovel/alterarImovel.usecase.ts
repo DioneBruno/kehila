@@ -3,7 +3,7 @@ import { EnderecoInput, normalizarUf, textoOpcional } from "../../pessoas/pessoa
 import { garantirUuid } from "../../shared/garantirUuid";
 import { ImovelFinalidade, ImovelSituacao, ImovelTipo } from "../../shared/imoveis.tipos";
 import { validarArea, validarFinalidade, validarIdentificacao, validarProprietarioUuid, validarSituacao, validarTipoImovel } from "../imovel.entity";
-import { AlterarImovelColunas, AlterarImovelRepository } from "./alterarImovelRepository";
+import { AlterarImovelColunas, AlterarImovelRepository, EstadoImovel } from "./alterarImovelRepository";
 
 /** Campos ausentes (undefined) não mudam; null limpa os campos opcionais. */
 export type AlterarImovelInput = {
@@ -32,19 +32,7 @@ export class AlterarImovelUsecase {
     if (!companyUuid) throw new ApiError("Empresa não identificada", 401);
     const uuid = garantirUuid(input.uuid, "Imóvel não encontrado");
 
-    const situacaoAtual = await this.repo.buscarSituacao(companyUuid, uuid);
-    if (!situacaoAtual) throw new ApiError("Imóvel não encontrado", 404);
-
-    let situacao: ImovelSituacao | undefined;
-    if (input.situacao !== undefined) {
-      situacao = validarSituacao(input.situacao);
-      if (situacao !== situacaoAtual) {
-        if (situacao === "alugado") throw new ApiError("A situação 'alugado' é definida pelo contrato");
-        if (await this.repo.temContratoVigente(companyUuid, uuid)) throw new ApiError("Imóvel com contrato vigente não pode mudar de situação", 409);
-      } else {
-        situacao = undefined;
-      }
-    }
+    const situacaoInformada: ImovelSituacao | undefined = input.situacao === undefined ? undefined : validarSituacao(input.situacao);
 
     const e = input.endereco ?? {};
     const colunas: AlterarImovelColunas = {
@@ -63,10 +51,17 @@ export class AlterarImovelUsecase {
       matricula: opcional(input.matricula),
       cartorio: opcional(input.cartorio),
       area_m2: input.areaM2 === undefined ? undefined : validarArea(input.areaM2),
-      situacao,
       observacoes: opcional(input.observacoes),
     };
 
-    await this.repo.alterar(companyUuid, uuid, colunas);
+    // A decisão sobre a situação roda com o imóvel travado (ver repositório), para não correr com IncluirContrato.
+    const montar = async ({ situacao: situacaoAtual, temContratoVigente }: EstadoImovel): Promise<AlterarImovelColunas> => {
+      if (situacaoInformada === undefined || situacaoInformada === situacaoAtual) return colunas;
+      if (situacaoInformada === "alugado") throw new ApiError("A situação 'alugado' é definida pelo contrato");
+      if (await temContratoVigente()) throw new ApiError("Imóvel com contrato vigente não pode mudar de situação", 409);
+      return { ...colunas, situacao: situacaoInformada };
+    };
+
+    await this.repo.alterar(companyUuid, uuid, montar);
   }
 }

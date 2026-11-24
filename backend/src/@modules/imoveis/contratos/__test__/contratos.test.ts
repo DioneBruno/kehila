@@ -61,6 +61,19 @@ const vigentes = async (imovelUuid: string) =>
     ])
   )[0].n;
 
+/** CNPJ válido a partir de um número (para criar várias pessoas nos testes de corrida). */
+function cnpj(n: number): string {
+  const base = `${String(n).padStart(8, "0")}0001`.split("").map(Number);
+  const dv = (d: number[]) => {
+    const pesos = d.length === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const r = d.reduce((acc, x, i) => acc + x * pesos[i], 0) % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  base.push(dv(base));
+  base.push(dv(base));
+  return base.join("");
+}
+
 const base = (extra: object = {}) => ({
   companyUuid,
   imovelUuid: imovel,
@@ -470,6 +483,75 @@ describe("Contratos do módulo imóveis", () => {
         criadoPorNome: "Usuário Teste Contratos",
       });
       expect(await query.listarEventosContrato(companyUuid, atual)).toEqual([]);
+    });
+  });
+
+  describe("Concorrência com exclusões e situação", () => {
+    const RODADAS = 10;
+    const novoImovel = async (identificacao: string) =>
+      (await incluirImovel.execute({ companyUuid, proprietarioUuid: dono, identificacao, tipo: "casa", finalidade: "residencial" })).uuid;
+    // Invariante: nenhum contrato vigente aponta para imóvel, inquilino ou fiador excluído; vigente => imóvel 'alugado'.
+    const violacoes = async () =>
+      (
+        await dataSource.query(
+          `SELECT c.uuid FROM imovel_contratos c
+           JOIN imovel_imoveis i ON i.uuid = c.imovel_uuid
+           JOIN imovel_pessoas inq ON inq.uuid = c.inquilino_uuid
+           LEFT JOIN imovel_pessoas fia ON fia.uuid = c.fiador_uuid
+           WHERE c.company_uuid = $1 AND c.status = 'vigente' AND c.deleted_at IS NULL
+             AND (i.deleted_at IS NOT NULL OR inq.deleted_at IS NOT NULL OR fia.deleted_at IS NOT NULL OR i.situacao <> 'alugado')`,
+          [companyUuid],
+        )
+      ).length;
+
+    test("IncluirContrato x DeletarImovel simultâneos nunca deixam contrato vigente em imóvel excluído", async () => {
+      for (let i = 0; i < RODADAS; i++) {
+        const uuid = await novoImovel(`Corrida imóvel ${i}`);
+        const [contrato, exclusao] = await Promise.allSettled([
+          incluir.execute(base({ imovelUuid: uuid })),
+          deletarImovel.execute({ companyUuid, uuid }),
+        ]);
+        // Exatamente um vence: ou o contrato (exclusão 409) ou a exclusão (contrato 404).
+        expect([contrato.status, exclusao.status].sort()).toEqual(["fulfilled", "rejected"]);
+      }
+      expect(await violacoes()).toBe(0);
+    });
+
+    test("IncluirContrato x DeletarPessoa (inquilino/fiador) simultâneos nunca deixam contrato vigente com pessoa excluída", async () => {
+      for (let i = 0; i < RODADAS; i++) {
+        const uuid = await novoImovel(`Corrida pessoa ${i}`);
+        const inq = (await incluirPessoa.execute({ companyUuid, tipo: "PJ", documento: cnpj(i), nome: `Inq ${i}` })).uuid;
+        const alvo = i % 2 === 0 ? inq : fiador;
+        const resultados = await Promise.allSettled([
+          incluir.execute(base({ imovelUuid: uuid, inquilinoUuid: inq, garantiaTipo: "fiador", fiadorUuid: fiador })),
+          deletarPessoa.execute({ companyUuid, uuid: alvo }),
+        ]);
+        expect(resultados.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+        // Se o fiador foi excluído, recria para a próxima rodada.
+        if (alvo === fiador && resultados[1].status === "fulfilled") {
+          fiador = (await incluirPessoa.execute({ companyUuid, tipo: "PJ", documento: cnpj(100 + i), nome: `Fiador ${i}` })).uuid;
+        }
+      }
+      expect(await violacoes()).toBe(0);
+    });
+
+    test("IncluirContrato x AlterarImovel(situação) simultâneos: contrato vigente sempre com imóvel alugado", async () => {
+      for (let i = 0; i < RODADAS; i++) {
+        const uuid = await novoImovel(`Corrida situação ${i}`);
+        await Promise.allSettled([incluir.execute(base({ imovelUuid: uuid })), alterarImovel.execute({ companyUuid, uuid, situacao: "reforma" })]);
+      }
+      expect(await violacoes()).toBe(0);
+    });
+
+    test("Inquilino e fiador trocados em dois contratos simultâneos não geram deadlock", async () => {
+      for (let i = 0; i < RODADAS; i++) {
+        const [x, y] = [await novoImovel(`Deadlock X ${i}`), await novoImovel(`Deadlock Y ${i}`)];
+        const resultados = await Promise.allSettled([
+          incluir.execute(base({ imovelUuid: x, inquilinoUuid: inquilino, garantiaTipo: "fiador", fiadorUuid: fiador })),
+          incluir.execute(base({ imovelUuid: y, inquilinoUuid: fiador, garantiaTipo: "fiador", fiadorUuid: inquilino })),
+        ]);
+        expect(resultados.map((r) => (r.status === "rejected" ? String((r.reason as Error)?.message) : "ok"))).toEqual(["ok", "ok"]);
+      }
     });
   });
 });
