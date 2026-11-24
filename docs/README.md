@@ -63,6 +63,10 @@ npm install
 npm run dev                     # :9000 — URL_API em .env / public/env-config.js
 ```
 
+> Deploy: rode `npm run migration:run` antes (ou junto) de subir o backend e confirme o `TZ` em
+> produção; sem a migration de `auth_company_modulos` as rotas de igreja respondem 500 (ver
+> [módulo Imóveis › Deploy](backend/modulos/imoveis.md#deploy)).
+
 Cadastre em `auth_company_domains` a origem exata do frontend (ex.: `http://localhost:9000`)
 para a empresa de teste; sem isso o login responde "Empresa não encontrada para o domínio
 informado".

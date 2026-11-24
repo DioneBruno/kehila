@@ -206,6 +206,26 @@ describe("Imóveis do módulo imóveis", () => {
     });
   });
 
+  test("Não troca o proprietário para o inquilino do contrato vigente", async () => {
+    const { uuid } = await incluir.execute(base());
+    await incluirContrato.execute({
+      companyUuid,
+      imovelUuid: uuid,
+      inquilinoUuid: donoB,
+      inicio: "2026-01-01",
+      fim: "2026-12-31",
+      valorAluguel: 1000,
+      diaVencimento: 5,
+      indiceReajuste: "IPCA",
+      garantiaTipo: "nenhuma",
+    });
+    await expect(alterar.execute({ companyUuid, uuid, proprietarioUuid: donoB })).rejects.toMatchObject({
+      message: "Inquilino não pode ser o proprietário do imóvel",
+      statusCode: 400,
+    });
+    expect((await buscarLinha(uuid)).proprietario_uuid).toBe(donoA);
+  });
+
   test("Deve excluir imóvel (soft delete) e sumir da busca", async () => {
     const { uuid } = await incluir.execute(base());
     await deletar.execute({ companyUuid, uuid });

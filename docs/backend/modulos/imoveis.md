@@ -42,6 +42,14 @@ removido, insira de novo; não "limpe" o `deleted_at`.)
 Bloqueio: `403 "Módulo não habilitado para esta empresa"`. Sem cache (Redis fora do ar) o
 middleware consulta o banco a cada requisição; falha de cache nunca derruba a rota.
 
+## Deploy
+
+`ModuloImoveisMiddleware`/`ModuloIgrejaMiddleware` consultam `auth_company_modulos` em toda
+requisição de igreja ou imóveis, e as migrations **não** rodam sozinhas (`backend/start.sh`).
+Se o código subir antes da migration `1792000000000-create-auth_company_modulos`, todas as rotas
+de igreja respondem 500. Passo obrigatório do release: rodar `npm run migration:run` antes (ou
+junto) do deploy e confirmar o `TZ` em produção (as regras de vencimento usam datas locais).
+
 ## Acesso
 
 `JwtAuthMiddleware` + `InternoMiddleware` + `ModuloImoveisMiddleware` em todos os controllers do
@@ -112,7 +120,7 @@ Resposta: `{ success: true, data, meta? }`. Listas: `pagina` (1-based, padrão 1
 
 | Método e rota | Use case / query | Notas |
 |---|---|---|
-| `GET /imoveis/pessoas` | `listarPessoas` | filtros `papel` (`proprietario`/`inquilino`/`fiador`), `busca` (nome, documento, e-mail) |
+| `GET /imoveis/pessoas` | `listarPessoas` | filtros `papel` (`proprietario`/`inquilino`/`fiador`), `busca` (nome, nome fantasia, documento) |
 | `GET /imoveis/pessoas/:uuid` | `buscarPessoa` | |
 | `POST /imoveis/pessoas` | `IncluirPessoaUsecase` | 201 `{ uuid }` |
 | `PATCH /imoveis/pessoas/:uuid` | `AlterarPessoaUsecase` | update parcial |

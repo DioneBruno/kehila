@@ -119,6 +119,21 @@ describe("Pessoas (PF/PJ) do módulo imóveis", () => {
     expect(linha.email).toBeNull();
   });
 
+  test("Alterar papéis aceita só boolean; valor inválido é 400, não 500", async () => {
+    const { uuid } = await incluir.execute({ companyUuid, tipo: "PF", documento: CPF, nome: "Maria", ehFiador: true });
+    for (const invalido of ["x", 1, null]) {
+      await expect(alterar.execute({ companyUuid, uuid, ehProprietario: invalido as any })).rejects.toMatchObject({
+        message: "Valor inválido para papel",
+        statusCode: 400,
+      });
+    }
+    await alterar.execute({ companyUuid, uuid, ehInquilino: true, ehFiador: false });
+    const linha = await buscarLinha(uuid);
+    expect(linha.eh_inquilino).toBe(true);
+    expect(linha.eh_fiador).toBe(false);
+    expect(linha.eh_proprietario).toBe(false);
+  });
+
   test("Alterar documento valida pelo tipo e respeita a unicidade", async () => {
     const { uuid } = await incluir.execute({ companyUuid, tipo: "PF", documento: CPF, nome: "A" });
     await incluir.execute({ companyUuid, tipo: "PJ", documento: CNPJ, nome: "B" });

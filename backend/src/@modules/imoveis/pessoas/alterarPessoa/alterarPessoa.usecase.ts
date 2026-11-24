@@ -20,6 +20,12 @@ export type AlterarPessoaInput = {
   ehFiador?: boolean;
 };
 
+const papel = (valor: unknown): boolean | undefined => {
+  if (valor === undefined) return undefined;
+  if (typeof valor === "boolean") return valor;
+  throw new ApiError("Valor inválido para papel", 400);
+};
+
 const opcional = (valor: string | null | undefined) => (valor === undefined ? undefined : textoOpcional(valor));
 
 export class AlterarPessoaUsecase {
@@ -52,9 +58,9 @@ export class AlterarPessoaUsecase {
       endereco_cidade: opcional(e.cidade),
       endereco_uf: e.uf === undefined ? undefined : normalizarUf(e.uf),
       observacoes: opcional(input.observacoes),
-      eh_proprietario: input.ehProprietario,
-      eh_inquilino: input.ehInquilino,
-      eh_fiador: input.ehFiador,
+      eh_proprietario: papel(input.ehProprietario),
+      eh_inquilino: papel(input.ehInquilino),
+      eh_fiador: papel(input.ehFiador),
     };
 
     await this.repo.alterar(companyUuid, uuid, colunas);

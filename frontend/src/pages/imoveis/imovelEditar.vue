@@ -104,8 +104,7 @@
                 </q-item>
               </q-list>
               <q-btn
-                v-if="rotaDetalheContrato"
-                flat
+                                flat
                 no-caps
                 color="primary"
                 icon="description"
@@ -120,7 +119,7 @@
             <template v-else>
               <p class="text-grey-6 q-mb-sm">Nenhum contrato vigente.</p>
               <q-btn
-                v-if="imovel.situacao === 'livre' && rotaCriarContrato"
+                v-if="imovel.situacao === 'livre'"
                 unelevated
                 no-caps
                 color="primary"
@@ -163,7 +162,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue";
 import TokenDecode from "src/@modules/auth/tokenDecode";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import type { ImovelDetalhe } from "src/@modules/imoveis/imovel.http";
 import ImovelForm, { imovelFormParaInput, novoImovelForm } from "./imovelForm.vue";
 import {
@@ -180,7 +179,6 @@ export default defineComponent({
   components: { ImovelForm },
   setup() {
     const $route = useRoute();
-    const $router = useRouter();
     const $service = new ImoveisService();
     const uuid = computed(() => $route.params.uuid as string);
     // O DELETE do backend é só para admin.
@@ -193,10 +191,6 @@ export default defineComponent({
     });
     const form = reactive(novoImovelForm());
     const formRef = ref();
-
-    // As telas de contrato chegam na Task 9: até lá os links não aparecem.
-    const rotaDetalheContrato = computed(() => $router.hasRoute("imoveis.contratos.detalhe"));
-    const rotaCriarContrato = computed(() => $router.hasRoute("imoveis.contratos.criar"));
 
     async function carregar() {
       const imovel = await $service.buscarImovel(uuid.value);
@@ -248,8 +242,6 @@ export default defineComponent({
       ehAdmin,
       form,
       formRef,
-      rotaDetalheContrato,
-      rotaCriarContrato,
       salvar,
       cancelarEdicao,
       excluir,

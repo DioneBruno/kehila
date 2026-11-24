@@ -199,7 +199,8 @@ export default defineComponent({
       layout: computed(() => $layoutStore.layout),
     });
 
-    // Lido dentro de computed para refletir o token atual (troca de usuário sem recarregar).
+    // O token é lido quando o layout monta (TokenDecode não é reativo): uma troca de usuário
+    // ainda exige recarregar a página (pendência B13).
     const token = computed(() => TokenDecode.execute());
     const itensMenu = computed<MenuItem[]>(() => {
       const t = token.value;

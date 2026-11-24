@@ -156,11 +156,6 @@ export function enderecoEmLinha(e: {
   return [rua, e.enderecoBairro, cidade].filter(Boolean).join(" - ");
 }
 
-/** Rota do módulo de contratos (Task 9) só existe depois que ela for registrada. */
-export function rotaExiste(router: ReturnType<typeof useRouter>, name: string) {
-  return router.hasRoute(name);
-}
-
 /** "2026-03-31T12:00:00Z" -> "31/03/2026 09:00" (hora local). */
 export function formatarDataHora(iso: string | null | undefined) {
   if (!iso) return "-";

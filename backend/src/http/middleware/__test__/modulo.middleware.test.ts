@@ -16,6 +16,13 @@ import { PublicModule } from "src/http/public/public.module";
 import { ApriscoController } from "src/http/aprisco/aprisco.controller";
 import { MembresiaController } from "src/http/membresia/membresia.controller";
 import { BiController } from "src/http/bi/bi.controller";
+import { ImoveisModule } from "src/http/imoveis/imoveis.module";
+import { PessoasController } from "src/http/imoveis/pessoas.controller";
+import { ImoveisController } from "src/http/imoveis/imoveis.controller";
+import { ContratosController } from "src/http/imoveis/contratos.controller";
+import { PainelController } from "src/http/imoveis/painel.controller";
+import { JwtAuthMiddleware } from "src/http/middleware/jwtAuth.middleware";
+import { InternoMiddleware } from "src/http/middleware/perfil.middleware";
 
 const fakeCache = () => {
   const store: Record<string, any> = {};
@@ -153,5 +160,12 @@ describe("matriz de rotas", () => {
     ["PublicModule", PublicModule],
   ])("%s não exige módulo", (_n, modulo) => {
     for (const a of configurar(modulo)) expect(a.middlewares).not.toContain(ModuloIgrejaMiddleware);
+  });
+
+  test("ImoveisModule aplica JwtAuth, Interno e ModuloImoveis, nessa ordem, nos quatro controllers", () => {
+    const aplicados = configurar(ImoveisModule);
+    expect(aplicados).toHaveLength(1);
+    expect(aplicados[0].middlewares).toEqual([JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware]);
+    expect(aplicados[0].rotas).toEqual([PessoasController, ImoveisController, ContratosController, PainelController]);
   });
 });

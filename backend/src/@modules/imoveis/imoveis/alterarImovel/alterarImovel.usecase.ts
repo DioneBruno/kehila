@@ -55,7 +55,10 @@ export class AlterarImovelUsecase {
     };
 
     // A decisão sobre a situação roda com o imóvel travado (ver repositório), para não correr com IncluirContrato.
-    const montar = async ({ situacao: situacaoAtual, temContratoVigente }: EstadoImovel): Promise<AlterarImovelColunas> => {
+    const montar = async ({ situacao: situacaoAtual, temContratoVigente, inquilinoVigenteUuid }: EstadoImovel): Promise<AlterarImovelColunas> => {
+      if (colunas.proprietario_uuid !== undefined && colunas.proprietario_uuid === (await inquilinoVigenteUuid())) {
+        throw new ApiError("Inquilino não pode ser o proprietário do imóvel", 400);
+      }
       if (situacaoInformada === undefined || situacaoInformada === situacaoAtual) return colunas;
       if (situacaoInformada === "alugado") throw new ApiError("A situação 'alugado' é definida pelo contrato");
       if (await temContratoVigente()) throw new ApiError("Imóvel com contrato vigente não pode mudar de situação", 409);

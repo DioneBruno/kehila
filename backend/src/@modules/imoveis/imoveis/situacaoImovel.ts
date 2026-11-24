@@ -25,3 +25,12 @@ export async function imovelTemContratoVigente(db: Consultavel, companyUuid: str
   );
   return !!row?.existe;
 }
+
+/** Inquilino do contrato vigente (não excluído) do imóvel; null se não há contrato vigente. */
+export async function inquilinoDoContratoVigente(db: Consultavel, companyUuid: string, uuid: string): Promise<string | null> {
+  const [row] = await db.query(
+    `SELECT inquilino_uuid FROM imovel_contratos WHERE deleted_at IS NULL AND company_uuid = $1 AND imovel_uuid = $2 AND status = 'vigente' LIMIT 1`,
+    [companyUuid, uuid],
+  );
+  return row?.inquilino_uuid ?? null;
+}

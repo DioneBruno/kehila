@@ -1,4 +1,4 @@
-import { imovelTemContratoVigente, travarImovel } from "../situacaoImovel";
+import { imovelTemContratoVigente, inquilinoDoContratoVigente, travarImovel } from "../situacaoImovel";
 import { ImovelSituacao } from "../../shared/imoveis.tipos";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
@@ -49,6 +49,7 @@ const COLUNAS_PERMITIDAS = [
 export type EstadoImovel = {
   situacao: ImovelSituacao;
   temContratoVigente: () => Promise<boolean>;
+  inquilinoVigenteUuid: () => Promise<string | null>;
 };
 
 export class AlterarImovelRepository {
@@ -62,7 +63,11 @@ export class AlterarImovelRepository {
     await this.connections.database.transaction(async (manager) => {
       const situacao = await travarImovel(manager, companyUuid, uuid);
       if (!situacao) throw new ApiError("Imóvel não encontrado", 404);
-      const data = await montar({ situacao, temContratoVigente: () => imovelTemContratoVigente(manager, companyUuid, uuid) });
+      const data = await montar({
+        situacao,
+        temContratoVigente: () => imovelTemContratoVigente(manager, companyUuid, uuid),
+        inquilinoVigenteUuid: () => inquilinoDoContratoVigente(manager, companyUuid, uuid),
+      });
 
       const campos: string[] = [];
       const valores: unknown[] = [];
