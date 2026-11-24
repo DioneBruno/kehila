@@ -28,7 +28,7 @@ backend/src
 Módulos: [auth](modulos/auth.md) · [usuario](modulos/usuario.md) · [empresa](modulos/empresa.md) ·
 [membresia](modulos/membresia.md) · [aprisco](modulos/aprisco.md) ·
 [portalEventos](modulos/portalEventos.md) · [financeiro](modulos/financeiro.md) ·
-[notificacao](modulos/notificacao.md) · [bi](modulos/bi.md)
+[notificacao](modulos/notificacao.md) · [bi](modulos/bi.md) · [imoveis](modulos/imoveis.md)
 
 ## Camadas e responsabilidades
 
@@ -86,10 +86,26 @@ Mapa de proteção atual:
 
 | Módulo | Middleware |
 |---|---|
-| auth (login) / public `/ping` / `publico/eventos` | Dominio |
-| `/auth/*`, `/pedidos`, `/cartao-credito` | JWT |
-| `/membros`, `/apriscos`, `/bi` | JWT + Interno |
-| `/usuarios`, `/empresa`, `/notificacoes`, `/eventos`, `/lotes`, `/contas-bancarias`, `/cobrancas`, `/pagamentos` | JWT + Admin |
+| auth (login) / public `/ping` | Dominio |
+| `publico/eventos` | Dominio + ModuloIgreja |
+| `/auth/*` | JWT |
+| `/pedidos`, `/cartao-credito` | JWT + ModuloIgreja |
+| `/imoveis/*` | JWT + Interno + ModuloImoveis |
+| `/membros`, `/apriscos`, `/bi` | JWT + Interno + ModuloIgreja |
+| `/usuarios`, `/empresa`, `/notificacoes` | JWT + Admin |
+| `/eventos`, `/lotes`, `/contas-bancarias`, `/cobrancas`, `/pagamentos` | JWT + Admin + ModuloIgreja |
+
+Todas as rotas de **igreja** (incluindo o portal público de eventos, `/pedidos`, `/cartao-credito` e
+o financeiro) exigem também `ModuloIgrejaMiddleware`; as de imóveis, `ModuloImoveisMiddleware`.
+Rotas de auth, usuários, empresa e notificações não dependem de módulo.
+
+### Módulos por empresa
+
+`auth_company_modulos` (`company_uuid`, `modulo`) diz quais pacotes a empresa tem. Os middlewares
+`ModuloIgreja`/`ModuloImoveis` (`http/middleware/modulo.middleware.ts`) leem a lista via
+`ModuloEmpresaRepository` e a cacheiam no Redis (`modulos:<companyUuid>`, 300 s); sem o módulo →
+403 "Módulo não habilitado para esta empresa". O JWT também leva `company.modulos` para o menu do
+frontend. Como habilitar e os avisos de cache/relogin: [módulo imóveis](modulos/imoveis.md#módulos-por-empresa-habilitar-o-módulo).
 
 ## Erros
 

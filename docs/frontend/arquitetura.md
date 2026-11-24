@@ -76,6 +76,9 @@ novo** — só sucesso.
   chamada.
 - `MainLayout` mostra o menu completo só se `TokenDecode.execute().user.position === "admin"`
   (avaliado uma vez no `setup`). Não-admin vê apenas "Sair" e a home (apriscos que lidera).
+- O menu é filtrado também por **módulo da empresa** (`company.modulos` do JWT) em
+  `layouts/menu.ts` (`filtrarMenu`): itens `imoveis` aparecem para qualquer usuário interno de empresa
+  com o módulo; itens `igreja` só para admin de empresa com o módulo. Ver [imóveis](modulos/imoveis.md).
 - Esconder no menu não protege nada: a regra real está nos middlewares do backend.
 
 ## Multiempresa / layout
@@ -97,6 +100,7 @@ da aba vem de `layout.telaLogin.titulo`.
 | `/usuarios[/criar\|/:uuid]` | `usuarios*` | usuários |
 | `/membros[/criar\|/:uuid]` | `membros*` | membresia |
 | `/apriscos[/criar\|/:uuid\|/:uuid/lider]` | `apriscos*` | apriscos |
+| `/imoveis` (painel), `/imoveis/proprietarios`, `/imoveis/inquilinos`, `/imoveis/pessoas/…`, `/imoveis/imoveis/…`, `/imoveis/contratos/…` | `imoveis.*` | [imóveis](modulos/imoveis.md) |
 | `/notificacao` | `notificacao` | gateways e teste de envio |
 | `/publico/eventos/:eventoUuid` | `eventos.publico` | página pública de compra (BlankLayout) |
 
@@ -114,6 +118,8 @@ npm run lint
 npm run format
 ```
 
+`quasar prepare` e `vue-tsc` exigem Node ≥ 22.22 (requisito do `@quasar/app-vite`).
+
 `vite-plugin-checker` roda `vue-tsc` + ESLint no dev (desligue com `SKIP_TYPE_CHECK=1`).
 Não há testes automatizados no frontend (`npm test` é um placeholder).
 
@@ -127,7 +133,7 @@ server). Em produção (Dockerfile + nginx) são injetadas por `docker-entrypoin
    e registre o boot em `quasar.config.ts`.
 3. `src/pages/<modulo>/<modulo>.service.ts` (loading + notify de sucesso + `try/catch` retornando `null`).
 4. Páginas `<x>Listar.vue`, `<x>Incluir.vue`, `<x>Editar.vue` e `<x>Form.vue`.
-5. Rotas em `router/routes.ts` (filhas de `MainLayout`) e item em `MENU_ITEMS` do `MainLayout.vue`.
+5. Rotas em `router/routes.ts` (filhas de `MainLayout`) e item em `MENU_ITEMS` de `layouts/menu.ts` (com `modulo` se pertencer a um pacote).
 6. HTML vindo do usuário só com `v-html="sanitizeHtml(...)"`.
 
 ## Convenções

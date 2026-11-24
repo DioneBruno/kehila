@@ -67,3 +67,14 @@ facilitar a correção. Prioridade: 🔴 segurança/dinheiro · 🟠 bug/consist
 - Frontend sem testes; backend quase só com testes de integração dependentes de banco.
 - Arquivos de exemplo do Quasar não usados (`ExampleComponent.vue`, `EssentialLink.vue`, `example-store.ts`).
 - `README.md` da raiz ainda lista funcionalidades como "planejadas" e "Tecnologias: a definir".
+
+## Imóveis (etapa 1)
+
+Lacunas conhecidas do módulo [imóveis](backend/modulos/imoveis.md) (não são falhas de segurança):
+
+- `IncluirContrato`/`AlterarContrato`: com `garantiaTipo ≠ fiador`, o `fiadorUuid` enviado é descartado em silêncio (não avisa).
+- Trocar `indiceReajuste` para `nenhum` mantém o `mes_reajuste` antigo (o painel ignora, mas o dado fica).
+- Aditivo aceita evento sem mudança real (mesmo valor/mesmo fim que o atual).
+- Encerramento/rescisão não valida a data do evento contra o `inicio` do contrato.
+- Sem testes HTTP dos controllers de `http/imoveis` (só use cases, query e middleware).
+- Não há tela (nem endpoint) para ligar/desligar módulos por empresa: é SQL em `auth_company_modulos`, com cache de 5 min e novo login.

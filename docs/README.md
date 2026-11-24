@@ -15,6 +15,8 @@ eventos com bilheteria, financeiro, BI). Escrito a partir da leitura do código 
                                                           PostgreSQL 17     Redis     Asaas · SMTP · Vonage · Metabase
 ```
 
+- **Módulos por empresa:** `auth_company_modulos` (`igreja`, `imoveis`) liga/desliga pacotes de
+  rotas e itens de menu (ver [backend › imóveis](backend/modulos/imoveis.md)).
 - **Multiempresa:** cada igreja é uma `auth_companies`. Rotas públicas descobrem a empresa pelo
   domínio (`Origin`); rotas logadas, pelo JWT.
 - **Perfis:** `admin` (position), **interno** (qualquer usuário da igreja) e **externo**
@@ -37,6 +39,7 @@ eventos com bilheteria, financeiro, BI). Escrito a partir da leitura do código 
 | Aprisco | células, integrantes, presença | [backend](backend/modulos/aprisco.md) | [frontend](frontend/modulos/aprisco.md) |
 | Portal de Eventos | eventos, lotes, pedidos, ingressos | [backend](backend/modulos/portalEventos.md) | [frontend](frontend/modulos/portalEventos.md) |
 | Financeiro | Asaas: cobranças, boleto, cartão, baixa | [backend](backend/modulos/financeiro.md) | [frontend](frontend/modulos/financeiro.md) |
+| Imóveis | pessoas, imóveis, contratos de locação, painel (módulo por empresa) | [backend](backend/modulos/imoveis.md) | [frontend](frontend/modulos/imoveis.md) |
 | Notificação | e-mail SMTP, SMS Vonage | [backend](backend/modulos/notificacao.md) | [frontend](frontend/modulos/notificacao.md) |
 | BI | painéis Metabase embutidos | [backend](backend/modulos/bi.md) | [frontend](frontend/modulos/bi.md) |
 
@@ -73,6 +76,8 @@ auth ──► usuario (UsuarioQuery em /auth/me)
 membresia ──► usuario/auth (cria auth_users) e aprisco (vincula integrante)
 aprisco ──► membresia (auth_pessoas)
 bi ──► Metabase (token de embed)
+imoveis ──► empresa/modulos (ModuloImoveisMiddleware; igreja usa ModuloIgrejaMiddleware)
+imoveis (contratos) ──► imoveis (imóveis e pessoas); eventos ──► auth_users (criado_por_uuid)
 ```
 
 ## Mantendo esta documentação
