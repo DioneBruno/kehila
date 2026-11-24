@@ -134,6 +134,26 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/imoveis/imovelEditar.vue"),
       },
       {
+        path: "imoveis",
+        name: "imoveis.painel",
+        component: () => import("pages/imoveis/painel.vue"),
+      },
+      {
+        path: "imoveis/contratos",
+        name: "imoveis.contratos",
+        component: () => import("pages/imoveis/contratoListar.vue"),
+      },
+      {
+        path: "imoveis/contratos/criar",
+        name: "imoveis.contratos.criar",
+        component: () => import("pages/imoveis/contratoIncluir.vue"),
+      },
+      {
+        path: "imoveis/contratos/:uuid",
+        name: "imoveis.contratos.detalhe",
+        component: () => import("pages/imoveis/contratoDetalhe.vue"),
+      },
+      {
         path: "apriscos",
         name: "apriscos",
         component: () => import("pages/aprisco/apriscoListar.vue"),
@@ -163,7 +183,13 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/publico/eventos/:eventoUuid",
     component: () => import("layouts/BlankLayout.vue"),
-    children: [{ path: "", name: "eventos.publico", component: () => import("pages/portalEventos/pedido/home.vue") }],
+    children: [
+      {
+        path: "",
+        name: "eventos.publico",
+        component: () => import("pages/portalEventos/pedido/home.vue"),
+      },
+    ],
   },
 
   {

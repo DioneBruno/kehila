@@ -26,7 +26,7 @@
           <q-badge v-if="pessoa.ehFiador" color="orange-8" label="Fiador" />
         </div>
       </div>
-      <div v-if="pessoa" class="col-auto">
+      <div v-if="pessoa && ehAdmin" class="col-auto">
         <q-btn unelevated color="negative" label="Excluir" icon="delete" @click="excluir" />
       </div>
     </div>
@@ -65,6 +65,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue";
+import TokenDecode from "src/@modules/auth/tokenDecode";
 import { useRoute } from "vue-router";
 import type { Pessoa, PessoaInput } from "src/@modules/imoveis/pessoa.http";
 import PessoaForm, { novaPessoaForm, pessoaFormParaInput } from "./pessoaForm.vue";
@@ -77,6 +78,8 @@ export default defineComponent({
     const $route = useRoute();
     const $service = new ImoveisService();
     const uuid = computed(() => $route.params.uuid as string);
+    // O DELETE do backend é só para admin.
+    const ehAdmin = TokenDecode.execute()?.user?.position === "admin";
 
     const data = reactive({
       pessoa: null as Pessoa | null,
@@ -127,7 +130,17 @@ export default defineComponent({
     });
     onMounted(() => void carregar());
 
-    return { ...toRefs(data), form, formRef, voltar, labelTipo, salvar, cancelarEdicao, excluir };
+    return {
+      ...toRefs(data),
+      ehAdmin,
+      form,
+      formRef,
+      voltar,
+      labelTipo,
+      salvar,
+      cancelarEdicao,
+      excluir,
+    };
   },
 });
 </script>

@@ -23,7 +23,7 @@
           <q-badge color="grey-7" :label="labelImovelTipo(imovel.tipo)" />
         </div>
       </div>
-      <div v-if="imovel" class="col-auto">
+      <div v-if="imovel && ehAdmin" class="col-auto">
         <q-btn unelevated color="negative" label="Excluir" icon="delete" @click="excluir" />
       </div>
     </div>
@@ -162,6 +162,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue";
+import TokenDecode from "src/@modules/auth/tokenDecode";
 import { useRoute, useRouter } from "vue-router";
 import type { ImovelDetalhe } from "src/@modules/imoveis/imovel.http";
 import ImovelForm, { imovelFormParaInput, novoImovelForm } from "./imovelForm.vue";
@@ -182,6 +183,8 @@ export default defineComponent({
     const $router = useRouter();
     const $service = new ImoveisService();
     const uuid = computed(() => $route.params.uuid as string);
+    // O DELETE do backend é só para admin.
+    const ehAdmin = TokenDecode.execute()?.user?.position === "admin";
 
     const data = reactive({
       imovel: null as ImovelDetalhe | null,
@@ -242,6 +245,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      ehAdmin,
       form,
       formRef,
       rotaDetalheContrato,

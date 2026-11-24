@@ -20,6 +20,7 @@
         lazy-rules
         no-error-icon
         @filter="filtrarProprietarios"
+        @update:model-value="selecionarProprietario"
       >
         <template v-slot:no-option>
           <q-item>
@@ -285,6 +286,13 @@ export default defineComponent({
       },
     );
 
+    // Guarda o nome da opção escolhida: é dele que opcaoSelecionada() depende nas próximas buscas.
+    function selecionarProprietario(uuid: string | null) {
+      const opcao = opcoesProprietario.value.find((o) => o.value === uuid);
+      // eslint-disable-next-line vue/no-mutating-props
+      props.form.proprietarioNome = opcao?.label ?? "";
+    }
+
     function filtrarProprietarios(texto: string, update: (fn: () => void) => void) {
       void $service
         .listarPessoas({ papel: "proprietario", busca: texto.trim() || undefined, porPagina: 30 })
@@ -301,6 +309,7 @@ export default defineComponent({
     return {
       opcoesProprietario,
       filtrarProprietarios,
+      selecionarProprietario,
       tipos: IMOVEL_TIPOS,
       finalidades: IMOVEL_FINALIDADES,
       // "alugado" é definido pelo contrato: não pode ser escolhido à mão.

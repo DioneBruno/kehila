@@ -1,9 +1,16 @@
 import { useQuasar } from "quasar";
 import type {
+  ContratoEditavelInput,
+  ContratoEventoInput,
+  ContratoEventoTipo,
+  ContratoHttp,
+  ContratoInput,
   ContratoStatus,
   GarantiaTipo,
   IndiceReajuste,
+  ListarContratosFiltro,
 } from "src/@modules/imoveis/contrato.http";
+import type { PainelHttp } from "src/@modules/imoveis/painel.http";
 import type {
   ImovelHttp,
   ImovelInput,
@@ -80,6 +87,13 @@ export const CONTRATO_STATUS: Opcao<ContratoStatus>[] = [
   { value: "rescindido", label: "Rescindido", color: "negative" },
 ];
 
+export const EVENTO_TIPOS: Opcao<ContratoEventoTipo>[] = [
+  { value: "renovacao", label: "Renovação", color: "primary" },
+  { value: "aditivo", label: "Aditivo", color: "blue-6" },
+  { value: "encerramento", label: "Encerramento", color: "grey-7" },
+  { value: "rescisao", label: "Rescisão", color: "negative" },
+];
+
 function rotulo<T extends string>(opcoes: Opcao<T>[], valor: T | null | undefined) {
   return opcoes.find((o) => o.value === valor)?.label ?? valor ?? "";
 }
@@ -96,6 +110,8 @@ export const labelIndice = (v: IndiceReajuste) => rotulo(INDICES_REAJUSTE, v);
 export const labelGarantia = (v: GarantiaTipo) => rotulo(GARANTIA_TIPOS, v);
 export const labelStatus = (v: ContratoStatus) => rotulo(CONTRATO_STATUS, v);
 export const corStatus = (v: ContratoStatus) => cor(CONTRATO_STATUS, v);
+export const labelEvento = (v: ContratoEventoTipo) => rotulo(EVENTO_TIPOS, v);
+export const corEvento = (v: ContratoEventoTipo) => cor(EVENTO_TIPOS, v);
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -145,9 +161,23 @@ export function rotaExiste(router: ReturnType<typeof useRouter>, name: string) {
   return router.hasRoute(name);
 }
 
+/** "2026-03-31T12:00:00Z" -> "31/03/2026 09:00" (hora local). */
+export function formatarDataHora(iso: string | null | undefined) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export class ImoveisService {
   private $pessoaHttp = inject("pessoaHttp") as PessoaHttp;
   private $imovelHttp = inject("imovelHttp") as ImovelHttp;
+  private $contratoHttp = inject("contratoHttp") as ContratoHttp;
+  private $painelHttp = inject("painelHttp") as PainelHttp;
   private $q = useQuasar();
   private $router = useRouter();
   private $confirmacao = new MessageConfirmationService();
@@ -283,6 +313,92 @@ export class ImoveisService {
       return true;
     } catch {
       return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async confirmar(mensagem: string) {
+    return this.$confirmacao.execute(mensagem);
+  }
+
+  async listarContratos(filtro: ListarContratosFiltro) {
+    try {
+      const response = await this.$contratoHttp.listar(filtro);
+      return { itens: response.data, total: response.meta?.total ?? response.data.length };
+    } catch {
+      return null;
+    }
+  }
+
+  async buscarContrato(uuid: string) {
+    try {
+      this.$q.loading.show();
+      return (await this.$contratoHttp.buscarPorUuid(uuid)).data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async incluirContrato(input: ContratoInput) {
+    try {
+      this.$q.loading.show();
+      const response = await this.$contratoHttp.incluir(input);
+      this.$q.notify({ type: "positive", message: "Contrato cadastrado" });
+      void this.$router.push({
+        name: "imoveis.contratos.detalhe",
+        params: { uuid: response.data.uuid },
+      });
+      return response.data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async alterarContrato(uuid: string, input: ContratoEditavelInput) {
+    try {
+      this.$q.loading.show();
+      await this.$contratoHttp.alterar(uuid, input);
+      this.$q.notify({ type: "positive", message: "Alterações salvas" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async listarEventosContrato(uuid: string) {
+    try {
+      return (await this.$contratoHttp.listarEventos(uuid)).data;
+    } catch {
+      return null;
+    }
+  }
+
+  async registrarEventoContrato(uuid: string, input: ContratoEventoInput) {
+    try {
+      this.$q.loading.show();
+      await this.$contratoHttp.registrarEvento(uuid, input);
+      this.$q.notify({ type: "positive", message: `${labelEvento(input.tipo)} registrada` });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async buscarPainel() {
+    try {
+      this.$q.loading.show();
+      return (await this.$painelHttp.buscar()).data;
+    } catch {
+      return null;
     } finally {
       this.$q.loading.hide();
     }
