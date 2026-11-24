@@ -11,6 +11,8 @@ import { AlterarImovelUsecase } from "../alterarImovel/alterarImovel.usecase";
 import { AlterarImovelRepository } from "../alterarImovel/alterarImovelRepository";
 import { DeletarImovelUsecase } from "../deletarImovel/deletarImovel.usecase";
 import { DeletarImovelRepository } from "../deletarImovel/deletarImovelRepository";
+import { IncluirContratoUsecase } from "../../contratos/incluirContrato/incluirContrato.usecase";
+import { IncluirContratoRepository } from "../../contratos/incluirContrato/incluirContratoRepository";
 
 const companyUuid = "b0a20000-0000-4000-8000-000000000a01";
 const companyUuidB = "b0a20000-0000-4000-8000-000000000b01";
@@ -24,6 +26,7 @@ let incluir: IncluirImovelUsecase;
 let alterar: AlterarImovelUsecase;
 let deletar: DeletarImovelUsecase;
 let query: ImoveisQuery;
+let incluirContrato: IncluirContratoUsecase;
 
 let donoA: string;
 let donoB: string;
@@ -60,6 +63,7 @@ describe("Imóveis do módulo imóveis", () => {
     alterar = new AlterarImovelUsecase(new AlterarImovelRepository(connections));
     deletar = new DeletarImovelUsecase(new DeletarImovelRepository(connections));
     query = new ImoveisQuery(connections);
+    incluirContrato = new IncluirContratoUsecase(new IncluirContratoRepository(connections));
   });
 
   afterAll(async () => {
@@ -69,6 +73,8 @@ describe("Imóveis do módulo imóveis", () => {
   });
 
   const limpar = async () => {
+    await dataSource.query(`DELETE FROM imovel_contrato_eventos WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
+    await dataSource.query(`DELETE FROM imovel_contratos WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_imoveis WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_pessoas WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
   };
@@ -175,9 +181,20 @@ describe("Imóveis do módulo imóveis", () => {
     expect((await buscarLinha(uuid)).situacao).toBe("reforma");
   });
 
-  test("Imóvel alugado não pode mudar de situação nem ser excluído (409)", async () => {
+  test("Imóvel com contrato vigente não pode mudar de situação nem ser excluído (409)", async () => {
     const { uuid } = await incluir.execute(base());
-    await dataSource.query(`UPDATE imovel_imoveis SET situacao = 'alugado' WHERE uuid = $1`, [uuid]);
+    await incluirContrato.execute({
+      companyUuid,
+      imovelUuid: uuid,
+      inquilinoUuid: donoB,
+      inicio: "2026-01-01",
+      fim: "2026-12-31",
+      valorAluguel: 1000,
+      diaVencimento: 5,
+      indiceReajuste: "IPCA",
+      garantiaTipo: "nenhuma",
+    });
+    expect((await buscarLinha(uuid)).situacao).toBe("alugado");
     await expect(alterar.execute({ companyUuid, uuid, situacao: "livre" })).rejects.toMatchObject({
       message: "Imóvel com contrato vigente não pode mudar de situação",
       statusCode: 409,

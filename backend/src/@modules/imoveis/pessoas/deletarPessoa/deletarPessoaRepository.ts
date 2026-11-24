@@ -19,9 +19,14 @@ export class DeletarPessoaRepository {
     return !!row;
   }
 
-  /** Seam da Task 6: checar imovel_contratos (vigente) como inquilino ou fiador quando a tabela existir. */
-  async temContratoVigente(_companyUuid: string, _uuid: string): Promise<boolean> {
-    return false;
+  /** A pessoa é inquilina ou fiadora de contrato vigente da empresa. */
+  async temContratoVigente(companyUuid: string, uuid: string): Promise<boolean> {
+    const [row] = await this.connections.database.query(
+      `SELECT 1 FROM imovel_contratos
+       WHERE deleted_at IS NULL AND company_uuid = $1 AND status = 'vigente' AND (inquilino_uuid = $2 OR fiador_uuid = $2) LIMIT 1`,
+      [companyUuid, uuid],
+    );
+    return !!row;
   }
 
   async deletar(companyUuid: string, uuid: string): Promise<void> {

@@ -1,7 +1,6 @@
 import { buscarSituacaoImovel, imovelTemContratoVigente } from "../situacaoImovel";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
-import { ImovelSituacao } from "../../shared/imoveis.tipos";
 import { MSG_PROPRIETARIO_NAO_ENCONTRADO } from "../imovel.entity";
 
 /** Chaves já são nomes de coluna; valores undefined são ignorados. */

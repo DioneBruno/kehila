@@ -1,5 +1,15 @@
 import { ConnectionHub } from "../shared/connections/connectionHub";
-import { ImovelFinalidade, ImovelSituacao, ImovelTipo, PessoaPapel, PessoaTipo } from "./shared/imoveis.tipos";
+import {
+  ContratoEventoTipo,
+  ContratoStatus,
+  GarantiaTipo,
+  ImovelFinalidade,
+  ImovelSituacao,
+  ImovelTipo,
+  IndiceReajuste,
+  PessoaPapel,
+  PessoaTipo,
+} from "./shared/imoveis.tipos";
 
 export type PessoaItem = {
   uuid: string;
@@ -86,8 +96,14 @@ export type ImovelListaItem = {
   updatedAt: Date;
 };
 
-/** Resumo do contrato vigente; definido na Task 6. */
-export type ContratoVigenteResumo = Record<string, unknown>;
+/** Resumo do contrato vigente mostrado no detalhe do imóvel. */
+export type ContratoVigenteResumo = {
+  uuid: string;
+  inquilinoNome: string;
+  valorAluguel: number;
+  inicio: string;
+  fim: string;
+};
 
 export type ImovelDetalhe = ImovelListaItem & { contratoVigente: ContratoVigenteResumo | null };
 
@@ -120,6 +136,100 @@ const COLUNAS_IMOVEL = `
         i.observacoes,
         i.created_at AS "createdAt",
         i.updated_at AS "updatedAt"
+`;
+
+export type ContratoItem = {
+  uuid: string;
+  numero: string | null;
+  imovelUuid: string;
+  imovelIdentificacao: string;
+  proprietarioUuid: string;
+  proprietarioNome: string;
+  inquilinoUuid: string;
+  inquilinoNome: string;
+  fiadorUuid: string | null;
+  fiadorNome: string | null;
+  inicio: string;
+  fim: string;
+  valorAluguel: number;
+  diaVencimento: number;
+  indiceReajuste: IndiceReajuste;
+  mesReajuste: number | null;
+  multaAtrasoPct: number;
+  jurosMesPct: number;
+  descontoPontualidadePct: number | null;
+  multaRescisoriaMeses: number | null;
+  garantiaTipo: GarantiaTipo;
+  garantiaValor: number | null;
+  status: ContratoStatus;
+  encerradoEm: string | null;
+  observacoes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ListarContratosFiltro = {
+  proprietarioUuid?: string;
+  imovelUuid?: string;
+  inquilinoUuid?: string;
+  status?: ContratoStatus;
+  busca?: string;
+  pagina: number;
+  porPagina: number;
+};
+
+export type ContratoEventoItem = {
+  uuid: string;
+  contratoUuid: string;
+  tipo: ContratoEventoTipo;
+  data: string;
+  descricao: string;
+  valorAnterior: number | null;
+  valorNovo: number | null;
+  fimAnterior: string | null;
+  fimNovo: string | null;
+  criadoPorUuid: string | null;
+  criadoPorNome: string | null;
+  createdAt: Date;
+};
+
+const COLUNAS_CONTRATO = `
+        c.uuid,
+        c.numero,
+        c.imovel_uuid AS "imovelUuid",
+        i.identificacao AS "imovelIdentificacao",
+        i.proprietario_uuid AS "proprietarioUuid",
+        prop.nome AS "proprietarioNome",
+        c.inquilino_uuid AS "inquilinoUuid",
+        inq.nome AS "inquilinoNome",
+        c.fiador_uuid AS "fiadorUuid",
+        fia.nome AS "fiadorNome",
+        TO_CHAR(c.inicio, 'YYYY-MM-DD') AS inicio,
+        TO_CHAR(c.fim, 'YYYY-MM-DD') AS fim,
+        c.valor_aluguel::float8 AS "valorAluguel",
+        c.dia_vencimento AS "diaVencimento",
+        c.indice_reajuste AS "indiceReajuste",
+        c.mes_reajuste AS "mesReajuste",
+        c.multa_atraso_pct::float8 AS "multaAtrasoPct",
+        c.juros_mes_pct::float8 AS "jurosMesPct",
+        c.desconto_pontualidade_pct::float8 AS "descontoPontualidadePct",
+        c.multa_rescisoria_meses::float8 AS "multaRescisoriaMeses",
+        c.garantia_tipo AS "garantiaTipo",
+        c.garantia_valor::float8 AS "garantiaValor",
+        c.status,
+        TO_CHAR(c.encerrado_em, 'YYYY-MM-DD') AS "encerradoEm",
+        c.observacoes,
+        c.created_at AS "createdAt",
+        c.updated_at AS "updatedAt"
+`;
+
+// Joins sem filtro de deleted_at: o contrato continua mostrando os nomes mesmo se a pessoa/imóvel for excluído depois.
+const FROM_CONTRATO = `
+  FROM imovel_contratos c
+  JOIN imovel_imoveis i ON i.uuid = c.imovel_uuid
+  JOIN imovel_pessoas prop ON prop.uuid = i.proprietario_uuid
+  JOIN imovel_pessoas inq ON inq.uuid = c.inquilino_uuid
+  LEFT JOIN imovel_pessoas fia ON fia.uuid = c.fiador_uuid
 `;
 
 export class ImoveisQuery {
@@ -205,7 +315,85 @@ export class ImoveisQuery {
       [companyUuid, uuid],
     );
     if (!imovel) return null;
-    // Task 6 preenche o resumo do contrato vigente quando a tabela imovel_contratos existir.
-    return { ...imovel, contratoVigente: null };
+    const [contratoVigente]: ContratoVigenteResumo[] = await this.connections.database.query(
+      `SELECT c.uuid, inq.nome AS "inquilinoNome", c.valor_aluguel::float8 AS "valorAluguel",
+              TO_CHAR(c.inicio, 'YYYY-MM-DD') AS inicio, TO_CHAR(c.fim, 'YYYY-MM-DD') AS fim
+       FROM imovel_contratos c JOIN imovel_pessoas inq ON inq.uuid = c.inquilino_uuid
+       WHERE c.deleted_at IS NULL AND c.company_uuid = $1 AND c.imovel_uuid = $2 AND c.status = 'vigente'
+       LIMIT 1`,
+      [companyUuid, uuid],
+    );
+    return { ...imovel, contratoVigente: contratoVigente ?? null };
+  }
+
+  async listarContratos(companyUuid: string, filtro: ListarContratosFiltro): Promise<{ data: ContratoItem[]; total: number }> {
+    const valores: unknown[] = [companyUuid];
+    let where = `c.deleted_at IS NULL AND c.company_uuid = $1`;
+
+    const igual: [string | undefined, string][] = [
+      [filtro.proprietarioUuid, "i.proprietario_uuid"],
+      [filtro.imovelUuid, "c.imovel_uuid"],
+      [filtro.inquilinoUuid, "c.inquilino_uuid"],
+      [filtro.status, "c.status"],
+    ];
+    for (const [valor, coluna] of igual) {
+      if (!valor) continue;
+      valores.push(valor);
+      where += ` AND ${coluna} = $${valores.length}`;
+    }
+    const busca = filtro.busca?.trim();
+    if (busca) {
+      valores.push(`%${busca.replace(/[\\%_]/g, "\\$&")}%`);
+      const n = `$${valores.length}`;
+      where += ` AND (c.numero ILIKE ${n} OR i.identificacao ILIKE ${n} OR inq.nome ILIKE ${n} OR prop.nome ILIKE ${n})`;
+    }
+
+    const [{ total }] = await this.connections.database.query(`SELECT COUNT(*)::int AS total ${FROM_CONTRATO} WHERE ${where}`, valores);
+
+    const porPagina = Math.max(1, filtro.porPagina);
+    const offset = (Math.max(1, filtro.pagina) - 1) * porPagina;
+    const data: ContratoItem[] = await this.connections.database.query(
+      `SELECT ${COLUNAS_CONTRATO} ${FROM_CONTRATO} WHERE ${where}
+       ORDER BY (c.status = 'vigente') DESC, c.inicio DESC, c.uuid ASC LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+      [...valores, porPagina, offset],
+    );
+    return { data, total };
+  }
+
+  async buscarContrato(companyUuid: string, uuid: string): Promise<ContratoItem | null> {
+    const [contrato]: ContratoItem[] = await this.connections.database.query(
+      `SELECT ${COLUNAS_CONTRATO} ${FROM_CONTRATO} WHERE c.deleted_at IS NULL AND c.company_uuid = $1 AND c.uuid = $2`,
+      [companyUuid, uuid],
+    );
+    return contrato ?? null;
+  }
+
+  /** Histórico do contrato, mais recente primeiro; null se o contrato não existe nesta empresa. */
+  async listarEventosContrato(companyUuid: string, contratoUuid: string): Promise<ContratoEventoItem[] | null> {
+    const [contrato] = await this.connections.database.query(
+      `SELECT 1 FROM imovel_contratos WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`,
+      [companyUuid, contratoUuid],
+    );
+    if (!contrato) return null;
+    return this.connections.database.query(
+      `SELECT
+         e.uuid,
+         e.contrato_uuid AS "contratoUuid",
+         e.tipo,
+         TO_CHAR(e.data, 'YYYY-MM-DD') AS data,
+         e.descricao,
+         e.valor_anterior::float8 AS "valorAnterior",
+         e.valor_novo::float8 AS "valorNovo",
+         TO_CHAR(e.fim_anterior, 'YYYY-MM-DD') AS "fimAnterior",
+         TO_CHAR(e.fim_novo, 'YYYY-MM-DD') AS "fimNovo",
+         e.criado_por_uuid AS "criadoPorUuid",
+         u.name AS "criadoPorNome",
+         e.created_at AS "createdAt"
+       FROM imovel_contrato_eventos e
+       LEFT JOIN auth_users u ON u.uuid = e.criado_por_uuid
+       WHERE e.deleted_at IS NULL AND e.company_uuid = $1 AND e.contrato_uuid = $2
+       ORDER BY e.data DESC, e.created_at DESC, e.uuid DESC`,
+      [companyUuid, contratoUuid],
+    );
   }
 }

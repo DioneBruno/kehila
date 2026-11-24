@@ -9,10 +9,13 @@ export async function buscarSituacaoImovel(connections: ConnectionHub, companyUu
   return row?.situacao ?? null;
 }
 
-/**
- * Seam único da Task 6: hoje o contrato vigente é refletido por situacao = 'alugado' (só o contrato a define).
- * Quando imovel_contratos existir, trocar por EXISTS (status = 'vigente').
- */
+/** Há contrato vigente (não excluído) da mesma empresa para o imóvel. */
 export async function imovelTemContratoVigente(connections: ConnectionHub, companyUuid: string, uuid: string): Promise<boolean> {
-  return (await buscarSituacaoImovel(connections, companyUuid, uuid)) === "alugado";
+  const [row] = await connections.database.query(
+    `SELECT EXISTS (
+       SELECT 1 FROM imovel_contratos WHERE deleted_at IS NULL AND company_uuid = $1 AND imovel_uuid = $2 AND status = 'vigente'
+     ) AS existe`,
+    [companyUuid, uuid],
+  );
+  return !!row?.existe;
 }
