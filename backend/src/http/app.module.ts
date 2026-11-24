@@ -16,6 +16,7 @@ import { BiModule } from "./bi/bi.module";
 import { UsuarioModule } from "./usuario/usuario.module";
 import { MembresiaModule } from "./membresia/membresia.module";
 import { ApriscoModule } from "./aprisco/aprisco.module";
+import { ImoveisModule } from "./imoveis/imoveis.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PublicModule } from "./public/public.module";
 
@@ -42,6 +43,7 @@ import { PublicModule } from "./public/public.module";
     UsuarioModule,
     MembresiaModule,
     ApriscoModule,
+    ImoveisModule,
     PublicModule,
   ],
   controllers: [AppController],
