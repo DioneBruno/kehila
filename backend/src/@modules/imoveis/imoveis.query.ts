@@ -1,5 +1,5 @@
 import { ConnectionHub } from "../shared/connections/connectionHub";
-import { PessoaPapel, PessoaTipo } from "./shared/imoveis.tipos";
+import { ImovelFinalidade, ImovelSituacao, ImovelTipo, PessoaPapel, PessoaTipo } from "./shared/imoveis.tipos";
 
 export type PessoaItem = {
   uuid: string;
@@ -62,6 +62,66 @@ const COLUNA_PAPEL: Record<PessoaPapel, string> = {
   fiador: "eh_fiador",
 };
 
+export type ImovelListaItem = {
+  uuid: string;
+  proprietarioUuid: string;
+  proprietarioNome: string;
+  identificacao: string;
+  tipo: ImovelTipo;
+  finalidade: ImovelFinalidade;
+  enderecoCep: string | null;
+  enderecoLogradouro: string | null;
+  enderecoNumero: string | null;
+  enderecoComplemento: string | null;
+  enderecoBairro: string | null;
+  enderecoCidade: string | null;
+  enderecoUf: string | null;
+  inscricaoIptu: string | null;
+  matricula: string | null;
+  cartorio: string | null;
+  areaM2: number | null;
+  situacao: ImovelSituacao;
+  observacoes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/** Resumo do contrato vigente; definido na Task 6. */
+export type ContratoVigenteResumo = Record<string, unknown>;
+
+export type ImovelDetalhe = ImovelListaItem & { contratoVigente: ContratoVigenteResumo | null };
+
+export type ListarImoveisFiltro = {
+  proprietarioUuid?: string;
+  situacao?: ImovelSituacao;
+  busca?: string;
+  pagina: number;
+  porPagina: number;
+};
+
+const COLUNAS_IMOVEL = `
+        i.uuid,
+        i.proprietario_uuid AS "proprietarioUuid",
+        i.identificacao,
+        i.tipo,
+        i.finalidade,
+        i.endereco_cep AS "enderecoCep",
+        i.endereco_logradouro AS "enderecoLogradouro",
+        i.endereco_numero AS "enderecoNumero",
+        i.endereco_complemento AS "enderecoComplemento",
+        i.endereco_bairro AS "enderecoBairro",
+        i.endereco_cidade AS "enderecoCidade",
+        i.endereco_uf AS "enderecoUf",
+        i.inscricao_iptu AS "inscricaoIptu",
+        i.matricula,
+        i.cartorio,
+        i.area_m2::float8 AS "areaM2",
+        i.situacao,
+        i.observacoes,
+        i.created_at AS "createdAt",
+        i.updated_at AS "updatedAt"
+`;
+
 export class ImoveisQuery {
   constructor(readonly connections: ConnectionHub) {}
 
@@ -104,5 +164,48 @@ export class ImoveisQuery {
       [companyUuid, uuid],
     );
     return pessoa ?? null;
+  }
+
+  async listarImoveis(companyUuid: string, filtro: ListarImoveisFiltro): Promise<{ data: ImovelListaItem[]; total: number }> {
+    const valores: unknown[] = [companyUuid];
+    let where = `i.deleted_at IS NULL AND i.company_uuid = $1`;
+
+    if (filtro.proprietarioUuid) {
+      valores.push(filtro.proprietarioUuid);
+      where += ` AND i.proprietario_uuid = $${valores.length}`;
+    }
+    if (filtro.situacao) {
+      valores.push(filtro.situacao);
+      where += ` AND i.situacao = $${valores.length}`;
+    }
+    const busca = filtro.busca?.trim();
+    if (busca) {
+      valores.push(`%${busca.replace(/[\\%_]/g, "\\$&")}%`);
+      const n = `$${valores.length}`;
+      where += ` AND (i.identificacao ILIKE ${n} OR i.endereco_logradouro ILIKE ${n} OR i.matricula ILIKE ${n} OR p.nome ILIKE ${n})`;
+    }
+
+    const from = `FROM imovel_imoveis i JOIN imovel_pessoas p ON p.uuid = i.proprietario_uuid`;
+    const [{ total }] = await this.connections.database.query(`SELECT COUNT(*)::int AS total ${from} WHERE ${where}`, valores);
+
+    const porPagina = Math.max(1, filtro.porPagina);
+    const offset = (Math.max(1, filtro.pagina) - 1) * porPagina;
+    const data: ImovelListaItem[] = await this.connections.database.query(
+      `SELECT ${COLUNAS_IMOVEL}, p.nome AS "proprietarioNome" ${from} WHERE ${where} ORDER BY i.identificacao ASC, i.uuid ASC LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+      [...valores, porPagina, offset],
+    );
+    return { data, total };
+  }
+
+  async buscarImovel(companyUuid: string, uuid: string): Promise<ImovelDetalhe | null> {
+    const [imovel]: ImovelListaItem[] = await this.connections.database.query(
+      `SELECT ${COLUNAS_IMOVEL}, p.nome AS "proprietarioNome"
+       FROM imovel_imoveis i JOIN imovel_pessoas p ON p.uuid = i.proprietario_uuid
+       WHERE i.deleted_at IS NULL AND i.company_uuid = $1 AND i.uuid = $2`,
+      [companyUuid, uuid],
+    );
+    if (!imovel) return null;
+    // Task 6 preenche o resumo do contrato vigente quando a tabela imovel_contratos existir.
+    return { ...imovel, contratoVigente: null };
   }
 }

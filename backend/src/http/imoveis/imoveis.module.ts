@@ -5,6 +5,7 @@ import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 import { ModuloImoveisMiddleware } from "../middleware/modulo.middleware";
 
 import { PessoasController } from "./pessoas.controller";
+import { ImoveisController } from "./imoveis.controller";
 
 import { ImoveisQuery } from "src/@modules/imoveis/imoveis.query";
 
@@ -17,6 +18,15 @@ import { AlterarPessoaRepository } from "src/@modules/imoveis/pessoas/alterarPes
 import { DeletarPessoaUsecase } from "src/@modules/imoveis/pessoas/deletarPessoa/deletarPessoa.usecase";
 import { DeletarPessoaRepository } from "src/@modules/imoveis/pessoas/deletarPessoa/deletarPessoaRepository";
 
+import { IncluirImovelUsecase } from "src/@modules/imoveis/imoveis/incluirImovel/incluirImovel.usecase";
+import { IncluirImovelRepository } from "src/@modules/imoveis/imoveis/incluirImovel/incluirImovelRepository";
+
+import { AlterarImovelUsecase } from "src/@modules/imoveis/imoveis/alterarImovel/alterarImovel.usecase";
+import { AlterarImovelRepository } from "src/@modules/imoveis/imoveis/alterarImovel/alterarImovelRepository";
+
+import { DeletarImovelUsecase } from "src/@modules/imoveis/imoveis/deletarImovel/deletarImovel.usecase";
+import { DeletarImovelRepository } from "src/@modules/imoveis/imoveis/deletarImovel/deletarImovelRepository";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -26,16 +36,19 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 }
 
 @Module({
-  controllers: [PessoasController],
+  controllers: [PessoasController, ImoveisController],
   providers: [
     makeProvider(ImoveisQuery, (hub) => new ImoveisQuery(hub)),
     makeProvider(IncluirPessoaUsecase, (hub) => new IncluirPessoaUsecase(new IncluirPessoaRepository(hub))),
     makeProvider(AlterarPessoaUsecase, (hub) => new AlterarPessoaUsecase(new AlterarPessoaRepository(hub))),
     makeProvider(DeletarPessoaUsecase, (hub) => new DeletarPessoaUsecase(new DeletarPessoaRepository(hub))),
+    makeProvider(IncluirImovelUsecase, (hub) => new IncluirImovelUsecase(new IncluirImovelRepository(hub))),
+    makeProvider(AlterarImovelUsecase, (hub) => new AlterarImovelUsecase(new AlterarImovelRepository(hub))),
+    makeProvider(DeletarImovelUsecase, (hub) => new DeletarImovelUsecase(new DeletarImovelRepository(hub))),
   ],
 })
 export class ImoveisModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware).forRoutes(PessoasController);
+    consumer.apply(JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware).forRoutes(PessoasController, ImoveisController);
   }
 }

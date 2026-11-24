@@ -1,4 +1,5 @@
 import { ApiError } from "src/@modules/shared/apiError";
+import { garantirUuid } from "../../shared/garantirUuid";
 import { DeletarPessoaRepository } from "./deletarPessoaRepository";
 
 export type DeletarPessoaInput = {
@@ -11,12 +12,17 @@ export class DeletarPessoaUsecase {
 
   async execute(input: DeletarPessoaInput): Promise<void> {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
-    if (!input.uuid) throw new ApiError("Pessoa não identificada");
+    const uuid = garantirUuid(input.uuid, "Pessoa não encontrada");
 
-    const existe = await this.repo.existe(input.companyUuid, input.uuid);
+    const existe = await this.repo.existe(input.companyUuid, uuid);
     if (!existe) throw new ApiError("Pessoa não encontrada", 404);
 
-    // TODO (Task 5): bloquear (409) quando a pessoa for proprietária de imóvel ou parte de contrato vigente.
-    await this.repo.deletar(input.companyUuid, input.uuid);
+    if (await this.repo.ehProprietarioDeImovelAtivo(input.companyUuid, uuid)) {
+      throw new ApiError("Não é possível excluir pessoa proprietária de imóvel ativo", 409);
+    }
+    if (await this.repo.temContratoVigente(input.companyUuid, uuid)) {
+      throw new ApiError("Não é possível excluir pessoa com contrato vigente", 409);
+    }
+    await this.repo.deletar(input.companyUuid, uuid);
   }
 }

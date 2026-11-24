@@ -6,6 +6,7 @@ import { PAPEIS_PESSOA, PessoaPapel } from "src/@modules/imoveis/shared/imoveis.
 import { IncluirPessoaUsecase } from "src/@modules/imoveis/pessoas/incluirPessoa/incluirPessoa.usecase";
 import { AlterarPessoaUsecase } from "src/@modules/imoveis/pessoas/alterarPessoa/alterarPessoa.usecase";
 import { DeletarPessoaUsecase } from "src/@modules/imoveis/pessoas/deletarPessoa/deletarPessoa.usecase";
+import { garantirUuid } from "src/@modules/imoveis/shared/garantirUuid";
 import { exigirAdmin } from "../middleware/perfil.middleware";
 
 function enderecoDoBody(body: any) {
@@ -68,7 +69,7 @@ export class PessoasController {
 
   @Get(":uuid")
   async detalhar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
-    const pessoa = await this.imoveisQuery.buscarPessoa(req.companyUuid, uuid);
+    const pessoa = await this.imoveisQuery.buscarPessoa(req.companyUuid, garantirUuid(uuid, "Pessoa não encontrada"));
     if (!pessoa) throw new ApiError("Pessoa não encontrada", 404);
     return res.status(200).json({ success: true, data: pessoa });
   }

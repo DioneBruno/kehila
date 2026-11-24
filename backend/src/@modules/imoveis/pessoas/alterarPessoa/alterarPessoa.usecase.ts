@@ -1,5 +1,6 @@
 import { ApiError } from "src/@modules/shared/apiError";
 import { EnderecoInput, normalizarEmailPessoa, normalizarUf, textoOpcional, validarDocumentoPessoa } from "../pessoa.entity";
+import { garantirUuid } from "../../shared/garantirUuid";
 import { AlterarPessoaColunas, AlterarPessoaRepository } from "./alterarPessoaRepository";
 
 /** Campos ausentes (undefined) não mudam; null limpa o campo. O tipo (PF/PJ) não pode ser alterado. */
@@ -25,9 +26,9 @@ export class AlterarPessoaUsecase {
   constructor(readonly repo: AlterarPessoaRepository) {}
 
   async execute(input: AlterarPessoaInput): Promise<void> {
-    const { companyUuid, uuid } = input;
+    const { companyUuid } = input;
     if (!companyUuid) throw new ApiError("Empresa não identificada", 401);
-    if (!uuid) throw new ApiError("Pessoa não identificada");
+    const uuid = garantirUuid(input.uuid, "Pessoa não encontrada");
 
     const tipo = await this.repo.buscarTipo(companyUuid, uuid);
     if (!tipo) throw new ApiError("Pessoa não encontrada", 404);
