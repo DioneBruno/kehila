@@ -58,6 +58,7 @@ import { EditarFormIngressoUsecase } from "src/@modules/portalEventos/pedidos/ed
 import { EditarFormIngressoRepository } from "src/@modules/portalEventos/pedidos/editarFormIngresso/editarFormIngressoRepository";
 import { CancelarPedidoUsecase } from "src/@modules/portalEventos/pedidos/cancelarPedido/cancelarPedido.usecase";
 import { CancelarPedidoRepository } from "src/@modules/portalEventos/pedidos/cancelarPedido/cancelarPedidoRepository";
+import { ModuloIgrejaMiddleware } from "src/http/middleware/modulo.middleware";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -94,8 +95,8 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class PortalEventosModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(DominioMiddleware).forRoutes(PublicoController);
-    consumer.apply(JwtAuthMiddleware).forRoutes(PedidosController);
-    consumer.apply(JwtAuthMiddleware, AdminMiddleware).forRoutes(EventosController, LotesController);
+    consumer.apply(DominioMiddleware, ModuloIgrejaMiddleware).forRoutes(PublicoController);
+    consumer.apply(JwtAuthMiddleware, ModuloIgrejaMiddleware).forRoutes(PedidosController);
+    consumer.apply(JwtAuthMiddleware, AdminMiddleware, ModuloIgrejaMiddleware).forRoutes(EventosController, LotesController);
   }
 }

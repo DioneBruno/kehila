@@ -42,6 +42,7 @@ import { InformarPagamentoManualRepository } from "src/@modules/financeiro/infor
 import { NotificarVencimentoPagamentoUsecase } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamento.usecase";
 import { NotificarVencimentoPagamentoRepository } from "src/@modules/financeiro/notificarVencimentoPagamento/notificarVencimentoPagamentoRepository";
 import { PagamentoService } from "./pagamento.service";
+import { ModuloIgrejaMiddleware } from "src/http/middleware/modulo.middleware";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -66,7 +67,10 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(ListarCobrancaUsecase, (hub) => new ListarCobrancaUsecase(new ListarCobrancaRepository(hub))),
     makeProvider(ListaPagamentoUsecase, (hub) => new ListaPagamentoUsecase(new ListaPagamentoRepository(hub))),
     makeProvider(GerarBoletoPagamentoUsecase, (hub) => new GerarBoletoPagamentoUsecase(new GerarBoletoPagamentoRepository(hub))),
-    makeProvider(NotificarVencimentoPagamentoUsecase, (hub) => new NotificarVencimentoPagamentoUsecase(new NotificarVencimentoPagamentoRepository(hub))),
+    makeProvider(
+      NotificarVencimentoPagamentoUsecase,
+      (hub) => new NotificarVencimentoPagamentoUsecase(new NotificarVencimentoPagamentoRepository(hub)),
+    ),
     makeProvider(
       VerificarPagamentoUsecase,
       (hub) => new VerificarPagamentoUsecase(new VerificarPagamentoRepostiory(hub), new VerificarPagamentoGateway(hub)),
@@ -76,7 +80,9 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 export class FinanceiroModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Cartão de crédito é usado pelo próprio usuário (portal de eventos); demais rotas são administrativas.
-    consumer.apply(JwtAuthMiddleware).forRoutes(CartaoCreditoController);
-    consumer.apply(JwtAuthMiddleware, AdminMiddleware).forRoutes(ContasBancariasController, CobrancasController, PagamentosController);
+    consumer.apply(JwtAuthMiddleware, ModuloIgrejaMiddleware).forRoutes(CartaoCreditoController);
+    consumer
+      .apply(JwtAuthMiddleware, AdminMiddleware, ModuloIgrejaMiddleware)
+      .forRoutes(ContasBancariasController, CobrancasController, PagamentosController);
   }
 }

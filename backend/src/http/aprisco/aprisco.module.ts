@@ -24,6 +24,7 @@ import { DisvincularIntegranteRepository } from "src/@modules/aprisco/disvincula
 
 import { RegistrarPresencaUsecase } from "src/@modules/aprisco/registrarPresenca/registrarPresenca.usecase";
 import { RegistrarPresencaRepository } from "src/@modules/aprisco/registrarPresenca/registrarPresencaRepository";
+import { ModuloIgrejaMiddleware } from "src/http/middleware/modulo.middleware";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -47,6 +48,6 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class ApriscoModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware, InternoMiddleware).forRoutes(ApriscoController);
+    consumer.apply(JwtAuthMiddleware, InternoMiddleware, ModuloIgrejaMiddleware).forRoutes(ApriscoController);
   }
 }

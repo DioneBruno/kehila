@@ -24,6 +24,7 @@ import { RemoverVinculoRepository } from "src/@modules/membresia/removerVinculo/
 
 import { CriarUsuarioUsecase } from "src/@modules/membresia/criarUsuario/criarUsuario.usecase";
 import { CriarUsuarioRepository } from "src/@modules/membresia/criarUsuario/criarUsuarioRepository";
+import { ModuloIgrejaMiddleware } from "src/http/middleware/modulo.middleware";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -47,6 +48,6 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 })
 export class MembresiaModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtAuthMiddleware, InternoMiddleware).forRoutes(MembresiaController);
+    consumer.apply(JwtAuthMiddleware, InternoMiddleware, ModuloIgrejaMiddleware).forRoutes(MembresiaController);
   }
 }
