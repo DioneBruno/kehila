@@ -30,7 +30,12 @@
                 </q-item-section>
               </q-item>
               <q-separator />
-              <q-item v-if="dispositivoConfiavel" v-close-popup clickable @click="esquecerDispositivo">
+              <q-item
+                v-if="dispositivoConfiavel"
+                v-close-popup
+                clickable
+                @click="esquecerDispositivo"
+              >
                 <q-item-section avatar><q-icon name="phonelink_erase" /></q-item-section>
                 <q-item-section>Esquecer este dispositivo</q-item-section>
               </q-item>
@@ -157,7 +162,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, reactive, ref, toRefs, watchEffect } from "vue";
+import {
+  computed,
+  defineComponent,
+  inject,
+  onMounted,
+  reactive,
+  ref,
+  toRefs,
+  watchEffect,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { AuthCookiesQuasar } from "src/@modules/auth/authCookies.quasar";
@@ -165,32 +179,10 @@ import { MainLayoutService } from "./MainLayout.service";
 import { useLayoutStore } from "src/stores/layout";
 import TokenDecode from "src/@modules/auth/tokenDecode";
 import type { LoginHttp } from "src/@modules/auth/login.http";
+import { MENU_ITEMS, filtrarMenu, type MenuItem } from "./menu";
 
-type MenuItem = {
-  label: string;
-  icon?: string;
-  route?: string;
-  type?: "section";
-  curto?: string;
-};
-
-const MENU_ITEMS: MenuItem[] = [
-  { label: "Início", icon: "home", route: "home" },
-  { label: "Eventos", icon: "event", route: "eventos" },
-  { label: "BI", icon: "dashboard", route: "bi" },
-  { label: "FINANCEIRO", type: "section" },
-  { label: "Contas Bancárias", icon: "account_balance", route: "financeiro.contas-bancarias" },
-  { label: "Cobranças", icon: "receipt_long", route: "financeiro.cobrancas" },
-  { label: "Pagamentos", icon: "payments", route: "financeiro.pagamentos" },
-  { label: "ADMINISTRAÇÃO", type: "section" },
-  { label: "Minha Empresa", icon: "business", route: "empresa" },
-  { label: "Membros", icon: "diversity_3", route: "membros" },
-  { label: "Apriscos", icon: "holiday_village", route: "apriscos" },
-  { label: "Usuários", icon: "group", route: "usuarios" },
-  { label: "Notificações", icon: "email", route: "notificacao" },
-];
-
-const ROTAS_NAV_INFERIOR = ["home", "eventos", "membros", "apriscos"];
+const ROTAS_NAV_INFERIOR_IGREJA = ["home", "eventos", "membros", "apriscos"];
+const ROTAS_NAV_INFERIOR_IMOVEIS = ["imoveis.painel", "imoveis.contratos", "imoveis.imoveis"];
 
 export default defineComponent({
   name: "MainLayout",
@@ -201,21 +193,32 @@ export default defineComponent({
     const $authCookies = new AuthCookiesQuasar();
     const $service = new MainLayoutService();
     const $layoutStore = useLayoutStore();
-    const token = TokenDecode.execute();
-    const isAdmin = token?.user?.position === "admin";
-
     const data = reactive({
       drawerAberto: false,
       expandirMini: false,
       layout: computed(() => $layoutStore.layout),
     });
 
-    const itensMenu = computed<MenuItem[]>(() =>
-      isAdmin ? MENU_ITEMS : MENU_ITEMS.filter((i) => i.route === "home"),
-    );
+    // Lido dentro de computed para refletir o token atual (troca de usuário sem recarregar).
+    const token = computed(() => TokenDecode.execute());
+    const itensMenu = computed<MenuItem[]>(() => {
+      const t = token.value;
+      const externo = !t?.user?.position && !!t?.user?.roles?.includes("usuario-externo");
+      return filtrarMenu(
+        MENU_ITEMS,
+        t?.company?.modulos ?? ["igreja"],
+        t?.user?.position === "admin",
+        !externo,
+      );
+    });
+
+    const rotasNavInferior = computed(() => {
+      const modulos = token.value?.company?.modulos ?? ["igreja"];
+      return modulos.includes("igreja") ? ROTAS_NAV_INFERIOR_IGREJA : ROTAS_NAV_INFERIOR_IMOVEIS;
+    });
 
     const itensNavInferior = computed(() =>
-      isAdmin ? MENU_ITEMS.filter((i) => i.route && ROTAS_NAV_INFERIOR.includes(i.route)) : [],
+      itensMenu.value.filter((i) => i.route && rotasNavInferior.value.includes(i.route)),
     );
 
     // Aba ativa derivada da rota atual (ex.: "membros.detalhe" -> "membros").
@@ -223,7 +226,7 @@ export default defineComponent({
     const abaInferior = computed({
       get: () => {
         const nome = String($route.name ?? "");
-        return ROTAS_NAV_INFERIOR.find((r) => nome === r || nome.startsWith(`${r}.`)) ?? "";
+        return rotasNavInferior.value.find((r) => nome === r || nome.startsWith(`${r}.`)) ?? "";
       },
       set: () => {},
     });
@@ -238,7 +241,7 @@ export default defineComponent({
     const mostrarNavInferior = computed(() => celular.value && itensNavInferior.value.length > 0);
 
     const iniciais = computed(() => {
-      const nome = (token?.user?.name ?? "").trim();
+      const nome = (token.value?.user?.name ?? "").trim();
       if (!nome) return "?";
       const partes = nome.split(/\s+/);
       const primeira = partes[0]?.[0] ?? "";
@@ -300,7 +303,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
-      usuario: token?.user,
+      usuario: computed(() => token.value?.user),
       itensMenu,
       itensNavInferior,
       modoMini,

@@ -118,6 +118,14 @@ export default defineComponent({
     });
 
     onMounted(async () => {
+      const modulos = token?.company?.modulos ?? ["igreja"];
+      if (!modulos.includes("igreja") && modulos.includes("imoveis")) {
+        // A rota só existe depois das páginas de imóveis; sem ela, segue na home.
+        if (router.hasRoute("imoveis.painel")) {
+          await router.replace({ name: "imoveis.painel" });
+          return;
+        }
+      }
       data.apriscosLiderados = (await apriscoService.listarLiderados()) ?? [];
       data.carregado = true;
     });

@@ -15,6 +15,7 @@ type TokenDecodeOutput = {
     uuid: string;
     name: string;
     cpfCnpj: string;
+    modulos?: string[];
   };
 };
 
