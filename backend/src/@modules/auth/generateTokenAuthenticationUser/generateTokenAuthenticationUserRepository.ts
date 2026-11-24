@@ -15,7 +15,12 @@ export class GenerateTokenAuthenticationUserRepository {
         "userCompanies".roles,
         companies.uuid AS company_uuid,
         companies.name AS company_name,
-        companies.cpf_cnpj AS company_cpf_cnpj
+        companies.cpf_cnpj AS company_cpf_cnpj,
+        COALESCE((
+          SELECT array_agg(m.modulo ORDER BY m.modulo)
+          FROM auth_company_modulos m
+          WHERE m.company_uuid = companies.uuid AND m.deleted_at IS NULL
+        ), '{}') AS company_modulos
       FROM auth_users users
         INNER JOIN auth_users_companies "userCompanies"
           ON users.uuid = "userCompanies".user_uuid
@@ -33,6 +38,7 @@ export class GenerateTokenAuthenticationUserRepository {
         uuid: usuarioModel.company_uuid,
         name: usuarioModel.company_name,
         cpfCnpj: usuarioModel.company_cpf_cnpj,
+        modulos: usuarioModel.company_modulos ?? [],
       },
       cpf: usuarioModel.cpf,
       email: usuarioModel.email,

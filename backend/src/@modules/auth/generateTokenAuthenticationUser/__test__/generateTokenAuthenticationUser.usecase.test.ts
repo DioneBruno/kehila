@@ -66,6 +66,43 @@ describe("Deve testar TokenGenerateUsecase", () => {
     expect(payload.company.cpfCnpj).toBe("cnpj");
   });
 
+  test("Deve incluir os módulos habilitados da empresa no token", async () => {
+    await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
+      VALUES ('${userUuid}', 'userCpf', 'nome', '${username}', '${passwordCrypto}', '2024-06-06');
+    `);
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
+    `);
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    `);
+    await dataSource.query(`INSERT INTO auth_company_modulos (uuid, company_uuid, modulo)
+      VALUES ('${randomUUID()}', '${companyUuid}', 'imoveis'), ('${randomUUID()}', '${companyUuid}', 'igreja');
+    `);
+
+    const usecase = new GenerateTokenAuthenticationUserUsecase(repo);
+    const response = await usecase.execute({ companyUuid, userUuid });
+
+    expect(ApiJwt.tokenDecoding(response.token).company.modulos).toEqual(["igreja", "imoveis"]);
+  });
+
+  test("Deve enviar lista vazia de módulos quando a empresa não tem nenhum", async () => {
+    await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
+      VALUES ('${userUuid}', 'userCpf', 'nome', '${username}', '${passwordCrypto}', '2024-06-06');
+    `);
+    await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj)
+      VALUES ('${companyUuid}', 'admin', 'companyName', 'cnpj');
+    `);
+    await dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position)
+      VALUES ('${randomUUID()}', '${userUuid}', '${companyUuid}', true, 'admin');
+    `);
+
+    const usecase = new GenerateTokenAuthenticationUserUsecase(repo);
+    const response = await usecase.execute({ companyUuid, userUuid });
+
+    expect(ApiJwt.tokenDecoding(response.token).company.modulos).toEqual([]);
+  });
+
   test("Deve validar usuario não encontrado", async () => {
     await dataSource.query(`INSERT INTO auth_users (uuid, cpf, name, email, password, email_confirmed_at)
       VALUES ('${userUuid}', 'userCpf', '${username}', 'userEmail', '${passwordCrypto}', '2024-06-06');

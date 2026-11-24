@@ -4,6 +4,7 @@ export type CompanyProps = {
   uuid: string;
   name: string;
   cpfCnpj: string;
+  modulos?: string[];
 };
 
 export type UserProps = {
@@ -55,6 +56,7 @@ export class UserEntity {
         uuid: this.company().uuid,
         name: this.company().name,
         cpfCnpj: this.company().cpfCnpj,
+        modulos: this.company().modulos ?? [],
       },
     });
     return token;
