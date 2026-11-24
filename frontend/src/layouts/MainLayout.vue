@@ -217,9 +217,13 @@ export default defineComponent({
       return modulos.includes("igreja") ? ROTAS_NAV_INFERIOR_IGREJA : ROTAS_NAV_INFERIOR_IMOVEIS;
     });
 
-    const itensNavInferior = computed(() =>
-      itensMenu.value.filter((i) => i.route && rotasNavInferior.value.includes(i.route)),
-    );
+    const itensNavInferior = computed(() => {
+      const t = token.value;
+      const modulos = t?.company?.modulos ?? ["igreja"];
+      // Igreja: só administradores têm a barra (como antes). Imóveis: qualquer usuário interno.
+      if (modulos.includes("igreja") && t?.user?.position !== "admin") return [];
+      return itensMenu.value.filter((i) => i.route && rotasNavInferior.value.includes(i.route));
+    });
 
     // Aba ativa derivada da rota atual (ex.: "membros.detalhe" -> "membros").
     // "Mais" só abre o menu e nunca fica marcada.

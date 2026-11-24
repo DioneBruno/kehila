@@ -119,12 +119,13 @@ export default defineComponent({
 
     onMounted(async () => {
       const modulos = token?.company?.modulos ?? ["igreja"];
-      if (!modulos.includes("igreja") && modulos.includes("imoveis")) {
-        // A rota só existe depois das páginas de imóveis; sem ela, segue na home.
-        if (router.hasRoute("imoveis.painel")) {
+      if (!modulos.includes("igreja")) {
+        // Sem módulo igreja: vai ao painel de imóveis (quando a rota existir) e não lista apriscos.
+        if (modulos.includes("imoveis") && router.hasRoute("imoveis.painel")) {
           await router.replace({ name: "imoveis.painel" });
-          return;
         }
+        data.carregado = true;
+        return;
       }
       data.apriscosLiderados = (await apriscoService.listarLiderados()) ?? [];
       data.carregado = true;
