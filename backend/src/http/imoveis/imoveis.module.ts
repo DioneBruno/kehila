@@ -7,6 +7,7 @@ import { ModuloImoveisMiddleware } from "../middleware/modulo.middleware";
 import { PessoasController } from "./pessoas.controller";
 import { ImoveisController } from "./imoveis.controller";
 import { ContratosController } from "./contratos.controller";
+import { PainelController } from "./painel.controller";
 
 import { ImoveisQuery } from "src/@modules/imoveis/imoveis.query";
 
@@ -46,7 +47,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 }
 
 @Module({
-  controllers: [PessoasController, ImoveisController, ContratosController],
+  controllers: [PessoasController, ImoveisController, ContratosController, PainelController],
   providers: [
     makeProvider(ImoveisQuery, (hub) => new ImoveisQuery(hub)),
     makeProvider(IncluirPessoaUsecase, (hub) => new IncluirPessoaUsecase(new IncluirPessoaRepository(hub))),
@@ -64,6 +65,6 @@ export class ImoveisModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware)
-      .forRoutes(PessoasController, ImoveisController, ContratosController);
+      .forRoutes(PessoasController, ImoveisController, ContratosController, PainelController);
   }
 }

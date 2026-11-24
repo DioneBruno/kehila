@@ -232,6 +232,28 @@ const FROM_CONTRATO = `
   LEFT JOIN imovel_pessoas fia ON fia.uuid = c.fiador_uuid
 `;
 
+export type ContratoResumo = {
+  uuid: string;
+  imovelIdentificacao: string;
+  proprietarioNome: string;
+  inquilinoNome: string;
+  valorAluguel: number;
+  fim: string;
+  indiceReajuste: IndiceReajuste;
+  mesReajuste: number | null;
+};
+
+export type ImovelLivreResumo = { uuid: string; identificacao: string; proprietarioNome: string };
+
+export type PainelImoveis = {
+  vencidos: ContratoResumo[];
+  vence0a30: ContratoResumo[];
+  vence31a60: ContratoResumo[];
+  vence61a90: ContratoResumo[];
+  reajustesMes: ContratoResumo[];
+  imoveisLivres: ImovelLivreResumo[];
+};
+
 export class ImoveisQuery {
   constructor(readonly connections: ConnectionHub) {}
 
@@ -395,5 +417,45 @@ export class ImoveisQuery {
        ORDER BY e.data DESC, e.created_at DESC, e.uuid DESC`,
       [companyUuid, contratoUuid],
     );
+  }
+
+  /** Vencimentos, reajustes do mês e imóveis livres. `hoje` é 'YYYY-MM-DD'; toda a aritmética de datas é feita no SQL. */
+  async painel(companyUuid: string, hoje: string): Promise<PainelImoveis> {
+    const colunas = `
+      c.uuid,
+      i.identificacao AS "imovelIdentificacao",
+      prop.nome AS "proprietarioNome",
+      inq.nome AS "inquilinoNome",
+      c.valor_aluguel::float8 AS "valorAluguel",
+      TO_CHAR(c.fim, 'YYYY-MM-DD') AS fim,
+      c.indice_reajuste AS "indiceReajuste",
+      c.mes_reajuste AS "mesReajuste"`;
+    const baseVigentes = `${FROM_CONTRATO} WHERE c.deleted_at IS NULL AND c.company_uuid = $1 AND c.status = 'vigente'`;
+    const porFim = `ORDER BY c.fim ASC, i.identificacao ASC, c.uuid ASC`;
+    const faixa = (filtro: string): Promise<ContratoResumo[]> =>
+      this.connections.database.query(`SELECT ${colunas} ${baseVigentes} AND ${filtro} ${porFim}`, [companyUuid, hoje]);
+
+    const [vencidos, vence0a30, vence31a60, vence61a90, reajustesMes, imoveisLivres] = await Promise.all([
+      faixa(`c.fim < $2::date`),
+      faixa(`c.fim BETWEEN $2::date AND $2::date + 30`),
+      faixa(`c.fim BETWEEN $2::date + 31 AND $2::date + 60`),
+      faixa(`c.fim BETWEEN $2::date + 61 AND $2::date + 90`),
+      this.connections.database.query(
+        `SELECT ${colunas} ${baseVigentes}
+           AND c.indice_reajuste <> 'nenhum'
+           AND c.mes_reajuste = EXTRACT(MONTH FROM $2::date)
+           AND c.inicio < date_trunc('month', $2::date)
+         ORDER BY i.identificacao ASC, c.uuid ASC`,
+        [companyUuid, hoje],
+      ),
+      this.connections.database.query(
+        `SELECT i.uuid, i.identificacao, p.nome AS "proprietarioNome"
+         FROM imovel_imoveis i JOIN imovel_pessoas p ON p.uuid = i.proprietario_uuid
+         WHERE i.deleted_at IS NULL AND i.company_uuid = $1 AND i.situacao = 'livre'
+         ORDER BY i.identificacao ASC, i.uuid ASC`,
+        [companyUuid],
+      ),
+    ]);
+    return { vencidos, vence0a30, vence31a60, vence61a90, reajustesMes, imoveisLivres };
   }
 }
