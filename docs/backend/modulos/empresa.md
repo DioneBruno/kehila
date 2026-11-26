@@ -69,7 +69,7 @@ O Admin tem as mesmas rotas em `/admin/empresas/:uuid/layout/imagem-login`.
 - Formato conferido pelos bytes iniciais (PNG, JPG ou WEBP; SVG não), até 5 MB.
 - Variáveis: `STORAGE_REGION`, `STORAGE_KEYID`, `STORAGE_ACCESSKEY`, `STORAGE_BUCKET` e
   `STORAGE_BASE_URL` (opcional: endpoint de provedor compatível com S3 — MinIO, Spaces, R2,
-  Wasabi —, usado em path-style; vazio = AWS; sem região, vai `auto`). Ver `criarClienteS3`.
+  Wasabi —, usado em path-style; vazio ou URL `*.amazonaws.com` = AWS na `STORAGE_REGION`; sem região, vai `auto`). Ver `criarClienteS3`.
 - Vai para o S3 (`ConnectionStorageAwsS3`) em
   `empresas/<uuid>/layout/login-<timestamp>.<ext>`; o caminho fica em `layout.imagemLogin`
   (chave de topo, então editar `header`/`telaLogin` não apaga a imagem).

@@ -4,12 +4,25 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Upload } from "@aws-sdk/lib-storage";
 import { StorageInterface } from "src/@modules/shared/connections/connectionStorage.interface";
 
+/** Endpoint S3-compatível; URLs da própria AWS (ex.: https://bucket.s3.amazonaws.com) são ignoradas. */
+function endpointCompativel(valor: string | undefined): string | undefined {
+  const url = valor?.trim();
+  if (!url) return undefined;
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    if (host === "amazonaws.com" || host.endsWith(".amazonaws.com")) return undefined;
+  } catch {
+    return undefined;
+  }
+  return url;
+}
+
 /**
  * Cliente S3. Com STORAGE_BASE_URL usa um provedor compatível com S3 (MinIO, Spaces, R2, Wasabi...)
- * em path-style; vazio = AWS. Sem região, provedores compatíveis recebem "auto".
+ * em path-style; vazio ou URL da AWS = AWS na STORAGE_REGION. Sem região, provedores compatíveis recebem "auto".
  */
 export function criarClienteS3(env: NodeJS.ProcessEnv = process.env): S3Client {
-  const endpoint = env.STORAGE_BASE_URL?.trim() || undefined;
+  const endpoint = endpointCompativel(env.STORAGE_BASE_URL);
   return new S3Client({
     region: env.STORAGE_REGION?.trim() || (endpoint ? "auto" : undefined),
     credentials: {

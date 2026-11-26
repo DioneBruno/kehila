@@ -17,4 +17,13 @@ describe("criarClienteS3", () => {
     expect(cliente.config.forcePathStyle).toBe(true);
     expect(await cliente.config.region()).toBe("auto");
   });
+  it.each(["https://kehila-developer.s3.amazonaws.com", "https://s3.sa-east-1.amazonaws.com", "nao-e-url"])(
+    "ignora STORAGE_BASE_URL da AWS ou inválida (%s) e usa a região",
+    async (url) => {
+      const cliente = criarClienteS3({ ...base, STORAGE_REGION: "us-east-1", STORAGE_BASE_URL: url });
+      expect(await cliente.config.region()).toBe("us-east-1");
+      expect(cliente.config.endpoint).toBeUndefined();
+      expect(cliente.config.forcePathStyle).toBeFalsy();
+    },
+  );
 });
