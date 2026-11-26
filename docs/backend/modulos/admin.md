@@ -21,7 +21,7 @@ Prefixo `/admin/empresas`. `:uuid` inválido ou empresa apagada/inexistente → 
 
 | Método | Rota | O que faz |
 |---|---|---|
-| GET | `/` | Lista empresas não deletadas (`busca` por nome, fantasia, CPF/CNPJ ou domínio; `pagina`, `porPagina` ≤ 100, padrão 20). Resposta `{success,data,meta:{total}}`, cada item com `modulos` e `dominios`. |
+| GET | `/` | Lista empresas não deletadas (`busca` por nome, fantasia, CPF/CNPJ ou domínio; `pagina`, `porPagina` ≤ 100, padrão 20). Resposta `{success,data,meta:{total}}`, cada item com `modulos` e `dominios` (na listagem, apenas domínios **ativos**; o detalhe mostra todos). |
 | POST | `/` | `CadastrarEmpresaUsecase` — empresa + domínio + módulos + usuário admin numa transação. `201 {data:{uuid}}`. |
 | GET | `/:uuid` | Detalhe: dados cadastrais, `modulos` e `dominios` (uuid, domain, active). |
 | PUT | `/:uuid` | Reaproveita `EditarEmpresaUsecase` (mesmas regras de `PUT /empresa`). |
@@ -62,11 +62,15 @@ Valem no Admin **e também em `/empresa/dominios`** (criar, editar, deletar):
 
 - **Normalização** (`normalizarDominio`): `trim`, minúsculas, remove barras finais; precisa casar
   `^https?://[a-z0-9.-]+(:porta)?$` (origem, sem caminho). Ex.: `HTTP://Admin.localhost:9000/` →
-  `http://admin.localhost:9000`.
+  `http://admin.localhost:9000`. As portas padrão são removidas (`:443` em https, `:80` em http),
+  pois o browser envia o `Origin` sem elas. Valor não-string → 400 `Campo domain inválido`.
 - **Unicidade** (`garantirDominioLivre`): não pode existir outro domínio **ativo e não deletado**
   igual, comparando `lower(rtrim(domain, '/'))` (pega valores antigos salvos com barra/maiúscula).
-  Ao editar, ignora o próprio registro. Conflito → 409. **Não há índice único no banco**; a
+  Ao editar, ignora o próprio registro; **também é checada ao reativar** (`active: true`) um domínio
+  existente. Conflito → 409. **Não há índice único no banco**; a
   garantia é só da aplicação.
+- **`active` booleano**: criar/editar com `active` que não seja `true`/`false` → 400
+  `Campo active inválido`.
 - **Último domínio ativo** (`garantirNaoEhUltimoAtivo`): desativar ou deletar o único domínio ativo
   da empresa → `A empresa precisa de pelo menos um domínio ativo`.
 

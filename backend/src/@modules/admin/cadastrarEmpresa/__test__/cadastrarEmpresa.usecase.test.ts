@@ -27,6 +27,12 @@ describe("CadastrarEmpresaUsecase", () => {
     ["e-mail inválido", (i) => (i.admin!.email = "abc"), "E-mail inválido"],
     ["cpf inválido", (i) => (i.admin!.cpf = "11111111111"), "CPF inválido"],
     ["sem senha", (i) => delete i.admin!.password, "A senha deve ter pelo menos 8 caracteres"],
+    ["nome da empresa numérico", (i) => ((i.empresa as any).name = 123), "Campo empresa.name inválido"],
+    ["cpfCnpj em array", (i) => ((i.empresa as any).cpfCnpj = ["1"]), "Campo empresa.cpfCnpj inválido"],
+    ["domínio numérico", (i) => ((i as any).dominio = 123), "Campo domain inválido"],
+    ["nome do admin numérico", (i) => ((i.admin as any).name = 5), "Campo admin.name inválido"],
+    ["senha numérica", (i) => ((i.admin as any).password = 12345678), "A senha deve ter pelo menos 8 caracteres"],
+    ["senha em array", (i) => ((i.admin as any).password = ["12345678"]), "A senha deve ter pelo menos 8 caracteres"],
     ["senha curta", (i) => (i.admin!.password = "1234567"), "A senha deve ter pelo menos 8 caracteres"],
   ];
 

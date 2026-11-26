@@ -53,8 +53,9 @@ Não há endpoint para editar `layout` — hoje só via banco.
 ## Regras de domínio
 
 `/empresa/dominios` (e o [módulo admin](admin.md)) usam `dominioRegras.ts`: o valor é normalizado
-(minúsculas, sem barra final) e precisa ser uma origem `http(s)://host[:porta]`; não pode repetir
-um domínio ativo de outra empresa (409 "Este domínio já está em uso por outra empresa") e a empresa
+(minúsculas, sem barra final, sem porta padrão `:443`/`:80`) e precisa ser uma origem
+`http(s)://host[:porta]`; `active` deve ser booleano (senão 400); não pode repetir
+um domínio ativo de outra empresa, nem ao criar, editar ou reativar (409 "Este domínio já está em uso por outra empresa") e a empresa
 não pode ficar sem domínio ativo (desativar/deletar o último → "A empresa precisa de pelo menos
 um domínio ativo").
 

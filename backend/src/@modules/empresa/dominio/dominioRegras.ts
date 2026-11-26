@@ -1,4 +1,5 @@
 import { ApiError } from "src/@modules/shared/apiError";
+import { texto } from "src/@modules/shared/apiTexto";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
 export const MSG_DOMINIO_FORMATO = "Informe o domínio como origem, ex.: https://app.exemplo.com.br";
@@ -8,10 +9,15 @@ export const MSG_ULTIMO_DOMINIO = "A empresa precisa de pelo menos um domínio a
 const FORMATO_ORIGEM = /^https?:\/\/[a-z0-9.-]+(:\d{1,5})?$/;
 
 export function normalizarDominio(valor: string | null | undefined): string {
-  const normalizado = (valor ?? "").trim().toLowerCase().replace(/\/+$/, "");
+  const normalizado = (texto(valor, "domain") ?? "").trim().toLowerCase().replace(/\/+$/, "");
   if (!normalizado) throw new ApiError("O domínio é obrigatório");
   if (!FORMATO_ORIGEM.test(normalizado)) throw new ApiError(MSG_DOMINIO_FORMATO);
-  return normalizado;
+  // Browsers enviam o Origin sem a porta padrão; guardar com ela nunca casaria no login.
+  return normalizado.replace(/^(https:\/\/.+):443$/, "$1").replace(/^(http:\/\/.+):80$/, "$1");
+}
+
+export function garantirActiveBooleano(active: unknown): void {
+  if (active !== undefined && typeof active !== "boolean") throw new ApiError("Campo active inválido");
 }
 
 export class DominioRegrasRepository {

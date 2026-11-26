@@ -2,7 +2,7 @@
 jest.mock("@vonage/server-sdk", () => ({ Vonage: class {} }));
 jest.mock("@vonage/messages", () => ({}));
 
-import { exigirModulo, ModuloIgrejaMiddleware, ModuloImoveisMiddleware } from "src/http/middleware/modulo.middleware";
+import { exigirModulo, ModuloAdminMiddleware, ModuloIgrejaMiddleware, ModuloImoveisMiddleware } from "src/http/middleware/modulo.middleware";
 import { ApriscoModule } from "src/http/aprisco/aprisco.module";
 import { MembresiaModule } from "src/http/membresia/membresia.module";
 import { BiModule } from "src/http/bi/bi.module";
@@ -22,7 +22,9 @@ import { ImoveisController } from "src/http/imoveis/imoveis.controller";
 import { ContratosController } from "src/http/imoveis/contratos.controller";
 import { PainelController } from "src/http/imoveis/painel.controller";
 import { JwtAuthMiddleware } from "src/http/middleware/jwtAuth.middleware";
-import { InternoMiddleware } from "src/http/middleware/perfil.middleware";
+import { AdminMiddleware, InternoMiddleware } from "src/http/middleware/perfil.middleware";
+import { AdminModule } from "src/http/admin/admin.module";
+import { AdminEmpresaController } from "src/http/admin/adminEmpresa.controller";
 
 const fakeCache = () => {
   const store: Record<string, any> = {};
@@ -173,5 +175,12 @@ describe("matriz de rotas", () => {
     expect(aplicados).toHaveLength(1);
     expect(aplicados[0].middlewares).toEqual([JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware]);
     expect(aplicados[0].rotas).toEqual([PessoasController, ImoveisController, ContratosController, PainelController]);
+  });
+
+  test("AdminModule aplica JwtAuth, Admin e ModuloAdmin, nessa ordem, no AdminEmpresaController", () => {
+    const aplicados = configurar(AdminModule);
+    expect(aplicados).toHaveLength(1);
+    expect(aplicados[0].middlewares).toEqual([JwtAuthMiddleware, AdminMiddleware, ModuloAdminMiddleware]);
+    expect(aplicados[0].rotas).toEqual([AdminEmpresaController]);
   });
 });

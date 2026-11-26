@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
+import { garantirUuid } from "src/@modules/imoveis/shared/garantirUuid";
 import { CriarDominioUsecase } from "src/@modules/empresa/dominio/criarDominio/criarDominio.usecase";
 import { ListarDominiosUsecase } from "src/@modules/empresa/dominio/listarDominios/listarDominios.usecase";
 import { EditarDominioUsecase } from "src/@modules/empresa/dominio/editarDominio/editarDominio.usecase";
@@ -34,6 +35,7 @@ export class DominioController {
 
   @Put(":uuid")
   async editar(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    garantirUuid(uuid, "Domínio não encontrado");
     await this.editarDominioUsecase.execute({
       companyUuid: req.companyUuid,
       dominioUuid: uuid,
@@ -45,6 +47,7 @@ export class DominioController {
 
   @Delete(":uuid")
   async deletar(@Req() req: Request | any, @Param("uuid") uuid: string, @Res() res: Response) {
+    garantirUuid(uuid, "Domínio não encontrado");
     await this.deletarDominioUsecase.execute({
       companyUuid: req.companyUuid,
       dominioUuid: uuid,

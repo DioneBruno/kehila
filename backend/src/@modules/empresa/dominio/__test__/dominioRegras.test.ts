@@ -30,6 +30,42 @@ describe("normalizarDominio", () => {
   });
 });
 
+describe("normalizarDominio - tipos e portas padrão", () => {
+  it.each([123, ["https://a.com"], {}])("rejeita domínio não-string com 400: %p", (v) => {
+    expect(() => normalizarDominio(v as any)).toThrow("Campo domain inválido");
+  });
+
+  it("remove portas padrão", () => {
+    expect(normalizarDominio("https://x.com:443")).toBe("https://x.com");
+    expect(normalizarDominio("http://x.com:80/")).toBe("http://x.com");
+  });
+
+  it("mantém portas não padrão", () => {
+    expect(normalizarDominio("https://x.com:80")).toBe("https://x.com:80");
+    expect(normalizarDominio("http://x.com:443")).toBe("http://x.com:443");
+    expect(normalizarDominio("https://x.com:4430")).toBe("https://x.com:4430");
+  });
+});
+
+describe("active deve ser booleano", () => {
+  it.each(["false", "true", 0, 1, null])("EditarDominio rejeita active=%p sem tocar no banco", async (active) => {
+    const repo = { existe: jest.fn().mockResolvedValue(true), atualizar: jest.fn() } as any;
+    await expect(new EditarDominioUsecase(repo, fakeRegras()).execute({ companyUuid: EMPRESA, dominioUuid: DOMINIO, active: active as any })).rejects.toMatchObject({
+      message: "Campo active inválido",
+      statusCode: 400,
+    });
+    expect(repo.atualizar).not.toHaveBeenCalled();
+  });
+
+  it.each(["false", 0, null])("CriarDominio rejeita active=%p", async (active) => {
+    const repo = { criar: jest.fn() } as any;
+    await expect(new CriarDominioUsecase(repo, fakeRegras()).execute({ companyUuid: EMPRESA, domain: "https://a.com", active: active as any })).rejects.toThrow(
+      "Campo active inválido",
+    );
+    expect(repo.criar).not.toHaveBeenCalled();
+  });
+});
+
 describe("CriarDominioUsecase", () => {
   it("rejeita domínio em uso com 409", async () => {
     const repo = { criar: jest.fn() } as any;

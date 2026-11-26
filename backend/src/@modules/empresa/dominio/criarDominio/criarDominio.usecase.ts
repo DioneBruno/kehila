@@ -1,5 +1,5 @@
 import { ApiError } from "src/@modules/shared/apiError";
-import { DominioRegrasRepository, garantirDominioLivre, normalizarDominio } from "../dominioRegras";
+import { DominioRegrasRepository, garantirActiveBooleano, garantirDominioLivre, normalizarDominio } from "../dominioRegras";
 import { CriarDominioRepository, DominioCriado } from "./criarDominioRepository";
 
 export type CriarDominioInput = {
@@ -16,6 +16,7 @@ export class CriarDominioUsecase {
 
   async execute(input: CriarDominioInput): Promise<DominioCriado> {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
+    garantirActiveBooleano(input.active);
     const domain = normalizarDominio(input.domain);
     await garantirDominioLivre(this.regras, domain);
 

@@ -1,5 +1,5 @@
 import { ApiError } from "src/@modules/shared/apiError";
-import { DominioRegrasRepository, garantirDominioLivre, garantirNaoEhUltimoAtivo, normalizarDominio } from "../dominioRegras";
+import { DominioRegrasRepository, garantirActiveBooleano, garantirDominioLivre, garantirNaoEhUltimoAtivo, normalizarDominio } from "../dominioRegras";
 import { EditarDominioRepository } from "./editarDominioRepository";
 
 export type EditarDominioInput = {
@@ -18,6 +18,7 @@ export class EditarDominioUsecase {
   async execute(input: EditarDominioInput): Promise<void> {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
     if (!input.dominioUuid) throw new ApiError("UUID do domínio é obrigatório");
+    garantirActiveBooleano(input.active);
     const domain = input.domain !== undefined ? normalizarDominio(input.domain) : undefined;
 
     const existe = await this.repo.existe(input.companyUuid, input.dominioUuid);

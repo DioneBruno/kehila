@@ -12,6 +12,7 @@ import { EditarDominioUsecase } from "src/@modules/empresa/dominio/editarDominio
 import { DeletarDominioUsecase } from "src/@modules/empresa/dominio/deletarDominio/deletarDominio.usecase";
 
 const EMPRESA_NAO_ENCONTRADA = "Empresa não encontrada";
+const DOMINIO_NAO_ENCONTRADO = "Domínio não encontrado";
 
 @Controller("admin/empresas")
 export class AdminEmpresaController {
@@ -82,15 +83,15 @@ export class AdminEmpresaController {
     await this.garantirEmpresa(uuid);
     await this.editarEmpresaUsecase.execute({
       companyUuid: uuid,
-      name: body.name,
-      commercialName: body.commercialName,
-      fantasyName: body.fantasyName,
-      stateRegistration: body.stateRegistration,
-      cpfCnpj: body.cpfCnpj,
-      email: body.email,
-      phone: body.phone,
-      address: body.address,
-      uf: body.uf,
+      name: body?.name,
+      commercialName: body?.commercialName,
+      fantasyName: body?.fantasyName,
+      stateRegistration: body?.stateRegistration,
+      cpfCnpj: body?.cpfCnpj,
+      email: body?.email,
+      phone: body?.phone,
+      address: body?.address,
+      uf: body?.uf,
     });
     return res.status(200).json({ success: true });
   }
@@ -105,20 +106,22 @@ export class AdminEmpresaController {
   @Post(":uuid/dominios")
   async criarDominio(@Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
     await this.garantirEmpresa(uuid);
-    const resultado = await this.criarDominioUsecase.execute({ companyUuid: uuid, domain: body.domain, active: body.active });
+    const resultado = await this.criarDominioUsecase.execute({ companyUuid: uuid, domain: body?.domain, active: body?.active });
     return res.status(201).json({ success: true, data: resultado });
   }
 
   @Put(":uuid/dominios/:dominioUuid")
   async editarDominio(@Param("uuid") uuid: string, @Param("dominioUuid") dominioUuid: string, @Body() body: any, @Res() res: Response) {
     await this.garantirEmpresa(uuid);
-    await this.editarDominioUsecase.execute({ companyUuid: uuid, dominioUuid, domain: body.domain, active: body.active });
+    garantirUuid(dominioUuid, DOMINIO_NAO_ENCONTRADO);
+    await this.editarDominioUsecase.execute({ companyUuid: uuid, dominioUuid, domain: body?.domain, active: body?.active });
     return res.status(200).json({ success: true });
   }
 
   @Delete(":uuid/dominios/:dominioUuid")
   async deletarDominio(@Param("uuid") uuid: string, @Param("dominioUuid") dominioUuid: string, @Res() res: Response) {
     await this.garantirEmpresa(uuid);
+    garantirUuid(dominioUuid, DOMINIO_NAO_ENCONTRADO);
     await this.deletarDominioUsecase.execute({ companyUuid: uuid, dominioUuid });
     return res.status(200).json({ success: true });
   }
@@ -126,7 +129,7 @@ export class AdminEmpresaController {
   @Put(":uuid/modulos")
   async definirModulos(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
     await this.garantirEmpresa(uuid);
-    const modulos = await this.definirModulosUsecase.execute({ companyUuid: uuid, companyUuidLogada: req.companyUuid, modulos: body.modulos });
+    const modulos = await this.definirModulosUsecase.execute({ companyUuid: uuid, companyUuidLogada: req.companyUuid, modulos: body?.modulos });
     return res.status(200).json({ success: true, data: modulos });
   }
 }
