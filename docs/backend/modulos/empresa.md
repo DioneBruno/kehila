@@ -67,7 +67,10 @@ devolvem `layout` cru (sem os padrões).
 O Admin tem as mesmas rotas em `/admin/empresas/:uuid/layout/imagem-login`.
 
 - Formato conferido pelos bytes iniciais (PNG, JPG ou WEBP; SVG não), até 5 MB.
-- Vai para o S3 (`ConnectionStorageAwsS3`, variáveis `STORAGE_*`) em
+- Variáveis: `STORAGE_REGION`, `STORAGE_KEYID`, `STORAGE_ACCESSKEY`, `STORAGE_BUCKET` e
+  `STORAGE_BASE_URL` (opcional: endpoint de provedor compatível com S3 — MinIO, Spaces, R2,
+  Wasabi —, usado em path-style; vazio = AWS; sem região, vai `auto`). Ver `criarClienteS3`.
+- Vai para o S3 (`ConnectionStorageAwsS3`) em
   `empresas/<uuid>/layout/login-<timestamp>.<ext>`; o caminho fica em `layout.imagemLogin`
   (chave de topo, então editar `header`/`telaLogin` não apaga a imagem).
 - `/ping` devolve `telaLogin.imagemUrl` (URL assinada, 6 h) ou `null`; os detalhes da empresa

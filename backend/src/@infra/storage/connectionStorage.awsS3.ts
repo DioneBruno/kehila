@@ -4,11 +4,21 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Upload } from "@aws-sdk/lib-storage";
 import { StorageInterface } from "src/@modules/shared/connections/connectionStorage.interface";
 
-const region = process.env.STORAGE_REGION as string;
-const credentials = {
-  accessKeyId: process.env.STORAGE_KEYID as string,
-  secretAccessKey: process.env.STORAGE_ACCESSKEY as string,
-};
+/**
+ * Cliente S3. Com STORAGE_BASE_URL usa um provedor compatível com S3 (MinIO, Spaces, R2, Wasabi...)
+ * em path-style; vazio = AWS. Sem região, provedores compatíveis recebem "auto".
+ */
+export function criarClienteS3(env: NodeJS.ProcessEnv = process.env): S3Client {
+  const endpoint = env.STORAGE_BASE_URL?.trim() || undefined;
+  return new S3Client({
+    region: env.STORAGE_REGION?.trim() || (endpoint ? "auto" : undefined),
+    credentials: {
+      accessKeyId: env.STORAGE_KEYID as string,
+      secretAccessKey: env.STORAGE_ACCESSKEY as string,
+    },
+    ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
+  });
+}
 
 function detectContentType(buffer: Buffer): string {
   if (buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) return "application/pdf";
@@ -35,7 +45,7 @@ function detectContentType(buffer: Buffer): string {
 
 export class ConnectionStorageAwsS3 implements StorageInterface {
   async generatePresignerUrl(path: string, expiresIn: number = 3600): Promise<string> {
-    const s3 = new S3Client({ region, credentials });
+    const s3 = criarClienteS3();
     const command = new GetObjectCommand({
       Bucket: process.env.STORAGE_BUCKET,
       Key: path,
@@ -50,7 +60,7 @@ export class ConnectionStorageAwsS3 implements StorageInterface {
   }
 
   async generatePresignerUrlInline(path: string, expiresIn: number = 3600): Promise<string> {
-    const s3 = new S3Client({ region, credentials });
+    const s3 = criarClienteS3();
     const command = new GetObjectCommand({
       Bucket: process.env.STORAGE_BUCKET,
       Key: path,
@@ -67,7 +77,7 @@ export class ConnectionStorageAwsS3 implements StorageInterface {
   } //TODO: Verificar sobre o inline (repliquei o generatePresignerUrl que virou generatePresignerUrlInline)
 
   async upload(path: string, file: Buffer, contentType?: string): Promise<{ path: string }> {
-    const client = new S3Client({ region, credentials });
+    const client = criarClienteS3();
     const resolvedContentType = contentType ?? detectContentType(file);
     const params = {
       Bucket: process.env.STORAGE_BUCKET,
@@ -86,7 +96,7 @@ export class ConnectionStorageAwsS3 implements StorageInterface {
   }
 
   async download(path: string): Promise<NodeJS.ReadableStream> {
-    const s3 = new S3Client({ region, credentials });
+    const s3 = criarClienteS3();
     const command = new GetObjectCommand({
       Bucket: process.env.STORAGE_BUCKET,
       Key: path,
