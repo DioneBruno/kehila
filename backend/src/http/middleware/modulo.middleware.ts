@@ -1,10 +1,10 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { ModuloEmpresaRepository } from "src/@modules/empresa/modulos/moduloEmpresaRepository";
+import { ModuloChave } from "src/@modules/empresa/modulos/modulos";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ConnectionCacheInterface } from "src/@modules/shared/connections/connectionCache.interface";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 
-export type ModuloChave = "igreja" | "imoveis";
 
 const CACHE_SEGUNDOS = 300;
 
@@ -67,6 +67,14 @@ export class ModuloIgrejaMiddleware extends ModuloMiddleware {
 @Injectable()
 export class ModuloImoveisMiddleware extends ModuloMiddleware {
   protected readonly modulo = "imoveis" as const;
+  constructor(hub: ConnectionHub) {
+    super(hub);
+  }
+}
+
+@Injectable()
+export class ModuloAdminMiddleware extends ModuloMiddleware {
+  protected readonly modulo = "admin" as const;
   constructor(hub: ConnectionHub) {
     super(hub);
   }

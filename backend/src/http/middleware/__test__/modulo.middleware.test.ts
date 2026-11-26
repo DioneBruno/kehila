@@ -44,6 +44,12 @@ describe("exigirModulo", () => {
     await expect(promise).rejects.toMatchObject({ statusCode: 403 });
   });
 
+  test("módulo admin: libera com admin e bloqueia sem", async () => {
+    await expect(exigirModulo({ listarModulos: jest.fn().mockResolvedValue(["admin"]) }, undefined, "c1", "admin")).resolves.toBeUndefined();
+    const promise = exigirModulo({ listarModulos: jest.fn().mockResolvedValue(["igreja"]) }, undefined, "c1", "admin");
+    await expect(promise).rejects.toMatchObject({ statusCode: 403 });
+  });
+
   test("libera empresa com o módulo", async () => {
     const repo = { listarModulos: jest.fn().mockResolvedValue(["igreja"]) };
     await expect(exigirModulo(repo, undefined, "c1", "igreja")).resolves.toBeUndefined();
