@@ -24,6 +24,7 @@ import { ListarDominiosRepository } from "src/@modules/empresa/dominio/listarDom
 import { EditarDominioUsecase } from "src/@modules/empresa/dominio/editarDominio/editarDominio.usecase";
 import { EditarDominioRepository } from "src/@modules/empresa/dominio/editarDominio/editarDominioRepository";
 
+import { DominioRegrasRepository } from "src/@modules/empresa/dominio/dominioRegras";
 import { DeletarDominioUsecase } from "src/@modules/empresa/dominio/deletarDominio/deletarDominio.usecase";
 import { DeletarDominioRepository } from "src/@modules/empresa/dominio/deletarDominio/deletarDominioRepository";
 
@@ -41,10 +42,10 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(DetalharEmpresaUsecase, (hub) => new DetalharEmpresaUsecase(new DetalharEmpresaRepository(hub))),
     makeProvider(EditarEmpresaUsecase, (hub) => new EditarEmpresaUsecase(new EditarEmpresaRepository(hub))),
     makeProvider(DeletarEmpresaUsecase, (hub) => new DeletarEmpresaUsecase(new DeletarEmpresaRepository(hub))),
-    makeProvider(CriarDominioUsecase, (hub) => new CriarDominioUsecase(new CriarDominioRepository(hub))),
+    makeProvider(CriarDominioUsecase, (hub) => new CriarDominioUsecase(new CriarDominioRepository(hub), new DominioRegrasRepository(hub))),
     makeProvider(ListarDominiosUsecase, (hub) => new ListarDominiosUsecase(new ListarDominiosRepository(hub))),
-    makeProvider(EditarDominioUsecase, (hub) => new EditarDominioUsecase(new EditarDominioRepository(hub))),
-    makeProvider(DeletarDominioUsecase, (hub) => new DeletarDominioUsecase(new DeletarDominioRepository(hub))),
+    makeProvider(EditarDominioUsecase, (hub) => new EditarDominioUsecase(new EditarDominioRepository(hub), new DominioRegrasRepository(hub))),
+    makeProvider(DeletarDominioUsecase, (hub) => new DeletarDominioUsecase(new DeletarDominioRepository(hub), new DominioRegrasRepository(hub))),
   ],
 })
 export class EmpresaModule implements NestModule {
