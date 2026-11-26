@@ -8,6 +8,7 @@ import * as bcryptjs from "bcryptjs";
 import { DominioRegrasRepository } from "src/@modules/empresa/dominio/dominioRegras";
 import { CadastrarEmpresaUsecase } from "../cadastrarEmpresa/cadastrarEmpresa.usecase";
 import { CadastrarEmpresaRepository } from "../cadastrarEmpresa/cadastrarEmpresaRepository";
+import { AdminQuery } from "../admin.query";
 
 const companyUuid = "ad000000-0000-4000-8000-000000000a01";
 const rollbackUuid = "ad000000-0000-4000-8000-000000000a03";
@@ -18,9 +19,15 @@ const todasEmpresas = () => [companyUuid, rollbackUuid, ...(cadastradas.uuid ? [
 const todosAdmins = () => [rollbackAdminUuid, ...(cadastradas.adminUuid ? [cadastradas.adminUuid] : [])];
 
 async function limpar() {
-  const empresas = todasEmpresas();
+  // Sobras de execuções interrompidas: empresas que ficaram com o domínio fixo de teste.
+  const sobras = await dataSource.query(`SELECT company_uuid FROM auth_company_domains WHERE lower(rtrim(domain, '/')) = $1`, [dominioTeste]);
+  const empresas = [...todasEmpresas(), ...sobras.map((s: { company_uuid: string }) => s.company_uuid)];
+  const usuarios = await dataSource.query(
+    `SELECT user_uuid FROM auth_users_companies WHERE company_uuid = ANY($1::uuid[]) AND user_uuid <> ALL($2::uuid[])`,
+    [sobras.map((s: { company_uuid: string }) => s.company_uuid), todosAdmins()],
+  );
   await dataSource.query(`DELETE FROM auth_users_companies WHERE company_uuid = ANY($1::uuid[])`, [empresas]);
-  await dataSource.query(`DELETE FROM auth_users WHERE uuid = ANY($1::uuid[])`, [todosAdmins()]);
+  await dataSource.query(`DELETE FROM auth_users WHERE uuid = ANY($1::uuid[])`, [[...todosAdmins(), ...usuarios.map((u: { user_uuid: string }) => u.user_uuid)]]);
   await dataSource.query(`DELETE FROM auth_company_modulos WHERE company_uuid = ANY($1::uuid[])`, [empresas]);
   await dataSource.query(`DELETE FROM auth_company_domains WHERE company_uuid = ANY($1::uuid[])`, [empresas]);
   await dataSource.query(`DELETE FROM auth_companies WHERE uuid = ANY($1::uuid[])`, [empresas]);
@@ -124,6 +131,56 @@ describe("Admin (banco)", () => {
     test("domínio já em uso (formato diferente) devolve 409", async () => {
       const { usecase } = montar();
       await expect(usecase.execute(input("HTTP://Teste-Admin-A.localhost:9000/"))).rejects.toMatchObject({ statusCode: 409 });
+    });
+  });
+
+  describe("consultas /admin/empresas", () => {
+    const deletadaUuid = "ad000000-0000-4000-8000-000000000a04";
+    let query: AdminQuery;
+
+    beforeAll(async () => {
+      query = new AdminQuery(connections);
+      await dataSource.query(
+        `INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj, deleted_at) VALUES ($1, 'test-admin-del', 'Empresa teste-admin-a Deletada', '00000000000000', now()) ON CONFLICT DO NOTHING`,
+        [deletadaUuid],
+      );
+    });
+
+    afterAll(async () => {
+      await dataSource.query(`DELETE FROM auth_companies WHERE uuid = $1`, [deletadaUuid]);
+    });
+
+    test("lista por domínio com módulos e domínios ativos, ignorando deletadas", async () => {
+      const { data, total } = await query.listarEmpresas({ busca: "teste-admin-a", pagina: 1, porPagina: 20 });
+
+      expect(total).toBe(1);
+      expect(data).toHaveLength(1);
+      expect(data[0]).toMatchObject({ uuid: cadastradas.uuid, name: "Empresa Cadastrada", cpfCnpj: "00000000000191", modulos: ["admin", "igreja"], dominios: [dominioTeste] });
+      expect(data.find((e) => e.uuid === deletadaUuid)).toBeUndefined();
+    });
+
+    test("busca por CNPJ e por nome", async () => {
+      expect((await query.listarEmpresas({ busca: "00000000000191", pagina: 1, porPagina: 100 })).data.map((e) => e.uuid)).toContain(cadastradas.uuid);
+      expect((await query.listarEmpresas({ busca: "Empresa Cadastrada", pagina: 1, porPagina: 100 })).data.map((e) => e.uuid)).toContain(cadastradas.uuid);
+    });
+
+    test("paginação respeita porPagina e total", async () => {
+      const { data, total } = await query.listarEmpresas({ pagina: 1, porPagina: 1 });
+      expect(data).toHaveLength(1);
+      expect(total).toBeGreaterThanOrEqual(2);
+    });
+
+    test("detalhe traz dados, módulos e domínios com active", async () => {
+      const detalhe = await query.detalharEmpresa(cadastradas.uuid!);
+      expect(detalhe).toMatchObject({ uuid: cadastradas.uuid, name: "Empresa Cadastrada", modulos: ["admin", "igreja"] });
+      expect(detalhe!.dominios).toEqual([expect.objectContaining({ domain: dominioTeste, active: true })]);
+    });
+
+    test("uuid inexistente ou deletada: detalhe null e existe false", async () => {
+      expect(await query.detalharEmpresa("ad000000-0000-4000-8000-0000000000ff")).toBeNull();
+      expect(await query.detalharEmpresa(deletadaUuid)).toBeNull();
+      expect(await query.existeEmpresa(deletadaUuid)).toBe(false);
+      expect(await query.existeEmpresa(cadastradas.uuid!)).toBe(true);
     });
   });
 });

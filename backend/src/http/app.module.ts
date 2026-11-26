@@ -19,6 +19,7 @@ import { ApriscoModule } from "./aprisco/aprisco.module";
 import { ImoveisModule } from "./imoveis/imoveis.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PublicModule } from "./public/public.module";
+import { AdminModule } from "./admin/admin.module";
 
 @Global()
 @Module({
@@ -45,6 +46,7 @@ import { PublicModule } from "./public/public.module";
     ApriscoModule,
     ImoveisModule,
     PublicModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
