@@ -101,6 +101,32 @@ export class AdminEmpresaService {
     }
   }
 
+  async enviarImagemLogin(uuid: string, arquivo: File) {
+    try {
+      this.$q.loading.show();
+      await this.$http.enviarImagemLogin(uuid, arquivo);
+      this.$q.notify({ type: "positive", message: "Imagem enviada com sucesso" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async removerImagemLogin(uuid: string) {
+    try {
+      this.$q.loading.show();
+      await this.$http.removerImagemLogin(uuid);
+      this.$q.notify({ type: "positive", message: "Imagem padrão restaurada" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
   async listarDominios(uuid: string) {
     try {
       this.$q.loading.show();

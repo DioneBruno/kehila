@@ -124,6 +124,12 @@
                   @click="salvarLayout"
                 />
               </div>
+              <q-separator class="q-my-md" />
+              <empresa-imagem-login
+                :imagem-url="empresa.imagemLoginUrl"
+                @enviar="enviarImagemLogin"
+                @remover="removerImagemLogin"
+              />
             </q-card-section>
           </q-card>
         </q-tab-panel>
@@ -284,6 +290,7 @@ import type { EmpresaDetalhe, EmpresaDominio } from "src/@modules/admin/empresa.
 import { AdminEmpresaService, MODULOS_EMPRESA, UFS } from "./admin.service";
 import EmpresaUsuarios from "./empresaUsuarios.vue";
 import EmpresaLayoutForm from "src/components/EmpresaLayoutForm.vue";
+import EmpresaImagemLogin from "src/components/EmpresaImagemLogin.vue";
 import { layoutParaForm } from "src/components/empresaLayout";
 import { MainLayoutService } from "src/layouts/MainLayout.service";
 import TokenDecode from "src/@modules/auth/tokenDecode";
@@ -292,7 +299,7 @@ const dominioFormVazio = () => ({ domain: "", active: true });
 
 export default defineComponent({
   name: "AdminEmpresaEditar",
-  components: { EmpresaUsuarios, EmpresaLayoutForm },
+  components: { EmpresaUsuarios, EmpresaLayoutForm, EmpresaImagemLogin },
   setup() {
     const $route = useRoute();
     const $service = new AdminEmpresaService();
@@ -378,6 +385,23 @@ export default defineComponent({
       if (TokenDecode.execute()?.company?.uuid === uuid) await $layoutService.ping().catch(() => undefined);
     }
 
+    async function enviarImagemLogin(arquivo: File, limpar: () => void) {
+      if (!(await $service.enviarImagemLogin(uuid, arquivo))) return;
+      limpar();
+      await recarregarImagem();
+    }
+
+    async function removerImagemLogin() {
+      if (await $service.removerImagemLogin(uuid)) await recarregarImagem();
+    }
+
+    // Só a URL da imagem: não descarta edições não salvas nas outras abas.
+    async function recarregarImagem() {
+      const empresa = await $service.detalhar(uuid);
+      if (empresa && data.empresa) data.empresa.imagemLoginUrl = empresa.imagemLoginUrl;
+      if (TokenDecode.execute()?.company?.uuid === uuid) await $layoutService.ping().catch(() => undefined);
+    }
+
     async function salvarModulos() {
       const ok = await $service.definirModulos(uuid, data.modulosSelecionados);
       if (ok && data.empresa) data.empresa.modulos = [...data.modulosSelecionados];
@@ -437,6 +461,8 @@ export default defineComponent({
       salvar,
       salvarModulos,
       salvarLayout,
+      enviarImagemLogin,
+      removerImagemLogin,
       formatarData,
       abrirDialogDominio,
       salvarDominio,

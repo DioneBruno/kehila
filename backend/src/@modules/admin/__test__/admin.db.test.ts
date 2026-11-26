@@ -12,6 +12,7 @@ import { AdminQuery } from "../admin.query";
 import { EditarEmpresaUsecase } from "src/@modules/empresa/editarEmpresa/editarEmpresa.usecase";
 import { EditarEmpresaRepository } from "src/@modules/empresa/editarEmpresa/editarEmpresaRepository";
 import { LayoutQuery } from "src/@modules/empresa/layout/layout.query";
+import { ImagemLoginRepository, ImagemLoginUrl } from "src/@modules/empresa/layout/imagemLogin/imagemLogin";
 import { DetalharUsuarioUsecase } from "src/@modules/usuario/detalharUsuario/detalharUsuario.usecase";
 import { DetalharUsuarioRepository } from "src/@modules/usuario/detalharUsuario/detalharUsuarioRepository";
 import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
@@ -266,6 +267,40 @@ describe("Admin (banco)", () => {
       extra: { cor: "azul" },
     });
     // Vazio cai no padrão do /ping.
-    expect((await new LayoutQuery(connections).buscarLayoutCompanyUuid(companyUuid)).telaLogin).toEqual({ titulo: "IBNA", subTitulo: "Bem-vindo" });
+    expect((await new LayoutQuery(connections).buscarLayoutCompanyUuid(companyUuid)).telaLogin).toEqual({ titulo: "IBNA", subTitulo: "Bem-vindo", imagemUrl: null });
+  });
+});
+
+describe("Imagem de login (banco)", () => {
+  const empresa = "ad000000-0000-4000-8000-000000000a01";
+  beforeAll(async () => {
+    await dataSource.initialize();
+    await dataSource.query(
+      `INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj) VALUES ($1, 'test-admin-a', 'Empresa Teste Admin', '00000000000000') ON CONFLICT DO NOTHING`,
+      [empresa],
+    );
+  });
+  afterAll(async () => {
+    await dataSource.query(`DELETE FROM auth_companies WHERE uuid = $1`, [empresa]);
+    await dataSource.destroy();
+  });
+
+  test("grava e remove layout.imagemLogin sem mexer nas outras chaves; editar layout preserva a imagem", async () => {
+    const hub = new ConnectionHub({ database: dataSource, cache: fakeCache as any });
+    const repo = new ImagemLoginRepository(hub);
+    await dataSource.query(`UPDATE auth_companies SET layout = '{"header": {"titulo": "H"}}'::jsonb WHERE uuid = $1`, [empresa]);
+
+    await repo.salvarCaminho(empresa, "empresas/x/layout/login-1.png");
+    await new EditarEmpresaUsecase(new EditarEmpresaRepository(hub)).execute({ companyUuid: empresa, layout: { telaLogin: { titulo: "T", subTitulo: "S" } } });
+    let [row] = await dataSource.query(`SELECT layout FROM auth_companies WHERE uuid = $1`, [empresa]);
+    expect(row.layout).toEqual({ header: { titulo: "H" }, telaLogin: { titulo: "T", subTitulo: "S" }, imagemLogin: "empresas/x/layout/login-1.png" });
+
+    const storage = { generatePresignerUrl: jest.fn(async (p: string) => `url:${p}`) };
+    const ping = await new LayoutQuery(hub, new ImagemLoginUrl(storage as any)).buscarLayoutCompanyUuid(empresa);
+    expect(ping.telaLogin.imagemUrl).toBe("url:empresas/x/layout/login-1.png");
+
+    await repo.removerCaminho(empresa);
+    [row] = await dataSource.query(`SELECT layout FROM auth_companies WHERE uuid = $1`, [empresa]);
+    expect(row.layout).toEqual({ header: { titulo: "H" }, telaLogin: { titulo: "T", subTitulo: "S" } });
   });
 });

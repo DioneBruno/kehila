@@ -185,6 +185,12 @@
               Textos exibidos no topo do painel e na tela de login.
             </p>
             <empresa-layout-form v-model="form.layout" :readonly="!editando" />
+            <q-separator class="q-my-md" />
+            <empresa-imagem-login
+              :imagem-url="empresa.imagemLoginUrl"
+              @enviar="enviarImagemLogin"
+              @remover="removerImagemLogin"
+            />
           </q-card-section>
         </q-card>
       </div>
@@ -327,6 +333,7 @@ import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { EmpresaService } from "./empresa.service";
 import { DominioService } from "./dominio.service";
 import EmpresaLayoutForm from "src/components/EmpresaLayoutForm.vue";
+import EmpresaImagemLogin from "src/components/EmpresaImagemLogin.vue";
 import { layoutParaForm } from "src/components/empresaLayout";
 import { MainLayoutService } from "src/layouts/MainLayout.service";
 
@@ -339,7 +346,7 @@ const dominioFormVazio = () => ({ domain: "", active: true });
 
 export default defineComponent({
   name: "EmpresaEditar",
-  components: { EmpresaLayoutForm },
+  components: { EmpresaLayoutForm, EmpresaImagemLogin },
   setup() {
     const $service = new EmpresaService();
     const $dominioService = new DominioService();
@@ -426,6 +433,23 @@ export default defineComponent({
       }
     }
 
+    async function enviarImagemLogin(arquivo: File, limpar: () => void) {
+      if (!(await $service.enviarImagemLogin(arquivo))) return;
+      limpar();
+      await recarregarImagem();
+    }
+
+    async function removerImagemLogin() {
+      if (await $service.removerImagemLogin()) await recarregarImagem();
+    }
+
+    // Só a URL da imagem: não descarta o que estiver sendo editado no formulário.
+    async function recarregarImagem() {
+      const empresa = await $service.buscar();
+      if (empresa && data.empresa) data.empresa.imagemLoginUrl = empresa.imagemLoginUrl;
+      await $layoutService.ping().catch(() => undefined);
+    }
+
     function cancelarEdicao() {
       data.editando = false;
       if (data.empresa) carregarForm(data.empresa);
@@ -490,6 +514,8 @@ export default defineComponent({
       ...toRefs(data),
       salvar,
       cancelarEdicao,
+      enviarImagemLogin,
+      removerImagemLogin,
       formatarData,
       abrirDialogDominio,
       salvarDominio,

@@ -1,5 +1,5 @@
 import type HttpClient from "../http/httpClient.interface";
-import type { LayoutForm } from "src/components/empresaLayout";
+import { formDataImagemLogin, type LayoutForm } from "src/components/empresaLayout";
 
 export type EmpresaEnderecoInput = {
   cep?: string | undefined;
@@ -65,6 +65,7 @@ export type EmpresaDetalhe = {
   address: EmpresaEnderecoInput | null;
   uf: string | null;
   layout: Record<string, any> | null;
+  imagemLoginUrl: string | null;
   createdAt: string;
   modulos: string[];
   dominios: EmpresaDominio[];
@@ -121,6 +122,14 @@ export class AdminEmpresaHttp {
 
   async editarLayout(uuid: string, layout: LayoutForm) {
     return this.http.put(`admin/empresas/${uuid}`, { layout });
+  }
+
+  async enviarImagemLogin(uuid: string, arquivo: File) {
+    return this.http.post(`admin/empresas/${uuid}/layout/imagem-login`, formDataImagemLogin(arquivo), { headers: { "Content-Type": "multipart/form-data" } });
+  }
+
+  async removerImagemLogin(uuid: string) {
+    return this.http.delete(`admin/empresas/${uuid}/layout/imagem-login`);
   }
 
   async listarDominios(uuid: string) {

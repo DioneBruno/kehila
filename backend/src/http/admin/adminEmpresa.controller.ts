@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import type { Request, Response } from "express";
 import { ApiError } from "src/@modules/shared/apiError";
 import { garantirUuid } from "src/@modules/imoveis/shared/garantirUuid";
@@ -6,6 +7,12 @@ import { AdminQuery } from "src/@modules/admin/admin.query";
 import { CadastrarEmpresaUsecase } from "src/@modules/admin/cadastrarEmpresa/cadastrarEmpresa.usecase";
 import { DefinirModulosEmpresaUsecase } from "src/@modules/admin/definirModulos/definirModulosEmpresa.usecase";
 import { EditarEmpresaUsecase } from "src/@modules/empresa/editarEmpresa/editarEmpresa.usecase";
+import {
+  EnviarImagemLoginUsecase,
+  IMAGEM_LOGIN_TAMANHO_MAXIMO,
+  ImagemLoginUrl,
+  RemoverImagemLoginUsecase,
+} from "src/@modules/empresa/layout/imagemLogin/imagemLogin";
 import { CriarDominioUsecase } from "src/@modules/empresa/dominio/criarDominio/criarDominio.usecase";
 import { ListarDominiosUsecase } from "src/@modules/empresa/dominio/listarDominios/listarDominios.usecase";
 import { EditarDominioUsecase } from "src/@modules/empresa/dominio/editarDominio/editarDominio.usecase";
@@ -36,6 +43,9 @@ export class AdminEmpresaController {
     readonly detalharUsuarioUsecase: DetalharUsuarioUsecase,
     readonly editarUsuarioUsecase: EditarUsuarioUsecase,
     readonly deletarUsuarioUsecase: DeletarUsuarioUsecase,
+    readonly enviarImagemLoginUsecase: EnviarImagemLoginUsecase,
+    readonly removerImagemLoginUsecase: RemoverImagemLoginUsecase,
+    readonly imagemLoginUrl: ImagemLoginUrl,
   ) {}
 
   private async garantirEmpresa(uuid: string) {
@@ -86,7 +96,23 @@ export class AdminEmpresaController {
     garantirUuid(uuid, EMPRESA_NAO_ENCONTRADA);
     const empresa = await this.adminQuery.detalharEmpresa(uuid);
     if (!empresa) throw new ApiError(EMPRESA_NAO_ENCONTRADA, 404);
-    return res.status(200).json({ success: true, data: empresa });
+    const imagemLoginUrl = await this.imagemLoginUrl.gerar(empresa.layout);
+    return res.status(200).json({ success: true, data: { ...empresa, imagemLoginUrl } });
+  }
+
+  @Post(":uuid/layout/imagem-login")
+  @UseInterceptors(FileInterceptor("arquivo", { limits: { fileSize: IMAGEM_LOGIN_TAMANHO_MAXIMO + 1 } }))
+  async enviarImagemLogin(@Param("uuid") uuid: string, @UploadedFile() arquivo: any, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    const data = await this.enviarImagemLoginUsecase.execute({ companyUuid: uuid, buffer: arquivo?.buffer });
+    return res.status(201).json({ success: true, data });
+  }
+
+  @Delete(":uuid/layout/imagem-login")
+  async removerImagemLogin(@Param("uuid") uuid: string, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    await this.removerImagemLoginUsecase.execute({ companyUuid: uuid });
+    return res.status(200).json({ success: true });
   }
 
   @Put(":uuid")

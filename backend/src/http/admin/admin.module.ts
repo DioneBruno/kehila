@@ -40,6 +40,14 @@ import { EditarUsuarioRepository } from "src/@modules/usuario/editarUsuario/edit
 import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
 import { DeletarUsuarioRepository } from "src/@modules/usuario/deletarUsuario/deletarUsuarioRepository";
 
+import { ConnectionStorageAwsS3 } from "src/@infra/storage/connectionStorage.awsS3";
+import {
+  EnviarImagemLoginUsecase,
+  ImagemLoginRepository,
+  ImagemLoginUrl,
+  RemoverImagemLoginUsecase,
+} from "src/@modules/empresa/layout/imagemLogin/imagemLogin";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -51,6 +59,13 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 @Module({
   controllers: [AdminEmpresaController],
   providers: [
+    { provide: ImagemLoginUrl, useFactory: () => new ImagemLoginUrl(new ConnectionStorageAwsS3()) },
+    {
+      provide: EnviarImagemLoginUsecase,
+      useFactory: (hub: ConnectionHub, urls: ImagemLoginUrl) => new EnviarImagemLoginUsecase(new ImagemLoginRepository(hub), new ConnectionStorageAwsS3(), urls),
+      inject: [ConnectionHub, ImagemLoginUrl],
+    },
+    makeProvider(RemoverImagemLoginUsecase, (hub) => new RemoverImagemLoginUsecase(new ImagemLoginRepository(hub))),
     makeProvider(AdminQuery, (hub) => new AdminQuery(hub)),
     makeProvider(CadastrarEmpresaUsecase, (hub) => new CadastrarEmpresaUsecase(new CadastrarEmpresaRepository(hub), new DominioRegrasRepository(hub))),
     makeProvider(DefinirModulosEmpresaUsecase, (hub) => new DefinirModulosEmpresaUsecase(new DefinirModulosEmpresaRepository(hub))),

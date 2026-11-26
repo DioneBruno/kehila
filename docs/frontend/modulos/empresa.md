@@ -13,6 +13,11 @@ endereço, UF), o card **Layout** (título/subtítulo do cabeçalho e da tela de
 com os dados no modo edição; ao salvar, chama `/ping` para atualizar o topo e o título da aba)
 e a lista de **domínios** (incluir, ativar/desativar, remover).
 
+No mesmo card fica a **imagem de fundo do login** (`src/components/EmpresaImagemLogin.vue`):
+prévia, escolher arquivo e "Enviar imagem" / "Usar imagem padrão". O envio é imediato, fora do
+modo edição. A tela de login (`pages/auth/login/home.vue`) usa `layout.telaLogin.imagemUrl` do
+`/ping` ou, se vier vazia, `IMAGEM_LOGIN_PADRAO`; antes do `/ping` responder não mostra imagem.
+
 O formulário de layout é o componente compartilhado `src/components/EmpresaLayoutForm.vue`
 (helpers em `src/components/empresaLayout.ts`), usado também na aba **Layout** do Admin.
 

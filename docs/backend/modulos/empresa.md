@@ -57,6 +57,24 @@ vazio mostra "Bem-vindo"). O update faz merge raso (`layout || $novo`): troca s�
 enviadas e preserva outras chaves do JSON. `GET /empresa` e `GET /admin/empresas/:uuid`
 devolvem `layout` cru (sem os padrões).
 
+### Imagem de fundo do login (`layout/imagemLogin/imagemLogin.ts`)
+
+| Método | Rota | O quê |
+|---|---|---|
+| POST | `/empresa/layout/imagem-login` | multipart, campo `arquivo`; devolve `{ imagemLoginUrl }` |
+| DELETE | `/empresa/layout/imagem-login` | volta para a imagem padrão |
+
+O Admin tem as mesmas rotas em `/admin/empresas/:uuid/layout/imagem-login`.
+
+- Formato conferido pelos bytes iniciais (PNG, JPG ou WEBP; SVG não), até 5 MB.
+- Vai para o S3 (`ConnectionStorageAwsS3`, variáveis `STORAGE_*`) em
+  `empresas/<uuid>/layout/login-<timestamp>.<ext>`; o caminho fica em `layout.imagemLogin`
+  (chave de topo, então editar `header`/`telaLogin` não apaga a imagem).
+- `/ping` devolve `telaLogin.imagemUrl` (URL assinada, 6 h) ou `null`; os detalhes da empresa
+  devolvem `imagemLoginUrl`. Se o S3 falhar ao assinar, vem `null` e o login usa a imagem padrão.
+- Remover só desvincula: o arquivo antigo continua no bucket (`StorageInterface` não tem
+  delete). Trocar a imagem também deixa a anterior lá.
+
 ## Regras de domínio
 
 `/empresa/dominios` (e o [módulo admin](admin.md)) usam `dominioRegras.ts`: o valor é normalizado

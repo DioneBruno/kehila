@@ -2,7 +2,7 @@
   <q-page class="login-page">
     <!-- Imagem de fundo -->
     <q-img
-      src="https://ministeriofiel.com.br/wp-content/uploads/2023/04/orac%CC%A7a%CC%83o-1.png"
+      :src="imagemFundo"
       fit="cover"
       class="login-page__bg"
       no-spinner
@@ -34,6 +34,7 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs, watchEffec
 import LoginForm from "./loginForm.vue";
 import { LoginService } from "./login.service";
 import { useLayoutStore } from "src/stores/layout.js";
+import { IMAGEM_LOGIN_PADRAO } from "src/components/empresaLayout";
 
 export default defineComponent({
   name: "authLoginHome",
@@ -47,6 +48,12 @@ export default defineComponent({
     const data = reactive({
       layout: computed(() => $layoutStore.layout),
       mostrarFormulario: ref(false),
+      // Antes do /ping responder não mostra nada, para não piscar a imagem padrão.
+      imagemFundo: computed(() => {
+        const telaLogin = $layoutStore.layout?.telaLogin;
+        if (!telaLogin) return undefined;
+        return telaLogin.imagemUrl || IMAGEM_LOGIN_PADRAO;
+      }),
     });
 
     onMounted(async () => {

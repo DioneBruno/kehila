@@ -3,6 +3,13 @@ import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
 import { AdminMiddleware } from "../middleware/perfil.middleware";
 import { JwtAuthMiddleware } from "../middleware/jwtAuth.middleware";
 
+import { ConnectionStorageAwsS3 } from "src/@infra/storage/connectionStorage.awsS3";
+import {
+  EnviarImagemLoginUsecase,
+  ImagemLoginRepository,
+  ImagemLoginUrl,
+  RemoverImagemLoginUsecase,
+} from "src/@modules/empresa/layout/imagemLogin/imagemLogin";
 import { EmpresaController } from "./empresa.controller";
 import { DominioController } from "./dominio.controller";
 
@@ -39,6 +46,13 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 @Module({
   controllers: [EmpresaController, DominioController],
   providers: [
+    { provide: ImagemLoginUrl, useFactory: () => new ImagemLoginUrl(new ConnectionStorageAwsS3()) },
+    {
+      provide: EnviarImagemLoginUsecase,
+      useFactory: (hub: ConnectionHub, urls: ImagemLoginUrl) => new EnviarImagemLoginUsecase(new ImagemLoginRepository(hub), new ConnectionStorageAwsS3(), urls),
+      inject: [ConnectionHub, ImagemLoginUrl],
+    },
+    makeProvider(RemoverImagemLoginUsecase, (hub) => new RemoverImagemLoginUsecase(new ImagemLoginRepository(hub))),
     makeProvider(DetalharEmpresaUsecase, (hub) => new DetalharEmpresaUsecase(new DetalharEmpresaRepository(hub))),
     makeProvider(EditarEmpresaUsecase, (hub) => new EditarEmpresaUsecase(new EditarEmpresaRepository(hub))),
     makeProvider(DeletarEmpresaUsecase, (hub) => new DeletarEmpresaUsecase(new DeletarEmpresaRepository(hub))),
