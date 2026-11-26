@@ -1,6 +1,7 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { SQL_ADMIN_ATIVO_BASE, UltimoAdminRepo } from "../ultimoAdmin";
 
-export class DeletarUsuarioRepository {
+export class DeletarUsuarioRepository implements UltimoAdminRepo {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async existe(companyUuid: string, usuarioUuid: string): Promise<boolean> {
@@ -17,6 +18,19 @@ export class DeletarUsuarioRepository {
       [companyUuid, usuarioUuid],
     );
     return !!row;
+  }
+
+  async ehAdminAtivo(companyUuid: string, usuarioUuid: string): Promise<boolean> {
+    const [row] = await this.connectionHub.database!.query(`SELECT 1 ${SQL_ADMIN_ATIVO_BASE} AND u.uuid = $2`, [companyUuid, usuarioUuid]);
+    return !!row;
+  }
+
+  async contarOutrosAdminsAtivos(companyUuid: string, usuarioUuid: string): Promise<number> {
+    const [row] = await this.connectionHub.database!.query(`SELECT COUNT(*)::int AS total ${SQL_ADMIN_ATIVO_BASE} AND u.uuid <> $2`, [
+      companyUuid,
+      usuarioUuid,
+    ]);
+    return row?.total ?? 0;
   }
 
   async deletar(companyUuid: string, usuarioUuid: string): Promise<void> {

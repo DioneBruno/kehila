@@ -1,5 +1,6 @@
 import { ApiError } from "src/@modules/shared/apiError";
 import { ApiValidate } from "src/@modules/shared/apiValidate";
+import { garantirNaoEhUltimoAdmin } from "../ultimoAdmin";
 import { EditarUsuarioRepository, UsuarioMeta } from "./editarUsuarioRepository";
 
 export type EditarUsuarioInput = {
@@ -22,6 +23,8 @@ export type EditarUsuarioInput = {
   position?: string;
   roles?: string[];
   isAccepted?: boolean;
+  /** Só o Admin passa true: permite alterar dados de acesso de quem pertence a outras igrejas. */
+  permitirAlterarAcessoCompartilhado?: boolean;
 };
 
 const ESTADOS_CIVIS = ["solteiro", "casado", "divorciado", "separado", "viuvo", "uniao"];
@@ -48,12 +51,19 @@ export class EditarUsuarioUsecase {
     const existe = await this.repo.existe(input.companyUuid, input.usuarioUuid);
     if (!existe) throw new ApiError("Usuário não encontrado", 404);
 
+    const removeAdmin = (input.position !== undefined && input.position !== "admin") || input.isAccepted === false;
+    if (removeAdmin) await garantirNaoEhUltimoAdmin(this.repo, input.companyUuid, input.usuarioUuid);
+
     // Dados de acesso (senha, e-mail, CPF, telefone) valem para todas as igrejas do usuário.
     // Se ele também pertence a outra igreja, um admin desta não pode alterá-los (evita tomar a conta em outra igreja).
     const alteraDadosDeAcesso = [input.password, input.email, input.cpf, input.phone].some(
       (valor) => valor !== undefined && valor !== null && valor !== "",
     );
-    if (alteraDadosDeAcesso && (await this.repo.vinculadoAOutrasEmpresas(input.companyUuid, input.usuarioUuid))) {
+    if (
+      !input.permitirAlterarAcessoCompartilhado &&
+      alteraDadosDeAcesso &&
+      (await this.repo.vinculadoAOutrasEmpresas(input.companyUuid, input.usuarioUuid))
+    ) {
       const [atual] = await this.repo.dadosDeAcesso(input.usuarioUuid);
       const mudou =
         !!input.password ||

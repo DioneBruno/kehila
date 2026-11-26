@@ -1,5 +1,6 @@
 import * as bcryptjs from "bcryptjs";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { SQL_ADMIN_ATIVO_BASE, UltimoAdminRepo } from "../ultimoAdmin";
 
 export type UsuarioMeta = {
   batizado?: boolean;
@@ -26,7 +27,7 @@ export type EditarUsuarioData = {
   isAccepted?: boolean;
 };
 
-export class EditarUsuarioRepository {
+export class EditarUsuarioRepository implements UltimoAdminRepo {
   constructor(readonly connectionHub: ConnectionHub) {}
 
   async existe(companyUuid: string, usuarioUuid: string): Promise<boolean> {
@@ -43,6 +44,19 @@ export class EditarUsuarioRepository {
       [companyUuid, usuarioUuid],
     );
     return !!row;
+  }
+
+  async ehAdminAtivo(companyUuid: string, usuarioUuid: string): Promise<boolean> {
+    const [row] = await this.connectionHub.database!.query(`SELECT 1 ${SQL_ADMIN_ATIVO_BASE} AND u.uuid = $2`, [companyUuid, usuarioUuid]);
+    return !!row;
+  }
+
+  async contarOutrosAdminsAtivos(companyUuid: string, usuarioUuid: string): Promise<number> {
+    const [row] = await this.connectionHub.database!.query(`SELECT COUNT(*)::int AS total ${SQL_ADMIN_ATIVO_BASE} AND u.uuid <> $2`, [
+      companyUuid,
+      usuarioUuid,
+    ]);
+    return row?.total ?? 0;
   }
 
   /** Usuários são globais: o mesmo login pode pertencer a várias igrejas. */
