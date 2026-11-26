@@ -15,7 +15,7 @@ eventos com bilheteria, financeiro, BI). Escrito a partir da leitura do código 
                                                           PostgreSQL 17     Redis     Asaas · SMTP · Vonage · Metabase
 ```
 
-- **Módulos por empresa:** `auth_company_modulos` (`igreja`, `imoveis`) liga/desliga pacotes de
+- **Módulos por empresa:** `auth_company_modulos` (`igreja`, `imoveis`, `admin`) liga/desliga pacotes de
   rotas e itens de menu (ver [backend › imóveis](backend/modulos/imoveis.md)).
 - **Multiempresa:** cada igreja é uma `auth_companies`. Rotas públicas descobrem a empresa pelo
   domínio (`Origin`); rotas logadas, pelo JWT.
@@ -40,6 +40,7 @@ eventos com bilheteria, financeiro, BI). Escrito a partir da leitura do código 
 | Portal de Eventos | eventos, lotes, pedidos, ingressos | [backend](backend/modulos/portalEventos.md) | [frontend](frontend/modulos/portalEventos.md) |
 | Financeiro | Asaas: cobranças, boleto, cartão, baixa | [backend](backend/modulos/financeiro.md) | [frontend](frontend/modulos/financeiro.md) |
 | Imóveis | pessoas, imóveis, contratos de locação, painel (módulo por empresa) | [backend](backend/modulos/imoveis.md) | [frontend](frontend/modulos/imoveis.md) |
+| Admin | gestão de empresas, domínios e módulos (só empresa-admin) | [backend](backend/modulos/admin.md) | [frontend](frontend/modulos/admin.md) |
 | Notificação | e-mail SMTP, SMS Vonage | [backend](backend/modulos/notificacao.md) | [frontend](frontend/modulos/notificacao.md) |
 | BI | painéis Metabase embutidos | [backend](backend/modulos/bi.md) | [frontend](frontend/modulos/bi.md) |
 
@@ -66,6 +67,17 @@ npm run dev                     # :9000 — URL_API em .env / public/env-config.
 > Deploy: rode `npm run migration:run` antes (ou junto) de subir o backend e confirme o `TZ` em
 > produção; sem a migration de `auth_company_modulos` as rotas de igreja respondem 500 (ver
 > [módulo Imóveis › Deploy](backend/modulos/imoveis.md#deploy)).
+
+Para gerenciar empresas pela tela Admin, crie a empresa-admin (senha em `ADMIN_SENHA` ou perguntada):
+
+```bash
+cd backend
+npm run admin:criar -- --dominio http://admin.localhost:9000 --email <e-mail>
+```
+
+> `*.localhost` resolve no navegador sem mexer em `/etc/hosts`; abra o frontend em
+> `http://admin.localhost:9000`. Em produção use `admin:criar:prod`. Detalhes em
+> [backend › admin](backend/modulos/admin.md#comando-admincriar).
 
 Cadastre em `auth_company_domains` a origem exata do frontend (ex.: `http://localhost:9000`)
 para a empresa de teste; sem isso o login responde "Empresa não encontrada para o domínio

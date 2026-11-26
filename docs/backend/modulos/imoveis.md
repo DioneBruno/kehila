@@ -14,11 +14,12 @@
 
 ## Módulos por empresa (habilitar o módulo)
 
-Cada empresa tem uma lista de módulos em `auth_company_modulos` (`igreja`, `imoveis`). A migration
+Cada empresa tem uma lista de módulos em `auth_company_modulos` (`igreja`, `imoveis`, `admin`). A migration
 cria a tabela e dá `igreja` a todas as empresas existentes, então nada muda para as igrejas atuais.
 Empresa nova **sem linhas** não acessa nenhum dos dois pacotes.
 
-Habilitar o módulo para um escritório:
+Habilitar o módulo para um escritório: pela tela **Admin** (aba Módulos da empresa, ver
+[módulo admin](admin.md)), que já limpa o cache Redis. Alternativa por SQL:
 
 ```sql
 INSERT INTO auth_company_modulos (uuid, company_uuid, modulo) VALUES (gen_random_uuid(), '<company_uuid>', 'imoveis');
@@ -37,7 +38,7 @@ removido, insira de novo; não "limpe" o `deleted_at`.)
 > 2. **Token:** o menu do frontend lê `company.modulos` do JWT (gerado no login por
 >    `GenerateTokenAuthenticationUserRepository`). O usuário precisa **logar de novo**.
 >
-> Não há tela para ligar/desligar módulos (ver [pendências](../../pendencias.md)).
+> A tela Admin limpa o cache do backend na hora; o relogin do usuário continua necessário.
 
 Bloqueio: `403 "Módulo não habilitado para esta empresa"`. Sem cache (Redis fora do ar) o
 middleware consulta o banco a cada requisição; falha de cache nunca derruba a rota.

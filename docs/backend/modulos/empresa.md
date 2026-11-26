@@ -50,10 +50,18 @@ Todos com `JwtAuthMiddleware` + `AdminMiddleware`, sempre sobre a empresa do tok
 O frontend chama `/ping` no boot para descobrir se o domínio é válido e qual layout usar.
 Não há endpoint para editar `layout` — hoje só via banco.
 
+## Regras de domínio
+
+`/empresa/dominios` (e o [módulo admin](admin.md)) usam `dominioRegras.ts`: o valor é normalizado
+(minúsculas, sem barra final) e precisa ser uma origem `http(s)://host[:porta]`; não pode repetir
+um domínio ativo de outra empresa (409 "Este domínio já está em uso por outra empresa") e a empresa
+não pode ficar sem domínio ativo (desativar/deletar o último → "A empresa precisa de pelo menos
+um domínio ativo").
+
 ## Atenção
 
-- Não há validação de formato nem unicidade de domínio. Dois tenants com o mesmo domínio
-  ativo → o middleware pega o primeiro.
+- A unicidade de domínio é validada só na aplicação (sem índice único no banco; há janela de
+  corrida em requisições simultâneas).
 - `DELETE /empresa` não bloqueia acesso: `DominioMiddleware` e JWT não checam
   `auth_companies.deleted_at`.
 - O seeder `CompanyDomainsSeeder` executa `DELETE FROM auth_company_domains` (todas as

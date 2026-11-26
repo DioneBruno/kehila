@@ -93,11 +93,12 @@ Mapa de proteção atual:
 | `/imoveis/*` | JWT + Interno + ModuloImoveis |
 | `/membros`, `/apriscos`, `/bi` | JWT + Interno + ModuloIgreja |
 | `/usuarios`, `/empresa`, `/notificacoes` | JWT + Admin |
+| `/admin/empresas` | JWT + Admin + ModuloAdmin |
 | `/eventos`, `/lotes`, `/contas-bancarias`, `/cobrancas`, `/pagamentos` | JWT + Admin + ModuloIgreja |
 
 Todas as rotas de **igreja** (incluindo o portal público de eventos, `/pedidos`, `/cartao-credito` e
 o financeiro) exigem também `ModuloIgrejaMiddleware`; as de imóveis, `ModuloImoveisMiddleware`.
-Rotas de auth, usuários, empresa e notificações não dependem de módulo.
+Rotas de auth, usuários, empresa e notificações não dependem de módulo; `/admin/empresas` exige `ModuloAdminMiddleware`. `ModuloChave` = `igreja | imoveis | admin` ([módulo admin](modulos/admin.md)).
 
 ### Módulos por empresa
 

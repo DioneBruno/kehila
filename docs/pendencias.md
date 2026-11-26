@@ -77,4 +77,11 @@ Lacunas conhecidas do módulo [imóveis](backend/modulos/imoveis.md) (não são 
 - Aditivo aceita evento sem mudança real (mesmo valor/mesmo fim que o atual).
 - Encerramento/rescisão não valida a data do evento contra o `inicio` do contrato.
 - Sem testes HTTP dos controllers de `http/imoveis` (só use cases, query e middleware).
-- Não há tela (nem endpoint) para ligar/desligar módulos por empresa: é SQL em `auth_company_modulos`, com cache de 5 min e novo login.
+
+## Admin (empresas)
+
+- Domínio: unicidade e "último domínio ativo" são validados na aplicação, sem índice único no banco
+  (janela de corrida em requisições simultâneas).
+- Não há exclusão de empresa pelo Admin.
+- O build do frontend (`vue-tsc`) tem ~32 erros de tipo pré-existentes em páginas de BI, financeiro,
+  portalEventos e usuario.
