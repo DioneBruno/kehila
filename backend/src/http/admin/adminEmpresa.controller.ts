@@ -150,8 +150,8 @@ export class AdminEmpresaController {
     const resultado = await this.listarUsuariosUsecase.execute({
       companyUuid: uuid,
       busca: query?.busca,
-      pagina: query?.pagina ? parseInt(query.pagina, 10) : 1,
-      porPagina: query?.porPagina ? parseInt(query.porPagina, 10) : 20,
+      pagina: Number(query?.pagina) > 0 ? Math.floor(Number(query.pagina)) : 1,
+      porPagina: Number(query?.porPagina) > 0 ? Math.min(Math.floor(Number(query.porPagina)), 100) : 20,
     });
     return res.status(200).json({ success: true, data: resultado.dados, meta: { total: resultado.total } });
   }
@@ -160,7 +160,8 @@ export class AdminEmpresaController {
   async detalharUsuario(@Param("uuid") uuid: string, @Param("usuarioUuid") usuarioUuid: string, @Res() res: Response) {
     await this.garantirEmpresa(uuid);
     garantirUuid(usuarioUuid, USUARIO_NAO_ENCONTRADO);
-    const detalhe = await this.detalharUsuarioUsecase.execute({ companyUuid: uuid, usuarioUuid });
+    // randomCode (código de login em uso) não é exposto pelo Admin.
+    const { randomCode: _randomCode, ...detalhe } = (await this.detalharUsuarioUsecase.execute({ companyUuid: uuid, usuarioUuid })) as any;
     const outrasEmpresas = await this.adminQuery.outrasEmpresasDoUsuario(usuarioUuid, uuid);
     return res.status(200).json({ success: true, data: { ...detalhe, outrasEmpresas } });
   }

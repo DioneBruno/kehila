@@ -137,4 +137,5 @@ não grava nada e avisa. Usa o mesmo `CadastrarEmpresaUsecase` (mesmas validaç�
 - Unicidade de domínio e "último domínio ativo" são checadas antes de gravar, sem lock nem índice:
   duas requisições simultâneas podem passar pela janela de corrida.
 - O usuário admin criado é sempre um `auth_users` novo.
+- Rebaixar/remover admins simultaneamente pode burlar a regra do último admin (checagem sem lock).
 - Remover o acesso de um usuário não invalida o token já emitido (vale até expirar).

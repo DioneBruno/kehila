@@ -9,9 +9,9 @@ export type UsuarioMeta = {
 
 export type EditarUsuarioData = {
   name?: string;
-  cpf?: string;
-  email?: string;
-  phone?: string;
+  cpf?: string | null;
+  email?: string | null;
+  phone?: string | null;
   cep?: string;
   endereco?: string;
   enderecoNumero?: string;

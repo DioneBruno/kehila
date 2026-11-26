@@ -1,4 +1,5 @@
 import { ApiError } from "src/@modules/shared/apiError";
+import { listaTexto, texto, textoLimpavel } from "src/@modules/shared/apiTexto";
 import { ApiValidate } from "src/@modules/shared/apiValidate";
 import { garantirNaoEhUltimoAdmin } from "../ultimoAdmin";
 import { EditarUsuarioRepository, UsuarioMeta } from "./editarUsuarioRepository";
@@ -7,9 +8,10 @@ export type EditarUsuarioInput = {
   companyUuid: string;
   usuarioUuid: string;
   name?: string;
-  cpf?: string;
-  email?: string;
-  phone?: string;
+  /** null (ou vazio) limpa o campo; undefined não altera. */
+  cpf?: string | null;
+  email?: string | null;
+  phone?: string | null;
   cep?: string;
   endereco?: string;
   enderecoNumero?: string;
@@ -41,35 +43,57 @@ export class EditarUsuarioUsecase {
   async execute(input: EditarUsuarioInput): Promise<void> {
     if (!input.companyUuid) throw new ApiError("Empresa não identificada", 401);
     if (!input.usuarioUuid) throw new ApiError("Usuário não identificado");
-    if (input.name !== undefined && !input.name.trim()) throw new ApiError("O nome do usuário é obrigatório");
-    if (input.cpf && !ApiValidate.validateCpf(input.cpf)) throw new ApiError("CPF inválido");
-    if (input.email && !ApiValidate.validateEmail(input.email)) throw new ApiError("E-mail inválido");
-    if (input.uf && input.uf.trim().length !== 2) throw new ApiError("UF inválida");
-    if (input.estadoCivil && !ESTADOS_CIVIS.includes(input.estadoCivil)) throw new ApiError("Estado civil inválido");
-    if (input.dataNascimento && !dataValida(input.dataNascimento)) throw new ApiError("Data de nascimento inválida");
+    const name = texto(input.name, "name");
+    const cpf = textoLimpavel(input.cpf, "cpf");
+    const email = textoLimpavel(input.email, "email");
+    const phone = textoLimpavel(input.phone, "phone");
+    const cep = texto(input.cep, "cep");
+    const endereco = texto(input.endereco, "endereco");
+    const enderecoNumero = texto(input.enderecoNumero, "enderecoNumero");
+    const bairro = texto(input.bairro, "bairro");
+    const cidade = texto(input.cidade, "cidade");
+    const uf = texto(input.uf, "uf");
+    const estadoCivil = texto(input.estadoCivil, "estadoCivil");
+    const dataNascimento = texto(input.dataNascimento, "dataNascimento");
+    const password = texto(input.password, "password") || undefined;
+    const position = texto(input.position, "position");
+    const roles = listaTexto(input.roles, "roles");
+    if (input.isAccepted !== undefined && typeof input.isAccepted !== "boolean") throw new ApiError("Campo isAccepted inválido");
+    const isAccepted = input.isAccepted;
+
+    if (name !== undefined && !name.trim()) throw new ApiError("O nome do usuário é obrigatório");
+    if (cpf && !ApiValidate.validateCpf(cpf)) throw new ApiError("CPF inválido");
+    if (email && !ApiValidate.validateEmail(email)) throw new ApiError("E-mail inválido");
+    if (uf && uf.trim().length !== 2) throw new ApiError("UF inválida");
+    if (estadoCivil && !ESTADOS_CIVIS.includes(estadoCivil)) throw new ApiError("Estado civil inválido");
+    if (dataNascimento && !dataValida(dataNascimento)) throw new ApiError("Data de nascimento inválida");
 
     const existe = await this.repo.existe(input.companyUuid, input.usuarioUuid);
     if (!existe) throw new ApiError("Usuário não encontrado", 404);
 
-    const removeAdmin = (input.position !== undefined && input.position !== "admin") || input.isAccepted === false;
+    const removeAdmin = (position !== undefined && position !== "admin") || isAccepted === false;
     if (removeAdmin) await garantirNaoEhUltimoAdmin(this.repo, input.companyUuid, input.usuarioUuid);
+
+    const [atual] =
+      cpf !== undefined || email !== undefined || phone !== undefined ? await this.repo.dadosDeAcesso(input.usuarioUuid) : [undefined];
+
+    if ((cpf !== undefined || email !== undefined) && !(cpf !== undefined ? cpf : atual?.cpf) && !(email !== undefined ? email : atual?.email)) {
+      throw new ApiError("Informe o CPF ou o e-mail do usuário");
+    }
 
     // Dados de acesso (senha, e-mail, CPF, telefone) valem para todas as igrejas do usuário.
     // Se ele também pertence a outra igreja, um admin desta não pode alterá-los (evita tomar a conta em outra igreja).
-    const alteraDadosDeAcesso = [input.password, input.email, input.cpf, input.phone].some(
-      (valor) => valor !== undefined && valor !== null && valor !== "",
-    );
+    const alteraDadosDeAcesso = !!password || cpf !== undefined || email !== undefined || phone !== undefined;
     if (
       !input.permitirAlterarAcessoCompartilhado &&
       alteraDadosDeAcesso &&
       (await this.repo.vinculadoAOutrasEmpresas(input.companyUuid, input.usuarioUuid))
     ) {
-      const [atual] = await this.repo.dadosDeAcesso(input.usuarioUuid);
       const mudou =
-        !!input.password ||
-        (input.email !== undefined && (input.email?.trim() || null) !== (atual?.email ?? null)) ||
-        (input.cpf !== undefined && (input.cpf?.trim() || null) !== (atual?.cpf ?? null)) ||
-        (input.phone !== undefined && (input.phone || null) !== (atual?.phone ?? null));
+        !!password ||
+        (email !== undefined && email !== (atual?.email ?? null)) ||
+        (cpf !== undefined && cpf !== (atual?.cpf ?? null)) ||
+        (phone !== undefined && phone !== (atual?.phone ?? null));
       if (mudou) {
         throw new ApiError(
           "Este usuário também pertence a outra igreja; senha, e-mail, CPF e telefone só podem ser alterados pelo próprio usuário.",
@@ -79,28 +103,28 @@ export class EditarUsuarioUsecase {
     }
 
     await this.repo.atualizar(input.companyUuid, input.usuarioUuid, {
-      name: input.name?.trim(),
-      cpf: input.cpf?.trim(),
-      email: input.email?.trim(),
-      phone: input.phone,
-      cep: input.cep?.replace(/\D/g, ""),
-      endereco: input.endereco?.trim(),
-      enderecoNumero: input.enderecoNumero?.trim(),
-      bairro: input.bairro?.trim(),
-      cidade: input.cidade?.trim(),
-      uf: input.uf?.trim().toUpperCase(),
-      estadoCivil: input.estadoCivil,
-      dataNascimento: input.dataNascimento,
+      name: name?.trim(),
+      cpf,
+      email,
+      phone,
+      cep: cep?.replace(/\D/g, ""),
+      endereco: endereco?.trim(),
+      enderecoNumero: enderecoNumero?.trim(),
+      bairro: bairro?.trim(),
+      cidade: cidade?.trim(),
+      uf: uf?.trim().toUpperCase(),
+      estadoCivil,
+      dataNascimento,
       meta: input.meta
         ? {
             ...(input.meta.batizado !== undefined && { batizado: !!input.meta.batizado }),
             ...(input.meta.outraIgreja !== undefined && { outraIgreja: !!input.meta.outraIgreja }),
           }
         : undefined,
-      password: input.password,
-      position: input.position,
-      roles: input.roles,
-      isAccepted: input.isAccepted,
+      password,
+      position,
+      roles,
+      isAccepted,
     });
   }
 }

@@ -38,8 +38,8 @@ export class UsuarioController {
     const resultado = await this.listarUsuariosUsecase.execute({
       companyUuid: req.companyUuid,
       busca: query.busca,
-      pagina: query.pagina ? parseInt(query.pagina, 10) : 1,
-      porPagina: query.porPagina ? parseInt(query.porPagina, 10) : 20,
+      pagina: Number(query.pagina) > 0 ? Math.floor(Number(query.pagina)) : 1,
+      porPagina: Number(query.porPagina) > 0 ? Math.min(Math.floor(Number(query.porPagina)), 100) : 20,
     });
     return res.status(200).json({
       success: true,

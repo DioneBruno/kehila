@@ -70,5 +70,6 @@ auth_users (global: nome, cpf, email, phone, password, endereço, estado_civil, 
 - `CriarUsuarioRepository` (este módulo) **sempre cria** um novo `auth_users`, enquanto
   `membresia/criarUsuario` **reaproveita** um usuário global existente. Escolha consciente ao
   evoluir; hoje é possível duplicar o mesmo CPF entre empresas.
+- Rebaixar/remover admins simultaneamente pode burlar a regra do último admin (checagem sem lock).
 - Os dois `INSERT` de criação não estão em transação.
 - `/auth/editar-perfil` não valida CPF/e-mail nem checa duplicidade.

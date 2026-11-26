@@ -89,9 +89,9 @@ export type EmpresaUsuarioDetalhe = EmpresaUsuarioItem & {
 
 export type EmpresaUsuarioInput = {
   name: string;
-  cpf?: string | undefined;
-  email?: string | undefined;
-  phone?: string | undefined;
+  cpf?: string | null | undefined;
+  email?: string | null | undefined;
+  phone?: string | null | undefined;
   password?: string | undefined;
   position?: string | undefined;
   roles?: string[] | undefined;

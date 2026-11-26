@@ -53,7 +53,7 @@
                 filled
                 emit-value
                 map-options
-                :options="cargos"
+                :options="editando ? [{ label: 'Sem cargo', value: '' }, ...cargos] : cargos"
               />
             </div>
             <div v-if="editando" class="col-12 col-sm-6 row items-center">
@@ -120,6 +120,7 @@ export default defineComponent({
       roles: [] as string[],
       outrasEmpresas: [] as { uuid: string; name: string }[],
       mostrarSenha: false,
+      original: { cpf: "", email: "", phone: "" },
     });
 
     const editando = computed(() => !!props.usuarioUuid);
@@ -128,6 +129,7 @@ export default defineComponent({
       data.form = formVazio();
       data.roles = [];
       data.outrasEmpresas = [];
+      data.original = { cpf: "", email: "", phone: "" };
       data.mostrarSenha = false;
       if (!props.usuarioUuid) return;
       const u = await $service.detalharUsuario(props.empresaUuid, props.usuarioUuid);
@@ -140,10 +142,11 @@ export default defineComponent({
         email: u.email ?? "",
         cpf: u.cpf ?? "",
         phone: u.phone ?? "",
-        position: u.position ?? "usuario",
+        position: u.position ?? "",
         password: "",
         isAccepted: u.isAccepted ?? true,
       };
+      data.original = { cpf: u.cpf ?? "", email: u.email ?? "", phone: u.phone ?? "" };
       data.roles = u.roles ?? [];
       data.outrasEmpresas = u.outrasEmpresas ?? [];
     }
@@ -154,6 +157,7 @@ export default defineComponent({
 
     async function salvar() {
       const f = data.form;
+      const original = data.original;
       const base = {
         name: f.name,
         cpf: f.cpf || undefined,
@@ -164,6 +168,10 @@ export default defineComponent({
       const ok = props.usuarioUuid
         ? await $service.editarUsuario(props.empresaUuid, props.usuarioUuid, {
             ...base,
+            // Campo que tinha valor e foi esvaziado vai como null para limpar no servidor.
+            cpf: f.cpf || (original.cpf ? null : undefined),
+            email: f.email || (original.email ? null : undefined),
+            phone: f.phone || (original.phone ? null : undefined),
             password: f.password || undefined,
             roles: data.roles,
             isAccepted: f.isAccepted,

@@ -49,7 +49,7 @@
           <q-td :props="props">
             <q-badge
               :color="props.row.isAccepted ? 'positive' : 'grey-6'"
-              :label="props.row.isAccepted ? 'Ativo' : 'Inativo'"
+              :label="props.row.isAccepted ? 'Ativo' : 'Pendente'"
             />
           </q-td>
         </template>
