@@ -17,6 +17,7 @@
         <q-tab name="dados" label="Dados" no-caps />
         <q-tab name="dominios" label="Domínios" no-caps />
         <q-tab name="modulos" label="Módulos" no-caps />
+        <q-tab name="usuarios" label="Usuários" no-caps />
       </q-tabs>
       <q-separator class="q-mb-md" />
 
@@ -199,6 +200,11 @@
             </q-card-section>
           </q-card>
         </q-tab-panel>
+
+        <!-- Usuários -->
+        <q-tab-panel name="usuarios" class="q-pa-none">
+          <empresa-usuarios :empresa-uuid="empresa.uuid" />
+        </q-tab-panel>
       </q-tab-panels>
     </template>
 
@@ -253,11 +259,13 @@ import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { useRoute } from "vue-router";
 import type { EmpresaDetalhe, EmpresaDominio } from "src/@modules/admin/empresa.http";
 import { AdminEmpresaService, MODULOS_EMPRESA, UFS } from "./admin.service";
+import EmpresaUsuarios from "./empresaUsuarios.vue";
 
 const dominioFormVazio = () => ({ domain: "", active: true });
 
 export default defineComponent({
   name: "AdminEmpresaEditar",
+  components: { EmpresaUsuarios },
   setup() {
     const $route = useRoute();
     const $service = new AdminEmpresaService();

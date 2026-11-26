@@ -28,6 +28,27 @@ Prefixo `/admin/empresas`. `:uuid` inválido ou empresa apagada/inexistente → 
 | GET/POST | `/:uuid/dominios` | Reaproveita `ListarDominiosUsecase` / `CriarDominioUsecase`. |
 | PUT/DELETE | `/:uuid/dominios/:dominioUuid` | Reaproveita `EditarDominioUsecase` / `DeletarDominioUsecase`. |
 | PUT | `/:uuid/modulos` | `DefinirModulosEmpresaUsecase` — `{ modulos: string[] }`. |
+| GET | `/:uuid/usuarios` | `ListarUsuariosUsecase` da empresa `:uuid` (`busca`, `pagina`, `porPagina`). `{success,data,meta:{total}}`. |
+| GET | `/:uuid/usuarios/:usuarioUuid` | `DetalharUsuarioUsecase` + `outrasEmpresas: [{uuid,name}]` (outras empresas com vínculo ativo do usuário). |
+| POST | `/:uuid/usuarios` | `CriarUsuarioUsecase` na empresa `:uuid`. `201`. |
+| PUT | `/:uuid/usuarios/:usuarioUuid` | `EditarUsuarioUsecase` com `permitirAlterarAcessoCompartilhado: true`. |
+| DELETE | `/:uuid/usuarios/:usuarioUuid` | `DeletarUsuarioUsecase` (remove só o vínculo com `:uuid`); não deixa remover o próprio acesso. |
+
+## Usuários de qualquer empresa
+
+Reaproveitam os use cases de [usuário](usuario.md) passando `companyUuid = :uuid` (a empresa da URL,
+não a do token). `usuarioUuid` inválido → `404 "Usuário não encontrado"`.
+
+- **Override do Admin:** na edição, o Admin pode alterar senha, e-mail, CPF e telefone mesmo quando o
+  usuário tem vínculo com outra empresa (a proteção multiempresa de `/usuarios` retorna 403). Esses
+  dados vivem em `auth_users` e mudam para todas as empresas; a tela avisa quais são
+  (`outrasEmpresas`).
+- **Último administrador:** remover, rebaixar de `admin` ou desativar (`is_accepted = false`) o último
+  admin ativo da empresa → `A empresa precisa de pelo menos um administrador`. A regra vive nos use
+  cases, então vale também em `/usuarios`.
+- **Login:** exige vínculo ativo (`auth_users_companies.deleted_at IS NULL`). Usuário sem vínculo na
+  empresa do domínio não entra; o token já emitido continua válido até expirar (ver
+  [pendências](../../pendencias.md)).
 
 ## Cadastro de empresa (`POST /admin/empresas`)
 
@@ -116,3 +137,4 @@ não grava nada e avisa. Usa o mesmo `CadastrarEmpresaUsecase` (mesmas validaç�
 - Unicidade de domínio e "último domínio ativo" são checadas antes de gravar, sem lock nem índice:
   duas requisições simultâneas podem passar pela janela de corrida.
 - O usuário admin criado é sempre um `auth_users` novo.
+- Remover o acesso de um usuário não invalida o token já emitido (vale até expirar).

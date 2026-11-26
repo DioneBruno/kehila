@@ -14,7 +14,7 @@ facilitar a correção. Prioridade: 🔴 segurança/dinheiro · 🟠 bug/consist
 | S5 | `backend/src/@modules/usuario/detalharUsuario/detalharUsuarioRepository.ts` | Devolve ao admin os códigos de login ativos do usuário (`randomCode`) — permite entrar como ele. Confirmar se é intencional (suporte) e, se for, registrar auditoria. |
 | S6 | `backend/src/@modules/portalEventos/cadastrarUsuario/` | Cadastro público devolve token sem confirmar posse de CPF/e-mail. |
 | S7 | `backend/src/@modules/usuario/usuario.query.ts` → `editarPerfilUsuario` | Usuário troca o próprio CPF/e-mail sem validação nem checagem de duplicidade (pode colidir com outro login). |
-| S8 | `backend/src/@modules/auth/generateTokenAutenticationUsernamePassword/tokenGenerateRepository.ts` | Login não filtra `auth_users_companies.deleted_at` nem `is_accepted`: usuário removido da empresa continua logando. |
+| S8 | `backend/src/@modules/auth/generateTokenAutenticationUsernamePassword/tokenGenerateRepository.ts` | Login já exige vínculo ativo (`deleted_at IS NULL`), mas **o token emitido continua válido após remover o acesso** (vale até expirar; não há revogação). `is_accepted` também não é checado no login. |
 | S9 | `notificacao_gateways.senha`, `financeiro_contas_bancarias.chave_api` | Segredos em texto puro no banco. |
 | S10 | `backend/src/@modules/notificacao/email/enviarEmailGateway.smtp.ts` | `tls.rejectUnauthorized: false`. |
 | S11 | `backend/src/main.ts` | CORS `origin: "*"`. |

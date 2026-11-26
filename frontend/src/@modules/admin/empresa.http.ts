@@ -70,6 +70,34 @@ export type EmpresaDetalhe = {
 
 export type DominioInput = { domain?: string | undefined; active?: boolean | undefined };
 
+export type EmpresaUsuarioItem = {
+  uuid: string;
+  name: string;
+  cpf: string | null;
+  email: string | null;
+  phone: string | null;
+  position: string | null;
+  roles: string[];
+  isAccepted: boolean;
+  isVerify: boolean;
+  createdAt: string;
+};
+
+export type EmpresaUsuarioDetalhe = EmpresaUsuarioItem & {
+  outrasEmpresas: { uuid: string; name: string }[];
+};
+
+export type EmpresaUsuarioInput = {
+  name: string;
+  cpf?: string | undefined;
+  email?: string | undefined;
+  phone?: string | undefined;
+  password?: string | undefined;
+  position?: string | undefined;
+  roles?: string[] | undefined;
+  isAccepted?: boolean | undefined;
+};
+
 export class AdminEmpresaHttp {
   constructor(readonly http: HttpClient) {}
 
@@ -107,5 +135,25 @@ export class AdminEmpresaHttp {
 
   async definirModulos(uuid: string, modulos: string[]) {
     return this.http.put(`admin/empresas/${uuid}/modulos`, { modulos });
+  }
+
+  async listarUsuarios(uuid: string, params: ListarEmpresasParams = {}) {
+    return this.http.get(`admin/empresas/${uuid}/usuarios`, { params });
+  }
+
+  async detalharUsuario(uuid: string, usuarioUuid: string) {
+    return this.http.get(`admin/empresas/${uuid}/usuarios/${usuarioUuid}`);
+  }
+
+  async criarUsuario(uuid: string, input: EmpresaUsuarioInput) {
+    return this.http.post(`admin/empresas/${uuid}/usuarios`, input);
+  }
+
+  async editarUsuario(uuid: string, usuarioUuid: string, input: EmpresaUsuarioInput) {
+    return this.http.put(`admin/empresas/${uuid}/usuarios/${usuarioUuid}`, input);
+  }
+
+  async deletarUsuario(uuid: string, usuarioUuid: string) {
+    return this.http.delete(`admin/empresas/${uuid}/usuarios/${usuarioUuid}`);
   }
 }

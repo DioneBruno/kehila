@@ -47,6 +47,13 @@ auth_users (global: nome, cpf, email, phone, password, endereço, estado_civil, 
   pode mudar senha, e-mail, CPF ou telefone (403). Só o próprio usuário, via
   `/auth/editar-perfil`.
 - Senha é re-hasheada (bcrypt 10) e atualiza `password_date_update`.
+- **Último administrador:** remover (`DELETE`), rebaixar o cargo ou desativar (`isAccepted = false`)
+  o último admin ativo da empresa → `A empresa precisa de pelo menos um administrador`. Vale em
+  `/usuarios` e nas rotas do Admin.
+- **Override do Admin:** o parâmetro `permitirAlterarAcessoCompartilhado` (só o `AdminEmpresaController`
+  passa `true`) dispensa a proteção multiempresa acima; ver [admin](admin.md).
+- **Login:** só autentica quem tem vínculo ativo (`auth_users_companies.deleted_at IS NULL`) com a
+  empresa do domínio. O JWT já emitido continua válido até expirar após a remoção do acesso.
 
 ## `UsuarioQuery` (compartilhada com Auth)
 

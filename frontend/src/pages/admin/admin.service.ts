@@ -7,6 +7,9 @@ import type {
   EmpresaDetalhe,
   EmpresaDominio,
   EmpresaResumo,
+  EmpresaUsuarioDetalhe,
+  EmpresaUsuarioInput,
+  EmpresaUsuarioItem,
   ListarEmpresasParams,
 } from "src/@modules/admin/empresa.http";
 import { inject } from "vue";
@@ -21,6 +24,15 @@ export const UFS = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
   "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ];
+
+export const CARGOS_USUARIO = [
+  { label: "Administrador", value: "admin" },
+  { label: "Usuário", value: "usuario" },
+];
+
+export function labelCargo(valor: string | null) {
+  return CARGOS_USUARIO.find((c) => c.value === valor)?.label ?? valor ?? "-";
+}
 
 export function labelModulo(valor: string) {
   return MODULOS_EMPRESA.find((m) => m.value === valor)?.label ?? valor;
@@ -149,6 +161,79 @@ export class AdminEmpresaService {
     } finally {
       this.$q.loading.hide();
     }
+  }
+
+  async listarUsuarios(uuid: string, params: ListarEmpresasParams) {
+    try {
+      const response = await this.$http.listarUsuarios(uuid, params);
+      const itens = response.data as EmpresaUsuarioItem[];
+      return { itens, total: (response.meta?.total ?? itens.length) as number };
+    } catch {
+      return null;
+    }
+  }
+
+  async detalharUsuario(uuid: string, usuarioUuid: string) {
+    try {
+      this.$q.loading.show();
+      return (await this.$http.detalharUsuario(uuid, usuarioUuid)).data as EmpresaUsuarioDetalhe;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async criarUsuario(uuid: string, input: EmpresaUsuarioInput) {
+    try {
+      this.$q.loading.show();
+      await this.$http.criarUsuario(uuid, input);
+      this.$q.notify({ type: "positive", message: "Usuário criado" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async editarUsuario(uuid: string, usuarioUuid: string, input: EmpresaUsuarioInput) {
+    try {
+      this.$q.loading.show();
+      await this.$http.editarUsuario(uuid, usuarioUuid, input);
+      this.$q.notify({ type: "positive", message: "Usuário atualizado" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async deletarUsuario(uuid: string, usuarioUuid: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.$q
+        .dialog({
+          title: "Remover usuário",
+          message: "Remover o acesso deste usuário a esta empresa?",
+          cancel: { label: "Não", flat: true, color: "grey" },
+          ok: { label: "Remover", unelevated: true, color: "negative" },
+          persistent: true,
+        })
+        .onOk(async () => {
+          try {
+            this.$q.loading.show();
+            await this.$http.deletarUsuario(uuid, usuarioUuid);
+            this.$q.notify({ type: "positive", message: "Usuário removido" });
+            resolve(true);
+          } catch {
+            resolve(false);
+          } finally {
+            this.$q.loading.hide();
+          }
+        })
+        .onCancel(() => resolve(false));
+    });
   }
 
   notificarCriada(dominio: string) {
