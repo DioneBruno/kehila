@@ -12,7 +12,7 @@
 |---|---|---|
 | `admin.empresas` (`/admin/empresas`) | `empresaListar.vue` | lista paginada com busca (nome, fantasia, CPF/CNPJ, domínio), módulos e domínios; botão "Nova empresa" |
 | `admin.empresas.criar` | `empresaIncluir.vue` | cadastro: dados da empresa, domínio, módulos e usuário administrador |
-| `admin.empresas.editar` (`/admin/empresas/:uuid`) | `empresaEditar.vue` | abas **Dados**, **Domínios** (incluir, editar, ativar/desativar, remover), **Módulos** e **Usuários** |
+| `admin.empresas.editar` (`/admin/empresas/:uuid`) | `empresaEditar.vue` | abas **Dados**, **Layout** (título/subtítulo do cabeçalho e da tela de login; salva só `{ layout }`), **Domínios** (incluir, editar, ativar/desativar, remover), **Módulos** e **Usuários** |
 
 ## Menu, home e acesso
 

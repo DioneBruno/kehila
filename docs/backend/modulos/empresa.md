@@ -48,7 +48,14 @@ Todos com `JwtAuthMiddleware` + `AdminMiddleware`, sempre sobre a empresa do tok
 ```
 
 O frontend chama `/ping` no boot para descobrir se o domínio é válido e qual layout usar.
-Não há endpoint para editar `layout` — hoje só via banco.
+
+**Edição:** `PUT /empresa` (e `PUT /admin/empresas/:uuid`) aceitam
+`layout: { header?: { titulo, subTitulo }, telaLogin?: { titulo, subTitulo } }`, validado por
+`layout/layoutRegras.ts` (`normalizarLayout`): só essas seções/campos, texto até 120
+caracteres, aparado; vazio vira `null` e o `/ping` usa o padrão acima (ex.: subtítulo do login
+vazio mostra "Bem-vindo"). O update faz merge raso (`layout || $novo`): troca só as seções
+enviadas e preserva outras chaves do JSON. `GET /empresa` e `GET /admin/empresas/:uuid`
+devolvem `layout` cru (sem os padrões).
 
 ## Regras de domínio
 

@@ -1,4 +1,5 @@
 import type HttpClient from "../http/httpClient.interface";
+import type { LayoutForm } from "src/components/empresaLayout";
 
 export type EditarEmpresaInput = {
   name?: string | undefined;
@@ -10,6 +11,7 @@ export type EditarEmpresaInput = {
   phone?: string | undefined;
   address?: Record<string, unknown> | undefined;
   uf?: string | undefined;
+  layout?: LayoutForm | undefined;
 };
 
 export class EmpresaHttp {

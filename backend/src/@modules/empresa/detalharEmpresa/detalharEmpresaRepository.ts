@@ -11,6 +11,7 @@ export type EmpresaDetalhe = {
   phone: string | null;
   address: Record<string, unknown> | null;
   uf: string | null;
+  layout: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -32,6 +33,7 @@ export class DetalharEmpresaRepository {
         c.phone,
         c.address,
         c.uf,
+        c.layout,
         c.created_at AS "createdAt",
         c.updated_at AS "updatedAt"
       FROM auth_companies c

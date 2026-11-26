@@ -1,4 +1,5 @@
 import type HttpClient from "../http/httpClient.interface";
+import type { LayoutForm } from "src/components/empresaLayout";
 
 export type EmpresaEnderecoInput = {
   cep?: string | undefined;
@@ -63,6 +64,7 @@ export type EmpresaDetalhe = {
   phone: string | null;
   address: EmpresaEnderecoInput | null;
   uf: string | null;
+  layout: Record<string, any> | null;
   createdAt: string;
   modulos: string[];
   dominios: EmpresaDominio[];
@@ -115,6 +117,10 @@ export class AdminEmpresaHttp {
 
   async editar(uuid: string, input: EmpresaDadosInput) {
     return this.http.put(`admin/empresas/${uuid}`, input);
+  }
+
+  async editarLayout(uuid: string, layout: LayoutForm) {
+    return this.http.put(`admin/empresas/${uuid}`, { layout });
   }
 
   async listarDominios(uuid: string) {

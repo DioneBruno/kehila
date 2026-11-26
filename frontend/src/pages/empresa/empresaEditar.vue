@@ -176,6 +176,17 @@
             </q-form>
           </q-card-section>
         </q-card>
+
+        <!-- Layout -->
+        <q-card flat bordered class="q-mt-md">
+          <q-card-section>
+            <p class="text-subtitle1 text-weight-bold q-ma-none">Layout</p>
+            <p class="text-caption text-grey-6 q-mt-none q-mb-md">
+              Textos exibidos no topo do painel e na tela de login.
+            </p>
+            <empresa-layout-form v-model="form.layout" :readonly="!editando" />
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Painel lateral -->
@@ -315,6 +326,9 @@
 import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { EmpresaService } from "./empresa.service";
 import { DominioService } from "./dominio.service";
+import EmpresaLayoutForm from "src/components/EmpresaLayoutForm.vue";
+import { layoutParaForm } from "src/components/empresaLayout";
+import { MainLayoutService } from "src/layouts/MainLayout.service";
 
 const UFS = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
@@ -325,9 +339,11 @@ const dominioFormVazio = () => ({ domain: "", active: true });
 
 export default defineComponent({
   name: "EmpresaEditar",
+  components: { EmpresaLayoutForm },
   setup() {
     const $service = new EmpresaService();
     const $dominioService = new DominioService();
+    const $layoutService = new MainLayoutService();
 
     const data = reactive({
       empresa: null as any,
@@ -350,6 +366,7 @@ export default defineComponent({
           bairro: "",
           cidade: "",
         },
+        layout: layoutParaForm(null),
       },
       dominios: [] as any[],
       dialogDominio: {
@@ -377,6 +394,7 @@ export default defineComponent({
         bairro: empresa.address?.bairro ?? "",
         cidade: empresa.address?.cidade ?? "",
       };
+      data.form.layout = layoutParaForm(empresa.layout);
     }
 
     async function carregar() {
@@ -398,10 +416,13 @@ export default defineComponent({
         phone: data.form.phone || undefined,
         uf: data.form.uf || undefined,
         address: data.form.address,
+        layout: data.form.layout,
       });
       if (ok) {
         data.editando = false;
         await carregar();
+        // Atualiza topo e título da aba sem precisar recarregar a página.
+        await $layoutService.ping().catch(() => undefined);
       }
     }
 

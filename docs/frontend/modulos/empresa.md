@@ -9,7 +9,12 @@
 ## Tela `empresa` (`empresaEditar.vue`)
 
 Dados cadastrais (razão social, nome comercial/fantasia, CPF/CNPJ, IE, e-mail, telefone,
-endereço, UF) e a lista de **domínios** (incluir, ativar/desativar, remover).
+endereço, UF), o card **Layout** (título/subtítulo do cabeçalho e da tela de login, salvo junto
+com os dados no modo edição; ao salvar, chama `/ping` para atualizar o topo e o título da aba)
+e a lista de **domínios** (incluir, ativar/desativar, remover).
+
+O formulário de layout é o componente compartilhado `src/components/EmpresaLayoutForm.vue`
+(helpers em `src/components/empresaLayout.ts`), usado também na aba **Layout** do Admin.
 
 Cuidado ao editar domínios: o domínio é como o backend identifica a empresa nas rotas
 públicas. Remover/desativar o domínio em uso derruba o login e a página pública daquele

@@ -21,6 +21,7 @@ export type EmpresaDetalhe = {
   phone: string | null;
   address: Record<string, unknown> | null;
   uf: string | null;
+  layout: Record<string, unknown> | null;
   createdAt: Date;
   modulos: string[];
   dominios: { uuid: string; domain: string; active: boolean; createdAt: Date }[];
@@ -61,7 +62,7 @@ export class AdminQuery {
   async detalharEmpresa(uuid: string): Promise<EmpresaDetalhe | null> {
     const [empresa] = await this.connections.database!.query(
       `SELECT c.uuid, c.name, c.commercial_name AS "commercialName", c.fantasy_name AS "fantasyName",
-        c.state_registration AS "stateRegistration", c.cpf_cnpj AS "cpfCnpj", c.email, c.phone, c.address, c.uf,
+        c.state_registration AS "stateRegistration", c.cpf_cnpj AS "cpfCnpj", c.email, c.phone, c.address, c.uf, c.layout,
         c.created_at AS "createdAt"
        FROM auth_companies c WHERE c.deleted_at IS NULL AND c.uuid = $1`,
       [uuid],

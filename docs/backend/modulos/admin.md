@@ -24,7 +24,7 @@ Prefixo `/admin/empresas`. `:uuid` inválido ou empresa apagada/inexistente → 
 | GET | `/` | Lista empresas não deletadas (`busca` por nome, fantasia, CPF/CNPJ ou domínio; `pagina`, `porPagina` ≤ 100, padrão 20). Resposta `{success,data,meta:{total}}`, cada item com `modulos` e `dominios` (na listagem, apenas domínios **ativos**; o detalhe mostra todos). |
 | POST | `/` | `CadastrarEmpresaUsecase` — empresa + domínio + módulos + usuário admin numa transação. `201 {data:{uuid}}`. |
 | GET | `/:uuid` | Detalhe: dados cadastrais, `modulos` e `dominios` (uuid, domain, active). |
-| PUT | `/:uuid` | Reaproveita `EditarEmpresaUsecase` (mesmas regras de `PUT /empresa`). |
+| PUT | `/:uuid` | Reaproveita `EditarEmpresaUsecase` (mesmas regras de `PUT /empresa`, inclusive `layout`). |
 | GET/POST | `/:uuid/dominios` | Reaproveita `ListarDominiosUsecase` / `CriarDominioUsecase`. |
 | PUT/DELETE | `/:uuid/dominios/:dominioUuid` | Reaproveita `EditarDominioUsecase` / `DeletarDominioUsecase`. |
 | PUT | `/:uuid/modulos` | `DefinirModulosEmpresaUsecase` — `{ modulos: string[] }`. |

@@ -33,6 +33,7 @@ export class EmpresaController {
       phone: body.phone,
       address: body.address,
       uf: body.uf,
+      layout: body.layout,
     });
     return res.status(200).json({ success: true });
   }

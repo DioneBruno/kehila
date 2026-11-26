@@ -1,4 +1,5 @@
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import type { LayoutEmpresa } from "../layout/layoutRegras";
 
 export type EditarEmpresaData = {
   name?: string;
@@ -10,6 +11,7 @@ export type EditarEmpresaData = {
   phone?: string;
   address?: Record<string, unknown>;
   uf?: string;
+  layout?: LayoutEmpresa;
 };
 
 export class EditarEmpresaRepository {
@@ -50,6 +52,13 @@ export class EditarEmpresaRepository {
     if ("address" in data && data.address !== undefined) {
       campos.push(`address = $${idx}`);
       valores.push(JSON.stringify(data.address));
+      idx++;
+    }
+
+    if ("layout" in data && data.layout !== undefined) {
+      // Merge raso: troca só as seções enviadas e preserva outras chaves do JSON.
+      campos.push(`layout = COALESCE(layout, '{}'::jsonb) || $${idx}::jsonb`);
+      valores.push(JSON.stringify(data.layout));
       idx++;
     }
 

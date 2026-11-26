@@ -1,6 +1,7 @@
 import { ApiError } from "src/@modules/shared/apiError";
 import { texto } from "src/@modules/shared/apiTexto";
 import { EditarEmpresaRepository } from "./editarEmpresaRepository";
+import { normalizarLayout } from "../layout/layoutRegras";
 
 export type EditarEmpresaInput = {
   companyUuid: string;
@@ -13,6 +14,7 @@ export type EditarEmpresaInput = {
   phone?: string;
   address?: Record<string, unknown>;
   uf?: string;
+  layout?: unknown;
 };
 
 export class EditarEmpresaUsecase {
@@ -27,6 +29,8 @@ export class EditarEmpresaUsecase {
     // Só valida o tipo; null continua limpando o campo.
     for (const campo of ["commercialName", "fantasyName", "stateRegistration", "email", "phone", "uf"] as const) texto(input[campo], campo);
 
+    const layout = normalizarLayout(input.layout);
+
     const existe = await this.repo.existe(input.companyUuid);
     if (!existe) throw new ApiError("Empresa não encontrada", 404);
 
@@ -40,6 +44,7 @@ export class EditarEmpresaUsecase {
       phone: input.phone,
       address: input.address,
       uf: input.uf,
+      layout,
     });
   }
 }

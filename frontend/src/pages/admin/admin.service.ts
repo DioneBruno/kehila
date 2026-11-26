@@ -12,6 +12,7 @@ import type {
   EmpresaUsuarioItem,
   ListarEmpresasParams,
 } from "src/@modules/admin/empresa.http";
+import type { LayoutForm } from "src/components/empresaLayout";
 import { inject } from "vue";
 
 export const MODULOS_EMPRESA = [
@@ -79,6 +80,19 @@ export class AdminEmpresaService {
       this.$q.loading.show();
       await this.$http.editar(uuid, input);
       this.$q.notify({ type: "positive", message: "Empresa atualizada com sucesso" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async editarLayout(uuid: string, layout: LayoutForm) {
+    try {
+      this.$q.loading.show();
+      await this.$http.editarLayout(uuid, layout);
+      this.$q.notify({ type: "positive", message: "Layout atualizado com sucesso" });
       return true;
     } catch {
       return false;

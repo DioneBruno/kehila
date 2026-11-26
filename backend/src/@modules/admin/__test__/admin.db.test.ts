@@ -9,6 +9,9 @@ import { DominioRegrasRepository } from "src/@modules/empresa/dominio/dominioReg
 import { CadastrarEmpresaUsecase } from "../cadastrarEmpresa/cadastrarEmpresa.usecase";
 import { CadastrarEmpresaRepository } from "../cadastrarEmpresa/cadastrarEmpresaRepository";
 import { AdminQuery } from "../admin.query";
+import { EditarEmpresaUsecase } from "src/@modules/empresa/editarEmpresa/editarEmpresa.usecase";
+import { EditarEmpresaRepository } from "src/@modules/empresa/editarEmpresa/editarEmpresaRepository";
+import { LayoutQuery } from "src/@modules/empresa/layout/layout.query";
 import { DetalharUsuarioUsecase } from "src/@modules/usuario/detalharUsuario/detalharUsuario.usecase";
 import { DetalharUsuarioRepository } from "src/@modules/usuario/detalharUsuario/detalharUsuarioRepository";
 import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
@@ -246,5 +249,23 @@ describe("Admin (banco)", () => {
       const [v] = await dataSource.query(`SELECT deleted_at FROM auth_users_companies WHERE uuid = $1`, ["ad000000-0000-4000-8000-000000000d02"]);
       expect(v.deleted_at).not.toBeNull();
     });
+  });
+
+  test("editar layout troca só as seções enviadas e preserva outras chaves", async () => {
+    await dataSource.query(
+      `UPDATE auth_companies SET layout = '{"header": {"titulo": "Antigo", "subTitulo": "Sub"}, "extra": {"cor": "azul"}}'::jsonb WHERE uuid = $1`,
+      [companyUuid],
+    );
+    const usecase = new EditarEmpresaUsecase(new EditarEmpresaRepository(connections));
+    await usecase.execute({ companyUuid, layout: { telaLogin: { titulo: "IBNA", subTitulo: "" } } });
+
+    const empresa = await new AdminQuery(connections).detalharEmpresa(companyUuid);
+    expect(empresa?.layout).toEqual({
+      header: { titulo: "Antigo", subTitulo: "Sub" },
+      telaLogin: { titulo: "IBNA", subTitulo: null },
+      extra: { cor: "azul" },
+    });
+    // Vazio cai no padrão do /ping.
+    expect((await new LayoutQuery(connections).buscarLayoutCompanyUuid(companyUuid)).telaLogin).toEqual({ titulo: "IBNA", subTitulo: "Bem-vindo" });
   });
 });

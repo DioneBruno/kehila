@@ -15,6 +15,7 @@
     <template v-if="empresa">
       <q-tabs v-model="aba" dense align="left" class="text-grey-7" active-color="primary">
         <q-tab name="dados" label="Dados" no-caps />
+        <q-tab name="layout" label="Layout" no-caps />
         <q-tab name="dominios" label="Domínios" no-caps />
         <q-tab name="modulos" label="Módulos" no-caps />
         <q-tab name="usuarios" label="Usuários" no-caps />
@@ -101,6 +102,28 @@
                   <q-btn unelevated type="submit" label="Salvar" color="primary" icon="save" />
                 </div>
               </q-form>
+            </q-card-section>
+          </q-card>
+        </q-tab-panel>
+
+        <!-- Layout -->
+        <q-tab-panel name="layout" class="q-pa-none">
+          <q-card flat bordered>
+            <q-card-section>
+              <p class="text-subtitle1 text-weight-bold q-ma-none">Layout</p>
+              <p class="text-caption text-grey-6 q-mt-none q-mb-md">
+                Textos exibidos no topo do painel e na tela de login da empresa.
+              </p>
+              <empresa-layout-form v-model="layout" />
+              <div class="row justify-end q-mt-md">
+                <q-btn
+                  unelevated
+                  label="Salvar"
+                  color="primary"
+                  icon="save"
+                  @click="salvarLayout"
+                />
+              </div>
             </q-card-section>
           </q-card>
         </q-tab-panel>
@@ -260,15 +283,20 @@ import { useRoute } from "vue-router";
 import type { EmpresaDetalhe, EmpresaDominio } from "src/@modules/admin/empresa.http";
 import { AdminEmpresaService, MODULOS_EMPRESA, UFS } from "./admin.service";
 import EmpresaUsuarios from "./empresaUsuarios.vue";
+import EmpresaLayoutForm from "src/components/EmpresaLayoutForm.vue";
+import { layoutParaForm } from "src/components/empresaLayout";
+import { MainLayoutService } from "src/layouts/MainLayout.service";
+import TokenDecode from "src/@modules/auth/tokenDecode";
 
 const dominioFormVazio = () => ({ domain: "", active: true });
 
 export default defineComponent({
   name: "AdminEmpresaEditar",
-  components: { EmpresaUsuarios },
+  components: { EmpresaUsuarios, EmpresaLayoutForm },
   setup() {
     const $route = useRoute();
     const $service = new AdminEmpresaService();
+    const $layoutService = new MainLayoutService();
     const uuid = $route.params.uuid as string;
 
     const data = reactive({
@@ -285,6 +313,7 @@ export default defineComponent({
         uf: "",
         address: { cep: "", logradouro: "", numero: "", complemento: "", bairro: "", cidade: "" },
       },
+      layout: layoutParaForm(null),
       dominios: [] as EmpresaDominio[],
       modulosSelecionados: [] as string[],
       dialogDominio: {
@@ -320,6 +349,7 @@ export default defineComponent({
         data.empresa = empresa;
         data.dominios = empresa.dominios ?? [];
         data.modulosSelecionados = [...(empresa.modulos ?? [])];
+        data.layout = layoutParaForm(empresa.layout);
         carregarForm(empresa);
       }
     }
@@ -338,6 +368,14 @@ export default defineComponent({
         address: f.address,
       });
       if (ok) await carregar();
+    }
+
+    async function salvarLayout() {
+      const ok = await $service.editarLayout(uuid, data.layout);
+      if (!ok) return;
+      await carregar();
+      // Editando a própria empresa: atualiza topo e título da aba na hora.
+      if (TokenDecode.execute()?.company?.uuid === uuid) await $layoutService.ping().catch(() => undefined);
     }
 
     async function salvarModulos() {
@@ -398,6 +436,7 @@ export default defineComponent({
       modulosDisponiveis: MODULOS_EMPRESA,
       salvar,
       salvarModulos,
+      salvarLayout,
       formatarData,
       abrirDialogDominio,
       salvarDominio,
