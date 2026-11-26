@@ -28,6 +28,7 @@ export class GenerateTokenAuthenticationUserRepository {
           ON "userCompanies".company_uuid = companies.uuid
       WHERE users.uuid = $2
         AND companies.uuid = $1
+        AND "userCompanies".deleted_at IS NULL
       `,
       [companyUuid, userUuid],
     );

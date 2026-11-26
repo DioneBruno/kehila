@@ -37,6 +37,7 @@ export class TokenGenerateRepository {
       WHERE users.deleted_at IS NULL
         AND (users.email = $1 OR users.cpf = $1)
         AND c.uuid = $2
+        AND uc.deleted_at IS NULL
     `,
       [userName, companyUuid],
     );

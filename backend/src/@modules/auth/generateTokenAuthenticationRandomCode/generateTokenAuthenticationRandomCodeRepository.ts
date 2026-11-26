@@ -20,6 +20,7 @@ export class GenerateTokenAuthenticationRandomCodeRepository {
          ON users.uuid = "userCompanies".user_uuid
        WHERE users.deleted_at IS NULL
          AND "userCompanies".company_uuid = $2
+         AND "userCompanies".deleted_at IS NULL
          AND (users.cpf = $1 OR users.email = $1 OR users.phone = $1)`,
       [username, companyUuid],
     );
