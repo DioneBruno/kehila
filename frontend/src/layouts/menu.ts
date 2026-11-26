@@ -1,4 +1,4 @@
-export type Modulo = "igreja" | "imoveis";
+export type Modulo = "igreja" | "imoveis" | "admin";
 
 export type MenuItem = {
   label: string;
@@ -28,6 +28,8 @@ export const MENU_ITEMS: MenuItem[] = [
   { label: "Imóveis", icon: "apartment", route: "imoveis.imoveis", modulo: "imoveis" },
   { label: "Contratos", icon: "description", route: "imoveis.contratos", modulo: "imoveis" },
   { label: "Inquilinos", icon: "people", route: "imoveis.inquilinos", modulo: "imoveis" },
+  { label: "ADMIN", type: "section", modulo: "admin" },
+  { label: "Empresas", icon: "domain", route: "admin.empresas", modulo: "admin" },
   { label: "ADMINISTRAÇÃO", type: "section" },
   { label: "Minha Empresa", icon: "business", route: "empresa" },
   { label: "Membros", icon: "diversity_3", route: "membros", modulo: "igreja" },
@@ -43,6 +45,7 @@ function itemVisivel(
   isInterno: boolean,
 ): boolean {
   if (item.modulo === "imoveis") return modulos.includes("imoveis") && isInterno;
+  if (item.modulo === "admin") return modulos.includes("admin") && isAdmin;
   if (item.modulo === "igreja") return modulos.includes("igreja") && isAdmin;
   return isAdmin || item.route === "home";
 }

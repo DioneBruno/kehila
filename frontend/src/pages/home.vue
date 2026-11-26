@@ -123,6 +123,8 @@ export default defineComponent({
         // Sem módulo igreja: vai ao painel de imóveis (quando a rota existir) e não lista apriscos.
         if (modulos.includes("imoveis") && router.hasRoute("imoveis.painel")) {
           await router.replace({ name: "imoveis.painel" });
+        } else if (modulos.includes("admin") && router.hasRoute("admin.empresas")) {
+          await router.replace({ name: "admin.empresas" });
         }
         data.carregado = true;
         return;

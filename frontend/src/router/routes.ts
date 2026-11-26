@@ -97,6 +97,21 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/membresia/membroEditar.vue"),
       },
       {
+        path: "admin/empresas",
+        name: "admin.empresas",
+        component: () => import("pages/admin/empresaListar.vue"),
+      },
+      {
+        path: "admin/empresas/criar",
+        name: "admin.empresas.criar",
+        component: () => import("pages/admin/empresaIncluir.vue"),
+      },
+      {
+        path: "admin/empresas/:uuid",
+        name: "admin.empresas.editar",
+        component: () => import("pages/admin/empresaEditar.vue"),
+      },
+      {
         path: "imoveis/proprietarios",
         name: "imoveis.proprietarios",
         component: () => import("pages/imoveis/pessoaListar.vue"),
