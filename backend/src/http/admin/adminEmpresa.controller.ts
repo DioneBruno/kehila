@@ -10,9 +10,15 @@ import { CriarDominioUsecase } from "src/@modules/empresa/dominio/criarDominio/c
 import { ListarDominiosUsecase } from "src/@modules/empresa/dominio/listarDominios/listarDominios.usecase";
 import { EditarDominioUsecase } from "src/@modules/empresa/dominio/editarDominio/editarDominio.usecase";
 import { DeletarDominioUsecase } from "src/@modules/empresa/dominio/deletarDominio/deletarDominio.usecase";
+import { CriarUsuarioUsecase } from "src/@modules/usuario/criarUsuario/criarUsuario.usecase";
+import { ListarUsuariosUsecase } from "src/@modules/usuario/listarUsuarios/listarUsuarios.usecase";
+import { DetalharUsuarioUsecase } from "src/@modules/usuario/detalharUsuario/detalharUsuario.usecase";
+import { EditarUsuarioUsecase } from "src/@modules/usuario/editarUsuario/editarUsuario.usecase";
+import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
 
 const EMPRESA_NAO_ENCONTRADA = "Empresa não encontrada";
 const DOMINIO_NAO_ENCONTRADO = "Domínio não encontrado";
+const USUARIO_NAO_ENCONTRADO = "Usuário não encontrado";
 
 @Controller("admin/empresas")
 export class AdminEmpresaController {
@@ -25,6 +31,11 @@ export class AdminEmpresaController {
     readonly listarDominiosUsecase: ListarDominiosUsecase,
     readonly editarDominioUsecase: EditarDominioUsecase,
     readonly deletarDominioUsecase: DeletarDominioUsecase,
+    readonly criarUsuarioUsecase: CriarUsuarioUsecase,
+    readonly listarUsuariosUsecase: ListarUsuariosUsecase,
+    readonly detalharUsuarioUsecase: DetalharUsuarioUsecase,
+    readonly editarUsuarioUsecase: EditarUsuarioUsecase,
+    readonly deletarUsuarioUsecase: DeletarUsuarioUsecase,
   ) {}
 
   private async garantirEmpresa(uuid: string) {
@@ -131,5 +142,70 @@ export class AdminEmpresaController {
     await this.garantirEmpresa(uuid);
     const modulos = await this.definirModulosUsecase.execute({ companyUuid: uuid, companyUuidLogada: req.companyUuid, modulos: body?.modulos });
     return res.status(200).json({ success: true, data: modulos });
+  }
+
+  @Get(":uuid/usuarios")
+  async listarUsuarios(@Param("uuid") uuid: string, @Query() query: any, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    const resultado = await this.listarUsuariosUsecase.execute({
+      companyUuid: uuid,
+      busca: query?.busca,
+      pagina: query?.pagina ? parseInt(query.pagina, 10) : 1,
+      porPagina: query?.porPagina ? parseInt(query.porPagina, 10) : 20,
+    });
+    return res.status(200).json({ success: true, data: resultado.dados, meta: { total: resultado.total } });
+  }
+
+  @Get(":uuid/usuarios/:usuarioUuid")
+  async detalharUsuario(@Param("uuid") uuid: string, @Param("usuarioUuid") usuarioUuid: string, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    garantirUuid(usuarioUuid, USUARIO_NAO_ENCONTRADO);
+    const detalhe = await this.detalharUsuarioUsecase.execute({ companyUuid: uuid, usuarioUuid });
+    const outrasEmpresas = await this.adminQuery.outrasEmpresasDoUsuario(usuarioUuid, uuid);
+    return res.status(200).json({ success: true, data: { ...detalhe, outrasEmpresas } });
+  }
+
+  @Post(":uuid/usuarios")
+  async criarUsuario(@Param("uuid") uuid: string, @Body() body: any, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    const resultado = await this.criarUsuarioUsecase.execute({
+      companyUuid: uuid,
+      name: body?.name,
+      cpf: body?.cpf,
+      email: body?.email,
+      phone: body?.phone,
+      password: body?.password,
+      position: body?.position,
+      roles: body?.roles,
+    });
+    return res.status(201).json({ success: true, data: resultado });
+  }
+
+  @Put(":uuid/usuarios/:usuarioUuid")
+  async editarUsuario(@Param("uuid") uuid: string, @Param("usuarioUuid") usuarioUuid: string, @Body() body: any, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    garantirUuid(usuarioUuid, USUARIO_NAO_ENCONTRADO);
+    await this.editarUsuarioUsecase.execute({
+      companyUuid: uuid,
+      usuarioUuid,
+      name: body?.name,
+      cpf: body?.cpf,
+      email: body?.email,
+      phone: body?.phone,
+      password: body?.password,
+      position: body?.position,
+      roles: body?.roles,
+      isAccepted: body?.isAccepted,
+      permitirAlterarAcessoCompartilhado: true,
+    });
+    return res.status(200).json({ success: true });
+  }
+
+  @Delete(":uuid/usuarios/:usuarioUuid")
+  async deletarUsuario(@Req() req: Request | any, @Param("uuid") uuid: string, @Param("usuarioUuid") usuarioUuid: string, @Res() res: Response) {
+    await this.garantirEmpresa(uuid);
+    garantirUuid(usuarioUuid, USUARIO_NAO_ENCONTRADO);
+    await this.deletarUsuarioUsecase.execute({ companyUuid: uuid, usuarioUuid, usuarioLogadoUuid: req.userUuid });
+    return res.status(200).json({ success: true });
   }
 }

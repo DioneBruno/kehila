@@ -9,6 +9,10 @@ import { DominioRegrasRepository } from "src/@modules/empresa/dominio/dominioReg
 import { CadastrarEmpresaUsecase } from "../cadastrarEmpresa/cadastrarEmpresa.usecase";
 import { CadastrarEmpresaRepository } from "../cadastrarEmpresa/cadastrarEmpresaRepository";
 import { AdminQuery } from "../admin.query";
+import { DetalharUsuarioUsecase } from "src/@modules/usuario/detalharUsuario/detalharUsuario.usecase";
+import { DetalharUsuarioRepository } from "src/@modules/usuario/detalharUsuario/detalharUsuarioRepository";
+import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
+import { DeletarUsuarioRepository } from "src/@modules/usuario/deletarUsuario/deletarUsuarioRepository";
 
 const companyUuid = "ad000000-0000-4000-8000-000000000a01";
 const rollbackUuid = "ad000000-0000-4000-8000-000000000a03";
@@ -181,6 +185,66 @@ describe("Admin (banco)", () => {
       expect(await query.detalharEmpresa(deletadaUuid)).toBeNull();
       expect(await query.existeEmpresa(deletadaUuid)).toBe(false);
       expect(await query.existeEmpresa(cadastradas.uuid!)).toBe(true);
+    });
+  });
+
+  describe("usuários da empresa", () => {
+    const empresaB = "ad000000-0000-4000-8000-000000000a05";
+    const empresaAdm = "ad000000-0000-4000-8000-000000000a06";
+    const usuarioU = "ad000000-0000-4000-8000-000000000c01";
+    const adminUm = "ad000000-0000-4000-8000-000000000c02";
+    const adminDois = "ad000000-0000-4000-8000-000000000c03";
+    const empresas = [empresaB, empresaAdm];
+    const usuarios = [usuarioU, adminUm, adminDois];
+    const vinculoB = "ad000000-0000-4000-8000-000000000d01";
+    let query: AdminQuery;
+
+    const limparUsuarios = async () => {
+      await dataSource.query(`DELETE FROM auth_users_companies WHERE user_uuid = ANY($1::uuid[]) OR company_uuid = ANY($2::uuid[])`, [usuarios, empresas]);
+      await dataSource.query(`DELETE FROM auth_users WHERE uuid = ANY($1::uuid[])`, [usuarios]);
+      await dataSource.query(`DELETE FROM auth_companies WHERE uuid = ANY($1::uuid[])`, [empresas]);
+    };
+    const vincular = (uuid: string, user: string, company: string, position: string | null = null) =>
+      dataSource.query(`INSERT INTO auth_users_companies (uuid, user_uuid, company_uuid, is_accepted, position) VALUES ($1, $2, $3, true, $4)`, [uuid, user, company, position]);
+
+    beforeAll(async () => {
+      query = new AdminQuery(connections);
+      await limparUsuarios();
+      await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj) VALUES ($1, 'test-admin-b', 'Empresa Teste B', '00000000000000')`, [empresaB]);
+      await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj) VALUES ($1, 'test-admin-adm', 'Empresa Teste Adm', '00000000000000')`, [empresaAdm]);
+      for (const [uuid, n] of [[usuarioU, "u"], [adminUm, "a1"], [adminDois, "a2"]]) {
+        await dataSource.query(`INSERT INTO auth_users (uuid, name, email) VALUES ($1, $2, $3)`, [uuid, `Usuario Teste ${n}`, `usuario-teste-${n}@exemplo.com`]);
+      }
+      await vincular("ad000000-0000-4000-8000-000000000d00", usuarioU, companyUuid);
+      await vincular(vinculoB, usuarioU, empresaB);
+    });
+
+    afterAll(limparUsuarios);
+
+    test("outrasEmpresasDoUsuario lista só vínculos ativos de outras empresas", async () => {
+      expect(await query.outrasEmpresasDoUsuario(usuarioU, companyUuid)).toEqual([{ uuid: empresaB, name: "Empresa Teste B" }]);
+
+      await dataSource.query(`UPDATE auth_users_companies SET deleted_at = now() WHERE uuid = $1`, [vinculoB]);
+      expect(await query.outrasEmpresasDoUsuario(usuarioU, companyUuid)).toEqual([]);
+      await dataSource.query(`UPDATE auth_users_companies SET deleted_at = NULL WHERE uuid = $1`, [vinculoB]);
+    });
+
+    test("detalhar usuário que não pertence à empresa alvo devolve 404", async () => {
+      const usecase = new DetalharUsuarioUsecase(new DetalharUsuarioRepository(connections));
+      await expect(usecase.execute({ companyUuid: empresaAdm, usuarioUuid: usuarioU })).rejects.toMatchObject({ statusCode: 404 });
+      await expect(usecase.execute({ companyUuid: empresaB, usuarioUuid: usuarioU })).resolves.toBeDefined();
+    });
+
+    test("último admin ativo não pode ser removido; com um segundo, pode", async () => {
+      const usecase = new DeletarUsuarioUsecase(new DeletarUsuarioRepository(connections));
+      await vincular("ad000000-0000-4000-8000-000000000d02", adminUm, empresaAdm, "admin");
+
+      await expect(usecase.execute({ companyUuid: empresaAdm, usuarioUuid: adminUm })).rejects.toThrow("A empresa precisa de pelo menos um administrador");
+
+      await vincular("ad000000-0000-4000-8000-000000000d03", adminDois, empresaAdm, "admin");
+      await expect(usecase.execute({ companyUuid: empresaAdm, usuarioUuid: adminUm })).resolves.toBeUndefined();
+      const [v] = await dataSource.query(`SELECT deleted_at FROM auth_users_companies WHERE uuid = $1`, ["ad000000-0000-4000-8000-000000000d02"]);
+      expect(v.deleted_at).not.toBeNull();
     });
   });
 });

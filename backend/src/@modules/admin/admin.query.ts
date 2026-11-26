@@ -84,4 +84,15 @@ export class AdminQuery {
     const rows = await this.connections.database!.query(`SELECT 1 FROM auth_companies WHERE deleted_at IS NULL AND uuid = $1`, [uuid]);
     return rows.length > 0;
   }
+
+  async outrasEmpresasDoUsuario(usuarioUuid: string, exceto: string): Promise<{ uuid: string; name: string }[]> {
+    return this.connections.database!.query(
+      `SELECT c.uuid, c.name
+       FROM auth_users_companies uc
+         INNER JOIN auth_companies c ON c.uuid = uc.company_uuid
+       WHERE uc.user_uuid = $1 AND uc.company_uuid <> $2 AND uc.deleted_at IS NULL AND c.deleted_at IS NULL
+       ORDER BY c.name ASC, c.uuid ASC`,
+      [usuarioUuid, exceto],
+    );
+  }
 }

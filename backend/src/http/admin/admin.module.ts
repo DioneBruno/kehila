@@ -29,6 +29,16 @@ import { EditarDominioRepository } from "src/@modules/empresa/dominio/editarDomi
 import { DominioRegrasRepository } from "src/@modules/empresa/dominio/dominioRegras";
 import { DeletarDominioUsecase } from "src/@modules/empresa/dominio/deletarDominio/deletarDominio.usecase";
 import { DeletarDominioRepository } from "src/@modules/empresa/dominio/deletarDominio/deletarDominioRepository";
+import { CriarUsuarioUsecase } from "src/@modules/usuario/criarUsuario/criarUsuario.usecase";
+import { CriarUsuarioRepository } from "src/@modules/usuario/criarUsuario/criarUsuarioRepository";
+import { ListarUsuariosUsecase } from "src/@modules/usuario/listarUsuarios/listarUsuarios.usecase";
+import { ListarUsuariosRepository } from "src/@modules/usuario/listarUsuarios/listarUsuariosRepository";
+import { DetalharUsuarioUsecase } from "src/@modules/usuario/detalharUsuario/detalharUsuario.usecase";
+import { DetalharUsuarioRepository } from "src/@modules/usuario/detalharUsuario/detalharUsuarioRepository";
+import { EditarUsuarioUsecase } from "src/@modules/usuario/editarUsuario/editarUsuario.usecase";
+import { EditarUsuarioRepository } from "src/@modules/usuario/editarUsuario/editarUsuarioRepository";
+import { DeletarUsuarioUsecase } from "src/@modules/usuario/deletarUsuario/deletarUsuario.usecase";
+import { DeletarUsuarioRepository } from "src/@modules/usuario/deletarUsuario/deletarUsuarioRepository";
 
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
@@ -49,6 +59,11 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(ListarDominiosUsecase, (hub) => new ListarDominiosUsecase(new ListarDominiosRepository(hub))),
     makeProvider(EditarDominioUsecase, (hub) => new EditarDominioUsecase(new EditarDominioRepository(hub), new DominioRegrasRepository(hub))),
     makeProvider(DeletarDominioUsecase, (hub) => new DeletarDominioUsecase(new DeletarDominioRepository(hub), new DominioRegrasRepository(hub))),
+    makeProvider(CriarUsuarioUsecase, (hub) => new CriarUsuarioUsecase(new CriarUsuarioRepository(hub))),
+    makeProvider(ListarUsuariosUsecase, (hub) => new ListarUsuariosUsecase(new ListarUsuariosRepository(hub))),
+    makeProvider(DetalharUsuarioUsecase, (hub) => new DetalharUsuarioUsecase(new DetalharUsuarioRepository(hub))),
+    makeProvider(EditarUsuarioUsecase, (hub) => new EditarUsuarioUsecase(new EditarUsuarioRepository(hub))),
+    makeProvider(DeletarUsuarioUsecase, (hub) => new DeletarUsuarioUsecase(new DeletarUsuarioRepository(hub))),
   ],
 })
 export class AdminModule implements NestModule {
