@@ -23,6 +23,8 @@
     "migration:create": "npm run typeorm migration:create src/@infra/database/migrations/migration-create.migration",
     "migration:run-dev": "npm run typeorm migration:run -- -d src/@infra/database/datasource",
     "migration:run": "npm run typeorm migration:run -- -d dist/@infra/database/datasource",
+    "admin:criar": "ts-node -r tsconfig-paths/register src/@infra/database/scripts/criarEmpresaAdmin.ts",
+    "admin:criar:prod": "NODE_PATH=dist node dist/@infra/database/scripts/criarEmpresaAdmin.js",
     "seed:run": "npm run typeorm-extension seed:run -- -d src/@infra/database/datasource"
   },
   "dependencies": {
