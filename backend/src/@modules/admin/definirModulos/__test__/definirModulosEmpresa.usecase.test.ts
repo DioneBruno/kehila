@@ -58,4 +58,27 @@ describe("DefinirModulosEmpresaUsecase", () => {
     expect(mocks.limparCache).toHaveBeenCalledWith("c1");
     expect(chamadas).toEqual(["definir", "limparCache"]);
   });
+
+  describe("validação dos módulos", () => {
+    const executar = (modulos: unknown) => {
+      const f = repoFake();
+      return { ...f, promise: new DefinirModulosEmpresaUsecase(f.repo).execute({ companyUuid: "c1", companyUuidLogada: "c2", modulos }) };
+    };
+
+    test.each([
+      [[], "Informe pelo menos um módulo"],
+      [undefined, "Informe pelo menos um módulo"],
+      [["foo"], "Módulo inválido: foo"],
+    ])("rejeita %j", async (modulos, mensagem) => {
+      const { promise, mocks } = executar(modulos);
+      await expect(promise).rejects.toThrow(mensagem);
+      expect(mocks.definir).not.toHaveBeenCalled();
+    });
+
+    test("remove duplicados antes de definir", async () => {
+      const { promise, mocks } = executar(["imoveis", "imoveis"]);
+      await expect(promise).resolves.toEqual(["imoveis"]);
+      expect(mocks.definir).toHaveBeenCalledWith("c1", ["imoveis"]);
+    });
+  });
 });
