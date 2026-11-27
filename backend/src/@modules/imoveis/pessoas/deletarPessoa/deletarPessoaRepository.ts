@@ -1,5 +1,6 @@
 import { ApiError } from "src/@modules/shared/apiError";
 import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { MSG_PESSOA_COM_CONTAS } from "../../contas/conta.entity";
 
 export const MSG_EXCLUIR_PESSOA_VINCULADA = "Não é possível excluir: a pessoa é proprietária de imóvel ou parte de contrato vigente";
 
@@ -28,6 +29,12 @@ export class DeletarPessoaRepository {
         [companyUuid, uuid],
       );
       if (vinculo) throw new ApiError(MSG_EXCLUIR_PESSOA_VINCULADA, 409);
+
+      const [conta] = await manager.query(
+        `SELECT 1 FROM imovel_contas WHERE deleted_at IS NULL AND company_uuid = $1 AND proprietario_uuid = $2 LIMIT 1`,
+        [companyUuid, uuid],
+      );
+      if (conta) throw new ApiError(MSG_PESSOA_COM_CONTAS, 409);
 
       await manager.query(
         `UPDATE imovel_pessoas SET deleted_at = now(), updated_at = now() WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`,

@@ -7,6 +7,7 @@ import { AlterarPessoaUsecase } from "../alterarPessoa/alterarPessoa.usecase";
 import { AlterarPessoaRepository } from "../alterarPessoa/alterarPessoaRepository";
 import { DeletarPessoaUsecase } from "../deletarPessoa/deletarPessoa.usecase";
 import { DeletarPessoaRepository } from "../deletarPessoa/deletarPessoaRepository";
+import { MSG_PESSOA_COM_CONTAS } from "../../contas/conta.entity";
 
 const companyUuid = "b0a10000-0000-4000-8000-000000000a01";
 const companyUuidB = "b0a10000-0000-4000-8000-000000000b01";
@@ -40,12 +41,14 @@ describe("Pessoas (PF/PJ) do módulo imóveis", () => {
   });
 
   afterAll(async () => {
+    await dataSource.query(`DELETE FROM imovel_contas WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_pessoas WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM auth_companies WHERE uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.destroy();
   });
 
   afterEach(async () => {
+    await dataSource.query(`DELETE FROM imovel_contas WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_pessoas WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
   });
 
@@ -176,5 +179,16 @@ describe("Pessoas (PF/PJ) do módulo imóveis", () => {
     ]);
     expect((await query.listarPessoas(companyUuid, { pagina: 1, porPagina: 1 })).data).toHaveLength(1);
     expect((await query.listarPessoas(companyUuid, { pagina: 1, porPagina: 1 })).total).toBe(2);
+  });
+  test("excluir pessoa proprietária de conta (sem imóvel) -> 409 MSG_PESSOA_COM_CONTAS", async () => {
+    const { uuid } = await incluir.execute({ companyUuid, tipo: "PF", documento: CPF, nome: "Dona", ehProprietario: true });
+    await dataSource.query(
+      `INSERT INTO imovel_contas (uuid, company_uuid, tipo, categoria, esfera, proprietario_uuid, vencimento, valor)
+       VALUES ('b0a10000-0000-4000-8000-0000000000c1', $1, 'guia', 'darf', 'federal', $2, '2026-12-10', 100)`,
+      [companyUuid, uuid],
+    );
+    await expect(deletar.execute({ companyUuid, uuid })).rejects.toMatchObject({ message: MSG_PESSOA_COM_CONTAS, statusCode: 409 });
+    await dataSource.query(`UPDATE imovel_contas SET deleted_at = now() WHERE uuid = 'b0a10000-0000-4000-8000-0000000000c1'`);
+    await deletar.execute({ companyUuid, uuid });
   });
 });

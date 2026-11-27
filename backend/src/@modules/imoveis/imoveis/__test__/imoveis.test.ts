@@ -11,6 +11,7 @@ import { AlterarImovelUsecase } from "../alterarImovel/alterarImovel.usecase";
 import { AlterarImovelRepository } from "../alterarImovel/alterarImovelRepository";
 import { DeletarImovelUsecase } from "../deletarImovel/deletarImovel.usecase";
 import { DeletarImovelRepository } from "../deletarImovel/deletarImovelRepository";
+import { MSG_IMOVEL_COM_CONTAS } from "../../contas/conta.entity";
 import { IncluirContratoUsecase } from "../../contratos/incluirContrato/incluirContrato.usecase";
 import { IncluirContratoRepository } from "../../contratos/incluirContrato/incluirContratoRepository";
 
@@ -73,6 +74,8 @@ describe("Imóveis do módulo imóveis", () => {
   });
 
   const limpar = async () => {
+    await dataSource.query(`DELETE FROM imovel_conta_anexos WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
+    await dataSource.query(`DELETE FROM imovel_contas WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_contrato_eventos WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_contratos WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     await dataSource.query(`DELETE FROM imovel_imoveis WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
@@ -267,5 +270,15 @@ describe("Imóveis do módulo imóveis", () => {
     await deletar.execute({ companyUuid, uuid });
     await deletarPessoa.execute({ companyUuid, uuid: donoA });
     expect(await dataSource.query(`SELECT 1 FROM imovel_pessoas WHERE uuid = $1 AND deleted_at IS NULL`, [donoA])).toHaveLength(0);
+  });
+  test("excluir imóvel com conta paga -> 409 MSG_IMOVEL_COM_CONTAS", async () => {
+    const { uuid } = await incluir.execute(base());
+    await dataSource.query(
+      `INSERT INTO imovel_contas (uuid, company_uuid, tipo, categoria, proprietario_uuid, imovel_uuid, vencimento, valor, pago_em, valor_pago)
+       VALUES ('b0a20000-0000-4000-8000-0000000000c1', $1, 'encargo', 'iptu', $2, $3, '2026-12-10', 100, '2026-12-01', 100)`,
+      [companyUuid, donoA, uuid],
+    );
+    await expect(deletar.execute({ companyUuid, uuid })).rejects.toMatchObject({ message: MSG_IMOVEL_COM_CONTAS, statusCode: 409 });
+    expect((await buscarLinha(uuid)).deleted_at).toBeNull();
   });
 });
