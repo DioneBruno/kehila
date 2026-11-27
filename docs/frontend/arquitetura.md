@@ -100,7 +100,7 @@ da aba vem de `layout.telaLogin.titulo`.
 | `/usuarios[/criar\|/:uuid]` | `usuarios*` | usuários |
 | `/membros[/criar\|/:uuid]` | `membros*` | membresia |
 | `/apriscos[/criar\|/:uuid\|/:uuid/lider]` | `apriscos*` | apriscos |
-| `/imoveis` (painel), `/imoveis/proprietarios`, `/imoveis/inquilinos`, `/imoveis/pessoas/…`, `/imoveis/imoveis/…`, `/imoveis/contratos/…` | `imoveis.*` | [imóveis](modulos/imoveis.md) |
+| `/imoveis` (painel), `/imoveis/proprietarios`, `/imoveis/inquilinos`, `/imoveis/pessoas/…`, `/imoveis/imoveis/…`, `/imoveis/contratos/…`, `/imoveis/agenda`, `/imoveis/contas/…` | `imoveis.*` | [imóveis](modulos/imoveis.md) |
 | `/notificacao` | `notificacao` | gateways e teste de envio |
 | `/publico/eventos/:eventoUuid` | `eventos.publico` | página pública de compra (BlankLayout) |
 

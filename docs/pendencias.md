@@ -78,6 +78,21 @@ Lacunas conhecidas do módulo [imóveis](backend/modulos/imoveis.md) (não são 
 - Encerramento/rescisão não valida a data do evento contra o `inicio` do contrato.
 - Sem testes HTTP dos controllers de `http/imoveis` (só use cases, query e middleware).
 
+## Imóveis — contas
+
+Lacunas conhecidas das [contas do imóvel](backend/modulos/imoveis.md#contas-do-imóvel):
+
+- Arquivo órfão no bucket: remover um anexo só faz soft delete do registro (o `StorageInterface` não tem
+  delete), e se a gravação do registro falhar depois do upload o arquivo também fica no bucket.
+- Sem exclusão em lote de parcelas: cada parcela é excluída (admin) uma a uma.
+- Conta de contrato antigo usa o proprietário **atual** do imóvel (o contrato não guarda o dono); em
+  imóvel vendido o ajuste é manual.
+- O filtro `contratoUuid` da tela Contas (vindo de "Ver todas") não tem chip visível.
+- `<input type="month">` da competência degrada para texto no Firefox desktop.
+- A agenda não tem guarda contra resposta fora de ordem (filtros trocados rápido podem mostrar o
+  resultado antigo).
+- Sem testes HTTP além de `contas.controller.test.ts` (os demais controllers de `http/imoveis` seguem sem).
+
 ## Admin (empresas)
 
 - Domínio: unicidade e "último domínio ativo" são validados na aplicação, sem índice único no banco
