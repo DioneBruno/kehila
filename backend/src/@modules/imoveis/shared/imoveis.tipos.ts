@@ -24,3 +24,24 @@ export const CONTRATO_STATUS: ContratoStatus[] = ["vigente", "encerrado", "resci
 
 export type ContratoEventoTipo = "renovacao" | "aditivo" | "encerramento" | "rescisao";
 export const CONTRATO_EVENTO_TIPOS: ContratoEventoTipo[] = ["renovacao", "aditivo", "encerramento", "rescisao"];
+
+export type ContaTipo = "encargo" | "despesa" | "guia";
+export const CONTA_TIPOS: ContaTipo[] = ["encargo", "despesa", "guia"];
+
+export type ContaEsfera = "municipal" | "estadual" | "federal";
+export const CONTA_ESFERAS: ContaEsfera[] = ["municipal", "estadual", "federal"];
+
+export type ContaResponsavel = "proprietario" | "inquilino";
+export const CONTA_RESPONSAVEIS: ContaResponsavel[] = ["proprietario", "inquilino"];
+
+export type ContaSituacao = "a_pagar" | "vencida" | "paga";
+export const CONTA_SITUACOES: ContaSituacao[] = ["a_pagar", "vencida", "paga"];
+
+export type AnexoTipo = "documento" | "comprovante";
+export const ANEXO_TIPOS: AnexoTipo[] = ["documento", "comprovante"];
+
+export const CATEGORIAS_POR_TIPO: Record<ContaTipo, string[]> = {
+  encargo: ["iptu", "taxa_lixo", "taxa_municipal", "condominio", "agua", "energia", "gas", "seguro", "outros"],
+  despesa: ["manutencao", "conservacao", "reforma", "limpeza", "servico", "outros"],
+  guia: ["carne_leao", "darf", "das", "gps", "iss", "itbi", "itcmd", "outros"],
+};
