@@ -8,6 +8,9 @@ import { PessoasController } from "./pessoas.controller";
 import { ImoveisController } from "./imoveis.controller";
 import { ContratosController } from "./contratos.controller";
 import { PainelController } from "./painel.controller";
+import { ContasController } from "./contas.controller";
+
+import { ConnectionStorageAwsS3 } from "src/@infra/storage/connectionStorage.awsS3";
 
 import { ImoveisQuery } from "src/@modules/imoveis/imoveis.query";
 
@@ -38,6 +41,22 @@ import { AlterarContratoRepository } from "src/@modules/imoveis/contratos/altera
 import { RegistrarEventoContratoUsecase } from "src/@modules/imoveis/contratos/registrarEventoContrato/registrarEventoContrato.usecase";
 import { RegistrarEventoContratoRepository } from "src/@modules/imoveis/contratos/registrarEventoContrato/registrarEventoContratoRepository";
 
+import { IncluirContaUsecase } from "src/@modules/imoveis/contas/incluirConta/incluirConta.usecase";
+import { IncluirContaRepository } from "src/@modules/imoveis/contas/incluirConta/incluirContaRepository";
+import { GerarParcelasUsecase } from "src/@modules/imoveis/contas/gerarParcelas/gerarParcelas.usecase";
+import { AlterarContaUsecase } from "src/@modules/imoveis/contas/alterarConta/alterarConta.usecase";
+import { AlterarContaRepository } from "src/@modules/imoveis/contas/alterarConta/alterarContaRepository";
+import { DeletarContaUsecase } from "src/@modules/imoveis/contas/deletarConta/deletarConta.usecase";
+import { DeletarContaRepository } from "src/@modules/imoveis/contas/deletarConta/deletarContaRepository";
+import { PagamentoContaUsecase } from "src/@modules/imoveis/contas/pagamentoConta/pagamentoConta.usecase";
+import { PagamentoContaRepository } from "src/@modules/imoveis/contas/pagamentoConta/pagamentoContaRepository";
+import {
+  AnexosContaRepository,
+  EnviarAnexoContaUsecase,
+  RemoverAnexoContaUsecase,
+  UrlAnexoContaUsecase,
+} from "src/@modules/imoveis/contas/anexos/anexosConta";
+
 function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: ConnectionHub) => T) {
   return {
     provide: token,
@@ -47,7 +66,7 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
 }
 
 @Module({
-  controllers: [PessoasController, ImoveisController, ContratosController, PainelController],
+  controllers: [PessoasController, ImoveisController, ContratosController, PainelController, ContasController],
   providers: [
     makeProvider(ImoveisQuery, (hub) => new ImoveisQuery(hub)),
     makeProvider(IncluirPessoaUsecase, (hub) => new IncluirPessoaUsecase(new IncluirPessoaRepository(hub))),
@@ -59,12 +78,20 @@ function makeProvider<T>(token: new (...args: any[]) => T, factory: (hub: Connec
     makeProvider(IncluirContratoUsecase, (hub) => new IncluirContratoUsecase(new IncluirContratoRepository(hub))),
     makeProvider(AlterarContratoUsecase, (hub) => new AlterarContratoUsecase(new AlterarContratoRepository(hub))),
     makeProvider(RegistrarEventoContratoUsecase, (hub) => new RegistrarEventoContratoUsecase(new RegistrarEventoContratoRepository(hub))),
+    makeProvider(IncluirContaUsecase, (hub) => new IncluirContaUsecase(new IncluirContaRepository(hub))),
+    makeProvider(GerarParcelasUsecase, (hub) => new GerarParcelasUsecase(new IncluirContaRepository(hub))),
+    makeProvider(AlterarContaUsecase, (hub) => new AlterarContaUsecase(new AlterarContaRepository(hub))),
+    makeProvider(DeletarContaUsecase, (hub) => new DeletarContaUsecase(new DeletarContaRepository(hub))),
+    makeProvider(PagamentoContaUsecase, (hub) => new PagamentoContaUsecase(new PagamentoContaRepository(hub))),
+    makeProvider(EnviarAnexoContaUsecase, (hub) => new EnviarAnexoContaUsecase(new AnexosContaRepository(hub), new ConnectionStorageAwsS3())),
+    makeProvider(UrlAnexoContaUsecase, (hub) => new UrlAnexoContaUsecase(new AnexosContaRepository(hub), new ConnectionStorageAwsS3())),
+    makeProvider(RemoverAnexoContaUsecase, (hub) => new RemoverAnexoContaUsecase(new AnexosContaRepository(hub))),
   ],
 })
 export class ImoveisModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware)
-      .forRoutes(PessoasController, ImoveisController, ContratosController, PainelController);
+      .forRoutes(PessoasController, ImoveisController, ContratosController, PainelController, ContasController);
   }
 }

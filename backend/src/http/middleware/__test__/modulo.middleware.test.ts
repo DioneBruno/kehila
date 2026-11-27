@@ -21,6 +21,7 @@ import { PessoasController } from "src/http/imoveis/pessoas.controller";
 import { ImoveisController } from "src/http/imoveis/imoveis.controller";
 import { ContratosController } from "src/http/imoveis/contratos.controller";
 import { PainelController } from "src/http/imoveis/painel.controller";
+import { ContasController } from "src/http/imoveis/contas.controller";
 import { JwtAuthMiddleware } from "src/http/middleware/jwtAuth.middleware";
 import { AdminMiddleware, InternoMiddleware } from "src/http/middleware/perfil.middleware";
 import { AdminModule } from "src/http/admin/admin.module";
@@ -170,11 +171,11 @@ describe("matriz de rotas", () => {
     for (const a of configurar(modulo)) expect(a.middlewares).not.toContain(ModuloIgrejaMiddleware);
   });
 
-  test("ImoveisModule aplica JwtAuth, Interno e ModuloImoveis, nessa ordem, nos quatro controllers", () => {
+  test("ImoveisModule aplica JwtAuth, Interno e ModuloImoveis, nessa ordem, nos cinco controllers", () => {
     const aplicados = configurar(ImoveisModule);
     expect(aplicados).toHaveLength(1);
     expect(aplicados[0].middlewares).toEqual([JwtAuthMiddleware, InternoMiddleware, ModuloImoveisMiddleware]);
-    expect(aplicados[0].rotas).toEqual([PessoasController, ImoveisController, ContratosController, PainelController]);
+    expect(aplicados[0].rotas).toEqual([PessoasController, ImoveisController, ContratosController, PainelController, ContasController]);
   });
 
   test("AdminModule aplica JwtAuth, Admin e ModuloAdmin, nessa ordem, no AdminEmpresaController", () => {
