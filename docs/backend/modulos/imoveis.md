@@ -152,7 +152,7 @@ Resposta: `{ success: true, data, meta? }`. Listas: `pagina` (1-based, padrão 1
 | `GET /imoveis/painel` | `ImoveisQuery.painel` | ver abaixo |
 | `/imoveis/contas/...` | `ContasController` | 12 rotas, ver [Contas do imóvel](#contas-do-imóvel) |
 
-Controllers montam o input **campo a campo** (nunca `...body`); `company_uuid` vem do token.
+Controllers montam o input **campo a campo** (nunca `...body`); `company_uuid` vem do token. Exceção: o `ContasController` espalha o corpo primeiro (`...body`) e coloca `companyUuid`, `uuid` e `hoje` por último, para que o cliente nunca os sobrescreva.
 
 ## Painel (`GET /imoveis/painel`)
 
@@ -263,7 +263,7 @@ Mesmos middlewares das demais (`/imoveis/...`). `agenda` e `parcelas` são decla
 | `GET /imoveis/contas` | filtros `tipo`, `categoria`, `proprietarioUuid`, `imovelUuid`, `contratoUuid`, `situacao` (`a_pagar/vencida/paga`), `responsavel`, `vencimentoDe`/`vencimentoAte`, `busca` (descrição, fornecedor, nº do documento); ordem por vencimento; `meta`: `total`, `totalValor` (soma de `valor` do filtro inteiro) e `totalPago` (soma de `valor_pago` das pagas) |
 | `GET /imoveis/contas/agenda` | só contas **não pagas**, em `vencidas` (`< hoje`), `proximos7` (`hoje..hoje+6`) e `proximos30` (`hoje+7..hoje+29`); cada grupo `{ total, soma, contas }` com as **50 primeiras** por vencimento (total e soma cobrem o grupo inteiro); filtros `proprietarioUuid`, `imovelUuid`, `tipo` |
 | `POST /imoveis/contas` | 201, inclui uma conta |
-| `POST /imoveis/contas/parcelas` | 201, gera N parcelas e devolve as contas criadas |
+| `POST /imoveis/contas/parcelas` | 201, gera N parcelas e devolve `{ uuids, grupoUuid }` |
 | `GET /imoveis/contas/:uuid` | detalhe com anexos, dados de imóvel/contrato/proprietário e as demais parcelas do grupo |
 | `PATCH /imoveis/contas/:uuid` | update parcial |
 | `DELETE /imoveis/contas/:uuid` | só admin |

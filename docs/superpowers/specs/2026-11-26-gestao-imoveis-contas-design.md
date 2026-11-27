@@ -178,7 +178,7 @@ de colunas.
 |---|---|
 | `GET /imoveis/contas` | lista com filtros `tipo`, `categoria`, `proprietarioUuid`, `imovelUuid`, `contratoUuid`, `situacao` (`a_pagar`/`vencida`/`paga`), `responsavel`, `vencimentoDe`/`vencimentoAte`, `busca` (descrição/fornecedor/nº do documento); ordem por vencimento; `meta` traz, para o filtro inteiro, `totalValor` (soma de `valor` de todas as linhas) e `totalPago` (soma de `valor_pago` das pagas) |
 | `POST /imoveis/contas` | inclui uma conta |
-| `POST /imoveis/contas/parcelas` | gera N parcelas; devolve as contas criadas |
+| `POST /imoveis/contas/parcelas` | gera N parcelas; devolve `{ uuids, grupoUuid }` |
 | `GET/PATCH/DELETE /imoveis/contas/:uuid` | detalhe (com anexos e dados de imóvel/contrato/proprietário), edição parcial, exclusão (admin) |
 | `POST/DELETE /imoveis/contas/:uuid/pagamento` | registra / desfaz pagamento |
 | `POST /imoveis/contas/:uuid/anexos` | multipart, campos `arquivo` e `tipo` |

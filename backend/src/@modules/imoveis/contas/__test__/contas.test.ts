@@ -13,6 +13,8 @@ import { DeletarContaRepository } from "../deletarConta/deletarContaRepository";
 import { DeletarContaUsecase } from "../deletarConta/deletarConta.usecase";
 import { PagamentoContaRepository } from "../pagamentoConta/pagamentoContaRepository";
 import { PagamentoContaUsecase } from "../pagamentoConta/pagamentoConta.usecase";
+import { AlterarImovelRepository } from "../../imoveis/alterarImovel/alterarImovelRepository";
+import { AlterarImovelUsecase } from "../../imoveis/alterarImovel/alterarImovel.usecase";
 import { DeletarImovelRepository } from "../../imoveis/deletarImovel/deletarImovelRepository";
 import { DeletarImovelUsecase } from "../../imoveis/deletarImovel/deletarImovel.usecase";
 import { GerarParcelasUsecase } from "../gerarParcelas/gerarParcelas.usecase";
@@ -29,6 +31,7 @@ let alterar: AlterarContaUsecase;
 let pagamento: PagamentoContaUsecase;
 let deletar: DeletarContaUsecase;
 let deletarImovel: DeletarImovelUsecase;
+let alterarImovel: AlterarImovelUsecase;
 let seq = 0;
 const uuid = (n: number) => `b0a80000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
@@ -104,6 +107,7 @@ describe("Incluir conta e gerar parcelas", () => {
     alterar = new AlterarContaUsecase(new AlterarContaRepository(connections));
     pagamento = new PagamentoContaUsecase(new PagamentoContaRepository(connections));
     deletar = new DeletarContaUsecase(new DeletarContaRepository(connections));
+    alterarImovel = new AlterarImovelUsecase(new AlterarImovelRepository(connections));
     deletarImovel = new DeletarImovelUsecase(new DeletarImovelRepository(connections));
   });
 
@@ -272,6 +276,26 @@ describe("Incluir conta e gerar parcelas", () => {
       const [row] = await contas();
       expect(row.imovel_uuid).toBe(im2);
       expect(row.proprietario_uuid).toBe(outroDono);
+    });
+
+    test("alterar outros campos não reescreve o proprietário gravado quando o imóvel mudou de dono", async () => {
+      const { id, dono, im } = await nova();
+      const novoDono = await pessoa(companyUuid, "Novo dono");
+      await alterarImovel.execute({ companyUuid, uuid: im, proprietarioUuid: novoDono });
+      await alterar.execute({ companyUuid, uuid: id, observacoes: "ajuste", imovelUuid: im });
+      const [row] = await contas();
+      expect(row.observacoes).toBe("ajuste");
+      expect(row.proprietario_uuid).toBe(dono);
+    });
+
+    test("trocar imovelUuid depois do imóvel mudar de dono re-deriva do novo imóvel", async () => {
+      const { id, im } = await nova();
+      const novoDono = await pessoa(companyUuid, "Novo dono");
+      await alterarImovel.execute({ companyUuid, uuid: im, proprietarioUuid: novoDono });
+      const im2 = await imovel(companyUuid, novoDono, "Casa 2");
+      await alterar.execute({ companyUuid, uuid: id, imovelUuid: im2 });
+      const [row] = await contas();
+      expect(row.proprietario_uuid).toBe(novoDono);
     });
 
     test("imovelUuid null com proprietarioUuid passa a ser conta sem imóvel", async () => {

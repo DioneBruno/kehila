@@ -8,7 +8,7 @@ export class AlterarContaRepository {
 
   /**
    * Numa transação: trava a conta (FOR UPDATE), entrega os dados atuais (camelCase) a `mesclar`, que devolve o resultado
-   * já validado; trava/valida os vínculos (contrato → imóvel → pessoa), re-deriva o proprietário e grava.
+   * já validado; trava/valida os vínculos (contrato → imóvel → pessoa), re-deriva o proprietário (só se o imóvel mudou) e grava.
    */
   async alterar(companyUuid: string, uuid: string, mesclar: (atual: Record<string, unknown>) => ContaDados): Promise<void> {
     await this.connections.database.transaction(async (manager) => {
@@ -37,7 +37,9 @@ export class AlterarContaRepository {
         documentoNumero: c.documento_numero,
         observacoes: c.observacoes,
       });
-      const { proprietarioUuid } = await resolverVinculosConta(manager, companyUuid, dados);
+      // Imóvel inalterado: o proprietário gravado fica (só re-deriva quando o imóvel muda).
+      const imovelInalterado = !!dados.imovelUuid && dados.imovelUuid === c.imovel_uuid;
+      const { proprietarioUuid } = await resolverVinculosConta(manager, companyUuid, dados, imovelInalterado ? c.proprietario_uuid : undefined);
 
       await manager.query(
         `UPDATE imovel_contas SET tipo = $3, categoria = $4, esfera = $5, descricao = $6, proprietario_uuid = $7, imovel_uuid = $8,

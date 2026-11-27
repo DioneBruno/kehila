@@ -19,6 +19,32 @@
     <q-card flat bordered class="q-mb-md">
       <q-card-section class="row q-col-gutter-sm">
         <div class="col-12 col-sm-6 col-md-3">
+          <q-input
+            v-model="filtro.busca"
+            dense
+            outlined
+            placeholder="Buscar conta..."
+            clearable
+            debounce="400"
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <q-select
+            v-model="filtro.responsavel"
+            label="Responsável"
+            dense
+            outlined
+            clearable
+            emit-value
+            map-options
+            :options="responsaveis"
+          />
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
           <q-select
             v-model="filtro.tipo"
             label="Tipo"
@@ -203,10 +229,11 @@
 import { useQuasar } from "quasar";
 import { computed, defineComponent, onMounted, reactive, toRefs, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import type { Conta, ContaSituacao, ContaTipo } from "src/@modules/imoveis/conta.http";
+import type { Conta, ContaResponsavel, ContaSituacao, ContaTipo } from "src/@modules/imoveis/conta.http";
 import { criarBusca } from "./contratoForm.vue";
 import {
   CATEGORIAS_POR_TIPO,
+  CONTA_RESPONSAVEIS,
   CONTA_SITUACOES,
   CONTA_TIPOS,
   ImoveisService,
@@ -267,6 +294,8 @@ export default defineComponent({
     // A agenda e as telas de imóvel/contrato linkam aqui com os filtros na query string.
     const q = $route.query;
     const filtro = reactive({
+      busca: texto(q.busca),
+      responsavel: texto(q.responsavel) as ContaResponsavel | null,
       tipo: texto(q.tipo) as ContaTipo | null,
       categoria: texto(q.categoria),
       situacao: texto(q.situacao) as ContaSituacao | null,
@@ -320,6 +349,8 @@ export default defineComponent({
     async function carregar() {
       data.carregando = true;
       const resultado = await $service.listarContas({
+        busca: filtro.busca?.trim() || undefined,
+        responsavel: filtro.responsavel || undefined,
         tipo: filtro.tipo || undefined,
         categoria: filtro.categoria || undefined,
         situacao: filtro.situacao || undefined,
@@ -376,6 +407,7 @@ export default defineComponent({
       filtro,
       colunas: COLUNAS,
       tipos: CONTA_TIPOS,
+      responsaveis: CONTA_RESPONSAVEIS.map((r) => ({ label: r.label, value: r.value })),
       situacoes: CONTA_SITUACOES.map((s) => ({ label: s.label, value: s.value })),
       categorias,
       proprietarios,

@@ -181,4 +181,27 @@ describe("ContasController: upload acima do limite (HTTP)", () => {
     expect(resp.body.message).toBe("O arquivo deve ter no máximo 10 MB");
     expect(enviar.execute).not.toHaveBeenCalled();
   });
+
+  test("nome de arquivo acentuado chega em UTF-8 ao use case", async () => {
+    const enviar = { execute: jest.fn().mockResolvedValue({ uuid: CONTA }) };
+    const modulo = await Test.createTestingModule({
+      controllers: [ContasController],
+      providers: [{ provide: ArquivoGrandeInterceptor, useValue: new ArquivoGrandeInterceptor() }],
+    })
+      .useMocker((token) => (token === EnviarAnexoContaUsecase ? enviar : {}))
+      .compile();
+    const app = modulo.createNestApplication();
+    app.useGlobalFilters(new GlobalErrorFilter());
+    app.use((r: any, _s: any, next: any) => {
+      r.companyUuid = EMPRESA;
+      next();
+    });
+    await app.init();
+    await request(app.getHttpServer())
+      .post(`/imoveis/contas/${CONTA}/anexos`)
+      .field("tipo", "documento")
+      .attach("arquivo", Buffer.from("x"), "conta de luz çãé.pdf");
+    await app.close();
+    expect(enviar.execute.mock.calls[0][0].nomeArquivo).toBe("conta de luz çãé.pdf");
+  });
 });

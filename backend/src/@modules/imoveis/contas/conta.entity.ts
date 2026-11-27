@@ -70,8 +70,9 @@ function validarDinheiro(valor: unknown, mensagem: string, permiteZero: boolean)
   if (typeof valor !== "string" && typeof valor !== "number") throw new ApiError(mensagem);
   if (typeof valor === "string" && !/^\d+(\.\d+)?$/.test(valor.trim())) throw new ApiError(mensagem);
   const numero = Number(valor);
-  if (!Number.isFinite(numero) || numero >= 1e10 || numero < 0) throw new ApiError(mensagem);
+  if (!Number.isFinite(numero) || numero < 0) throw new ApiError(mensagem);
   const arredondado = Math.round(numero * 100) / 100;
+  if (arredondado >= 1e10) throw new ApiError(mensagem);
   if (!permiteZero && arredondado <= 0) throw new ApiError(mensagem);
   return arredondado;
 }

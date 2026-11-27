@@ -91,6 +91,14 @@ Lacunas conhecidas das [contas do imóvel](backend/modulos/imoveis.md#contas-do-
 - `<input type="month">` da competência degrada para texto no Firefox desktop.
 - A agenda não tem guarda contra resposta fora de ordem (filtros trocados rápido podem mostrar o
   resultado antigo).
+- Sem teste de corrida entre incluir conta sem imóvel e excluir a pessoa (proprietário).
+- O upload de anexo pode terminar logo depois de `DeletarConta` (`contaExiste` não trava); inofensivo, a
+  conta já está oculta.
+- `ContasDoVinculo` lista as 20 contas mais antigas por vencimento, não as próximas a vencer.
+- O "hoje" do frontend é o do navegador, e o do servidor tem o fuso do servidor (diferença perto da
+  meia-noite).
+- Os joins de leitura em `listarContas` não filtram `company_uuid` nas tabelas unidas (as escritas
+  garantem o tenant).
 - Sem testes HTTP além de `contas.controller.test.ts` (os demais controllers de `http/imoveis` seguem sem).
 
 ## Admin (empresas)

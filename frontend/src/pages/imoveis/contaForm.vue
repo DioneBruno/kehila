@@ -238,6 +238,8 @@
         label="Competência"
         :type="tipoMes"
         hint="Mês de referência (o da primeira parcela, se parcelada)"
+        :rules="[(v) => !v || /^\d{4}-\d{2}$/.test(v) || 'Use AAAA-MM']"
+        lazy-rules
         filled
         stack-label
         clearable

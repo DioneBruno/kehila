@@ -234,7 +234,7 @@ export class ContasController {
   }
 
   @Post(":uuid/anexos")
-  @UseInterceptors(ArquivoGrandeInterceptor, FileInterceptor("arquivo", { limits: { fileSize: ANEXO_TAMANHO_MAXIMO + 1 } }))
+  @UseInterceptors(ArquivoGrandeInterceptor, FileInterceptor("arquivo", { limits: { fileSize: ANEXO_TAMANHO_MAXIMO + 1 }, defParamCharset: "utf8" }))
   async enviarAnexo(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @UploadedFile() arquivo: any, @Res() res: Response) {
     const data = await this.enviarAnexoContaUsecase.execute({
       tipo: body?.tipo,

@@ -12,9 +12,15 @@ import {
 /**
  * Trava (FOR UPDATE, nesta ordem: contrato, imóvel, proprietário) e valida os vínculos da conta.
  * Com imóvel, o proprietário é o dono do imóvel; sem imóvel, exige a pessoa informada com eh_proprietario.
- * Deve rodar dentro de transação.
+ * Se `proprietarioGravado` vier, o imóvel não mudou: mantém esse proprietário (histórico não é reescrito), ainda travando
+ * contrato → imóvel → pessoa gravada. Deve rodar dentro de transação.
  */
-export async function resolverVinculosConta(manager: Consultavel, companyUuid: string, d: ContaDados): Promise<{ proprietarioUuid: string }> {
+export async function resolverVinculosConta(
+  manager: Consultavel,
+  companyUuid: string,
+  d: ContaDados,
+  proprietarioGravado?: string,
+): Promise<{ proprietarioUuid: string }> {
   if (d.contratoUuid) {
     const [contrato] = await manager.query(
       `SELECT imovel_uuid FROM imovel_contratos WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2 FOR UPDATE`,
@@ -30,11 +36,12 @@ export async function resolverVinculosConta(manager: Consultavel, companyUuid: s
       [companyUuid, d.imovelUuid],
     );
     if (!imovel) throw new ApiError(MSG_IMOVEL_NAO_ENCONTRADO, 404);
+    const proprietarioUuid = proprietarioGravado ?? imovel.proprietario_uuid;
     await manager.query(`SELECT uuid FROM imovel_pessoas WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2 FOR UPDATE`, [
       companyUuid,
-      imovel.proprietario_uuid,
+      proprietarioUuid,
     ]);
-    return { proprietarioUuid: imovel.proprietario_uuid };
+    return { proprietarioUuid };
   }
 
   if (!d.proprietarioUuid) throw new ApiError(MSG_INFORME_PROPRIETARIO);

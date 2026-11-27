@@ -94,6 +94,9 @@ describe("validarDadosConta", () => {
   it("rejeita valor acima do limite", () => {
     expect(erro(() => validarDadosConta({ ...base, valor: 1e10 })).message).toBe(MSG_VALOR_INVALIDO);
   });
+  it("rejeita valor que arredonda para 1e10", () => {
+    expect(erro(() => validarDadosConta({ ...base, valor: 9999999999.996 })).message).toBe(MSG_VALOR_INVALIDO);
+  });
   it("aceita valor '180.5' e arredonda para 180.5", () => {
     expect(validarDadosConta({ ...base, valor: "180.5" }).valor).toBe(180.5);
     expect(validarDadosConta({ ...base, valor: 10.126 }).valor).toBe(10.13);
