@@ -1,5 +1,10 @@
 import { ConnectionHub } from "../shared/connections/connectionHub";
 import {
+  AnexoTipo,
+  ContaEsfera,
+  ContaResponsavel,
+  ContaSituacao,
+  ContaTipo,
   ContratoEventoTipo,
   ContratoStatus,
   GarantiaTipo,
@@ -252,7 +257,106 @@ export type PainelImoveis = {
   vence61a90: ContratoResumo[];
   reajustesMes: ContratoResumo[];
   imoveisLivres: ImovelLivreResumo[];
+  contasVencidas: number;
 };
+
+export type ContaItem = {
+  uuid: string;
+  tipo: ContaTipo;
+  categoria: string;
+  esfera: ContaEsfera | null;
+  descricao: string | null;
+  proprietarioUuid: string;
+  proprietarioNome: string;
+  imovelUuid: string | null;
+  imovelIdentificacao: string | null;
+  contratoUuid: string | null;
+  contratoNumero: string | null;
+  inquilinoNome: string | null;
+  responsavel: ContaResponsavel;
+  competencia: string | null;
+  vencimento: string;
+  valor: number;
+  pagoEm: string | null;
+  valorPago: number | null;
+  fornecedor: string | null;
+  documentoNumero: string | null;
+  grupoUuid: string | null;
+  parcelaNumero: number | null;
+  parcelaTotal: number | null;
+  observacoes: string | null;
+  situacao: ContaSituacao;
+  createdAt: Date;
+};
+
+export type ContaAnexoItem = {
+  uuid: string;
+  tipo: AnexoTipo;
+  nomeArquivo: string;
+  contentType: string;
+  tamanho: number;
+  createdAt: Date;
+};
+
+export type ListarContasFiltro = {
+  tipo?: ContaTipo;
+  categoria?: string;
+  proprietarioUuid?: string;
+  imovelUuid?: string;
+  contratoUuid?: string;
+  situacao?: ContaSituacao;
+  responsavel?: ContaResponsavel;
+  vencimentoDe?: string;
+  vencimentoAte?: string;
+  busca?: string;
+  pagina: number;
+  porPagina: number;
+};
+
+export type GrupoAgenda = { total: number; soma: number; contas: ContaItem[] };
+export type AgendaContas = { vencidas: GrupoAgenda; proximos7: GrupoAgenda; proximos30: GrupoAgenda };
+
+/** `hoje` é o texto do parâmetro SQL com a data de hoje (ex.: "$2"); a situação usa ele, nunca now(). */
+const situacaoSql = (hoje: string) =>
+  `(CASE WHEN ct.pago_em IS NOT NULL THEN 'paga' WHEN ct.vencimento < ${hoje}::date THEN 'vencida' ELSE 'a_pagar' END)`;
+
+const colunasConta = (hoje: string) => `
+        ct.uuid,
+        ct.tipo,
+        ct.categoria,
+        ct.esfera,
+        ct.descricao,
+        ct.proprietario_uuid AS "proprietarioUuid",
+        prop.nome AS "proprietarioNome",
+        ct.imovel_uuid AS "imovelUuid",
+        i.identificacao AS "imovelIdentificacao",
+        ct.contrato_uuid AS "contratoUuid",
+        c.numero AS "contratoNumero",
+        inq.nome AS "inquilinoNome",
+        ct.responsavel,
+        TO_CHAR(ct.competencia, 'YYYY-MM-DD') AS competencia,
+        TO_CHAR(ct.vencimento, 'YYYY-MM-DD') AS vencimento,
+        ct.valor::float8 AS valor,
+        TO_CHAR(ct.pago_em, 'YYYY-MM-DD') AS "pagoEm",
+        ct.valor_pago::float8 AS "valorPago",
+        ct.fornecedor,
+        ct.documento_numero AS "documentoNumero",
+        ct.grupo_uuid AS "grupoUuid",
+        ct.parcela_numero AS "parcelaNumero",
+        ct.parcela_total AS "parcelaTotal",
+        ct.observacoes,
+        ${situacaoSql(hoje)} AS situacao,
+        ct.created_at AS "createdAt"
+`;
+
+// Joins sem filtro de deleted_at: a conta continua mostrando os nomes mesmo se a pessoa/imóvel/contrato for excluído depois.
+const FROM_CONTA = `
+  FROM imovel_contas ct
+  JOIN imovel_pessoas prop ON prop.uuid = ct.proprietario_uuid
+  LEFT JOIN imovel_imoveis i ON i.uuid = ct.imovel_uuid
+  LEFT JOIN imovel_contratos c ON c.uuid = ct.contrato_uuid
+  LEFT JOIN imovel_pessoas inq ON inq.uuid = c.inquilino_uuid
+`;
 
 export class ImoveisQuery {
   constructor(readonly connections: ConnectionHub) {}
@@ -456,6 +560,137 @@ export class ImoveisQuery {
         [companyUuid],
       ),
     ]);
-    return { vencidos, vence0a30, vence31a60, vence61a90, reajustesMes, imoveisLivres };
+    const [{ total: contasVencidas }] = await this.connections.database.query(
+      `SELECT COUNT(*)::int AS total FROM imovel_contas
+       WHERE deleted_at IS NULL AND company_uuid = $1 AND pago_em IS NULL AND vencimento < $2::date`,
+      [companyUuid, hoje],
+    );
+    return { vencidos, vence0a30, vence31a60, vence61a90, reajustesMes, imoveisLivres, contasVencidas };
+  }
+
+  async listarContas(
+    companyUuid: string,
+    filtro: ListarContasFiltro,
+    hoje: string,
+  ): Promise<{ data: ContaItem[]; total: number; totalValor: number; totalPago: number }> {
+    const valores: unknown[] = [companyUuid, hoje];
+    // `$2::date IS NOT NULL` mantém o parâmetro `hoje` referenciado também na contagem (o Postgres exige todos os parâmetros usados).
+    let where = `ct.deleted_at IS NULL AND ct.company_uuid = $1 AND $2::date IS NOT NULL`;
+
+    const igual: [string | undefined, string][] = [
+      [filtro.tipo, "ct.tipo"],
+      [filtro.categoria, "ct.categoria"],
+      [filtro.proprietarioUuid, "ct.proprietario_uuid"],
+      [filtro.imovelUuid, "ct.imovel_uuid"],
+      [filtro.contratoUuid, "ct.contrato_uuid"],
+      [filtro.responsavel, "ct.responsavel"],
+    ];
+    for (const [valor, coluna] of igual) {
+      if (!valor) continue;
+      valores.push(valor);
+      where += ` AND ${coluna} = $${valores.length}`;
+    }
+    if (filtro.situacao) {
+      valores.push(filtro.situacao);
+      where += ` AND ${situacaoSql("$2")} = $${valores.length}`;
+    }
+    if (filtro.vencimentoDe) {
+      valores.push(filtro.vencimentoDe);
+      where += ` AND ct.vencimento >= $${valores.length}::date`;
+    }
+    if (filtro.vencimentoAte) {
+      valores.push(filtro.vencimentoAte);
+      where += ` AND ct.vencimento <= $${valores.length}::date`;
+    }
+    const busca = filtro.busca?.trim();
+    if (busca) {
+      valores.push(`%${busca.replace(/[\\%_]/g, "\\$&")}%`);
+      const n = `$${valores.length}`;
+      where += ` AND (ct.descricao ILIKE ${n} OR ct.fornecedor ILIKE ${n} OR ct.documento_numero ILIKE ${n})`;
+    }
+
+    const [meta] = await this.connections.database.query(
+      `SELECT COUNT(*)::int AS total, COALESCE(SUM(ct.valor), 0)::float8 AS "totalValor", COALESCE(SUM(ct.valor_pago), 0)::float8 AS "totalPago"
+       ${FROM_CONTA} WHERE ${where}`,
+      valores,
+    );
+
+    const porPagina = Math.max(1, filtro.porPagina);
+    const offset = (Math.max(1, filtro.pagina) - 1) * porPagina;
+    const data: ContaItem[] = await this.connections.database.query(
+      `SELECT ${colunasConta("$2")} ${FROM_CONTA} WHERE ${where}
+       ORDER BY ct.vencimento ASC, ct.created_at ASC, ct.uuid ASC LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+      [...valores, porPagina, offset],
+    );
+    return { data, total: meta.total, totalValor: meta.totalValor, totalPago: meta.totalPago };
+  }
+
+  async buscarConta(
+    companyUuid: string,
+    uuid: string,
+    hoje: string,
+  ): Promise<
+    (ContaItem & { anexos: ContaAnexoItem[]; parcelas: { uuid: string; parcelaNumero: number; vencimento: string; situacao: ContaSituacao }[] }) | null
+  > {
+    const [conta]: ContaItem[] = await this.connections.database.query(
+      `SELECT ${colunasConta("$3")} ${FROM_CONTA} WHERE ct.deleted_at IS NULL AND ct.company_uuid = $1 AND ct.uuid = $2`,
+      [companyUuid, uuid, hoje],
+    );
+    if (!conta) return null;
+    const anexos: ContaAnexoItem[] = await this.connections.database.query(
+      `SELECT uuid, tipo, nome_arquivo AS "nomeArquivo", content_type AS "contentType", tamanho, created_at AS "createdAt"
+       FROM imovel_conta_anexos
+       WHERE deleted_at IS NULL AND company_uuid = $1 AND conta_uuid = $2
+       ORDER BY created_at ASC, uuid ASC`,
+      [companyUuid, uuid],
+    );
+    const parcelas = conta.grupoUuid
+      ? await this.connections.database.query(
+          `SELECT ct.uuid, ct.parcela_numero AS "parcelaNumero", TO_CHAR(ct.vencimento, 'YYYY-MM-DD') AS vencimento, ${situacaoSql("$4")} AS situacao
+           FROM imovel_contas ct
+           WHERE ct.deleted_at IS NULL AND ct.company_uuid = $1 AND ct.grupo_uuid = $2 AND ct.uuid <> $3
+           ORDER BY ct.parcela_numero ASC, ct.uuid ASC`,
+          [companyUuid, conta.grupoUuid, uuid, hoje],
+        )
+      : [];
+    return { ...conta, anexos, parcelas };
+  }
+
+  /** Contas não pagas em três faixas que não se sobrepõem: vencidas, hoje..hoje+6 e hoje+7..hoje+29. */
+  async agendaContas(
+    companyUuid: string,
+    hoje: string,
+    filtro: { proprietarioUuid?: string; imovelUuid?: string; tipo?: ContaTipo },
+  ): Promise<AgendaContas> {
+    const valores: unknown[] = [companyUuid, hoje];
+    let base = `ct.deleted_at IS NULL AND ct.company_uuid = $1 AND ct.pago_em IS NULL`;
+    const igual: [string | undefined, string][] = [
+      [filtro.proprietarioUuid, "ct.proprietario_uuid"],
+      [filtro.imovelUuid, "ct.imovel_uuid"],
+      [filtro.tipo, "ct.tipo"],
+    ];
+    for (const [valor, coluna] of igual) {
+      if (!valor) continue;
+      valores.push(valor);
+      base += ` AND ${coluna} = $${valores.length}`;
+    }
+    const grupo = async (faixa: string): Promise<GrupoAgenda> => {
+      const where = `${base} AND ${faixa}`;
+      const [meta] = await this.connections.database.query(
+        `SELECT COUNT(*)::int AS total, COALESCE(SUM(ct.valor), 0)::float8 AS soma ${FROM_CONTA} WHERE ${where}`,
+        valores,
+      );
+      const contas: ContaItem[] = await this.connections.database.query(
+        `SELECT ${colunasConta("$2")} ${FROM_CONTA} WHERE ${where} ORDER BY ct.vencimento ASC, ct.created_at ASC, ct.uuid ASC LIMIT 50`,
+        valores,
+      );
+      return { total: meta.total, soma: meta.soma, contas };
+    };
+    const [vencidas, proximos7, proximos30] = await Promise.all([
+      grupo(`ct.vencimento < $2::date`),
+      grupo(`ct.vencimento >= $2::date AND ct.vencimento <= $2::date + 6`),
+      grupo(`ct.vencimento >= $2::date + 7 AND ct.vencimento <= $2::date + 29`),
+    ]);
+    return { vencidas, proximos7, proximos30 };
   }
 }

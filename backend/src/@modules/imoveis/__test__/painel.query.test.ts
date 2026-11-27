@@ -48,7 +48,7 @@ async function contrato(
 
 describe("Painel do módulo imóveis", () => {
   const limpar = async () => {
-    for (const tabela of ["imovel_contratos", "imovel_imoveis", "imovel_pessoas"]) {
+    for (const tabela of ["imovel_contas", "imovel_contratos", "imovel_imoveis", "imovel_pessoas"]) {
       await dataSource.query(`DELETE FROM ${tabela} WHERE company_uuid IN ($1, $2)`, [companyUuid, companyUuidB]);
     }
   };
@@ -152,6 +152,25 @@ describe("Painel do módulo imóveis", () => {
     await dataSource.query(`UPDATE imovel_contratos SET deleted_at = now() WHERE uuid = $1`, [c]);
 
     const painel = await query.painel(companyUuid, HOJE);
-    expect(painel).toEqual({ vencidos: [], vence0a30: [], vence31a60: [], vence61a90: [], reajustesMes: [], imoveisLivres: [] });
+    expect(painel).toEqual({ vencidos: [], vence0a30: [], vence31a60: [], vence61a90: [], reajustesMes: [], imoveisLivres: [], contasVencidas: 0 });
+  });
+
+  test("Painel conta contas vencidas da empresa", async () => {
+    const dono = await pessoa(companyUuid, "Dono");
+    const donoB = await pessoa(companyUuidB, "Dono B");
+    const ins = (company: string, proprietario: string, vencimento: string, pago: boolean, apagada = false) =>
+      dataSource.query(
+        `INSERT INTO imovel_contas (uuid, company_uuid, tipo, categoria, proprietario_uuid, vencimento, valor, pago_em, valor_pago, deleted_at)
+         VALUES ($1, $2, 'encargo', 'iptu', $3, $4, 100, $5, $6, $7)`,
+        [uuid(++seq), company, proprietario, vencimento, pago ? "2026-11-01" : null, pago ? 100 : null, apagada ? new Date() : null],
+      );
+    await ins(companyUuid, dono, "2026-11-23", false);
+    await ins(companyUuid, dono, "2026-01-01", false);
+    await ins(companyUuid, dono, "2026-11-24", false);
+    await ins(companyUuid, dono, "2026-11-01", true);
+    await ins(companyUuid, dono, "2026-11-01", false, true);
+    await ins(companyUuidB, donoB, "2026-11-01", false);
+    const painel = await query.painel(companyUuid, HOJE);
+    expect(painel.contasVencidas).toBe(2);
   });
 });
