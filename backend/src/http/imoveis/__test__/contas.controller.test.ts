@@ -1,4 +1,8 @@
-import { ContasController } from "../contas.controller";
+import { Test } from "@nestjs/testing";
+import request from "supertest";
+import { GlobalErrorFilter } from "../../shared/globalErrorFilter";
+import { ArquivoGrandeInterceptor, ContasController } from "../contas.controller";
+import { EnviarAnexoContaUsecase } from "src/@modules/imoveis/contas/anexos/anexosConta";
 
 const EMPRESA = "11111111-1111-4111-8111-111111111111";
 const OUTRA = "22222222-2222-4222-8222-222222222222";
@@ -119,5 +123,62 @@ describe("ContasController: filtros de listagem", () => {
   test("agenda com tipo inválido -> 400", async () => {
     const { ctrl, res } = montar();
     await expect(ctrl.agenda(req, "", "", "xx", res)).rejects.toMatchObject({ statusCode: 400 });
+  });
+});
+
+describe("ContasController: perfil e anexos", () => {
+  test("DELETE sem ser admin -> 403 e não chama o use case", async () => {
+    const { ctrl, res } = montar();
+    const deletar = jest.fn();
+    (ctrl as any).deletarContaUsecase = { execute: deletar };
+    await expect(ctrl.excluir({ companyUuid: EMPRESA, userPosition: "gerente" }, CONTA, res)).rejects.toMatchObject({ statusCode: 403 });
+    expect(deletar).not.toHaveBeenCalled();
+    await ctrl.excluir({ companyUuid: EMPRESA, userPosition: "admin" }, CONTA, res);
+    expect(deletar).toHaveBeenCalledWith({ companyUuid: EMPRESA, uuid: CONTA });
+  });
+
+  test("url e remover de anexo passam conta e anexo dos params", async () => {
+    const { ctrl, res } = montar();
+    const url = jest.fn().mockResolvedValue({ url: "u", nomeArquivo: "a" });
+    const remover = jest.fn();
+    (ctrl as any).urlAnexoContaUsecase = { execute: url };
+    (ctrl as any).removerAnexoContaUsecase = { execute: remover };
+    await ctrl.urlAnexo(req, CONTA, OUTRA, res);
+    await ctrl.removerAnexo(req, CONTA, OUTRA, res);
+    expect(url).toHaveBeenCalledWith({ companyUuid: EMPRESA, contaUuid: CONTA, anexoUuid: OUTRA });
+    expect(remover).toHaveBeenCalledWith({ companyUuid: EMPRESA, contaUuid: CONTA, anexoUuid: OUTRA });
+  });
+
+  test("pagina/porPagina infinitos caem no padrão", async () => {
+    const { ctrl, q, res } = montar();
+    await ctrl.listar(req, "" as any, "", "", "", "", "", "", "", "", "", "1e999", "Infinity", res);
+    expect(q.listarContas.mock.calls[0][1]).toMatchObject({ pagina: 1, porPagina: 20 });
+  });
+});
+
+describe("ContasController: upload acima do limite (HTTP)", () => {
+  test("11 MB -> 400 com MSG_ARQUIVO_GRANDE", async () => {
+    const enviar = { execute: jest.fn() };
+    const modulo = await Test.createTestingModule({
+      controllers: [ContasController],
+      providers: [{ provide: ArquivoGrandeInterceptor, useValue: new ArquivoGrandeInterceptor() }],
+    })
+      .useMocker((token) => (token === EnviarAnexoContaUsecase ? enviar : {}))
+      .compile();
+    const app = modulo.createNestApplication();
+    app.useGlobalFilters(new GlobalErrorFilter());
+    app.use((r: any, _s: any, next: any) => {
+      r.companyUuid = EMPRESA;
+      next();
+    });
+    await app.init();
+    const resp = await request(app.getHttpServer())
+      .post(`/imoveis/contas/${CONTA}/anexos`)
+      .field("tipo", "documento")
+      .attach("arquivo", Buffer.alloc(11 * 1024 * 1024, 1), "grande.pdf");
+    await app.close();
+    expect(resp.status).toBe(400);
+    expect(resp.body.message).toBe("O arquivo deve ter no máximo 10 MB");
+    expect(enviar.execute).not.toHaveBeenCalled();
   });
 });

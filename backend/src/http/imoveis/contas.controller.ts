@@ -1,6 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  CallHandler,
+  Controller,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  PayloadTooLargeException,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Request, Response } from "express";
+import { Observable, catchError, throwError } from "rxjs";
 import { ApiError } from "src/@modules/shared/apiError";
 import { ApiDate } from "src/@modules/shared/apiDate";
 import { ImoveisQuery } from "src/@modules/imoveis/imoveis.query";
@@ -14,8 +33,9 @@ import {
   ContaTipo,
 } from "src/@modules/imoveis/shared/imoveis.tipos";
 import { garantirUuid } from "src/@modules/imoveis/shared/garantirUuid";
-import { validarData } from "src/@modules/imoveis/contratos/contrato.entity";
+import { MSG_CONTRATO_NAO_ENCONTRADO, MSG_IMOVEL_NAO_ENCONTRADO, validarData } from "src/@modules/imoveis/contratos/contrato.entity";
 import {
+  MSG_ARQUIVO_GRANDE,
   MSG_CATEGORIA_INVALIDA,
   MSG_CONTA_NAO_ENCONTRADA,
   MSG_PROPRIETARIO_NAO_ENCONTRADO,
@@ -35,8 +55,6 @@ import {
 } from "src/@modules/imoveis/contas/anexos/anexosConta";
 import { exigirAdmin } from "../middleware/perfil.middleware";
 
-const MSG_IMOVEL_NAO_ENCONTRADO = "Imóvel não encontrado";
-const MSG_CONTRATO_NAO_ENCONTRADO = "Contrato não encontrado";
 const MSG_SITUACAO_INVALIDA = "Situação inválida";
 const MSG_VENCIMENTO_DE_INVALIDO = "Data inicial do vencimento inválida";
 const MSG_VENCIMENTO_ATE_INVALIDO = "Data final do vencimento inválida";
@@ -79,6 +97,21 @@ function quantidadeParcelas(valor: unknown): unknown {
   if (typeof valor === "string" && valor.trim() !== "" && Number.isFinite(Number(valor))) return Number(valor);
   return valor;
 }
+
+/** O multer corta o upload no limite (proteção de memória) e o Nest responde 413 em inglês; aqui vira o 400 padrão do módulo. */
+@Injectable()
+export class ArquivoGrandeInterceptor implements NestInterceptor {
+  intercept(_ctx: ExecutionContext, next: CallHandler): Observable<any> {
+    return next
+      .handle()
+      .pipe(catchError((erro) => throwError(() => (erro instanceof PayloadTooLargeException ? new ApiError(MSG_ARQUIVO_GRANDE) : erro))));
+  }
+}
+
+const numeroPositivo = (valor: unknown, padrao: number) => {
+  const n = Number(valor);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : padrao;
+};
 
 const hojeAtual = () => ApiDate.now("YYYY-MM-DD");
 
@@ -127,8 +160,8 @@ export class ContasController {
         vencimentoDe: dataOpcional(vencimentoDe, MSG_VENCIMENTO_DE_INVALIDO),
         vencimentoAte: dataOpcional(vencimentoAte, MSG_VENCIMENTO_ATE_INVALIDO),
         busca: typeof busca === "string" ? busca : undefined,
-        pagina: Number(pagina) > 0 ? Math.floor(Number(pagina)) : 1,
-        porPagina: Number(porPagina) > 0 ? Math.min(Math.floor(Number(porPagina)), 100) : 20,
+        pagina: numeroPositivo(pagina, 1),
+        porPagina: Math.min(numeroPositivo(porPagina, 20), 100),
       },
       hojeAtual(),
     );
@@ -201,7 +234,7 @@ export class ContasController {
   }
 
   @Post(":uuid/anexos")
-  @UseInterceptors(FileInterceptor("arquivo", { limits: { fileSize: ANEXO_TAMANHO_MAXIMO + 1 } }))
+  @UseInterceptors(ArquivoGrandeInterceptor, FileInterceptor("arquivo", { limits: { fileSize: ANEXO_TAMANHO_MAXIMO + 1 } }))
   async enviarAnexo(@Req() req: Request | any, @Param("uuid") uuid: string, @Body() body: any, @UploadedFile() arquivo: any, @Res() res: Response) {
     const data = await this.enviarAnexoContaUsecase.execute({
       tipo: body?.tipo,
