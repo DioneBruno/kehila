@@ -8,6 +8,26 @@
     </div>
 
     <div v-if="painel" class="row q-col-gutter-sm q-mb-md">
+      <div class="col-6 col-md-2">
+        <q-card
+          flat
+          bordered
+          v-ripple
+          class="cursor-pointer text-center"
+          :class="{ 'bg-red-1': painel.contasVencidas > 0 }"
+          @click="abrirAgenda"
+        >
+          <q-card-section class="q-pa-md">
+            <div
+              class="text-h4 text-weight-bold"
+              :class="painel.contasVencidas > 0 ? 'text-negative' : 'text-primary'"
+            >
+              {{ painel.contasVencidas }}
+            </div>
+            <div class="text-caption text-grey-7">Contas vencidas</div>
+          </q-card-section>
+        </q-card>
+      </div>
       <div v-for="c in cards" :key="c.chave" class="col-6 col-md-2">
         <q-card
           flat
@@ -57,6 +77,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
+import { useRouter } from "vue-router";
 import type { ContratoResumo, PainelImoveis } from "src/@modules/imoveis/painel.http";
 import { ImoveisService, formatarData, formatarMoeda, labelIndice } from "./imoveis.service";
 
@@ -90,6 +111,7 @@ const ORDEM: Chave[] = [
 export default defineComponent({
   name: "ImoveisPainel",
   setup() {
+    const $router = useRouter();
     const $service = new ImoveisService();
     const data = reactive({
       painel: null as PainelImoveis | null,
@@ -140,7 +162,11 @@ export default defineComponent({
       if (data.painel?.vencidos.length) data.selecionado = "vencidos";
     });
 
-    return { ...toRefs(data), cards, cardAtual, linhas };
+    function abrirAgenda() {
+      void $router.push({ name: "imoveis.agenda" });
+    }
+
+    return { ...toRefs(data), cards, cardAtual, linhas, abrirAgenda };
   },
 });
 </script>

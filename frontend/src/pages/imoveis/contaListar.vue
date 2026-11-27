@@ -272,6 +272,7 @@ export default defineComponent({
       situacao: texto(q.situacao) as ContaSituacao | null,
       proprietarioUuid: texto(q.proprietarioUuid),
       imovelUuid: texto(q.imovelUuid),
+      contratoUuid: texto(q.contratoUuid),
       vencimentoDe: texto(q.vencimentoDe),
       vencimentoAte: texto(q.vencimentoAte),
     });
@@ -324,6 +325,7 @@ export default defineComponent({
         situacao: filtro.situacao || undefined,
         proprietarioUuid: filtro.proprietarioUuid || undefined,
         imovelUuid: filtro.imovelUuid || undefined,
+        contratoUuid: filtro.contratoUuid || undefined,
         vencimentoDe: filtro.vencimentoDe || undefined,
         vencimentoAte: filtro.vencimentoAte || undefined,
         pagina: data.paginacao.page,

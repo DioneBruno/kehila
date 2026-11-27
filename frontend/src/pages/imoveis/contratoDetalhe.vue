@@ -154,6 +154,13 @@
       </div>
 
       <div class="col-12">
+        <contas-do-vinculo
+          :contrato-uuid="contrato.uuid"
+          :imovel-uuid-do-contrato="contrato.imovelUuid"
+        />
+      </div>
+
+      <div class="col-12">
         <q-card flat bordered>
           <q-card-section>
             <p class="text-subtitle1 text-weight-bold q-ma-none q-mb-sm">Histórico</p>
@@ -205,6 +212,7 @@ import type {
   ContratoEvento,
   ContratoEventoTipo,
 } from "src/@modules/imoveis/contrato.http";
+import ContasDoVinculo from "src/components/ContasDoVinculo.vue";
 import ContratoEventoDialog from "./contratoEventoDialog.vue";
 import ContratoForm, { contratoFormParaEdicao, novoContratoForm } from "./contratoForm.vue";
 import {
@@ -220,7 +228,7 @@ import {
 
 export default defineComponent({
   name: "ContratoDetalhe",
-  components: { ContratoForm, ContratoEventoDialog },
+  components: { ContratoForm, ContratoEventoDialog, ContasDoVinculo },
   setup() {
     const $route = useRoute();
     const $service = new ImoveisService();

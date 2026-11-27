@@ -155,6 +155,10 @@
           </q-card-section>
         </q-card>
       </div>
+
+      <div class="col-12">
+        <contas-do-vinculo :imovel-uuid="imovel.uuid" />
+      </div>
     </div>
   </q-page>
 </template>
@@ -164,6 +168,7 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } fr
 import TokenDecode from "src/@modules/auth/tokenDecode";
 import { useRoute } from "vue-router";
 import type { ImovelDetalhe } from "src/@modules/imoveis/imovel.http";
+import ContasDoVinculo from "src/components/ContasDoVinculo.vue";
 import ImovelForm, { imovelFormParaInput, novoImovelForm } from "./imovelForm.vue";
 import {
   ImoveisService,
@@ -176,7 +181,7 @@ import {
 
 export default defineComponent({
   name: "ImovelEditar",
-  components: { ImovelForm },
+  components: { ImovelForm, ContasDoVinculo },
   setup() {
     const $route = useRoute();
     const $service = new ImoveisService();

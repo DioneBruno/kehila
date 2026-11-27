@@ -24,6 +24,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { label: "Pagamentos", icon: "payments", route: "financeiro.pagamentos", modulo: "igreja" },
   { label: "IMÓVEIS", type: "section", modulo: "imoveis" },
   { label: "Painel", icon: "space_dashboard", route: "imoveis.painel", modulo: "imoveis" },
+  { label: "Agenda", icon: "event", route: "imoveis.agenda", modulo: "imoveis" },
   { label: "Proprietários", icon: "badge", route: "imoveis.proprietarios", modulo: "imoveis" },
   { label: "Imóveis", icon: "apartment", route: "imoveis.imoveis", modulo: "imoveis" },
   { label: "Contratos", icon: "description", route: "imoveis.contratos", modulo: "imoveis" },
