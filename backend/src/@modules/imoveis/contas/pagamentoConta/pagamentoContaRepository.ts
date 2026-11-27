@@ -20,7 +20,7 @@ export class PagamentoContaRepository {
       if (!c) throw new ApiError(MSG_CONTA_NAO_ENCONTRADA, 404);
       if (c.paga) throw new ApiError(MSG_CONTA_JA_PAGA, 409);
       const { pagoEm, valorPago } = calcular(c.valor);
-      await manager.query(`UPDATE imovel_contas SET pago_em = $3, valor_pago = $4, updated_at = now() WHERE company_uuid = $1 AND uuid = $2`, [
+      await manager.query(`UPDATE imovel_contas SET pago_em = $3, valor_pago = $4, updated_at = now() WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`, [
         companyUuid,
         uuid,
         pagoEm,
@@ -37,7 +37,7 @@ export class PagamentoContaRepository {
       );
       if (!c) throw new ApiError(MSG_CONTA_NAO_ENCONTRADA, 404);
       if (!c.paga) throw new ApiError(MSG_CONTA_NAO_PAGA, 409);
-      await manager.query(`UPDATE imovel_contas SET pago_em = NULL, valor_pago = NULL, updated_at = now() WHERE company_uuid = $1 AND uuid = $2`, [
+      await manager.query(`UPDATE imovel_contas SET pago_em = NULL, valor_pago = NULL, updated_at = now() WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`, [
         companyUuid,
         uuid,
       ]);

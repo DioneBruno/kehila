@@ -17,7 +17,7 @@ export class DeletarContaRepository {
         `UPDATE imovel_conta_anexos SET deleted_at = now() WHERE deleted_at IS NULL AND company_uuid = $1 AND conta_uuid = $2`,
         [companyUuid, uuid],
       );
-      await manager.query(`UPDATE imovel_contas SET deleted_at = now(), updated_at = now() WHERE company_uuid = $1 AND uuid = $2`, [
+      await manager.query(`UPDATE imovel_contas SET deleted_at = now(), updated_at = now() WHERE deleted_at IS NULL AND company_uuid = $1 AND uuid = $2`, [
         companyUuid,
         uuid,
       ]);
