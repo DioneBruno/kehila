@@ -394,7 +394,7 @@ export function contratoFormParaInclusao(form: ContratoFormModel): ContratoInput
 type Opcao = { value: string; label: string };
 
 /** Select com busca no servidor que mantém a opção já escolhida na lista. */
-function criarBusca(
+export function criarBusca(
   buscar: (texto: string) => Promise<Opcao[]>,
   atual: () => Opcao | null,
 ): {

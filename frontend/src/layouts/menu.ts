@@ -27,6 +27,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { label: "Proprietários", icon: "badge", route: "imoveis.proprietarios", modulo: "imoveis" },
   { label: "Imóveis", icon: "apartment", route: "imoveis.imoveis", modulo: "imoveis" },
   { label: "Contratos", icon: "description", route: "imoveis.contratos", modulo: "imoveis" },
+  { label: "Contas", icon: "receipt_long", route: "imoveis.contas", modulo: "imoveis" },
   { label: "Inquilinos", icon: "people", route: "imoveis.inquilinos", modulo: "imoveis" },
   { label: "ADMIN", type: "section", modulo: "admin" },
   { label: "Empresas", icon: "domain", route: "admin.empresas", modulo: "admin" },

@@ -169,6 +169,21 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/imoveis/contratoDetalhe.vue"),
       },
       {
+        path: "imoveis/contas",
+        name: "imoveis.contas",
+        component: () => import("pages/imoveis/contaListar.vue"),
+      },
+      {
+        path: "imoveis/contas/criar",
+        name: "imoveis.contas.criar",
+        component: () => import("pages/imoveis/contaIncluir.vue"),
+      },
+      {
+        path: "imoveis/contas/:uuid",
+        name: "imoveis.contas.detalhe",
+        component: () => import("pages/imoveis/contaEditar.vue"),
+      },
+      {
         path: "apriscos",
         name: "apriscos",
         component: () => import("pages/aprisco/apriscoListar.vue"),
