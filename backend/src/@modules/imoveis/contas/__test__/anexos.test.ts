@@ -1,4 +1,8 @@
-import { EnviarAnexoContaUsecase, RemoverAnexoContaUsecase, UrlAnexoContaUsecase, validarArquivoAnexo } from "../anexos/anexosConta";
+import dataSource from "src/@infra/database/datasource";
+import { ConnectionHub } from "src/@modules/shared/connections/connectionHub";
+import { IncluirContaRepository } from "../incluirConta/incluirContaRepository";
+import { IncluirContaUsecase } from "../incluirConta/incluirConta.usecase";
+import { AnexosContaRepository, EnviarAnexoContaUsecase, RemoverAnexoContaUsecase, UrlAnexoContaUsecase, validarArquivoAnexo } from "../anexos/anexosConta";
 import { MSG_ANEXO_NAO_ENCONTRADO, MSG_ARQUIVO_GRANDE, MSG_CONTA_NAO_ENCONTRADA, MSG_ENVIE_ARQUIVO, MSG_FORMATO_ANEXO, MSG_TIPO_ANEXO_INVALIDO } from "../conta.entity";
 
 const EMPRESA = "11111111-1111-4111-8111-111111111111";
@@ -85,6 +89,7 @@ describe("EnviarAnexoContaUsecase", () => {
     const m = montar();
     const grande = Buffer.concat([PDF, Buffer.alloc(10 * 1024 * 1024 + 1 - PDF.length)]);
     await expect(enviar(m, { buffer: grande })).rejects.toMatchObject({ message: MSG_ARQUIVO_GRANDE, statusCode: 400 });
+    expect(m.storage.upload).not.toHaveBeenCalled();
   });
 
   it("rejeita tipo de anexo inválido", async () => {
@@ -132,5 +137,103 @@ describe("RemoverAnexoContaUsecase", () => {
   });
   it("uuid de conta malformado -> 404 da conta", async () => {
     await expect(rem(montar(), { contaUuid: "x" })).rejects.toMatchObject({ message: MSG_CONTA_NAO_ENCONTRADA });
+  });
+});
+
+describe("AnexosContaRepository (banco real)", () => {
+  const empresa = "b0a80000-0000-4000-8000-0000000005a1";
+  const outraEmpresa = "b0a80000-0000-4000-8000-0000000005b1";
+  const pessoaUuid = "b0a80000-0000-4000-8000-0000000005c1";
+  let repo: AnexosContaRepository;
+  let incluir: IncluirContaUsecase;
+
+  const limpar = async () => {
+    for (const t of ["imovel_conta_anexos", "imovel_contas", "imovel_pessoas"]) {
+      await dataSource.query(`DELETE FROM ${t} WHERE company_uuid IN ($1, $2)`, [empresa, outraEmpresa]);
+    }
+  };
+  const novaConta = async (company = empresa) => {
+    const { uuid } = await incluir.execute({ companyUuid: company, hoje: "2026-11-24", tipo: "encargo", categoria: "iptu", vencimento: "2026-12-10", valor: 100, proprietarioUuid: pessoaUuid } as any);
+    return uuid;
+  };
+
+  beforeAll(async () => {
+    await dataSource.initialize();
+    for (const [id, tenant] of [
+      [empresa, "test-anexos-a"],
+      [outraEmpresa, "test-anexos-b"],
+    ]) {
+      await dataSource.query(`INSERT INTO auth_companies (uuid, tenant_id, name, cpf_cnpj) VALUES ($1, $2, 'Empresa Teste Anexos', '00000000000000') ON CONFLICT DO NOTHING`, [id, tenant]);
+    }
+    const hub = new ConnectionHub({ database: dataSource });
+    repo = new AnexosContaRepository(hub);
+    incluir = new IncluirContaUsecase(new IncluirContaRepository(hub));
+  });
+  beforeEach(async () => {
+    await limpar();
+    await dataSource.query(
+      `INSERT INTO imovel_pessoas (uuid, company_uuid, tipo, documento, nome, eh_proprietario) VALUES ($1, $2, 'PF', '29999999901', 'Dono', true)`,
+      [pessoaUuid, empresa],
+    );
+  });
+  afterAll(async () => {
+    await limpar();
+    await dataSource.query(`DELETE FROM auth_companies WHERE uuid IN ($1, $2)`, [empresa, outraEmpresa]);
+    await dataSource.destroy();
+  });
+
+  const registro = (contaUuid: string, over: Record<string, unknown> = {}) => ({
+    uuid: "b0a80000-0000-4000-8000-0000000005d1",
+    companyUuid: empresa,
+    contaUuid,
+    tipo: "documento" as const,
+    nomeArquivo: "a.pdf",
+    caminho: "empresas/x/a.pdf",
+    contentType: "application/pdf",
+    tamanho: 10,
+    ...over,
+  });
+
+  it("contaExiste respeita empresa", async () => {
+    const conta = await novaConta();
+    expect(await repo.contaExiste(empresa, conta)).toBe(true);
+    expect(await repo.contaExiste(outraEmpresa, conta)).toBe(false);
+  });
+
+  it("insere e busca; empresa ou conta erradas -> null", async () => {
+    const conta = await novaConta();
+    const outraConta = await novaConta();
+    const r = registro(conta);
+    await repo.inserir(r);
+    expect(await repo.buscar(empresa, conta, r.uuid)).toEqual({ caminho: r.caminho, nomeArquivo: "a.pdf" });
+    expect(await repo.buscar(outraEmpresa, conta, r.uuid)).toBeNull();
+    expect(await repo.buscar(empresa, outraConta, r.uuid)).toBeNull();
+  });
+
+  it("remover devolve true uma vez e false depois; buscar fica null", async () => {
+    const conta = await novaConta();
+    const r = registro(conta);
+    await repo.inserir(r);
+    expect(await repo.remover(outraEmpresa, conta, r.uuid)).toBe(false);
+    expect(await repo.remover(empresa, conta, r.uuid)).toBe(true);
+    expect(await repo.remover(empresa, conta, r.uuid)).toBe(false);
+    expect(await repo.buscar(empresa, conta, r.uuid)).toBeNull();
+  });
+
+  it("CHECK da tabela rejeita tipo inválido", async () => {
+    const conta = await novaConta();
+    await expect(repo.inserir(registro(conta, { tipo: "foto" }))).rejects.toThrow();
+  });
+
+  it("fluxo completo: enviar -> url -> remover -> url 404, com storage falso", async () => {
+    const conta = await novaConta();
+    const storage = { upload: jest.fn(async (p: string) => ({ path: p })), generatePresignerUrl: jest.fn(async (p: string) => `url-fake:${p}`), download: jest.fn() };
+    const { uuid } = await new EnviarAnexoContaUsecase(repo, storage as any).execute({ companyUuid: empresa, contaUuid: conta, tipo: "comprovante", buffer: PNG, nomeArquivo: "foto.png" });
+    const [row] = await dataSource.query(`SELECT * FROM imovel_conta_anexos WHERE uuid = $1`, [uuid]);
+    expect(row).toMatchObject({ company_uuid: empresa, conta_uuid: conta, tipo: "comprovante", nome_arquivo: "foto.png", content_type: "image/png", tamanho: PNG.length });
+    const url = new UrlAnexoContaUsecase(repo, storage as any);
+    expect(await url.execute({ companyUuid: empresa, contaUuid: conta, anexoUuid: uuid })).toEqual({ url: `url-fake:${row.caminho}`, nomeArquivo: "foto.png" });
+    await new RemoverAnexoContaUsecase(repo).execute({ companyUuid: empresa, contaUuid: conta, anexoUuid: uuid });
+    await expect(url.execute({ companyUuid: empresa, contaUuid: conta, anexoUuid: uuid })).rejects.toMatchObject({ statusCode: 404 });
   });
 });

@@ -72,14 +72,13 @@ export class AnexosContaRepository {
 
   /** Soft delete; devolve false se não havia anexo ativo nessa conta. */
   async remover(companyUuid: string, contaUuid: string, anexoUuid: string): Promise<boolean> {
-    const rows = await this.connectionHub.database!.query(
+    // UPDATE ... RETURNING no TypeORM/pg devolve [linhas, quantidade]
+    const [linhas] = await this.connectionHub.database!.query(
       `UPDATE imovel_conta_anexos SET deleted_at = now()
        WHERE company_uuid = $1 AND conta_uuid = $2 AND uuid = $3 AND deleted_at IS NULL RETURNING uuid`,
       [companyUuid, contaUuid, anexoUuid],
     );
-    // Dependendo do driver, o resultado de UPDATE ... RETURNING vem como [rows, count].
-    const lista = Array.isArray(rows) && Array.isArray(rows[0]) ? rows[0] : rows;
-    return Array.isArray(lista) && lista.length > 0;
+    return !!linhas?.length;
   }
 }
 
