@@ -21,6 +21,7 @@ export type PainelImoveis = {
   vence61a90: ContratoResumo[];
   reajustesMes: ContratoResumo[];
   imoveisLivres: ImovelLivreResumo[];
+  contasVencidas: number;
 };
 
 export class PainelHttp {

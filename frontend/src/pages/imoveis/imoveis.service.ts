@@ -1,5 +1,19 @@
 import { useQuasar } from "quasar";
 import type {
+  AgendaFiltro,
+  Conta,
+  ContaAnexoTipo,
+  ContaEditavelInput,
+  ContaEsfera,
+  ContaHttp,
+  ContaInput,
+  ContaResponsavel,
+  ContaSituacao,
+  ContaTipo,
+  GerarParcelasInput,
+  ListarContasFiltro,
+} from "src/@modules/imoveis/conta.http";
+import type {
   ContratoEditavelInput,
   ContratoEventoInput,
   ContratoEventoTipo,
@@ -94,6 +108,72 @@ export const EVENTO_TIPOS: Opcao<ContratoEventoTipo>[] = [
   { value: "rescisao", label: "Rescisão", color: "negative" },
 ];
 
+export const CONTA_TIPOS: Opcao<ContaTipo>[] = [
+  { value: "encargo", label: "Encargo" },
+  { value: "despesa", label: "Despesa" },
+  { value: "guia", label: "Guia de imposto" },
+];
+
+export const CATEGORIAS_POR_TIPO: Record<ContaTipo, Opcao<string>[]> = {
+  encargo: [
+    { value: "iptu", label: "IPTU" },
+    { value: "taxa_lixo", label: "Taxa de lixo" },
+    { value: "taxa_municipal", label: "Taxa municipal" },
+    { value: "condominio", label: "Condomínio" },
+    { value: "agua", label: "Água" },
+    { value: "energia", label: "Energia" },
+    { value: "gas", label: "Gás" },
+    { value: "seguro", label: "Seguro" },
+    { value: "outros", label: "Outros" },
+  ],
+  despesa: [
+    { value: "manutencao", label: "Manutenção" },
+    { value: "conservacao", label: "Conservação" },
+    { value: "reforma", label: "Reforma" },
+    { value: "limpeza", label: "Limpeza" },
+    { value: "servico", label: "Serviço" },
+    { value: "outros", label: "Outros" },
+  ],
+  guia: [
+    { value: "carne_leao", label: "Carnê-leão" },
+    { value: "darf", label: "DARF" },
+    { value: "das", label: "DAS" },
+    { value: "gps", label: "GPS" },
+    { value: "iss", label: "ISS" },
+    { value: "itbi", label: "ITBI" },
+    { value: "itcmd", label: "ITCMD" },
+    { value: "outros", label: "Outros" },
+  ],
+};
+
+export const CONTA_ESFERAS: Opcao<ContaEsfera>[] = [
+  { value: "municipal", label: "Municipal" },
+  { value: "estadual", label: "Estadual" },
+  { value: "federal", label: "Federal" },
+];
+
+/** Esfera sugerida ao escolher a categoria de uma guia. */
+export const ESFERA_PADRAO_POR_CATEGORIA: Record<string, ContaEsfera> = {
+  carne_leao: "federal",
+  darf: "federal",
+  das: "federal",
+  gps: "federal",
+  itcmd: "estadual",
+  iss: "municipal",
+  itbi: "municipal",
+};
+
+export const CONTA_RESPONSAVEIS: Opcao<ContaResponsavel>[] = [
+  { value: "proprietario", label: "Proprietário" },
+  { value: "inquilino", label: "Inquilino" },
+];
+
+export const CONTA_SITUACOES: Opcao<ContaSituacao>[] = [
+  { value: "a_pagar", label: "A pagar", color: "primary" },
+  { value: "vencida", label: "Vencida", color: "negative" },
+  { value: "paga", label: "Paga", color: "positive" },
+];
+
 function rotulo<T extends string>(opcoes: Opcao<T>[], valor: T | null | undefined) {
   return opcoes.find((o) => o.value === valor)?.label ?? valor ?? "";
 }
@@ -112,6 +192,25 @@ export const labelStatus = (v: ContratoStatus) => rotulo(CONTRATO_STATUS, v);
 export const corStatus = (v: ContratoStatus) => cor(CONTRATO_STATUS, v);
 export const labelEvento = (v: ContratoEventoTipo) => rotulo(EVENTO_TIPOS, v);
 export const corEvento = (v: ContratoEventoTipo) => cor(EVENTO_TIPOS, v);
+
+export const labelContaTipo = (v: ContaTipo) => rotulo(CONTA_TIPOS, v);
+export const labelEsfera = (v: ContaEsfera) => rotulo(CONTA_ESFERAS, v);
+export const labelResponsavel = (v: ContaResponsavel) => rotulo(CONTA_RESPONSAVEIS, v);
+export const labelContaSituacao = (v: ContaSituacao) => rotulo(CONTA_SITUACOES, v);
+export const corContaSituacao = (v: ContaSituacao) => cor(CONTA_SITUACOES, v);
+
+export function labelCategoria(categoria: string) {
+  const todas = Object.values(CATEGORIAS_POR_TIPO).flat();
+  return todas.find((o) => o.value === categoria)?.label ?? categoria;
+}
+
+/** Nome da conta na lista: categoria (ou a descrição, quando for "Outros") + " 3/10" se for parcela. */
+export function labelConta(
+  c: Pick<Conta, "categoria" | "descricao" | "parcelaNumero" | "parcelaTotal">,
+) {
+  const base = c.categoria === "outros" && c.descricao ? c.descricao : labelCategoria(c.categoria);
+  return c.parcelaNumero && c.parcelaTotal ? `${base} ${c.parcelaNumero}/${c.parcelaTotal}` : base;
+}
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -172,6 +271,7 @@ export class ImoveisService {
   private $pessoaHttp = inject("pessoaHttp") as PessoaHttp;
   private $imovelHttp = inject("imovelHttp") as ImovelHttp;
   private $contratoHttp = inject("contratoHttp") as ContratoHttp;
+  private $contaHttp = inject("contaHttp") as ContaHttp;
   private $painelHttp = inject("painelHttp") as PainelHttp;
   private $q = useQuasar();
   private $router = useRouter();
@@ -385,6 +485,155 @@ export class ImoveisService {
       return false;
     } finally {
       this.$q.loading.hide();
+    }
+  }
+
+  async listarContas(filtro: ListarContasFiltro) {
+    try {
+      const response = await this.$contaHttp.listar(filtro);
+      return {
+        itens: response.data,
+        total: response.meta?.total ?? response.data.length,
+        totalValor: response.meta?.totalValor ?? 0,
+        totalPago: response.meta?.totalPago ?? 0,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async buscarConta(uuid: string) {
+    try {
+      this.$q.loading.show();
+      return (await this.$contaHttp.buscar(uuid)).data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async incluirConta(input: ContaInput) {
+    try {
+      this.$q.loading.show();
+      const response = await this.$contaHttp.incluir(input);
+      this.$q.notify({ type: "positive", message: "Conta lançada" });
+      return response.data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async gerarParcelasConta(input: GerarParcelasInput) {
+    try {
+      this.$q.loading.show();
+      const response = await this.$contaHttp.gerarParcelas(input);
+      this.$q.notify({ type: "positive", message: `${response.data.uuids.length} parcelas lançadas` });
+      return response.data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async alterarConta(uuid: string, input: ContaEditavelInput) {
+    try {
+      this.$q.loading.show();
+      await this.$contaHttp.alterar(uuid, input);
+      this.$q.notify({ type: "positive", message: "Alterações salvas" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async deletarConta(uuid: string) {
+    if (!(await this.$confirmacao.execute("Excluir esta conta? Esta ação não pode ser desfeita.")))
+      return false;
+    try {
+      this.$q.loading.show();
+      await this.$contaHttp.deletar(uuid);
+      this.$q.notify({ type: "positive", message: "Conta excluída" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async registrarPagamentoConta(uuid: string, input: { pagoEm: string; valorPago?: number | null }) {
+    try {
+      this.$q.loading.show();
+      await this.$contaHttp.registrarPagamento(uuid, input);
+      this.$q.notify({ type: "positive", message: "Pagamento registrado" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async desfazerPagamentoConta(uuid: string) {
+    try {
+      this.$q.loading.show();
+      await this.$contaHttp.desfazerPagamento(uuid);
+      this.$q.notify({ type: "positive", message: "Pagamento desfeito" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async enviarAnexoConta(uuid: string, arquivo: File, tipo: ContaAnexoTipo) {
+    try {
+      this.$q.loading.show();
+      const response = await this.$contaHttp.enviarAnexo(uuid, arquivo, tipo);
+      this.$q.notify({ type: "positive", message: "Anexo enviado" });
+      return response.data;
+    } catch {
+      return null;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async urlAnexoConta(uuid: string, anexoUuid: string) {
+    try {
+      return (await this.$contaHttp.urlAnexo(uuid, anexoUuid)).data;
+    } catch {
+      return null;
+    }
+  }
+
+  async removerAnexoConta(uuid: string, anexoUuid: string) {
+    if (!(await this.$confirmacao.execute("Remover este anexo? Esta ação não pode ser desfeita.")))
+      return false;
+    try {
+      this.$q.loading.show();
+      await this.$contaHttp.removerAnexo(uuid, anexoUuid);
+      this.$q.notify({ type: "positive", message: "Anexo removido" });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.$q.loading.hide();
+    }
+  }
+
+  async buscarAgendaContas(filtro: AgendaFiltro = {}) {
+    try {
+      return (await this.$contaHttp.agenda(filtro)).data;
+    } catch {
+      return null;
     }
   }
 

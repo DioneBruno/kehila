@@ -1,5 +1,6 @@
 import { boot } from "quasar/wrappers";
 import AxiosAdapter from "src/@modules/http/axiosAdapter";
+import { ContaHttp } from "src/@modules/imoveis/conta.http";
 import { ContratoHttp } from "src/@modules/imoveis/contrato.http";
 import { ImovelHttp } from "src/@modules/imoveis/imovel.http";
 import { PainelHttp } from "src/@modules/imoveis/painel.http";
@@ -11,5 +12,6 @@ export default boot(({ app }) => {
   app.provide("pessoaHttp", new PessoaHttp(axiosAdapter));
   app.provide("imovelHttp", new ImovelHttp(axiosAdapter));
   app.provide("contratoHttp", new ContratoHttp(axiosAdapter));
+  app.provide("contaHttp", new ContaHttp(axiosAdapter));
   app.provide("painelHttp", new PainelHttp(axiosAdapter));
 });

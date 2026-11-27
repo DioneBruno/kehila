@@ -60,7 +60,7 @@ import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import type { ContratoResumo, PainelImoveis } from "src/@modules/imoveis/painel.http";
 import { ImoveisService, formatarData, formatarMoeda, labelIndice } from "./imoveis.service";
 
-type Chave = Exclude<keyof PainelImoveis, never>;
+type Chave = Exclude<keyof PainelImoveis, "contasVencidas">;
 
 const TITULOS: Record<Chave, string> = {
   vencidos: "Vencidos",
